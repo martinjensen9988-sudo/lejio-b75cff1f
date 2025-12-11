@@ -89,38 +89,14 @@ function SearchMap({ vehicles, selectedVehicle, onVehicleSelect }: SearchMapProp
         if (!vehicle.lat || !vehicle.lng) return null;
 
         return (
-          <Marker
-            key={vehicle.id}
-            position={[vehicle.lat, vehicle.lng]}
-            icon={createCarIcon(selectedVehicle === vehicle.id)}
-            eventHandlers={{
-              click: () => onVehicleSelect(vehicle.id),
-            }}
-          >
-            <Popup>
-              <div style={{ padding: "8px", minWidth: "180px" }}>
-                {vehicle.image_url && (
-                  <img
-                    src={vehicle.image_url}
-                    alt={`${vehicle.make} ${vehicle.model}`}
-                    style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "8px", marginBottom: "8px" }}
-                  />
-                )}
-                <h3 style={{ fontWeight: "bold", margin: "0 0 4px 0" }}>
-                  {vehicle.make} {vehicle.model}
-                </h3>
-                {vehicle.variant && (
-                  <p style={{ fontSize: "12px", color: "#666", margin: "0 0 8px 0" }}>{vehicle.variant}</p>
-                )}
-                <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid #eee" }}>
-                  <span style={{ fontSize: "16px", fontWeight: "bold", color: "#2962FF" }}>
-                    {vehicle.daily_price?.toLocaleString("da-DK")} kr
-                  </span>
-                  <span style={{ fontSize: "12px", color: "#666" }}>/dag</span>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
+            <Marker
+              key={vehicle.id}
+              position={[vehicle.lat, vehicle.lng]}
+              icon={createCarIcon(selectedVehicle === vehicle.id)}
+              eventHandlers={{
+                click: () => onVehicleSelect(vehicle.id),
+              }}
+            />
         );
       })}
     </MapContainer>
