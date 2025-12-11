@@ -91,7 +91,7 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2 mb-4 p-3 rounded-xl bg-muted/50">
+        <div className="grid grid-cols-3 gap-2 mb-3 p-3 rounded-xl bg-muted/50">
           <div className="text-center">
             <p className="text-xs text-muted-foreground mb-1">Dag</p>
             <p className="font-bold text-foreground text-sm">
@@ -110,6 +110,17 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
               {vehicle.monthly_price ? `${vehicle.monthly_price} kr` : '-'}
             </p>
           </div>
+        </div>
+
+        {/* Km info */}
+        <div className="text-xs text-center mb-4 text-muted-foreground">
+          {vehicle.unlimited_km ? (
+            <span className="text-mint font-medium">✓ Fri km inkluderet</span>
+          ) : (
+            <span>
+              {vehicle.included_km || 100} km/dag inkl. • {vehicle.extra_km_price || 2.5} kr/ekstra km
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2 pt-3 border-t border-border">

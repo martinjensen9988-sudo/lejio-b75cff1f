@@ -313,6 +313,7 @@ export type Database = {
           monthly_price: number | null
           owner_id: string
           registration: string
+          unlimited_km: boolean
           updated_at: string
           variant: string | null
           vin: string | null
@@ -336,6 +337,7 @@ export type Database = {
           monthly_price?: number | null
           owner_id: string
           registration: string
+          unlimited_km?: boolean
           updated_at?: string
           variant?: string | null
           vin?: string | null
@@ -359,6 +361,7 @@ export type Database = {
           monthly_price?: number | null
           owner_id?: string
           registration?: string
+          unlimited_km?: boolean
           updated_at?: string
           variant?: string | null
           vin?: string | null

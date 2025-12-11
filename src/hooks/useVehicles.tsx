@@ -19,6 +19,7 @@ export interface Vehicle {
   monthly_price: number | null;
   included_km: number | null;
   extra_km_price: number | null;
+  unlimited_km: boolean;
   description: string | null;
   image_url: string | null;
   features: string[];
@@ -41,6 +42,7 @@ export interface VehicleInsert {
   monthly_price?: number;
   included_km?: number;
   extra_km_price?: number;
+  unlimited_km?: boolean;
   description?: string;
   image_url?: string;
   features?: string[];
