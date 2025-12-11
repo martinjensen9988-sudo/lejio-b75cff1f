@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Booking } from '@/hooks/useBookings';
 import { Contract, useContracts } from '@/hooks/useContracts';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -15,10 +17,11 @@ import ContractSigningModal from '@/components/contracts/ContractSigningModal';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { Check, X, Car, Calendar, FileText, Loader2, FileCheck } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BookingsTableProps {
   bookings: Booking[];
-  onUpdateStatus: (id: string, status: Booking['status']) => void;
+  onUpdateStatus: (id: string, status: Booking['status']) => Promise<boolean>;
 }
 
 const statusConfig: Record<Booking['status'], { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -30,10 +33,51 @@ const statusConfig: Record<Booking['status'], { label: string; variant: 'default
 };
 
 const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
+  const { profile } = useAuth();
   const { contracts, generateContract, signContract, isLoading: contractsLoading } = useContracts();
   const [generatingContractFor, setGeneratingContractFor] = useState<string | null>(null);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [signingModalOpen, setSigningModalOpen] = useState(false);
+  const [confirmingBooking, setConfirmingBooking] = useState<string | null>(null);
+
+  const handleConfirmBooking = async (booking: Booking) => {
+    setConfirmingBooking(booking.id);
+    
+    try {
+      // Update booking status
+      const success = await onUpdateStatus(booking.id, 'confirmed');
+      
+      if (success && booking.renter_email && booking.renter_name) {
+        // Send confirmation email to renter
+        const { error } = await supabase.functions.invoke('send-booking-confirmation', {
+          body: {
+            renterEmail: booking.renter_email,
+            renterName: booking.renter_name,
+            lessorName: profile?.full_name || 'Udlejer',
+            lessorPhone: profile?.phone,
+            lessorEmail: profile?.email,
+            vehicleMake: booking.vehicle?.make || '',
+            vehicleModel: booking.vehicle?.model || '',
+            vehicleRegistration: booking.vehicle?.registration || '',
+            startDate: format(new Date(booking.start_date), 'd. MMMM yyyy', { locale: da }),
+            endDate: format(new Date(booking.end_date), 'd. MMMM yyyy', { locale: da }),
+            totalPrice: booking.total_price,
+          },
+        });
+
+        if (error) {
+          console.error('Email error:', error);
+          toast.warning('Booking bekræftet, men email kunne ikke sendes');
+        } else {
+          toast.success('Booking bekræftet og email sendt til lejer');
+        }
+      }
+    } catch (error) {
+      console.error('Error confirming booking:', error);
+    } finally {
+      setConfirmingBooking(null);
+    }
+  };
 
   const handleGenerateContract = async (booking: Booking) => {
     setGeneratingContractFor(booking.id);
@@ -175,9 +219,14 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                           size="sm"
                           variant="ghost"
                           className="text-mint hover:text-mint"
-                          onClick={() => onUpdateStatus(booking.id, 'confirmed')}
+                          onClick={() => handleConfirmBooking(booking)}
+                          disabled={confirmingBooking === booking.id}
                         >
-                          <Check className="w-4 h-4" />
+                          {confirmingBooking === booking.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Check className="w-4 h-4" />
+                          )}
                         </Button>
                         <Button
                           size="sm"
