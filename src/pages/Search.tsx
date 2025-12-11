@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export interface SearchVehicle {
   id: string;
+  owner_id: string;
   make: string;
   model: string;
   variant: string | null;

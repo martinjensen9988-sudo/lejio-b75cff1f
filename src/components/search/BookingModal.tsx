@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { SearchVehicle, SearchFiltersState } from "@/pages/Search";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingModalProps {
   open: boolean;
@@ -74,16 +75,79 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
 
     setLoading(true);
 
-    // Simulate booking submission (in production, this would call an API)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Fetch vehicle owner's profile for email
+      const { data: ownerProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', vehicle.owner_id)
+        .single();
 
-    setLoading(false);
-    setStep("success");
+      if (profileError) {
+        console.error('Error fetching owner profile:', profileError);
+        throw new Error('Kunne ikke finde udlejer');
+      }
 
-    toast({
-      title: "Booking sendt!",
-      description: "Udlejeren vil kontakte dig snarest",
-    });
+      // Create booking in database
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          vehicle_id: vehicle.id,
+          lessor_id: vehicle.owner_id,
+          start_date: format(filters.startDate!, 'yyyy-MM-dd'),
+          end_date: format(filters.endDate!, 'yyyy-MM-dd'),
+          total_price: totalPrice,
+          status: 'pending',
+          renter_name: formData.name,
+          renter_email: formData.email,
+          renter_phone: formData.phone,
+          notes: formData.notes || null,
+        });
+
+      if (bookingError) {
+        console.error('Error creating booking:', bookingError);
+        throw new Error('Kunne ikke oprette booking');
+      }
+
+      // Send email notification to lessor
+      const { error: emailError } = await supabase.functions.invoke('send-booking-notification', {
+        body: {
+          lessorEmail: ownerProfile.email,
+          lessorName: ownerProfile.full_name || 'Udlejer',
+          renterName: formData.name,
+          renterEmail: formData.email,
+          renterPhone: formData.phone,
+          vehicleMake: vehicle.make,
+          vehicleModel: vehicle.model,
+          vehicleRegistration: vehicle.registration,
+          startDate: format(filters.startDate!, 'dd. MMMM yyyy', { locale: da }),
+          endDate: format(filters.endDate!, 'dd. MMMM yyyy', { locale: da }),
+          totalPrice: totalPrice,
+          notes: formData.notes,
+        },
+      });
+
+      if (emailError) {
+        console.error('Email notification error:', emailError);
+        // Don't throw - booking was created, just email failed
+      }
+
+      setStep("success");
+
+      toast({
+        title: "Booking sendt!",
+        description: "Udlejeren vil kontakte dig snarest",
+      });
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: "Fejl",
+        description: error instanceof Error ? error.message : "Der opstod en fejl",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
