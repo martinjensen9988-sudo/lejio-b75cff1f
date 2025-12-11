@@ -1,101 +1,105 @@
-import { CreditCard, FileText, Calendar, Shield } from "lucide-react";
+import { Car, FileSignature, CreditCard, Shield, User, Building2, ArrowRight } from "lucide-react";
 
 const HeroVisual = () => {
-  const features = [
-    { icon: CreditCard, label: "Betaling", color: "from-primary to-primary/60" },
-    { icon: FileText, label: "Kontrakt", color: "from-accent to-accent/60" },
-    { icon: Calendar, label: "Kalender", color: "from-primary to-accent" },
-    { icon: Shield, label: "Forsikring", color: "from-accent/80 to-primary/80" },
-  ];
-
   return (
-    <div className="relative w-full max-w-lg mx-auto aspect-square">
-      {/* Center Core */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-2xl bg-glass border border-border glow-primary flex items-center justify-center z-20">
-        <div className="text-center">
-          <div className="font-display text-lg font-bold text-foreground">LEJIO</div>
-          <div className="text-xs text-muted-foreground">Platform</div>
+    <div className="relative w-full aspect-square max-w-lg mx-auto">
+      {/* Central Hub */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-2xl bg-gradient-to-br from-primary via-primary/80 to-accent flex items-center justify-center shadow-2xl shadow-primary/30 z-20">
+        <span className="font-display text-xl font-bold text-primary-foreground tracking-tight">LEJIO</span>
+      </div>
+
+      {/* Orbiting connection lines */}
+      <svg className="absolute inset-0 w-full h-full animate-spin-slow" style={{ animationDuration: '30s' }}>
+        <circle
+          cx="50%"
+          cy="50%"
+          r="38%"
+          fill="none"
+          stroke="url(#gradient)"
+          strokeWidth="1"
+          strokeDasharray="8 12"
+          opacity="0.3"
+        />
+        <defs>
+          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="hsl(174, 72%, 56%)" />
+            <stop offset="100%" stopColor="hsl(270, 60%, 60%)" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* The Fork - Two User Types */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-4">
+        {/* P2P User */}
+        <div className="relative group animate-float" style={{ animationDelay: '0s' }}>
+          <div className="w-16 h-16 rounded-xl bg-card border border-accent/50 flex flex-col items-center justify-center shadow-lg hover:border-accent hover:shadow-accent/20 transition-all cursor-pointer">
+            <User className="w-6 h-6 text-accent mb-1" />
+            <span className="text-[10px] text-muted-foreground font-medium">Privat</span>
+          </div>
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-px h-6 bg-gradient-to-b from-accent/50 to-transparent" />
+        </div>
+
+        {/* Pro User */}
+        <div className="relative group animate-float" style={{ animationDelay: '0.5s' }}>
+          <div className="w-16 h-16 rounded-xl bg-card border border-primary/50 flex flex-col items-center justify-center shadow-lg hover:border-primary hover:shadow-primary/20 transition-all cursor-pointer">
+            <Building2 className="w-6 h-6 text-primary mb-1" />
+            <span className="text-[10px] text-muted-foreground font-medium">Erhverv</span>
+          </div>
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-px h-6 bg-gradient-to-b from-primary/50 to-transparent" />
         </div>
       </div>
 
-      {/* Orbital Ring */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full border border-border/30" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full border border-border/20" />
-
-      {/* Feature Nodes */}
-      {features.map((feature, i) => {
-        const angle = (i * 90 - 45) * (Math.PI / 180);
-        const radius = 160;
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-
-        return (
-          <div
-            key={i}
-            className="absolute top-1/2 left-1/2 animate-float"
-            style={{
-              transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          >
-            <div className="relative group cursor-pointer">
-              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} p-[1px] shadow-lg shadow-primary/20 group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-300 group-hover:scale-110`}>
-                <div className="w-full h-full rounded-xl bg-card flex items-center justify-center">
-                  <feature.icon className="w-6 h-6 text-foreground" />
-                </div>
-              </div>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                {feature.label}
-              </div>
-            </div>
+      {/* Left side - P2P Flow */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 space-y-4">
+        <div className="group animate-float" style={{ animationDelay: '0.2s' }}>
+          <div className="w-14 h-14 rounded-xl bg-card border border-accent/30 flex items-center justify-center shadow-lg hover:border-accent hover:shadow-accent/20 transition-all cursor-pointer">
+            <CreditCard className="w-6 h-6 text-accent" />
           </div>
-        );
-      })}
+          <div className="mt-1 text-[10px] text-center text-muted-foreground">Via Lejio</div>
+        </div>
+      </div>
 
-      {/* Connection Lines */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400">
-        <defs>
-          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(174 72% 56% / 0.3)" />
-            <stop offset="100%" stopColor="hsl(270 60% 60% / 0.3)" />
-          </linearGradient>
-        </defs>
-        {features.map((_, i) => {
-          const angle = (i * 90 - 45) * (Math.PI / 180);
-          const radius = 160;
-          const x = 200 + Math.cos(angle) * radius;
-          const y = 200 + Math.sin(angle) * radius;
+      {/* Right side - Pro Flow */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 space-y-4">
+        <div className="group animate-float" style={{ animationDelay: '0.4s' }}>
+          <div className="w-14 h-14 rounded-xl bg-card border border-primary/30 flex items-center justify-center shadow-lg hover:border-primary hover:shadow-primary/20 transition-all cursor-pointer">
+            <CreditCard className="w-6 h-6 text-primary" />
+          </div>
+          <div className="mt-1 text-[10px] text-center text-muted-foreground">Direkte</div>
+        </div>
+      </div>
 
-          return (
-            <line
-              key={i}
-              x1="200"
-              y1="200"
-              x2={x}
-              y2={y}
-              stroke="url(#lineGradient)"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-              className="animate-pulse-glow"
-              style={{ animationDelay: `${i * 0.25}s` }}
-            />
-          );
-        })}
-      </svg>
+      {/* Bottom - Shared Features */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-6">
+        <div className="group animate-float" style={{ animationDelay: '0.6s' }}>
+          <div className="w-14 h-14 rounded-xl bg-card border border-border flex items-center justify-center shadow-lg hover:border-primary/50 hover:shadow-primary/20 transition-all cursor-pointer">
+            <Car className="w-6 h-6 text-foreground/80" />
+          </div>
+          <div className="mt-1 text-[10px] text-center text-muted-foreground">Biler</div>
+        </div>
+        <div className="group animate-float" style={{ animationDelay: '0.8s' }}>
+          <div className="w-14 h-14 rounded-xl bg-card border border-border flex items-center justify-center shadow-lg hover:border-primary/50 hover:shadow-primary/20 transition-all cursor-pointer">
+            <FileSignature className="w-6 h-6 text-foreground/80" />
+          </div>
+          <div className="mt-1 text-[10px] text-center text-muted-foreground">Kontrakt</div>
+        </div>
+        <div className="group animate-float" style={{ animationDelay: '1s' }}>
+          <div className="w-14 h-14 rounded-xl bg-card border border-border flex items-center justify-center shadow-lg hover:border-primary/50 hover:shadow-primary/20 transition-all cursor-pointer">
+            <Shield className="w-6 h-6 text-foreground/80" />
+          </div>
+          <div className="mt-1 text-[10px] text-center text-muted-foreground">Forsikring</div>
+        </div>
+      </div>
 
-      {/* Floating Particles */}
-      {[...Array(8)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute w-1 h-1 rounded-full bg-primary/60 animate-float"
-          style={{
-            top: `${20 + Math.random() * 60}%`,
-            left: `${20 + Math.random() * 60}%`,
-            animationDelay: `${Math.random() * 3}s`,
-            animationDuration: `${4 + Math.random() * 2}s`,
-          }}
-        />
-      ))}
+      {/* Payment Flow Indicators */}
+      <div className="absolute left-16 top-1/3 flex items-center gap-1 text-[9px] text-accent/70">
+        <span>20% gebyr</span>
+        <ArrowRight className="w-3 h-3" />
+      </div>
+      <div className="absolute right-16 top-1/3 flex items-center gap-1 text-[9px] text-primary/70">
+        <span>Direkte til dig</span>
+        <ArrowRight className="w-3 h-3" />
+      </div>
     </div>
   );
 };
