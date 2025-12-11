@@ -736,7 +736,7 @@ const Booking = () => {
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {pricing.periodCount} × {pricing.unitPrice.toLocaleString("da-DK")} kr
+                        {pricing.periodCount} {pricing.periodType === "monthly" ? (pricing.periodCount === 1 ? "md." : "mdr.") : pricing.periodType === "weekly" ? (pricing.periodCount === 1 ? "uge" : "uger") : (pricing.periodCount === 1 ? "dag" : "dage")} × {pricing.unitPrice.toLocaleString("da-DK")} kr{pricing.periodType === "monthly" ? "/md" : pricing.periodType === "weekly" ? "/uge" : "/dag"}
                       </span>
                       <span>{pricing.rentalTotal.toLocaleString("da-DK")} kr</span>
                     </div>
