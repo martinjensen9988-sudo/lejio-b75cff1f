@@ -18,13 +18,29 @@ export type Database = {
         Row: {
           created_at: string
           end_date: string
+          extra_driver_birth_date: string | null
+          extra_driver_first_name: string | null
+          extra_driver_last_name: string | null
+          extra_driver_license_country: string | null
+          extra_driver_license_issue_date: string | null
+          extra_driver_license_number: string | null
+          has_extra_driver: boolean | null
           id: string
           lessor_id: string
           notes: string | null
+          renter_address: string | null
+          renter_birth_date: string | null
+          renter_city: string | null
           renter_email: string | null
+          renter_first_name: string | null
           renter_id: string | null
+          renter_last_name: string | null
+          renter_license_country: string | null
+          renter_license_issue_date: string | null
+          renter_license_number: string | null
           renter_name: string | null
           renter_phone: string | null
+          renter_postal_code: string | null
           start_date: string
           status: string
           total_price: number
@@ -34,13 +50,29 @@ export type Database = {
         Insert: {
           created_at?: string
           end_date: string
+          extra_driver_birth_date?: string | null
+          extra_driver_first_name?: string | null
+          extra_driver_last_name?: string | null
+          extra_driver_license_country?: string | null
+          extra_driver_license_issue_date?: string | null
+          extra_driver_license_number?: string | null
+          has_extra_driver?: boolean | null
           id?: string
           lessor_id: string
           notes?: string | null
+          renter_address?: string | null
+          renter_birth_date?: string | null
+          renter_city?: string | null
           renter_email?: string | null
+          renter_first_name?: string | null
           renter_id?: string | null
+          renter_last_name?: string | null
+          renter_license_country?: string | null
+          renter_license_issue_date?: string | null
+          renter_license_number?: string | null
           renter_name?: string | null
           renter_phone?: string | null
+          renter_postal_code?: string | null
           start_date: string
           status?: string
           total_price: number
@@ -50,13 +82,29 @@ export type Database = {
         Update: {
           created_at?: string
           end_date?: string
+          extra_driver_birth_date?: string | null
+          extra_driver_first_name?: string | null
+          extra_driver_last_name?: string | null
+          extra_driver_license_country?: string | null
+          extra_driver_license_issue_date?: string | null
+          extra_driver_license_number?: string | null
+          has_extra_driver?: boolean | null
           id?: string
           lessor_id?: string
           notes?: string | null
+          renter_address?: string | null
+          renter_birth_date?: string | null
+          renter_city?: string | null
           renter_email?: string | null
+          renter_first_name?: string | null
           renter_id?: string | null
+          renter_last_name?: string | null
+          renter_license_country?: string | null
+          renter_license_issue_date?: string | null
+          renter_license_number?: string | null
           renter_name?: string | null
           renter_phone?: string | null
+          renter_postal_code?: string | null
           start_date?: string
           status?: string
           total_price?: number
