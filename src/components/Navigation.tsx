@@ -35,6 +35,9 @@ const Navigation = () => {
             <a href="#features" className="text-muted-foreground hover:text-primary font-medium transition-colors">Funktioner</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary font-medium transition-colors">Sådan virker det</a>
             <a href="#pricing" className="text-muted-foreground hover:text-primary font-medium transition-colors">Priser</a>
+            {user && (
+              <a href="/my-rentals" onClick={(e) => { e.preventDefault(); navigate("/my-rentals"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">Mine lejeaftaler</a>
+            )}
           </div>
 
           <div className="hidden md:flex items-center gap-3">
@@ -78,6 +81,9 @@ const Navigation = () => {
             <a href="#features" className="text-muted-foreground hover:text-primary font-medium py-2">Funktioner</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary font-medium py-2">Sådan virker det</a>
             <a href="#pricing" className="text-muted-foreground hover:text-primary font-medium py-2">Priser</a>
+            {user && (
+              <a href="/my-rentals" onClick={(e) => { e.preventDefault(); navigate("/my-rentals"); setIsOpen(false); }} className="text-muted-foreground hover:text-primary font-medium py-2">Mine lejeaftaler</a>
+            )}
             <div className="flex flex-col gap-2 pt-2 border-t border-border">
               {user ? (
                 <>
