@@ -35,6 +35,8 @@ const AddVehicleDialog = () => {
         color: result.color,
         vin: result.vin,
         daily_price: 499,
+        weekly_price: 2800,
+        monthly_price: 9900,
         included_km: 100,
         extra_km_price: 2.50,
       });
@@ -153,36 +155,59 @@ const AddVehicleDialog = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Dagspris (kr)</Label>
-                <Input
-                  type="number"
-                  value={vehicleDetails.daily_price || ''}
-                  onChange={(e) => setVehicleDetails(prev => ({ ...prev, daily_price: parseFloat(e.target.value) }))}
-                  placeholder="499"
-                />
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Priser</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Pr. dag (kr)</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.daily_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, daily_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="499"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Pr. uge (kr)</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.weekly_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, weekly_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="2.800"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Pr. måned (kr)</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.monthly_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, monthly_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="9.900"
+                  />
+                </div>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Inkl. km/dag</Label>
                 <Input
                   type="number"
                   value={vehicleDetails.included_km || ''}
-                  onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) }))}
+                  onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
                   placeholder="100"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Ekstra km pris (kr)</Label>
-              <Input
-                type="number"
-                step="0.50"
-                value={vehicleDetails.extra_km_price || ''}
-                onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) }))}
-                placeholder="2.50"
-              />
+              <div className="space-y-2">
+                <Label>Ekstra km pris (kr)</Label>
+                <Input
+                  type="number"
+                  step="0.50"
+                  value={vehicleDetails.extra_km_price || ''}
+                  onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
+                  placeholder="2,50"
+                />
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4">
