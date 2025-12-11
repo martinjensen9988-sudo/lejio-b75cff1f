@@ -40,6 +40,10 @@ const AddVehicleDialog = () => {
         monthly_price: 9900,
         included_km: 100,
         extra_km_price: 2.50,
+        deposit_required: false,
+        deposit_amount: 0,
+        prepaid_rent_enabled: false,
+        prepaid_rent_months: 1,
       });
       setStep('details');
     }
@@ -227,6 +231,70 @@ const AddVehicleDialog = () => {
                 </div>
               </div>
             )}
+
+            {/* Deposit Section */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Depositum & Forudbetaling</Label>
+              
+              {/* Deposit checkbox */}
+              <div 
+                className="flex items-center space-x-3 p-3 rounded-xl bg-lavender/10 border border-lavender/20 cursor-pointer"
+                onClick={() => setVehicleDetails(prev => ({ ...prev, deposit_required: !prev.deposit_required }))}
+              >
+                <Checkbox
+                  id="deposit_required"
+                  checked={vehicleDetails.deposit_required || false}
+                  onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, deposit_required: !!checked }))}
+                />
+                <label htmlFor="deposit_required" className="text-sm font-medium cursor-pointer select-none">
+                  Kræv depositum
+                </label>
+              </div>
+
+              {vehicleDetails.deposit_required && (
+                <div className="space-y-2 pl-6">
+                  <Label className="text-xs text-muted-foreground">Depositum beløb (kr)</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.deposit_amount || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, deposit_amount: parseFloat(e.target.value) || 0 }))}
+                    placeholder="2.500"
+                  />
+                </div>
+              )}
+
+              {/* Prepaid rent checkbox */}
+              <div 
+                className="flex items-center space-x-3 p-3 rounded-xl bg-accent/10 border border-accent/20 cursor-pointer"
+                onClick={() => setVehicleDetails(prev => ({ ...prev, prepaid_rent_enabled: !prev.prepaid_rent_enabled }))}
+              >
+                <Checkbox
+                  id="prepaid_rent"
+                  checked={vehicleDetails.prepaid_rent_enabled || false}
+                  onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, prepaid_rent_enabled: !!checked }))}
+                />
+                <label htmlFor="prepaid_rent" className="text-sm font-medium cursor-pointer select-none">
+                  Kræv forudbetalt leje
+                </label>
+              </div>
+
+              {vehicleDetails.prepaid_rent_enabled && (
+                <div className="space-y-2 pl-6">
+                  <Label className="text-xs text-muted-foreground">Antal måneder forudbetaling</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={12}
+                    value={vehicleDetails.prepaid_rent_months || 1}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, prepaid_rent_months: parseInt(e.target.value) || 1 }))}
+                    placeholder="1"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Lejer skal betale {vehicleDetails.prepaid_rent_months || 1} måneds leje forud ved første betaling
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="flex gap-3 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setStep('lookup')}>
