@@ -4,16 +4,16 @@ import { Button } from "@/components/ui/button";
 const Pricing = () => {
   return (
     <section id="pricing" className="py-24 relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,hsl(270_60%_60%/0.06),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,hsl(168_80%_50%/0.05),transparent_50%)]" />
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16 animate-slide-up">
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4">
             Priser der passer til{" "}
-            <span className="text-gradient">din situation</span>
+            <span className="text-gradient">din model</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Privat eller professionel – vælg det spor der giver mening for dig.
+            No-Cure-No-Pay for private. SaaS for professionelle. Du vælger.
           </p>
         </div>
 
@@ -26,24 +26,25 @@ const Pricing = () => {
               </div>
               <div>
                 <h3 className="font-display text-xl font-bold text-foreground">Privat Udlejer</h3>
-                <p className="text-sm text-muted-foreground">Uden CVR-nummer</p>
+                <p className="text-sm text-muted-foreground">P2P – No-Cure-No-Pay</p>
               </div>
             </div>
 
             <div className="mb-6">
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="font-display text-4xl font-bold text-foreground">Gratis</span>
+                <span className="font-display text-4xl font-extrabold text-foreground">Gratis</span>
+                <span className="text-muted-foreground">at starte</span>
               </div>
-              <p className="text-sm text-accent font-medium">20% gebyr per booking</p>
-              <p className="text-xs text-muted-foreground mt-1">Du får 80% udbetalt til din bankkonto</p>
+              <p className="text-sm text-accent font-medium">15-20% provision per booking</p>
+              <p className="text-xs text-muted-foreground mt-1">Du betaler kun når du tjener penge</p>
             </div>
 
             <ul className="space-y-3 mb-8">
               {[
                 "Ingen månedlig betaling",
-                "Vi håndterer kortbetaling",
+                "Vi håndterer kortbetaling (Escrow)",
                 "Automatisk P2P-kontrakt",
-                "Udbetaling til din bank",
+                "Udbetaling til din bank efter leje",
                 "Kalender og booking-system",
                 "Email-notifikationer",
               ].map((feature, i) => (
@@ -55,7 +56,7 @@ const Pricing = () => {
             </ul>
 
             <Button variant="glass" size="lg" className="w-full group border-accent/30 hover:border-accent">
-              Kom i gang
+              Opret gratis profil
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
 
@@ -67,7 +68,7 @@ const Pricing = () => {
           {/* Pro Pricing */}
           <div className="rounded-2xl bg-card border border-primary/50 p-8 shadow-lg shadow-primary/10 hover:border-primary transition-all animate-scale-in relative" style={{ animationDelay: '0.1s' }}>
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
-              Mest populær
+              For virksomheder
             </div>
             
             <div className="flex items-center gap-3 mb-6">
@@ -76,28 +77,29 @@ const Pricing = () => {
               </div>
               <div>
                 <h3 className="font-display text-xl font-bold text-foreground">Professionel Udlejer</h3>
-                <p className="text-sm text-muted-foreground">Med CVR-nummer</p>
+                <p className="text-sm text-muted-foreground">SaaS – Abonnement</p>
               </div>
             </div>
 
             <div className="mb-6">
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="font-display text-4xl font-bold text-foreground">299</span>
+                <span className="text-muted-foreground">Fra</span>
+                <span className="font-display text-4xl font-extrabold text-foreground">299</span>
                 <span className="text-muted-foreground">kr/md</span>
               </div>
-              <p className="text-sm text-primary font-medium">+ 19 kr. per booking</p>
-              <p className="text-xs text-muted-foreground mt-1">Du beholder 100% af betalingen</p>
+              <p className="text-sm text-primary font-medium">+ 10-20 kr. per booking</p>
+              <p className="text-xs text-muted-foreground mt-1">Du beholder 100% af betalingen fra kunden</p>
             </div>
 
             <ul className="space-y-3 mb-8">
               {[
-                "Din egen betalingsløsning",
+                "Bring Your Own Gateway",
                 "Din egen forsikring i kontrakten",
-                "Erhvervskontrakt med CVR",
+                "B2B-kontrakt med CVR",
                 "Ubegrænset antal biler",
-                "Smart kalender og booking",
+                "Smart kalender og instant booking",
                 "Månedlig fakturering (fradrag)",
-                "Priority support",
+                "Prioriteret support",
               ].map((feature, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-primary shrink-0" />
@@ -107,25 +109,37 @@ const Pricing = () => {
             </ul>
 
             <Button variant="hero" size="lg" className="w-full group">
-              Prøv gratis i 14 dage
+              Start gratis prøveperiode
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
 
             <p className="text-center text-xs text-muted-foreground mt-4">
-              Ingen kreditkort påkrævet. Ingen binding.
+              14 dage gratis. Ingen kreditkort påkrævet.
             </p>
           </div>
         </div>
 
-        {/* Bottom note */}
-        <div className="mt-12 max-w-2xl mx-auto p-6 rounded-xl bg-secondary/50 border border-border animate-scale-in" style={{ animationDelay: '0.3s' }}>
-          <h4 className="font-display font-bold text-foreground mb-2">Hvordan fungerer betalingsflowet?</h4>
-          <div className="grid sm:grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <div>
-              <span className="text-accent font-medium">Privat:</span> Kunden betaler til Lejio → Vi fratrækker 20% → Du får resten udbetalt.
+        {/* Revenue Model Explanation */}
+        <div className="mt-12 max-w-3xl mx-auto p-6 rounded-xl bg-secondary/50 border border-border animate-scale-in" style={{ animationDelay: '0.3s' }}>
+          <h4 className="font-display font-bold text-foreground mb-4 text-center">Hvordan fungerer betalingsflowet?</h4>
+          <div className="grid sm:grid-cols-2 gap-6 text-sm">
+            <div className="p-4 rounded-lg bg-card border border-accent/20">
+              <div className="flex items-center gap-2 mb-2">
+                <User className="w-4 h-4 text-accent" />
+                <span className="font-medium text-accent">Privat udlejer</span>
+              </div>
+              <p className="text-muted-foreground">
+                Kunde betaler 1.000 kr → Lejio holder pengene (Escrow) → Efter lejen: Vi fratrækker 15-20% → Du får 800-850 kr udbetalt.
+              </p>
             </div>
-            <div>
-              <span className="text-primary font-medium">Professionel:</span> Kunden betaler direkte til din konto → Vi sender månedlig faktura.
+            <div className="p-4 rounded-lg bg-card border border-primary/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Building2 className="w-4 h-4 text-primary" />
+                <span className="font-medium text-primary">Professionel udlejer</span>
+              </div>
+              <p className="text-muted-foreground">
+                Kunde betaler 1.000 kr → Pengene går direkte til din konto (din gateway) → Sidst på måneden: Vi sender faktura på booking-gebyrer.
+              </p>
             </div>
           </div>
         </div>
