@@ -44,11 +44,25 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
     setConfirmingBooking(booking.id);
     
     try {
+      // First generate the contract
+      setGeneratingContractFor(booking.id);
+      const contract = await generateContract(booking.id, {
+        vehicleValue: 150000,
+        depositAmount: 2500,
+      });
+      setGeneratingContractFor(null);
+
+      if (!contract) {
+        toast.error('Kunne ikke oprette kontrakt');
+        setConfirmingBooking(null);
+        return;
+      }
+
       // Update booking status
       const success = await onUpdateStatus(booking.id, 'confirmed');
       
       if (success && booking.renter_email && booking.renter_name) {
-        // Send confirmation email to renter
+        // Send confirmation email with contract link
         const { error } = await supabase.functions.invoke('send-booking-confirmation', {
           body: {
             renterEmail: booking.renter_email,
@@ -62,6 +76,8 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
             startDate: format(new Date(booking.start_date), 'd. MMMM yyyy', { locale: da }),
             endDate: format(new Date(booking.end_date), 'd. MMMM yyyy', { locale: da }),
             totalPrice: booking.total_price,
+            contractId: contract.id,
+            contractNumber: contract.contract_number,
           },
         });
 
@@ -69,11 +85,12 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
           console.error('Email error:', error);
           toast.warning('Booking bekræftet, men email kunne ikke sendes');
         } else {
-          toast.success('Booking bekræftet og email sendt til lejer');
+          toast.success('Booking bekræftet, kontrakt oprettet og email sendt til lejer');
         }
       }
     } catch (error) {
       console.error('Error confirming booking:', error);
+      toast.error('Der opstod en fejl ved bekræftelse');
     } finally {
       setConfirmingBooking(null);
     }
