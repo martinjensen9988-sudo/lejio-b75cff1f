@@ -20,6 +20,8 @@ export interface Vehicle {
   included_km: number | null;
   extra_km_price: number | null;
   description: string | null;
+  image_url: string | null;
+  features: string[];
   is_available: boolean;
   created_at: string;
   updated_at: string;
@@ -40,6 +42,8 @@ export interface VehicleInsert {
   included_km?: number;
   extra_km_price?: number;
   description?: string;
+  image_url?: string;
+  features?: string[];
 }
 
 export const useVehicles = () => {
