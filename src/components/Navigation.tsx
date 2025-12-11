@@ -41,6 +41,9 @@ const Navigation = () => {
               <div className="w-24 h-9 bg-muted rounded-xl animate-pulse" />
             ) : user ? (
               <>
+                <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </Button>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 border border-border">
                   <div className={`w-2 h-2 rounded-full ${profile?.user_type === 'professionel' ? 'bg-primary' : 'bg-accent'}`} />
                   <span className="text-sm font-medium text-foreground">
@@ -76,6 +79,9 @@ const Navigation = () => {
             <div className="flex flex-col gap-2 pt-2 border-t border-border">
               {user ? (
                 <>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { navigate("/dashboard"); setIsOpen(false); }}>
+                    Dashboard
+                  </Button>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50">
                     <User className="w-4 h-4" />
                     <span className="text-sm font-medium">{profile?.full_name || user.email}</span>
