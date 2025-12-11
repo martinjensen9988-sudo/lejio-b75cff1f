@@ -1,14 +1,49 @@
-import { User, Building2, CreditCard, FileSignature, Shield, Check, ArrowRight } from "lucide-react";
+import { User, Building2, CreditCard, FileSignature, Shield, Check, ArrowRight, Zap, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Features = () => {
   return (
     <section id="features" className="py-24 relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(270_60%_60%/0.05),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(168_80%_50%/0.04),transparent_60%)]" />
       
       <div className="container mx-auto px-6 relative z-10">
+        {/* For Lejere Section */}
         <div className="text-center mb-16 animate-slide-up">
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-4">
+            For lejere
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4">
+            Én søgning –{" "}
+            <span className="text-gradient">alle muligheder</span>
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Find den perfekte bil fra private og professionelle udlejere. Sammenlign priser, book direkte, og få kontrakten med det samme.
+          </p>
+        </div>
+
+        {/* Unified Search Benefits */}
+        <div className="grid sm:grid-cols-3 gap-6 mb-24">
+          {[
+            { icon: Zap, title: "Instant booking", desc: "Book med det samme på de fleste biler" },
+            { icon: FileSignature, title: "Automatisk kontrakt", desc: "Juridisk bindende aftale genereres ved booking" },
+            { icon: Shield, title: "Sikker betaling", desc: "Alle transaktioner er beskyttet" },
+          ].map((item, i) => (
+            <div key={i} className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <item.icon className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-display text-lg font-bold text-foreground mb-2">{item.title}</h3>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* For Udlejere Section */}
+        <div className="text-center mb-16 animate-slide-up">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border text-muted-foreground text-xs font-medium mb-4">
+            For udlejere
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4">
             Ét system –{" "}
             <span className="text-gradient">to spor</span>
           </h2>
@@ -27,12 +62,12 @@ const Features = () => {
               </div>
               <div>
                 <h3 className="font-display text-2xl font-bold text-foreground">Privat Udlejer</h3>
-                <p className="text-sm text-accent">Ingen CVR? Intet problem.</p>
+                <p className="text-sm text-accent">P2P – Peer-to-Peer</p>
               </div>
             </div>
 
             <p className="text-muted-foreground mb-6">
-              Du har en bil du sjældent bruger? Lej den ud og tjen penge. Vi klarer alt det tekniske – du skal bare godkende bookinger.
+              Du har en bil du sjældent bruger? Lej den ud og tjen penge. Vi klarer betaling, kontrakt og formidling – du godkender bare bookinger.
             </p>
 
             <div className="space-y-4 mb-6">
@@ -42,7 +77,7 @@ const Features = () => {
                 </div>
                 <div>
                   <div className="font-medium text-foreground">Vi håndterer betalingen</div>
-                  <p className="text-sm text-muted-foreground">Kunden betaler via Lejio. Vi udbetaler til din bankkonto efter lejen.</p>
+                  <p className="text-sm text-muted-foreground">Kunden betaler via Lejio (Escrow). Vi udbetaler til dig efter lejen.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -51,7 +86,7 @@ const Features = () => {
                 </div>
                 <div>
                   <div className="font-medium text-foreground">Forsikringsvejledning</div>
-                  <p className="text-sm text-muted-foreground">Vi guider lejeren til at købe dags-forsikring eller acceptere eget ansvar.</p>
+                  <p className="text-sm text-muted-foreground">Vi guider lejeren til dags-forsikring eller accept af eget ansvar.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -60,7 +95,7 @@ const Features = () => {
                 </div>
                 <div>
                   <div className="font-medium text-foreground">P2P-kontrakt</div>
-                  <p className="text-sm text-muted-foreground">Automatisk genereret lejeaftale mellem dig og lejeren.</p>
+                  <p className="text-sm text-muted-foreground">Standard lejeaftale mellem dig og lejeren.</p>
                 </div>
               </div>
             </div>
@@ -68,7 +103,7 @@ const Features = () => {
             <div className="p-4 rounded-xl bg-accent/10 border border-accent/20">
               <div className="flex items-center gap-2 text-sm text-accent font-medium">
                 <span>💰</span>
-                <span>20% gebyr på bookinger – du får 80% udbetalt</span>
+                <span>15-20% provision – ingen faste omkostninger</span>
               </div>
             </div>
           </div>
@@ -81,12 +116,12 @@ const Features = () => {
               </div>
               <div>
                 <h3 className="font-display text-2xl font-bold text-foreground">Professionel Udlejer</h3>
-                <p className="text-sm text-primary">Med CVR og egen indløsningsaftale</p>
+                <p className="text-sm text-primary">B2P – Business-to-Platform</p>
               </div>
             </div>
 
             <p className="text-muted-foreground mb-6">
-              Kør din biludlejning professionelt. Behold fuld kontrol over betalinger, forsikring og prissætning – vi leverer teknologien.
+              Kør din biludlejning professionelt. Behold fuld kontrol over betalinger og forsikring – vi leverer teknologien og kunderne.
             </p>
 
             <div className="space-y-4 mb-6">
@@ -95,7 +130,7 @@ const Features = () => {
                   <CreditCard className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Din egen betalingsløsning</div>
+                  <div className="font-medium text-foreground">Bring Your Own Gateway</div>
                   <p className="text-sm text-muted-foreground">Forbind Quickpay, PensoPay, Reepay eller Stripe. Pengene går direkte til dig.</p>
                 </div>
               </div>
@@ -104,7 +139,7 @@ const Features = () => {
                   <Shield className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Din egen forsikring</div>
+                  <div className="font-medium text-foreground">Din egen flådeforsikring</div>
                   <p className="text-sm text-muted-foreground">Dit policenummer og selskab flettes automatisk ind i kontrakten.</p>
                 </div>
               </div>
@@ -113,8 +148,8 @@ const Features = () => {
                   <FileSignature className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Erhvervskontrakt</div>
-                  <p className="text-sm text-muted-foreground">Juridisk bindende aftale med CVR, forsikringsoplysninger og fuld sporbarhed.</p>
+                  <div className="font-medium text-foreground">B2B-kontrakt</div>
+                  <p className="text-sm text-muted-foreground">Professionel kontrakt med CVR og dine egne lejebetingelser.</p>
                 </div>
               </div>
             </div>
@@ -122,24 +157,24 @@ const Features = () => {
             <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
               <div className="flex items-center gap-2 text-sm text-primary font-medium">
                 <span>✨</span>
-                <span>299 kr/md + 19 kr per booking – du beholder 100%</span>
+                <span>SaaS abonnement + lille booking-gebyr – du beholder 100%</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Shared Features */}
+        {/* Shared Tech Features */}
         <div className="text-center mb-8">
-          <h3 className="font-display text-xl font-bold text-foreground mb-2">Fælles for begge spor</h3>
-          <p className="text-muted-foreground">Disse funktioner får alle udlejere adgang til</p>
+          <h3 className="font-display text-xl font-bold text-foreground mb-2">Den tekniske motor</h3>
+          <p className="text-muted-foreground">Disse funktioner driver hele platformen</p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { title: "Nummerplade-opslag", desc: "Automatisk bildata via Kameli API" },
-            { title: "Smart kalender", desc: "Booking-system med tilgængelighed" },
-            { title: "Kundevalidering", desc: "Kørekort og ID-tjek" },
-            { title: "Automatiske kontrakter", desc: "PDF genereres ved booking" },
+            { title: "Smart Payment Switch", desc: "Skifter automatisk gateway baseret på biltype" },
+            { title: "Nummerplade API", desc: "Kameli integration – hent bildata på sekunder" },
+            { title: "Legal Engine", desc: "PDF-kontrakter genereret on-the-fly" },
+            { title: "Unified Search", desc: "Private + Pro biler i én søgning" },
           ].map((feature, i) => (
             <div key={i} className="p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all animate-scale-in" style={{ animationDelay: `${0.2 + i * 0.05}s` }}>
               <Check className="w-5 h-5 text-primary mb-2" />
@@ -151,7 +186,7 @@ const Features = () => {
 
         <div className="text-center mt-12">
           <Button variant="glass" size="lg" className="group">
-            Se alle funktioner
+            Bliv udlejer
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
