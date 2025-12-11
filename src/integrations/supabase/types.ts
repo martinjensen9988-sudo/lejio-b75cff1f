@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          bank_account: string | null
+          city: string | null
+          company_name: string | null
+          created_at: string
+          cvr_number: string | null
+          email: string
+          full_name: string | null
+          gateway_api_key: string | null
+          gateway_merchant_id: string | null
+          id: string
+          insurance_company: string | null
+          insurance_policy_number: string | null
+          payment_gateway: string | null
+          phone: string | null
+          postal_code: string | null
+          updated_at: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          bank_account?: string | null
+          city?: string | null
+          company_name?: string | null
+          created_at?: string
+          cvr_number?: string | null
+          email: string
+          full_name?: string | null
+          gateway_api_key?: string | null
+          gateway_merchant_id?: string | null
+          id: string
+          insurance_company?: string | null
+          insurance_policy_number?: string | null
+          payment_gateway?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          bank_account?: string | null
+          city?: string | null
+          company_name?: string | null
+          created_at?: string
+          cvr_number?: string | null
+          email?: string
+          full_name?: string | null
+          gateway_api_key?: string | null
+          gateway_merchant_id?: string | null
+          id?: string
+          insurance_company?: string | null
+          insurance_policy_number?: string | null
+          payment_gateway?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +88,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_type: "privat" | "professionel"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +215,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_type: ["privat", "professionel"],
+    },
   },
 } as const
