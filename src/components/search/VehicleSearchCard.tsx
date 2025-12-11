@@ -1,9 +1,9 @@
+import { useMemo } from "react";
 import { Car, Fuel, Calendar, Gauge, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SearchVehicle, SearchFiltersState } from "@/pages/Search";
-import { differenceInDays } from "date-fns";
 
 interface VehicleSearchCardProps {
   vehicle: SearchVehicle;
@@ -20,18 +20,41 @@ const VehicleSearchCard = ({
 }: VehicleSearchCardProps) => {
   const navigate = useNavigate();
 
-  // Calculate total price if dates are selected
-  const calculateTotalPrice = () => {
-    if (!filters.startDate || !filters.endDate || !vehicle.daily_price) return null;
-    const days = differenceInDays(filters.endDate, filters.startDate) + 1;
-    return days * vehicle.daily_price;
-  };
+  // Calculate pricing based on period type
+  const pricing = useMemo(() => {
+    const { periodType, periodCount } = filters;
 
-  const totalPrice = calculateTotalPrice();
-  const days =
-    filters.startDate && filters.endDate
-      ? differenceInDays(filters.endDate, filters.startDate) + 1
-      : null;
+    let unitPrice = 0;
+    let unitLabel = "";
+    let periodLabel = "";
+
+    switch (periodType) {
+      case "monthly":
+        unitPrice = vehicle.monthly_price || (vehicle.daily_price || 0) * 30;
+        unitLabel = "/måned";
+        periodLabel = periodCount === 1 ? "måned" : "måneder";
+        break;
+      case "weekly":
+        unitPrice = vehicle.weekly_price || (vehicle.daily_price || 0) * 7;
+        unitLabel = "/uge";
+        periodLabel = periodCount === 1 ? "uge" : "uger";
+        break;
+      default:
+        unitPrice = vehicle.daily_price || 0;
+        unitLabel = "/dag";
+        periodLabel = periodCount === 1 ? "dag" : "dage";
+    }
+
+    const totalPrice = unitPrice * periodCount;
+
+    return {
+      unitPrice,
+      unitLabel,
+      totalPrice,
+      periodCount,
+      periodLabel,
+    };
+  }, [filters, vehicle]);
 
   return (
     <>
@@ -78,9 +101,9 @@ const VehicleSearchCard = ({
               </div>
               <div className="text-right">
                 <div className="text-xl font-bold text-primary">
-                  {vehicle.daily_price?.toLocaleString("da-DK")} kr
+                  {pricing.unitPrice.toLocaleString("da-DK")} kr
                 </div>
-                <span className="text-sm text-muted-foreground">/dag</span>
+                <span className="text-sm text-muted-foreground">{pricing.unitLabel}</span>
               </div>
             </div>
 
@@ -122,13 +145,13 @@ const VehicleSearchCard = ({
 
             {/* Total price & Book button */}
             <div className="flex items-center justify-between pt-3 border-t border-border">
-              {totalPrice && days ? (
+              {filters.startDate ? (
                 <div>
                   <span className="text-sm text-muted-foreground">
-                    {days} {days === 1 ? "dag" : "dage"}:
+                    {pricing.periodCount} {pricing.periodLabel}:
                   </span>
                   <span className="ml-2 font-bold text-foreground">
-                    {totalPrice.toLocaleString("da-DK")} kr
+                    {pricing.totalPrice.toLocaleString("da-DK")} kr
                   </span>
                 </div>
               ) : (
