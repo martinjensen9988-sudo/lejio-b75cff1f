@@ -10,13 +10,14 @@ import LejioLogo from '@/components/LejioLogo';
 import AddVehicleDialog from '@/components/dashboard/AddVehicleDialog';
 import VehicleCard from '@/components/dashboard/VehicleCard';
 import BookingsTable from '@/components/dashboard/BookingsTable';
+import CreateBookingDialog from '@/components/dashboard/CreateBookingDialog';
 import { Car, Calendar, LogOut, Home, Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, profile, loading: authLoading, signOut } = useAuth();
   const { vehicles, isLoading: vehiclesLoading, updateVehicle, deleteVehicle } = useVehicles();
-  const { bookings, isLoading: bookingsLoading, updateBookingStatus } = useBookings();
+  const { bookings, isLoading: bookingsLoading, updateBookingStatus, refetch: refetchBookings } = useBookings();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -128,7 +129,10 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
 
-            <AddVehicleDialog />
+            <div className="flex gap-2">
+              <CreateBookingDialog vehicles={vehicles} onBookingCreated={refetchBookings} />
+              <AddVehicleDialog />
+            </div>
           </div>
 
           <TabsContent value="vehicles" className="mt-6">
