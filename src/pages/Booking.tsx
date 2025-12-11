@@ -28,6 +28,10 @@ import {
   Loader2,
   Check,
   AlertCircle,
+  MapPin,
+  CreditCard as IdCard,
+  UserPlus,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -71,10 +75,29 @@ const Booking = () => {
   const [periodCount, setPeriodCount] = useState(1);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    firstName: "",
+    lastName: "",
+    birthDate: "",
+    address: "",
+    postalCode: "",
+    city: "",
     phone: "",
+    email: "",
+    licenseNumber: "",
+    licenseIssueDate: "",
+    licenseCountry: "Danmark",
     notes: "",
+  });
+
+  // Extra driver
+  const [hasExtraDriver, setHasExtraDriver] = useState(false);
+  const [extraDriver, setExtraDriver] = useState({
+    firstName: "",
+    lastName: "",
+    birthDate: "",
+    licenseNumber: "",
+    licenseIssueDate: "",
+    licenseCountry: "Danmark",
   });
 
   // Step 2: Document uploads
@@ -193,8 +216,12 @@ const Booking = () => {
           toast({ title: "Vælg startdato", variant: "destructive" });
           return false;
         }
-        if (!formData.name || !formData.email || !formData.phone) {
+        if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.birthDate || !formData.address || !formData.postalCode || !formData.city || !formData.licenseNumber || !formData.licenseIssueDate) {
           toast({ title: "Udfyld alle påkrævede felter", variant: "destructive" });
+          return false;
+        }
+        if (hasExtraDriver && (!extraDriver.firstName || !extraDriver.lastName || !extraDriver.licenseNumber || !extraDriver.licenseIssueDate)) {
+          toast({ title: "Udfyld alle felter for ekstra fører", variant: "destructive" });
           return false;
         }
         return true;
@@ -260,7 +287,7 @@ const Booking = () => {
         end_date: format(endDate, "yyyy-MM-dd"),
         total_price: pricing.grandTotal,
         status: "pending",
-        renter_name: formData.name,
+        renter_name: `${formData.firstName} ${formData.lastName}`,
         renter_email: formData.email,
         renter_phone: formData.phone,
         notes: formData.notes || null,
@@ -273,7 +300,7 @@ const Booking = () => {
         body: {
           lessorEmail: ownerProfile.email,
           lessorName: ownerProfile.full_name || "Udlejer",
-          renterName: formData.name,
+          renterName: `${formData.firstName} ${formData.lastName}`,
           renterEmail: formData.email,
           renterPhone: formData.phone,
           vehicleMake: vehicle.make,
@@ -452,17 +479,89 @@ const Booking = () => {
 
                     <hr className="border-border" />
 
-                    <h2 className="text-xl font-semibold">Dine oplysninger</h2>
+                    <h2 className="text-xl font-semibold">Personlige oplysninger</h2>
+                    <p className="text-sm text-muted-foreground -mt-4">Til lejekontrakten - skal matche dit kørekort</p>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">Fornavn *</Label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="firstName"
+                            value={formData.firstName}
+                            onChange={(e) => setFormData((p) => ({ ...p, firstName: e.target.value }))}
+                            placeholder="Fornavn"
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Efternavn *</Label>
+                        <Input
+                          id="lastName"
+                          value={formData.lastName}
+                          onChange={(e) => setFormData((p) => ({ ...p, lastName: e.target.value }))}
+                          placeholder="Efternavn"
+                        />
+                      </div>
+                    </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="name">Fulde navn *</Label>
+                      <Label htmlFor="birthDate">Fødselsdato *</Label>
+                      <Input
+                        id="birthDate"
+                        type="date"
+                        value={formData.birthDate}
+                        onChange={(e) => setFormData((p) => ({ ...p, birthDate: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Adresse *</Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
-                          id="name"
-                          value={formData.name}
-                          onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                          placeholder="Dit navn"
+                          id="address"
+                          value={formData.address}
+                          onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))}
+                          placeholder="Vejnavn og husnummer"
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="postalCode">Postnummer *</Label>
+                        <Input
+                          id="postalCode"
+                          value={formData.postalCode}
+                          onChange={(e) => setFormData((p) => ({ ...p, postalCode: e.target.value }))}
+                          placeholder="1234"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="city">By *</Label>
+                        <Input
+                          id="city"
+                          value={formData.city}
+                          onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
+                          placeholder="By"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefon *</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+                          placeholder="+45 12 34 56 78"
                           className="pl-10"
                         />
                       </div>
@@ -483,20 +582,137 @@ const Booking = () => {
                       </div>
                     </div>
 
+                    <hr className="border-border" />
+
+                    <h2 className="text-xl font-semibold">Føreroplysninger</h2>
+                    <p className="text-sm text-muted-foreground -mt-4">Til forsikring og verifikation</p>
+
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Telefon *</Label>
+                      <Label htmlFor="licenseNumber">Kørekortnummer *</Label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-                          placeholder="+45 12 34 56 78"
+                          id="licenseNumber"
+                          value={formData.licenseNumber}
+                          onChange={(e) => setFormData((p) => ({ ...p, licenseNumber: e.target.value }))}
+                          placeholder="Det lange nummer på kortet"
                           className="pl-10"
                         />
                       </div>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="licenseIssueDate">Udstedelsesdato *</Label>
+                        <Input
+                          id="licenseIssueDate"
+                          type="date"
+                          value={formData.licenseIssueDate}
+                          onChange={(e) => setFormData((p) => ({ ...p, licenseIssueDate: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="licenseCountry">Land</Label>
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="licenseCountry"
+                            value={formData.licenseCountry}
+                            onChange={(e) => setFormData((p) => ({ ...p, licenseCountry: e.target.value }))}
+                            placeholder="Danmark"
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <hr className="border-border" />
+
+                    {/* Extra Driver */}
+                    <div className="flex items-center gap-3 p-4 border border-border rounded-xl">
+                      <Checkbox
+                        id="extraDriver"
+                        checked={hasExtraDriver}
+                        onCheckedChange={(c) => setHasExtraDriver(c as boolean)}
+                      />
+                      <label htmlFor="extraDriver" className="flex items-center gap-2 cursor-pointer">
+                        <UserPlus className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">Tilføj ekstra fører</span>
+                      </label>
+                    </div>
+
+                    {hasExtraDriver && (
+                      <div className="p-4 border border-border rounded-xl space-y-4 bg-muted/30">
+                        <h3 className="font-medium flex items-center gap-2">
+                          <UserPlus className="w-4 h-4" />
+                          Ekstra fører
+                        </h3>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="extraFirstName">Fornavn *</Label>
+                            <Input
+                              id="extraFirstName"
+                              value={extraDriver.firstName}
+                              onChange={(e) => setExtraDriver((p) => ({ ...p, firstName: e.target.value }))}
+                              placeholder="Fornavn"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="extraLastName">Efternavn *</Label>
+                            <Input
+                              id="extraLastName"
+                              value={extraDriver.lastName}
+                              onChange={(e) => setExtraDriver((p) => ({ ...p, lastName: e.target.value }))}
+                              placeholder="Efternavn"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="extraBirthDate">Fødselsdato</Label>
+                          <Input
+                            id="extraBirthDate"
+                            type="date"
+                            value={extraDriver.birthDate}
+                            onChange={(e) => setExtraDriver((p) => ({ ...p, birthDate: e.target.value }))}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="extraLicenseNumber">Kørekortnummer *</Label>
+                          <Input
+                            id="extraLicenseNumber"
+                            value={extraDriver.licenseNumber}
+                            onChange={(e) => setExtraDriver((p) => ({ ...p, licenseNumber: e.target.value }))}
+                            placeholder="Det lange nummer på kortet"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="extraLicenseIssueDate">Udstedelsesdato *</Label>
+                            <Input
+                              id="extraLicenseIssueDate"
+                              type="date"
+                              value={extraDriver.licenseIssueDate}
+                              onChange={(e) => setExtraDriver((p) => ({ ...p, licenseIssueDate: e.target.value }))}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="extraLicenseCountry">Land</Label>
+                            <Input
+                              id="extraLicenseCountry"
+                              value={extraDriver.licenseCountry}
+                              onChange={(e) => setExtraDriver((p) => ({ ...p, licenseCountry: e.target.value }))}
+                              placeholder="Danmark"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <hr className="border-border" />
 
                     <div className="space-y-2">
                       <Label htmlFor="notes">Besked til udlejer (valgfri)</Label>
@@ -641,7 +857,7 @@ const Booking = () => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Lejer:</span>
-                          <span className="font-medium">{formData.name}</span>
+                          <span className="font-medium">{formData.firstName} {formData.lastName}</span>
                         </div>
                       </div>
                     </div>
