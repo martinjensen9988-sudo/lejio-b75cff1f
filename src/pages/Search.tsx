@@ -31,12 +31,16 @@ export interface SearchVehicle {
   lng?: number;
 }
 
+export type RentalPeriodType = 'daily' | 'weekly' | 'monthly';
+
 export interface SearchFiltersState {
   priceMin: number;
   priceMax: number;
   fuelType: string;
   startDate: Date | undefined;
   endDate: Date | undefined;
+  periodType: RentalPeriodType;
+  periodCount: number;
 }
 
 const Search = () => {
@@ -51,6 +55,8 @@ const Search = () => {
     fuelType: "all",
     startDate: undefined,
     endDate: undefined,
+    periodType: 'daily',
+    periodCount: 1,
   });
 
   // Fetch available vehicles

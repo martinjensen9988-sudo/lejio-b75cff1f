@@ -1,8 +1,26 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, Search, Sparkles } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { da } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import HeroAnimations from "./HeroAnimations";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const [location, setLocation] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>();
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (location) params.set("location", location);
+    if (startDate) params.set("startDate", startDate.toISOString());
+    navigate(`/search?${params.toString()}`);
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-hero-gradient">
       {/* Organic blob backgrounds */}
@@ -39,18 +57,35 @@ const Hero = () => {
                 <input 
                   type="text" 
                   placeholder="Hvor skal du hente bilen?"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                   className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
               </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-muted/50 border border-border md:w-48">
-                <Calendar className="w-5 h-5 text-lavender shrink-0" />
-                <input 
-                  type="text" 
-                  placeholder="Hvornår?"
-                  className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-                />
-              </div>
-              <Button variant="hero" size="xl" className="md:px-8 group">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-muted/50 border border-border md:w-48 cursor-pointer hover:bg-muted/70 transition-colors">
+                    <Calendar className="w-5 h-5 text-lavender shrink-0" />
+                    <span className={cn(
+                      "flex-1 text-left",
+                      startDate ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {startDate ? format(startDate, "dd/MM/yyyy") : "Hvornår?"}
+                    </span>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <CalendarComponent
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button variant="hero" size="xl" className="md:px-8 group" onClick={handleSearch}>
                 <Search className="w-5 h-5" />
                 <span className="hidden sm:inline">Find din bil nu</span>
                 <span className="sm:hidden">Søg</span>
