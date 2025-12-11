@@ -46,9 +46,9 @@ serve(async (req) => {
     const cleanedRegistration = registration.replace(/\s/g, '').toUpperCase();
     console.log(`Looking up vehicle: ${cleanedRegistration}`);
 
-    // Call Kameli API
+    // Call Kameli/Nummerplade API - correct endpoint is api.nrpla.de
     const response = await fetch(
-      `https://www.nummerpladeapi.dk/api/v2/vehicle/${cleanedRegistration}`,
+      `https://api.nrpla.de/${cleanedRegistration}?advanced=1`,
       {
         method: 'GET',
         headers: {
@@ -60,7 +60,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Kameli API error: ${response.status} - ${errorText}`);
+      console.error(`Nummerplade API error: ${response.status} - ${errorText}`);
       
       if (response.status === 404) {
         return new Response(
@@ -85,17 +85,18 @@ serve(async (req) => {
     const data = await response.json();
     console.log('Vehicle data received:', JSON.stringify(data));
 
-    // Map Kameli API response to our format
+    // Map Nummerplade API response to our format
+    // API returns: registration, vin, brand, model, version, fuel_type, model_year, color, etc.
     const vehicleData: VehicleData = {
-      registration: cleanedRegistration,
-      make: data.make || data.brand || '',
+      registration: data.registration || cleanedRegistration,
+      make: data.brand || '',
       model: data.model || '',
-      variant: data.variant || data.version || '',
-      year: data.model_year || data.first_registration_date?.substring(0, 4) || 0,
-      fuel_type: data.fuel_type || data.propellant || '',
+      variant: data.version || '',
+      year: data.model_year || (data.first_registration_date ? parseInt(data.first_registration_date.substring(0, 4)) : 0),
+      fuel_type: data.fuel_type || '',
       color: data.color || '',
       vin: data.vin || '',
-      vehicle_id: data.vehicle_id || data.id || '',
+      vehicle_id: data.registration || '',
     };
 
     return new Response(
