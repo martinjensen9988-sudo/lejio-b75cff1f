@@ -277,6 +277,120 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          card_brand: string | null
+          card_expiry_month: number | null
+          card_expiry_year: number | null
+          card_last_four: string | null
+          created_at: string
+          customer_id: string
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_payment_method_id: string
+          id: string
+          is_default: boolean | null
+          lessor_id: string
+          updated_at: string
+        }
+        Insert: {
+          card_brand?: string | null
+          card_expiry_month?: number | null
+          card_expiry_year?: number | null
+          card_last_four?: string | null
+          created_at?: string
+          customer_id: string
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_payment_method_id: string
+          id?: string
+          is_default?: boolean | null
+          lessor_id: string
+          updated_at?: string
+        }
+        Update: {
+          card_brand?: string | null
+          card_expiry_month?: number | null
+          card_expiry_year?: number | null
+          card_last_four?: string | null
+          created_at?: string
+          customer_id?: string
+          gateway?: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_payment_method_id?: string
+          id?: string
+          is_default?: boolean | null
+          lessor_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          failure_reason: string | null
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_transaction_id: string | null
+          id: string
+          lessor_id: string
+          renter_id: string | null
+          status: string
+          subscription_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          failure_reason?: string | null
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_transaction_id?: string | null
+          id?: string
+          lessor_id: string
+          renter_id?: string | null
+          status?: string
+          subscription_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          failure_reason?: string | null
+          gateway?: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_transaction_id?: string | null
+          id?: string
+          lessor_id?: string
+          renter_id?: string | null
+          status?: string
+          subscription_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -343,6 +457,91 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          amount: number
+          booking_id: string
+          cancelled_at: string | null
+          created_at: string
+          currency: string
+          current_period_end: string | null
+          current_period_start: string | null
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_subscription_id: string | null
+          id: string
+          interval: string
+          lessor_id: string
+          next_payment_date: string | null
+          payment_method_id: string | null
+          renter_id: string | null
+          status: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          cancelled_at?: string | null
+          created_at?: string
+          currency?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_subscription_id?: string | null
+          id?: string
+          interval?: string
+          lessor_id: string
+          next_payment_date?: string | null
+          payment_method_id?: string | null
+          renter_id?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          cancelled_at?: string | null
+          created_at?: string
+          currency?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          gateway?: Database["public"]["Enums"]["payment_gateway_type"]
+          gateway_subscription_id?: string | null
+          id?: string
+          interval?: string
+          lessor_id?: string
+          next_payment_date?: string | null
+          payment_method_id?: string | null
+          renter_id?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           color: string | null
@@ -362,6 +561,9 @@ export type Database = {
           model: string
           monthly_price: number | null
           owner_id: string
+          payment_schedule:
+            | Database["public"]["Enums"]["payment_schedule_type"]
+            | null
           prepaid_rent_enabled: boolean
           prepaid_rent_months: number | null
           registration: string
@@ -390,6 +592,9 @@ export type Database = {
           model: string
           monthly_price?: number | null
           owner_id: string
+          payment_schedule?:
+            | Database["public"]["Enums"]["payment_schedule_type"]
+            | null
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
           registration: string
@@ -418,6 +623,9 @@ export type Database = {
           model?: string
           monthly_price?: number | null
           owner_id?: string
+          payment_schedule?:
+            | Database["public"]["Enums"]["payment_schedule_type"]
+            | null
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
           registration?: string
@@ -438,6 +646,13 @@ export type Database = {
       generate_contract_number: { Args: never; Returns: string }
     }
     Enums: {
+      payment_gateway_type:
+        | "stripe"
+        | "quickpay"
+        | "pensopay"
+        | "reepay"
+        | "onpay"
+      payment_schedule_type: "upfront" | "monthly"
       user_type: "privat" | "professionel"
     }
     CompositeTypes: {
@@ -566,6 +781,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      payment_gateway_type: [
+        "stripe",
+        "quickpay",
+        "pensopay",
+        "reepay",
+        "onpay",
+      ],
+      payment_schedule_type: ["upfront", "monthly"],
       user_type: ["privat", "professionel"],
     },
   },

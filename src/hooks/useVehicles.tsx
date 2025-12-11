@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
+export type PaymentScheduleType = 'upfront' | 'monthly';
+
 export interface Vehicle {
   id: string;
   owner_id: string;
@@ -28,6 +30,7 @@ export interface Vehicle {
   deposit_amount: number | null;
   prepaid_rent_enabled: boolean;
   prepaid_rent_months: number | null;
+  payment_schedule: PaymentScheduleType | null;
   created_at: string;
   updated_at: string;
 }
@@ -54,6 +57,7 @@ export interface VehicleInsert {
   deposit_amount?: number;
   prepaid_rent_enabled?: boolean;
   prepaid_rent_months?: number;
+  payment_schedule?: PaymentScheduleType;
 }
 
 export const useVehicles = () => {

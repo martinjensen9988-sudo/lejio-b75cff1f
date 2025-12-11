@@ -10,9 +10,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
-import { Plus, Search, Loader2, Car, Check } from 'lucide-react';
+import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock } from 'lucide-react';
 
 const AddVehicleDialog = () => {
   const [open, setOpen] = useState(false);
@@ -44,6 +45,7 @@ const AddVehicleDialog = () => {
         deposit_amount: 0,
         prepaid_rent_enabled: false,
         prepaid_rent_months: 1,
+        payment_schedule: 'upfront' as const,
       });
       setStep('details');
     }
@@ -294,6 +296,57 @@ const AddVehicleDialog = () => {
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* Payment Schedule */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Betalingsplan</Label>
+              <RadioGroup
+                value={vehicleDetails.payment_schedule || 'upfront'}
+                onValueChange={(value: 'upfront' | 'monthly') => 
+                  setVehicleDetails(prev => ({ ...prev, payment_schedule: value }))
+                }
+                className="space-y-2"
+              >
+                <div 
+                  className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                    vehicleDetails.payment_schedule === 'upfront' 
+                      ? 'bg-primary/10 border-primary/30' 
+                      : 'bg-muted/30 border-border hover:bg-muted/50'
+                  }`}
+                  onClick={() => setVehicleDetails(prev => ({ ...prev, payment_schedule: 'upfront' as const }))}
+                >
+                  <RadioGroupItem value="upfront" id="payment_upfront" />
+                  <CreditCard className="w-4 h-4 text-primary" />
+                  <div className="flex-1">
+                    <label htmlFor="payment_upfront" className="text-sm font-medium cursor-pointer">
+                      Forudbetaling
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Lejer betaler hele lejeperioden på forhånd
+                    </p>
+                  </div>
+                </div>
+                <div 
+                  className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                    vehicleDetails.payment_schedule === 'monthly' 
+                      ? 'bg-coral/10 border-coral/30' 
+                      : 'bg-muted/30 border-border hover:bg-muted/50'
+                  }`}
+                  onClick={() => setVehicleDetails(prev => ({ ...prev, payment_schedule: 'monthly' as const }))}
+                >
+                  <RadioGroupItem value="monthly" id="payment_monthly" />
+                  <CalendarClock className="w-4 h-4 text-coral" />
+                  <div className="flex-1">
+                    <label htmlFor="payment_monthly" className="text-sm font-medium cursor-pointer">
+                      Månedlig opkrævning
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Automatisk trækning fra lejers kort hver måned
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
             </div>
 
             <div className="flex gap-3 pt-4">
