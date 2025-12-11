@@ -1,22 +1,34 @@
 import { Vehicle } from '@/hooks/useVehicles';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Car, Calendar, Fuel, Trash2, Edit, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Car, Calendar, Fuel, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
+import EditVehicleDialog from './EditVehicleDialog';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
   onToggleAvailability: (id: string, available: boolean) => void;
+  onUpdate: (id: string, updates: Partial<Vehicle>) => Promise<boolean>;
   onDelete: (id: string) => void;
 }
 
-const VehicleCard = ({ vehicle, onToggleAvailability, onDelete }: VehicleCardProps) => {
+const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: VehicleCardProps) => {
   return (
-    <div className="bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-lg transition-shadow">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Car className="w-6 h-6 text-primary" />
-          </div>
+    <div className="bg-card rounded-2xl shadow-soft border border-border hover:shadow-lg transition-shadow overflow-hidden">
+      {/* Vehicle Image */}
+      <div className="h-32 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
+        {vehicle.image_url ? (
+          <img 
+            src={vehicle.image_url} 
+            alt={`${vehicle.make} ${vehicle.model}`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <Car className="w-12 h-12 text-primary/30" />
+        )}
+      </div>
+
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="font-display font-bold text-foreground">
               {vehicle.make} {vehicle.model}
@@ -25,70 +37,110 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onDelete }: VehicleCardPro
               {vehicle.registration}
             </p>
           </div>
+          <Badge variant={vehicle.is_available ? 'default' : 'secondary'}>
+            {vehicle.is_available ? 'Tilgængelig' : 'Ikke tilgængelig'}
+          </Badge>
         </div>
-        <Badge variant={vehicle.is_available ? 'default' : 'secondary'}>
-          {vehicle.is_available ? 'Tilgængelig' : 'Ikke tilgængelig'}
-        </Badge>
-      </div>
 
-      <div className="flex items-center gap-3 mb-4 text-sm">
-        {vehicle.year && (
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{vehicle.year}</span>
-          </div>
-        )}
-        {vehicle.fuel_type && (
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Fuel className="w-3.5 h-3.5" />
-            <span className="capitalize">{vehicle.fuel_type}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-3 gap-2 mb-4 p-3 rounded-xl bg-muted/50">
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground mb-1">Dag</p>
-          <p className="font-bold text-foreground">
-            {vehicle.daily_price ? `${vehicle.daily_price} kr` : '-'}
-          </p>
-        </div>
-        <div className="text-center border-x border-border">
-          <p className="text-xs text-muted-foreground mb-1">Uge</p>
-          <p className="font-bold text-foreground">
-            {vehicle.weekly_price ? `${vehicle.weekly_price} kr` : '-'}
-          </p>
-        </div>
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground mb-1">Måned</p>
-          <p className="font-bold text-foreground">
-            {vehicle.monthly_price ? `${vehicle.monthly_price} kr` : '-'}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 pt-3 border-t border-border">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex-1 text-xs"
-          onClick={() => onToggleAvailability(vehicle.id, !vehicle.is_available)}
-        >
-          {vehicle.is_available ? (
-            <>
-              <ToggleRight className="w-4 h-4 mr-1 text-mint" />
-              Deaktiver
-            </>
-          ) : (
-            <>
-              <ToggleLeft className="w-4 h-4 mr-1" />
-              Aktiver
-            </>
+        <div className="flex items-center gap-3 mb-4 text-sm">
+          {vehicle.year && (
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>{vehicle.year}</span>
+            </div>
           )}
-        </Button>
-        <Button variant="ghost" size="sm" className="text-destructive text-xs" onClick={() => onDelete(vehicle.id)}>
-          <Trash2 className="w-4 h-4" />
-        </Button>
+          {vehicle.fuel_type && (
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Fuel className="w-3.5 h-3.5" />
+              <span className="capitalize">{vehicle.fuel_type}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Features badges */}
+        {vehicle.features && vehicle.features.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {vehicle.features.slice(0, 4).map(feature => (
+              <span 
+                key={feature} 
+                className="text-xs px-2 py-0.5 rounded-full bg-mint/10 text-mint"
+              >
+                {feature === 'aircon' && 'AC'}
+                {feature === 'gps' && 'GPS'}
+                {feature === 'bluetooth' && 'BT'}
+                {feature === 'cruise_control' && 'Fartpilot'}
+                {feature === 'parking_sensors' && 'P-sensor'}
+                {feature === 'backup_camera' && 'Bakkamera'}
+                {feature === 'heated_seats' && 'Sædevarme'}
+                {feature === 'leather_seats' && 'Læder'}
+                {feature === 'sunroof' && 'Panorama'}
+                {feature === 'keyless' && 'Keyless'}
+                {feature === 'apple_carplay' && 'CarPlay'}
+                {feature === 'android_auto' && 'Android'}
+                {feature === 'roof_rack' && 'Tagbøjler'}
+                {feature === 'tow_hitch' && 'Træk'}
+                {feature === 'child_seat' && 'Barnestol'}
+                {feature === 'winter_tires' && 'Vinterdæk'}
+              </span>
+            ))}
+            {vehicle.features.length > 4 && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                +{vehicle.features.length - 4}
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 gap-2 mb-4 p-3 rounded-xl bg-muted/50">
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-1">Dag</p>
+            <p className="font-bold text-foreground text-sm">
+              {vehicle.daily_price ? `${vehicle.daily_price} kr` : '-'}
+            </p>
+          </div>
+          <div className="text-center border-x border-border">
+            <p className="text-xs text-muted-foreground mb-1">Uge</p>
+            <p className="font-bold text-foreground text-sm">
+              {vehicle.weekly_price ? `${vehicle.weekly_price} kr` : '-'}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-1">Måned</p>
+            <p className="font-bold text-foreground text-sm">
+              {vehicle.monthly_price ? `${vehicle.monthly_price} kr` : '-'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-3 border-t border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => onToggleAvailability(vehicle.id, !vehicle.is_available)}
+          >
+            {vehicle.is_available ? (
+              <>
+                <ToggleRight className="w-4 h-4 mr-1 text-mint" />
+                Deaktiver
+              </>
+            ) : (
+              <>
+                <ToggleLeft className="w-4 h-4 mr-1" />
+                Aktiver
+              </>
+            )}
+          </Button>
+          <EditVehicleDialog vehicle={vehicle} onUpdate={onUpdate} />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-destructive text-xs" 
+            onClick={() => onDelete(vehicle.id)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -156,6 +156,7 @@ const Dashboard = () => {
                     key={vehicle.id}
                     vehicle={vehicle}
                     onToggleAvailability={handleToggleAvailability}
+                    onUpdate={updateVehicle}
                     onDelete={deleteVehicle}
                   />
                 ))}

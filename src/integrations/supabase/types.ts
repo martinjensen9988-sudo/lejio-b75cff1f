@@ -302,8 +302,10 @@ export type Database = {
           daily_price: number | null
           description: string | null
           extra_km_price: number | null
+          features: string[] | null
           fuel_type: string | null
           id: string
+          image_url: string | null
           included_km: number | null
           is_available: boolean | null
           make: string
@@ -323,8 +325,10 @@ export type Database = {
           daily_price?: number | null
           description?: string | null
           extra_km_price?: number | null
+          features?: string[] | null
           fuel_type?: string | null
           id?: string
+          image_url?: string | null
           included_km?: number | null
           is_available?: boolean | null
           make: string
@@ -344,8 +348,10 @@ export type Database = {
           daily_price?: number | null
           description?: string | null
           extra_km_price?: number | null
+          features?: string[] | null
           fuel_type?: string | null
           id?: string
+          image_url?: string | null
           included_km?: number | null
           is_available?: boolean | null
           make?: string
