@@ -11,7 +11,7 @@ import AddVehicleDialog from '@/components/dashboard/AddVehicleDialog';
 import VehicleCard from '@/components/dashboard/VehicleCard';
 import BookingsTable from '@/components/dashboard/BookingsTable';
 import CreateBookingDialog from '@/components/dashboard/CreateBookingDialog';
-import { Car, Calendar, LogOut, Home, Loader2 } from 'lucide-react';
+import { Car, Calendar, LogOut, Home, Loader2, Settings } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -69,6 +69,9 @@ const Dashboard = () => {
                   <span className="text-xs px-1.5 py-0.5 rounded-md bg-primary/20 text-primary font-medium">Pro</span>
                 )}
               </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/settings')}>
+                <Settings className="w-4 h-4" />
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
                 <Home className="w-4 h-4" />
               </Button>

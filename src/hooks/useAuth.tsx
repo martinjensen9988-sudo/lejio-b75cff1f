@@ -16,6 +16,8 @@ interface Profile {
   cvr_number: string | null;
   company_name: string | null;
   payment_gateway: string | null;
+  gateway_api_key: string | null;
+  gateway_merchant_id: string | null;
   insurance_company: string | null;
   insurance_policy_number: string | null;
 }
