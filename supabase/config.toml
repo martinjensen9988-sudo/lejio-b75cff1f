@@ -2,3 +2,9 @@ project_id = "aqzggwewjttbkaqnbmrb"
 
 [functions.vehicle-lookup]
 verify_jwt = false
+
+[functions.generate-contract]
+verify_jwt = true
+
+[functions.sign-contract]
+verify_jwt = true
