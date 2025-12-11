@@ -1,10 +1,9 @@
 import { Car, Fuel, Calendar, Gauge, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SearchVehicle, SearchFiltersState } from "@/pages/Search";
 import { differenceInDays } from "date-fns";
-import { useState } from "react";
-import BookingModal from "./BookingModal";
 
 interface VehicleSearchCardProps {
   vehicle: SearchVehicle;
@@ -19,7 +18,7 @@ const VehicleSearchCard = ({
   onSelect,
   filters,
 }: VehicleSearchCardProps) => {
-  const [showBookingModal, setShowBookingModal] = useState(false);
+  const navigate = useNavigate();
 
   // Calculate total price if dates are selected
   const calculateTotalPrice = () => {
@@ -142,7 +141,7 @@ const VehicleSearchCard = ({
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowBookingModal(true);
+                  navigate(`/booking/${vehicle.id}`);
                 }}
               >
                 Book nu
@@ -151,13 +150,6 @@ const VehicleSearchCard = ({
           </div>
         </div>
       </div>
-
-      <BookingModal
-        open={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        vehicle={vehicle}
-        filters={filters}
-      />
     </>
   );
 };
