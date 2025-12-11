@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, Search, Sparkles } from "lucide-react";
+import HeroAnimations from "./HeroAnimations";
 
 const Hero = () => {
   return (
@@ -72,31 +73,33 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Happy car illustration area */}
-        <div className="mt-16 flex justify-center gap-8 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-          <div className="flex items-end gap-4">
-            {/* Car cards floating */}
-            <div className="bg-card rounded-2xl p-4 shadow-lg border-2 border-mint/30 animate-float" style={{ animationDelay: '0s' }}>
-              <div className="w-20 h-14 bg-mint/20 rounded-xl flex items-center justify-center mb-2">
-                <span className="text-2xl">🚗</span>
-              </div>
-              <div className="text-xs font-bold text-foreground">VW Golf</div>
-              <div className="text-xs text-muted-foreground">Fra 299 kr/dag</div>
+        {/* Happy animated illustrations */}
+        <div className="mt-12 md:mt-16 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <HeroAnimations />
+        </div>
+
+        {/* Car cards floating below */}
+        <div className="mt-8 flex justify-center gap-4 md:gap-8 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+          <div className="bg-card rounded-2xl p-3 md:p-4 shadow-lg border-2 border-mint/30 animate-float" style={{ animationDelay: '0s' }}>
+            <div className="w-16 h-12 md:w-20 md:h-14 bg-mint/20 rounded-xl flex items-center justify-center mb-2">
+              <span className="text-xl md:text-2xl">🚗</span>
             </div>
-            <div className="bg-card rounded-2xl p-4 shadow-lg border-2 border-accent/30 animate-float" style={{ animationDelay: '0.5s' }}>
-              <div className="w-20 h-14 bg-accent/20 rounded-xl flex items-center justify-center mb-2">
-                <span className="text-2xl">🚙</span>
-              </div>
-              <div className="text-xs font-bold text-foreground">Tesla Model 3</div>
-              <div className="text-xs text-muted-foreground">Fra 599 kr/dag</div>
+            <div className="text-xs font-bold text-foreground">VW Golf</div>
+            <div className="text-xs text-muted-foreground">Fra 299 kr/dag</div>
+          </div>
+          <div className="bg-card rounded-2xl p-3 md:p-4 shadow-lg border-2 border-accent/30 animate-float" style={{ animationDelay: '0.5s' }}>
+            <div className="w-16 h-12 md:w-20 md:h-14 bg-accent/20 rounded-xl flex items-center justify-center mb-2">
+              <span className="text-xl md:text-2xl">🚙</span>
             </div>
-            <div className="bg-card rounded-2xl p-4 shadow-lg border-2 border-lavender/30 animate-float" style={{ animationDelay: '1s' }}>
-              <div className="w-20 h-14 bg-lavender/20 rounded-xl flex items-center justify-center mb-2">
-                <span className="text-2xl">🚐</span>
-              </div>
-              <div className="text-xs font-bold text-foreground">VW Transporter</div>
-              <div className="text-xs text-muted-foreground">Fra 499 kr/dag</div>
+            <div className="text-xs font-bold text-foreground">Tesla Model 3</div>
+            <div className="text-xs text-muted-foreground">Fra 599 kr/dag</div>
+          </div>
+          <div className="hidden sm:block bg-card rounded-2xl p-3 md:p-4 shadow-lg border-2 border-lavender/30 animate-float" style={{ animationDelay: '1s' }}>
+            <div className="w-16 h-12 md:w-20 md:h-14 bg-lavender/20 rounded-xl flex items-center justify-center mb-2">
+              <span className="text-xl md:text-2xl">🚐</span>
             </div>
+            <div className="text-xs font-bold text-foreground">VW Transporter</div>
+            <div className="text-xs text-muted-foreground">Fra 499 kr/dag</div>
           </div>
         </div>
       </div>
