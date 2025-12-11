@@ -308,11 +308,13 @@ export type Database = {
           is_available: boolean | null
           make: string
           model: string
+          monthly_price: number | null
           owner_id: string
           registration: string
           updated_at: string
           variant: string | null
           vin: string | null
+          weekly_price: number | null
           year: number | null
         }
         Insert: {
@@ -327,11 +329,13 @@ export type Database = {
           is_available?: boolean | null
           make: string
           model: string
+          monthly_price?: number | null
           owner_id: string
           registration: string
           updated_at?: string
           variant?: string | null
           vin?: string | null
+          weekly_price?: number | null
           year?: number | null
         }
         Update: {
@@ -346,11 +350,13 @@ export type Database = {
           is_available?: boolean | null
           make?: string
           model?: string
+          monthly_price?: number | null
           owner_id?: string
           registration?: string
           updated_at?: string
           variant?: string | null
           vin?: string | null
+          weekly_price?: number | null
           year?: number | null
         }
         Relationships: []

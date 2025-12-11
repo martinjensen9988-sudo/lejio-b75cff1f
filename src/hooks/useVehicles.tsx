@@ -15,6 +15,8 @@ export interface Vehicle {
   color: string | null;
   vin: string | null;
   daily_price: number | null;
+  weekly_price: number | null;
+  monthly_price: number | null;
   included_km: number | null;
   extra_km_price: number | null;
   description: string | null;
@@ -33,6 +35,8 @@ export interface VehicleInsert {
   color?: string;
   vin?: string;
   daily_price?: number;
+  weekly_price?: number;
+  monthly_price?: number;
   included_km?: number;
   extra_km_price?: number;
   description?: string;
