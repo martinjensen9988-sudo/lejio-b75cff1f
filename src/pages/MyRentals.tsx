@@ -26,6 +26,7 @@ import {
   Phone,
   MapPin,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,7 +63,7 @@ const MyRentals = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, profile, loading: authLoading } = useAuth();
-  const { contracts, signContract, refetch: refetchContracts } = useContracts();
+  const { contracts, signContract, downloadContractPdf, refetch: refetchContracts } = useContracts();
   
   const [bookings, setBookings] = useState<RentalBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -279,24 +280,37 @@ const MyRentals = () => {
                             {/* Contract Actions */}
                             <div className="flex flex-wrap gap-2 pt-2">
                               {contract ? (
-                                <Button
-                                  size="sm"
-                                  variant={contract.renter_signature ? "outline" : "default"}
-                                  className="gap-1"
-                                  onClick={() => handleViewContract(contract)}
-                                >
-                                  {contract.renter_signature ? (
-                                    <>
-                                      <FileCheck className="w-4 h-4" />
-                                      Se kontrakt
-                                    </>
-                                  ) : (
-                                    <>
-                                      <FileText className="w-4 h-4" />
-                                      Underskriv kontrakt
-                                    </>
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant={contract.renter_signature ? "outline" : "default"}
+                                    className="gap-1"
+                                    onClick={() => handleViewContract(contract)}
+                                  >
+                                    {contract.renter_signature ? (
+                                      <>
+                                        <FileCheck className="w-4 h-4" />
+                                        Se kontrakt
+                                      </>
+                                    ) : (
+                                      <>
+                                        <FileText className="w-4 h-4" />
+                                        Underskriv kontrakt
+                                      </>
+                                    )}
+                                  </Button>
+                                  {contract.pdf_url && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="gap-1"
+                                      onClick={() => downloadContractPdf(contract)}
+                                    >
+                                      <Download className="w-4 h-4" />
+                                      Download PDF
+                                    </Button>
                                   )}
-                                </Button>
+                                </>
                               ) : booking.status === "confirmed" ? (
                                 <p className="text-sm text-muted-foreground">
                                   Kontrakt afventer oprettelse...
@@ -379,15 +393,28 @@ const MyRentals = () => {
                             {/* Actions */}
                             <div className="flex flex-wrap gap-2 pt-2">
                               {contract && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="gap-1"
-                                  onClick={() => handleViewContract(contract)}
-                                >
-                                  <FileCheck className="w-4 h-4" />
-                                  Se kontrakt
-                                </Button>
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="gap-1"
+                                    onClick={() => handleViewContract(contract)}
+                                  >
+                                    <FileCheck className="w-4 h-4" />
+                                    Se kontrakt
+                                  </Button>
+                                  {contract.pdf_url && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="gap-1"
+                                      onClick={() => downloadContractPdf(contract)}
+                                    >
+                                      <Download className="w-4 h-4" />
+                                      Download PDF
+                                    </Button>
+                                  )}
+                                </>
                               )}
                               {booking.status === "completed" && (
                                 <Button
