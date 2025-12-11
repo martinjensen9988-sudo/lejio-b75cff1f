@@ -25,6 +25,11 @@ export interface Booking {
   };
 }
 
+export interface UpdateStatusResult {
+  success: boolean;
+  booking?: Booking;
+}
+
 export const useBookings = () => {
   const { user } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
