@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import SearchMap from "@/components/search/SearchMap";
 import SearchFilters from "@/components/search/SearchFilters";
 import VehicleSearchCard from "@/components/search/VehicleSearchCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Car, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const SearchMap = lazy(() => import("@/components/search/SearchMap"));
 
 export interface SearchVehicle {
   id: string;
@@ -163,11 +164,13 @@ const Search = () => {
               {/* Map - Hidden on mobile when showing list */}
               <div className={`${showMap ? 'block' : 'hidden'} md:block md:w-1/2 lg:w-3/5`}>
                 <div className="sticky top-24 h-[500px] md:h-[calc(100vh-200px)] rounded-2xl overflow-hidden border border-border shadow-soft">
-                  <SearchMap
-                    vehicles={filteredVehicles}
-                    selectedVehicle={selectedVehicle}
-                    onVehicleSelect={setSelectedVehicle}
-                  />
+                  <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+                    <SearchMap
+                      vehicles={filteredVehicles}
+                      selectedVehicle={selectedVehicle}
+                      onVehicleSelect={setSelectedVehicle}
+                    />
+                  </Suspense>
                 </div>
               </div>
 
