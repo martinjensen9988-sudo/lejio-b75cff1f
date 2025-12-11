@@ -1,9 +1,8 @@
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useEffect, useMemo } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { SearchVehicle } from "@/pages/Search";
-import { Car, Fuel } from "lucide-react";
 
 // Fix Leaflet default marker icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -42,12 +41,17 @@ const createCarIcon = (isSelected: boolean) => {
     `,
     iconSize: [40, 40],
     iconAnchor: [20, 20],
-    popupAnchor: [0, -20],
   });
 };
 
-// Component to handle map center changes
-function MapCenterHandler({ selectedVehicle, vehicles }: { selectedVehicle: string | null; vehicles: SearchVehicle[] }) {
+interface SearchMapProps {
+  vehicles: SearchVehicle[];
+  selectedVehicle: string | null;
+  onVehicleSelect: (id: string | null) => void;
+}
+
+// Inner component that uses map context
+function MapContent({ vehicles, selectedVehicle, onVehicleSelect }: SearchMapProps) {
   const map = useMap();
 
   useEffect(() => {
@@ -59,17 +63,25 @@ function MapCenterHandler({ selectedVehicle, vehicles }: { selectedVehicle: stri
     }
   }, [selectedVehicle, vehicles, map]);
 
-  return null;
-}
+  const markers = useMemo(() => {
+    return vehicles
+      .filter((vehicle) => vehicle.lat && vehicle.lng)
+      .map((vehicle) => (
+        <Marker
+          key={vehicle.id}
+          position={[vehicle.lat!, vehicle.lng!]}
+          icon={createCarIcon(selectedVehicle === vehicle.id)}
+          eventHandlers={{
+            click: () => onVehicleSelect(vehicle.id),
+          }}
+        />
+      ));
+  }, [vehicles, selectedVehicle, onVehicleSelect]);
 
-interface SearchMapProps {
-  vehicles: SearchVehicle[];
-  selectedVehicle: string | null;
-  onVehicleSelect: (id: string | null) => void;
+  return <>{markers}</>;
 }
 
 function SearchMap({ vehicles, selectedVehicle, onVehicleSelect }: SearchMapProps) {
-  // Center of Denmark
   const defaultCenter: [number, number] = [55.8, 10.5];
   const defaultZoom = 7;
 
@@ -77,28 +89,17 @@ function SearchMap({ vehicles, selectedVehicle, onVehicleSelect }: SearchMapProp
     <MapContainer
       center={defaultCenter}
       zoom={defaultZoom}
-      className="h-full w-full"
-      style={{ background: "#f3f4f6" }}
+      style={{ height: "100%", width: "100%", background: "#f3f4f6" }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapCenterHandler selectedVehicle={selectedVehicle} vehicles={vehicles} />
-      {vehicles.map((vehicle) => {
-        if (!vehicle.lat || !vehicle.lng) return null;
-
-        return (
-            <Marker
-              key={vehicle.id}
-              position={[vehicle.lat, vehicle.lng]}
-              icon={createCarIcon(selectedVehicle === vehicle.id)}
-              eventHandlers={{
-                click: () => onVehicleSelect(vehicle.id),
-              }}
-            />
-        );
-      })}
+      <MapContent
+        vehicles={vehicles}
+        selectedVehicle={selectedVehicle}
+        onVehicleSelect={onVehicleSelect}
+      />
     </MapContainer>
   );
 }
