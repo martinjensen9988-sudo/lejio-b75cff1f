@@ -54,9 +54,9 @@ serve(async (req: Request): Promise<Response> => {
       },
     });
 
-    // Generate contract signing link
-    const baseUrl = supabaseUrl?.replace('.supabase.co', '') || 'https://lejio.dk';
-    const contractLink = `${baseUrl.includes('supabase') ? 'https://lejio.dk' : baseUrl}/booking?contractId=${data.contractId}`;
+    // Generate contract signing link - use the app domain
+    const appDomain = "https://lejio.dk"; // Production domain
+    const contractLink = `${appDomain}/my-rentals?contractId=${data.contractId}`;
 
     const emailHtml = `
 <!DOCTYPE html>
