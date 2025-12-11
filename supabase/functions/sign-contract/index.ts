@@ -140,6 +140,28 @@ serve(async (req) => {
       console.log(`Booking ${contract.booking_id} confirmed`);
     }
 
+    // Send email confirmation to renter when they sign
+    if (role === 'renter') {
+      try {
+        const functionUrl = `${supabaseUrl}/functions/v1/send-contract-signed`;
+        await fetch(functionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            contractId,
+            signerRole: role,
+          }),
+        });
+        console.log('Contract signed email sent to renter');
+      } catch (emailError) {
+        console.error('Failed to send contract signed email:', emailError);
+        // Don't fail the signing if email fails
+      }
+    }
+
     console.log(`Contract ${contractId} signed by ${role}`);
 
     return new Response(JSON.stringify({ contract: updatedContract }), {
