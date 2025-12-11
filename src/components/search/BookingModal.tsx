@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { differenceInDays, format } from "date-fns";
 import { da } from "date-fns/locale";
 import { Calendar, Car, Check, User, Mail, Phone, Loader2 } from "lucide-react";
@@ -37,11 +37,45 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
     acceptTerms: false,
   });
 
-  const days =
-    filters.startDate && filters.endDate
-      ? differenceInDays(filters.endDate, filters.startDate) + 1
-      : 1;
-  const totalPrice = (vehicle.daily_price || 0) * days;
+  // Calculate pricing based on period type
+  const pricing = useMemo(() => {
+    const { periodType, periodCount, startDate, endDate } = filters;
+    
+    let unitPrice = 0;
+    let unitLabel = '';
+    let totalPrice = 0;
+    let days = 1;
+
+    if (startDate && endDate) {
+      days = differenceInDays(endDate, startDate) + 1;
+    }
+
+    switch (periodType) {
+      case 'monthly':
+        unitPrice = vehicle.monthly_price || (vehicle.daily_price || 0) * 30;
+        unitLabel = 'pr. måned';
+        totalPrice = unitPrice * periodCount;
+        break;
+      case 'weekly':
+        unitPrice = vehicle.weekly_price || (vehicle.daily_price || 0) * 7;
+        unitLabel = 'pr. uge';
+        totalPrice = unitPrice * periodCount;
+        break;
+      default: // daily
+        unitPrice = vehicle.daily_price || 0;
+        unitLabel = 'pr. dag';
+        totalPrice = unitPrice * periodCount;
+    }
+
+    return {
+      unitPrice,
+      unitLabel,
+      totalPrice,
+      periodCount,
+      periodType,
+      days,
+    };
+  }, [filters, vehicle]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +130,7 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
           lessor_id: vehicle.owner_id,
           start_date: format(filters.startDate!, 'yyyy-MM-dd'),
           end_date: format(filters.endDate!, 'yyyy-MM-dd'),
-          total_price: totalPrice,
+          total_price: pricing.totalPrice,
           status: 'pending',
           renter_name: formData.name,
           renter_email: formData.email,
@@ -122,7 +156,7 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
           vehicleRegistration: vehicle.registration,
           startDate: format(filters.startDate!, 'dd. MMMM yyyy', { locale: da }),
           endDate: format(filters.endDate!, 'dd. MMMM yyyy', { locale: da }),
-          totalPrice: totalPrice,
+          totalPrice: pricing.totalPrice,
           notes: formData.notes,
         },
       });
@@ -195,15 +229,19 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Antal dage:</span>
-                    <span className="font-medium">{days}</span>
+                    <span className="text-muted-foreground">Varighed:</span>
+                    <span className="font-medium">
+                      {pricing.periodCount} {pricing.periodType === 'monthly' ? (pricing.periodCount === 1 ? 'måned' : 'måneder') : 
+                        pricing.periodType === 'weekly' ? (pricing.periodCount === 1 ? 'uge' : 'uger') : 
+                        (pricing.periodCount === 1 ? 'dag' : 'dage')}
+                    </span>
                   </div>
                 </>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Dagspris:</span>
+                <span className="text-muted-foreground">Pris {pricing.unitLabel}:</span>
                 <span className="font-medium">
-                  {vehicle.daily_price?.toLocaleString("da-DK")} kr
+                  {pricing.unitPrice.toLocaleString("da-DK")} kr
                 </span>
               </div>
               {vehicle.unlimited_km ? (
@@ -220,7 +258,7 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
               <div className="pt-2 border-t border-border flex justify-between">
                 <span className="font-semibold">Total:</span>
                 <span className="font-bold text-lg text-primary">
-                  {totalPrice.toLocaleString("da-DK")} kr
+                  {pricing.totalPrice.toLocaleString("da-DK")} kr
                 </span>
               </div>
             </div>
