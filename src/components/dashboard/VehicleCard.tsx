@@ -31,7 +31,7 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onDelete }: VehicleCardPro
         </Badge>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
+      <div className="flex items-center gap-3 mb-4 text-sm">
         {vehicle.year && (
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Calendar className="w-3.5 h-3.5" />
@@ -44,11 +44,27 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onDelete }: VehicleCardPro
             <span className="capitalize">{vehicle.fuel_type}</span>
           </div>
         )}
-        {vehicle.daily_price && (
-          <div className="font-semibold text-foreground">
-            {vehicle.daily_price} kr/dag
-          </div>
-        )}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-4 p-3 rounded-xl bg-muted/50">
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground mb-1">Dag</p>
+          <p className="font-bold text-foreground">
+            {vehicle.daily_price ? `${vehicle.daily_price} kr` : '-'}
+          </p>
+        </div>
+        <div className="text-center border-x border-border">
+          <p className="text-xs text-muted-foreground mb-1">Uge</p>
+          <p className="font-bold text-foreground">
+            {vehicle.weekly_price ? `${vehicle.weekly_price} kr` : '-'}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground mb-1">Måned</p>
+          <p className="font-bold text-foreground">
+            {vehicle.monthly_price ? `${vehicle.monthly_price} kr` : '-'}
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 pt-3 border-t border-border">
