@@ -185,7 +185,7 @@ const Booking = () => {
       rentalTotal,
       deposit,
       prepaidRent,
-      grandTotal: rentalTotal + deposit + prepaidRent,
+      grandTotal: unitPrice + deposit + prepaidRent, // Only unit price + deposit + prepaid, not entire period
       periodCount,
       periodType,
     };
