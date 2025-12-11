@@ -82,8 +82,11 @@ serve(async (req) => {
       );
     }
 
-    const data = await response.json();
-    console.log('Vehicle data received:', JSON.stringify(data));
+    const responseData = await response.json();
+    console.log('Vehicle data received:', JSON.stringify(responseData));
+
+    // API returns data nested inside a "data" object
+    const data = responseData.data || responseData;
 
     // Map Nummerplade API response to our format
     // API returns: registration, vin, brand, model, version, fuel_type, model_year, color, etc.
@@ -94,9 +97,9 @@ serve(async (req) => {
       variant: data.version || '',
       year: data.model_year || (data.first_registration_date ? parseInt(data.first_registration_date.substring(0, 4)) : 0),
       fuel_type: data.fuel_type || '',
-      color: data.color || '',
+      color: typeof data.color === 'object' ? data.color.name : (data.color || ''),
       vin: data.vin || '',
-      vehicle_id: data.registration || '',
+      vehicle_id: String(data.vehicle_id || data.registration || ''),
     };
 
     return new Response(
