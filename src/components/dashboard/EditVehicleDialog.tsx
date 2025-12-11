@@ -55,6 +55,10 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     description: vehicle.description || '',
     image_url: vehicle.image_url || '',
     features: vehicle.features || [],
+    deposit_required: vehicle.deposit_required || false,
+    deposit_amount: vehicle.deposit_amount || 0,
+    prepaid_rent_enabled: vehicle.prepaid_rent_enabled || false,
+    prepaid_rent_months: vehicle.prepaid_rent_months || 1,
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -71,6 +75,10 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         description: vehicle.description || '',
         image_url: vehicle.image_url || '',
         features: vehicle.features || [],
+        deposit_required: vehicle.deposit_required || false,
+        deposit_amount: vehicle.deposit_amount || 0,
+        prepaid_rent_enabled: vehicle.prepaid_rent_enabled || false,
+        prepaid_rent_months: vehicle.prepaid_rent_months || 1,
       });
     }
   };
@@ -297,6 +305,70 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Fortæl om din bil..."
             />
+          </div>
+
+          {/* Deposit Section */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Depositum & Forudbetaling</Label>
+            
+            {/* Deposit checkbox */}
+            <div 
+              className="flex items-center space-x-3 p-3 rounded-xl bg-lavender/10 border border-lavender/20 cursor-pointer"
+              onClick={() => setFormData(prev => ({ ...prev, deposit_required: !prev.deposit_required }))}
+            >
+              <Checkbox
+                id="edit_deposit_required"
+                checked={formData.deposit_required || false}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, deposit_required: !!checked }))}
+              />
+              <label htmlFor="edit_deposit_required" className="text-sm font-medium cursor-pointer select-none">
+                Kræv depositum
+              </label>
+            </div>
+
+            {formData.deposit_required && (
+              <div className="space-y-2 pl-6">
+                <Label className="text-xs text-muted-foreground">Depositum beløb (kr)</Label>
+                <Input
+                  type="number"
+                  value={formData.deposit_amount || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, deposit_amount: parseFloat(e.target.value) || 0 }))}
+                  placeholder="2.500"
+                />
+              </div>
+            )}
+
+            {/* Prepaid rent checkbox */}
+            <div 
+              className="flex items-center space-x-3 p-3 rounded-xl bg-accent/10 border border-accent/20 cursor-pointer"
+              onClick={() => setFormData(prev => ({ ...prev, prepaid_rent_enabled: !prev.prepaid_rent_enabled }))}
+            >
+              <Checkbox
+                id="edit_prepaid_rent"
+                checked={formData.prepaid_rent_enabled || false}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, prepaid_rent_enabled: !!checked }))}
+              />
+              <label htmlFor="edit_prepaid_rent" className="text-sm font-medium cursor-pointer select-none">
+                Kræv forudbetalt leje
+              </label>
+            </div>
+
+            {formData.prepaid_rent_enabled && (
+              <div className="space-y-2 pl-6">
+                <Label className="text-xs text-muted-foreground">Antal måneder forudbetaling</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={formData.prepaid_rent_months || 1}
+                  onChange={(e) => setFormData(prev => ({ ...prev, prepaid_rent_months: parseInt(e.target.value) || 1 }))}
+                  placeholder="1"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Lejer skal betale {formData.prepaid_rent_months || 1} måneds leje forud ved første betaling
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Features */}

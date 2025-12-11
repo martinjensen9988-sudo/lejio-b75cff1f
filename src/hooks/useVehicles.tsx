@@ -24,6 +24,10 @@ export interface Vehicle {
   image_url: string | null;
   features: string[];
   is_available: boolean;
+  deposit_required: boolean;
+  deposit_amount: number | null;
+  prepaid_rent_enabled: boolean;
+  prepaid_rent_months: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -46,6 +50,10 @@ export interface VehicleInsert {
   description?: string;
   image_url?: string;
   features?: string[];
+  deposit_required?: boolean;
+  deposit_amount?: number;
+  prepaid_rent_enabled?: boolean;
+  prepaid_rent_months?: number;
 }
 
 export const useVehicles = () => {

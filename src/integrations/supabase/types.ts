@@ -300,6 +300,8 @@ export type Database = {
           color: string | null
           created_at: string
           daily_price: number | null
+          deposit_amount: number | null
+          deposit_required: boolean
           description: string | null
           extra_km_price: number | null
           features: string[] | null
@@ -312,6 +314,8 @@ export type Database = {
           model: string
           monthly_price: number | null
           owner_id: string
+          prepaid_rent_enabled: boolean
+          prepaid_rent_months: number | null
           registration: string
           unlimited_km: boolean
           updated_at: string
@@ -324,6 +328,8 @@ export type Database = {
           color?: string | null
           created_at?: string
           daily_price?: number | null
+          deposit_amount?: number | null
+          deposit_required?: boolean
           description?: string | null
           extra_km_price?: number | null
           features?: string[] | null
@@ -336,6 +342,8 @@ export type Database = {
           model: string
           monthly_price?: number | null
           owner_id: string
+          prepaid_rent_enabled?: boolean
+          prepaid_rent_months?: number | null
           registration: string
           unlimited_km?: boolean
           updated_at?: string
@@ -348,6 +356,8 @@ export type Database = {
           color?: string | null
           created_at?: string
           daily_price?: number | null
+          deposit_amount?: number | null
+          deposit_required?: boolean
           description?: string | null
           extra_km_price?: number | null
           features?: string[] | null
@@ -360,6 +370,8 @@ export type Database = {
           model?: string
           monthly_price?: number | null
           owner_id?: string
+          prepaid_rent_enabled?: boolean
+          prepaid_rent_months?: number | null
           registration?: string
           unlimited_km?: boolean
           updated_at?: string
