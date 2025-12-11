@@ -346,6 +346,42 @@ const handler = async (req: Request): Promise<Response> => {
     const pdfBase64 = btoa(String.fromCharCode(...pdfBytes));
     console.log('PDF generated successfully, size:', pdfBytes.length);
 
+    // Upload PDF to Supabase Storage
+    const fileName = `${contract.lessor_id}/${contract.contract_number}.pdf`;
+    console.log('Uploading PDF to storage:', fileName);
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('contracts')
+      .upload(fileName, pdfBytes, {
+        contentType: 'application/pdf',
+        upsert: true, // Overwrite if exists
+      });
+
+    if (uploadError) {
+      console.error('Error uploading PDF to storage:', uploadError);
+    } else {
+      console.log('PDF uploaded successfully:', uploadData.path);
+      
+      // Update contract with PDF URL
+      const { data: urlData } = supabase.storage
+        .from('contracts')
+        .getPublicUrl(fileName);
+      
+      // For private buckets, we store the path instead
+      const pdfPath = fileName;
+      
+      const { error: updateError } = await supabase
+        .from('contracts')
+        .update({ pdf_url: pdfPath })
+        .eq('id', contractId);
+        
+      if (updateError) {
+        console.error('Error updating contract with PDF URL:', updateError);
+      } else {
+        console.log('Contract updated with PDF path:', pdfPath);
+      }
+    }
+
     // Build contract details HTML
     const contractDetailsHtml = `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0;">

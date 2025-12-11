@@ -148,6 +148,36 @@ export const useContracts = () => {
     return contracts.find(c => c.booking_id === bookingId);
   };
 
+  const downloadContractPdf = async (contract: Contract) => {
+    if (!contract.pdf_url) {
+      toast.error('Ingen PDF tilgængelig for denne kontrakt');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('contracts')
+        .download(contract.pdf_url);
+
+      if (error) throw error;
+
+      // Create download link
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Lejekontrakt-${contract.contract_number}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('PDF downloaded');
+    } catch (err) {
+      console.error('Error downloading contract PDF:', err);
+      toast.error('Kunne ikke downloade PDF');
+    }
+  };
+
   useEffect(() => {
     fetchContracts();
   }, [user]);
@@ -158,6 +188,7 @@ export const useContracts = () => {
     generateContract,
     signContract,
     getContractByBookingId,
+    downloadContractPdf,
     refetch: fetchContracts,
   };
 };
