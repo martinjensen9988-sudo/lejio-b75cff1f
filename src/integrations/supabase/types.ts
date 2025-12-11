@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          lessor_id: string
+          notes: string | null
+          renter_email: string | null
+          renter_id: string | null
+          renter_name: string | null
+          renter_phone: string | null
+          start_date: string
+          status: string
+          total_price: number
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          lessor_id: string
+          notes?: string | null
+          renter_email?: string | null
+          renter_id?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          start_date: string
+          status?: string
+          total_price: number
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          lessor_id?: string
+          notes?: string | null
+          renter_email?: string | null
+          renter_id?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          start_date?: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -77,6 +136,66 @@ export type Database = {
           postal_code?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          color: string | null
+          created_at: string
+          daily_price: number | null
+          description: string | null
+          extra_km_price: number | null
+          fuel_type: string | null
+          id: string
+          included_km: number | null
+          is_available: boolean | null
+          make: string
+          model: string
+          owner_id: string
+          registration: string
+          updated_at: string
+          variant: string | null
+          vin: string | null
+          year: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          daily_price?: number | null
+          description?: string | null
+          extra_km_price?: number | null
+          fuel_type?: string | null
+          id?: string
+          included_km?: number | null
+          is_available?: boolean | null
+          make: string
+          model: string
+          owner_id: string
+          registration: string
+          updated_at?: string
+          variant?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          daily_price?: number | null
+          description?: string | null
+          extra_km_price?: number | null
+          fuel_type?: string | null
+          id?: string
+          included_km?: number | null
+          is_available?: boolean | null
+          make?: string
+          model?: string
+          owner_id?: string
+          registration?: string
+          updated_at?: string
+          variant?: string | null
+          vin?: string | null
+          year?: number | null
         }
         Relationships: []
       }
