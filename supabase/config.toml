@@ -14,3 +14,12 @@ verify_jwt = false
 
 [functions.send-booking-confirmation]
 verify_jwt = false
+
+[functions.send-contract-signed]
+verify_jwt = false
+
+[functions.process-payment]
+verify_jwt = true
+
+[functions.get-mapbox-token]
+verify_jwt = false

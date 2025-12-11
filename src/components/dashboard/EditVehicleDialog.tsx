@@ -10,9 +10,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Vehicle } from '@/hooks/useVehicles';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Loader2, Upload, X, Car } from 'lucide-react';
+import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VEHICLE_FEATURES = [
@@ -59,6 +60,7 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     deposit_amount: vehicle.deposit_amount || 0,
     prepaid_rent_enabled: vehicle.prepaid_rent_enabled || false,
     prepaid_rent_months: vehicle.prepaid_rent_months || 1,
+    payment_schedule: (vehicle.payment_schedule || 'upfront') as PaymentScheduleType,
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -79,6 +81,7 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         deposit_amount: vehicle.deposit_amount || 0,
         prepaid_rent_enabled: vehicle.prepaid_rent_enabled || false,
         prepaid_rent_months: vehicle.prepaid_rent_months || 1,
+        payment_schedule: (vehicle.payment_schedule || 'upfront') as PaymentScheduleType,
       });
     }
   };
@@ -368,8 +371,59 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
                   Lejer skal betale {formData.prepaid_rent_months || 1} måneds leje forud ved første betaling
                 </p>
               </div>
-            )}
-          </div>
+              )}
+            </div>
+
+            {/* Payment Schedule */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Betalingsplan</Label>
+              <RadioGroup
+                value={formData.payment_schedule || 'upfront'}
+                onValueChange={(value: PaymentScheduleType) => 
+                  setFormData(prev => ({ ...prev, payment_schedule: value }))
+                }
+                className="space-y-2"
+              >
+                <div 
+                  className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                    formData.payment_schedule === 'upfront' 
+                      ? 'bg-primary/10 border-primary/30' 
+                      : 'bg-muted/30 border-border hover:bg-muted/50'
+                  }`}
+                  onClick={() => setFormData(prev => ({ ...prev, payment_schedule: 'upfront' as PaymentScheduleType }))}
+                >
+                  <RadioGroupItem value="upfront" id="edit_payment_upfront" />
+                  <CreditCard className="w-4 h-4 text-primary" />
+                  <div className="flex-1">
+                    <label htmlFor="edit_payment_upfront" className="text-sm font-medium cursor-pointer">
+                      Forudbetaling
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Lejer betaler hele lejeperioden på forhånd
+                    </p>
+                  </div>
+                </div>
+                <div 
+                  className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                    formData.payment_schedule === 'monthly' 
+                      ? 'bg-coral/10 border-coral/30' 
+                      : 'bg-muted/30 border-border hover:bg-muted/50'
+                  }`}
+                  onClick={() => setFormData(prev => ({ ...prev, payment_schedule: 'monthly' as PaymentScheduleType }))}
+                >
+                  <RadioGroupItem value="monthly" id="edit_payment_monthly" />
+                  <CalendarClock className="w-4 h-4 text-coral" />
+                  <div className="flex-1">
+                    <label htmlFor="edit_payment_monthly" className="text-sm font-medium cursor-pointer">
+                      Månedlig opkrævning
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Automatisk trækning fra lejers kort hver måned
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
+            </div>
 
           {/* Features */}
           <div className="space-y-3">
