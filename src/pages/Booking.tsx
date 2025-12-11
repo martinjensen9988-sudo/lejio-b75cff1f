@@ -291,6 +291,24 @@ const Booking = () => {
         renter_email: formData.email,
         renter_phone: formData.phone,
         notes: formData.notes || null,
+        // New driver info fields
+        renter_first_name: formData.firstName,
+        renter_last_name: formData.lastName,
+        renter_birth_date: formData.birthDate || null,
+        renter_address: formData.address,
+        renter_postal_code: formData.postalCode,
+        renter_city: formData.city,
+        renter_license_number: formData.licenseNumber,
+        renter_license_issue_date: formData.licenseIssueDate || null,
+        renter_license_country: formData.licenseCountry,
+        // Extra driver
+        has_extra_driver: hasExtraDriver,
+        extra_driver_first_name: hasExtraDriver ? extraDriver.firstName : null,
+        extra_driver_last_name: hasExtraDriver ? extraDriver.lastName : null,
+        extra_driver_birth_date: hasExtraDriver && extraDriver.birthDate ? extraDriver.birthDate : null,
+        extra_driver_license_number: hasExtraDriver ? extraDriver.licenseNumber : null,
+        extra_driver_license_issue_date: hasExtraDriver && extraDriver.licenseIssueDate ? extraDriver.licenseIssueDate : null,
+        extra_driver_license_country: hasExtraDriver ? extraDriver.licenseCountry : null,
       });
 
       if (bookingError) throw new Error("Kunne ikke oprette booking");
