@@ -31,6 +31,7 @@ const Navigation = () => {
           </a>
 
           <div className="hidden md:flex items-center gap-8">
+            <a href="/search" onClick={(e) => { e.preventDefault(); navigate("/search"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">Find bil</a>
             <a href="#features" className="text-muted-foreground hover:text-primary font-medium transition-colors">Funktioner</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary font-medium transition-colors">Sådan virker det</a>
             <a href="#pricing" className="text-muted-foreground hover:text-primary font-medium transition-colors">Priser</a>
@@ -73,6 +74,7 @@ const Navigation = () => {
 
         {isOpen && (
           <div className="md:hidden mt-4 pb-4 flex flex-col gap-4 animate-fade-in">
+            <a href="/search" onClick={(e) => { e.preventDefault(); navigate("/search"); setIsOpen(false); }} className="text-muted-foreground hover:text-primary font-medium py-2">Find bil</a>
             <a href="#features" className="text-muted-foreground hover:text-primary font-medium py-2">Funktioner</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary font-medium py-2">Sådan virker det</a>
             <a href="#pricing" className="text-muted-foreground hover:text-primary font-medium py-2">Priser</a>
