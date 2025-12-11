@@ -73,6 +73,162 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          booking_id: string
+          contract_number: string
+          contract_type: string
+          created_at: string
+          daily_price: number
+          deductible_amount: number | null
+          deposit_amount: number | null
+          end_date: string
+          extra_km_price: number
+          id: string
+          included_km: number
+          insurance_company: string | null
+          insurance_policy_number: string | null
+          lessor_address: string | null
+          lessor_company_name: string | null
+          lessor_cvr: string | null
+          lessor_email: string
+          lessor_id: string
+          lessor_name: string
+          lessor_phone: string | null
+          lessor_signature: string | null
+          lessor_signed_at: string | null
+          pdf_url: string | null
+          renter_address: string | null
+          renter_email: string
+          renter_id: string | null
+          renter_license_number: string | null
+          renter_name: string
+          renter_phone: string | null
+          renter_signature: string | null
+          renter_signed_at: string | null
+          start_date: string
+          status: string
+          total_price: number
+          updated_at: string
+          vanvidskørsel_accepted: boolean
+          vanvidskørsel_liability_amount: number | null
+          vehicle_id: string
+          vehicle_make: string
+          vehicle_model: string
+          vehicle_registration: string
+          vehicle_value: number | null
+          vehicle_vin: string | null
+          vehicle_year: number | null
+        }
+        Insert: {
+          booking_id: string
+          contract_number: string
+          contract_type?: string
+          created_at?: string
+          daily_price: number
+          deductible_amount?: number | null
+          deposit_amount?: number | null
+          end_date: string
+          extra_km_price?: number
+          id?: string
+          included_km?: number
+          insurance_company?: string | null
+          insurance_policy_number?: string | null
+          lessor_address?: string | null
+          lessor_company_name?: string | null
+          lessor_cvr?: string | null
+          lessor_email: string
+          lessor_id: string
+          lessor_name: string
+          lessor_phone?: string | null
+          lessor_signature?: string | null
+          lessor_signed_at?: string | null
+          pdf_url?: string | null
+          renter_address?: string | null
+          renter_email: string
+          renter_id?: string | null
+          renter_license_number?: string | null
+          renter_name: string
+          renter_phone?: string | null
+          renter_signature?: string | null
+          renter_signed_at?: string | null
+          start_date: string
+          status?: string
+          total_price: number
+          updated_at?: string
+          vanvidskørsel_accepted?: boolean
+          vanvidskørsel_liability_amount?: number | null
+          vehicle_id: string
+          vehicle_make: string
+          vehicle_model: string
+          vehicle_registration: string
+          vehicle_value?: number | null
+          vehicle_vin?: string | null
+          vehicle_year?: number | null
+        }
+        Update: {
+          booking_id?: string
+          contract_number?: string
+          contract_type?: string
+          created_at?: string
+          daily_price?: number
+          deductible_amount?: number | null
+          deposit_amount?: number | null
+          end_date?: string
+          extra_km_price?: number
+          id?: string
+          included_km?: number
+          insurance_company?: string | null
+          insurance_policy_number?: string | null
+          lessor_address?: string | null
+          lessor_company_name?: string | null
+          lessor_cvr?: string | null
+          lessor_email?: string
+          lessor_id?: string
+          lessor_name?: string
+          lessor_phone?: string | null
+          lessor_signature?: string | null
+          lessor_signed_at?: string | null
+          pdf_url?: string | null
+          renter_address?: string | null
+          renter_email?: string
+          renter_id?: string | null
+          renter_license_number?: string | null
+          renter_name?: string
+          renter_phone?: string | null
+          renter_signature?: string | null
+          renter_signed_at?: string | null
+          start_date?: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+          vanvidskørsel_accepted?: boolean
+          vanvidskørsel_liability_amount?: number | null
+          vehicle_id?: string
+          vehicle_make?: string
+          vehicle_model?: string
+          vehicle_registration?: string
+          vehicle_value?: number | null
+          vehicle_vin?: string | null
+          vehicle_year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -204,7 +360,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_contract_number: { Args: never; Returns: string }
     }
     Enums: {
       user_type: "privat" | "professionel"
