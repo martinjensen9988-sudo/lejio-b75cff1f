@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
 import { Plus, Search, Loader2, Car, Check } from 'lucide-react';
@@ -188,27 +189,44 @@ const AddVehicleDialog = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Inkl. km/dag</Label>
-                <Input
-                  type="number"
-                  value={vehicleDetails.included_km || ''}
-                  onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
-                  placeholder="100"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Ekstra km pris (kr)</Label>
-                <Input
-                  type="number"
-                  step="0.50"
-                  value={vehicleDetails.extra_km_price || ''}
-                  onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
-                  placeholder="2,50"
-                />
-              </div>
+            {/* Unlimited KM checkbox */}
+            <div 
+              className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
+              onClick={() => setVehicleDetails(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
+            >
+              <Checkbox
+                id="unlimited_km"
+                checked={vehicleDetails.unlimited_km || false}
+                onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, unlimited_km: !!checked }))}
+              />
+              <label htmlFor="unlimited_km" className="text-sm font-medium cursor-pointer select-none">
+                Fri km (ingen km-begrænsning)
+              </label>
             </div>
+
+            {!vehicleDetails.unlimited_km && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Inkl. km/dag</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.included_km || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
+                    placeholder="100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Ekstra km pris (kr)</Label>
+                  <Input
+                    type="number"
+                    step="0.50"
+                    value={vehicleDetails.extra_km_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="2,50"
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setStep('lookup')}>

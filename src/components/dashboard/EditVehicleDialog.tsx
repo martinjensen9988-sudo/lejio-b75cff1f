@@ -51,6 +51,7 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     monthly_price: vehicle.monthly_price || undefined,
     included_km: vehicle.included_km || 100,
     extra_km_price: vehicle.extra_km_price || 2.5,
+    unlimited_km: vehicle.unlimited_km || false,
     description: vehicle.description || '',
     image_url: vehicle.image_url || '',
     features: vehicle.features || [],
@@ -66,6 +67,7 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         monthly_price: vehicle.monthly_price || undefined,
         included_km: vehicle.included_km || 100,
         extra_km_price: vehicle.extra_km_price || 2.5,
+        unlimited_km: vehicle.unlimited_km || false,
         description: vehicle.description || '',
         image_url: vehicle.image_url || '',
         features: vehicle.features || [],
@@ -240,34 +242,51 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
             </div>
           </div>
 
-          {/* Kilometers */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Inkl. km/dag</Label>
-              <Input
-                type="number"
-                value={formData.included_km || ''}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  included_km: parseInt(e.target.value) || undefined 
-                }))}
-                placeholder="100"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Ekstra km pris (kr)</Label>
-              <Input
-                type="number"
-                step="0.50"
-                value={formData.extra_km_price || ''}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  extra_km_price: parseFloat(e.target.value) || undefined 
-                }))}
-                placeholder="2,50"
-              />
-            </div>
+          {/* Unlimited KM checkbox */}
+          <div 
+            className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
+            onClick={() => setFormData(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
+          >
+            <Checkbox
+              id="edit_unlimited_km"
+              checked={formData.unlimited_km || false}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, unlimited_km: !!checked }))}
+            />
+            <label htmlFor="edit_unlimited_km" className="text-sm font-medium cursor-pointer select-none">
+              Fri km (ingen km-begrænsning)
+            </label>
           </div>
+
+          {/* Kilometers - only show if not unlimited */}
+          {!formData.unlimited_km && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Inkl. km/dag</Label>
+                <Input
+                  type="number"
+                  value={formData.included_km || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    included_km: parseInt(e.target.value) || undefined 
+                  }))}
+                  placeholder="100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Ekstra km pris (kr)</Label>
+                <Input
+                  type="number"
+                  step="0.50"
+                  value={formData.extra_km_price || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    extra_km_price: parseFloat(e.target.value) || undefined 
+                  }))}
+                  placeholder="2,50"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Description */}
           <div className="space-y-2">
