@@ -1,11 +1,11 @@
-import { Wallet, Calculator, FileSignature, Radio } from "lucide-react";
+import { CreditCard, FileText, Calendar, Shield } from "lucide-react";
 
 const HeroVisual = () => {
-  const engines = [
-    { icon: Wallet, label: "Financial", color: "from-primary to-primary/60" },
-    { icon: Calculator, label: "Accounting", color: "from-accent to-accent/60" },
-    { icon: FileSignature, label: "Legal", color: "from-primary to-accent" },
-    { icon: Radio, label: "Telematics", color: "from-accent/80 to-primary/80" },
+  const features = [
+    { icon: CreditCard, label: "Betaling", color: "from-primary to-primary/60" },
+    { icon: FileText, label: "Kontrakt", color: "from-accent to-accent/60" },
+    { icon: Calendar, label: "Kalender", color: "from-primary to-accent" },
+    { icon: Shield, label: "Forsikring", color: "from-accent/80 to-primary/80" },
   ];
 
   return (
@@ -13,7 +13,7 @@ const HeroVisual = () => {
       {/* Center Core */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-2xl bg-glass border border-border glow-primary flex items-center justify-center z-20">
         <div className="text-center">
-          <div className="font-display text-lg font-bold text-foreground">FleetCore</div>
+          <div className="font-display text-lg font-bold text-foreground">LEJIO</div>
           <div className="text-xs text-muted-foreground">Platform</div>
         </div>
       </div>
@@ -22,8 +22,8 @@ const HeroVisual = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full border border-border/30" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full border border-border/20" />
 
-      {/* Engine Nodes */}
-      {engines.map((engine, i) => {
+      {/* Feature Nodes */}
+      {features.map((feature, i) => {
         const angle = (i * 90 - 45) * (Math.PI / 180);
         const radius = 160;
         const x = Math.cos(angle) * radius;
@@ -39,13 +39,13 @@ const HeroVisual = () => {
             }}
           >
             <div className="relative group cursor-pointer">
-              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${engine.color} p-[1px] shadow-lg shadow-primary/20 group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-300 group-hover:scale-110`}>
+              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} p-[1px] shadow-lg shadow-primary/20 group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-300 group-hover:scale-110`}>
                 <div className="w-full h-full rounded-xl bg-card flex items-center justify-center">
-                  <engine.icon className="w-6 h-6 text-foreground" />
+                  <feature.icon className="w-6 h-6 text-foreground" />
                 </div>
               </div>
               <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                {engine.label}
+                {feature.label}
               </div>
             </div>
           </div>
@@ -60,7 +60,7 @@ const HeroVisual = () => {
             <stop offset="100%" stopColor="hsl(270 60% 60% / 0.3)" />
           </linearGradient>
         </defs>
-        {engines.map((_, i) => {
+        {features.map((_, i) => {
           const angle = (i * 90 - 45) * (Math.PI / 180);
           const radius = 160;
           const x = 200 + Math.cos(angle) * radius;

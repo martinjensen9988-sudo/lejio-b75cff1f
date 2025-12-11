@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import HeroVisual from "./HeroVisual";
 
 const Hero = () => {
@@ -24,39 +24,41 @@ const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left animate-slide-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border mb-6">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Vertical SaaS Platform</span>
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-sm text-muted-foreground">Bookingsystem til biludlejning</span>
             </div>
 
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-6">
-              Ét system til{" "}
-              <span className="text-gradient">hele værdikæden</span>
+              Det komplette{" "}
+              <span className="text-gradient">bookingsystem</span>{" "}
+              til din biludlejning
             </h1>
 
             <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
-              Integreret platform der erstatter Dinero, e-Boks, eksterne forsikringer og fleet management. 
-              Byg en walled garden hvor udlejere aldrig forlader.
+              Få en professionel booking-platform uden at miste kontrollen. 
+              Brug din egen indløsningsaftale, din egen forsikring – vi klarer alt det tekniske.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
               <Button variant="hero" size="xl" className="group">
-                Start din rejse
+                Prøv gratis i 14 dage
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button variant="glass" size="xl">
-                Se arkitekturen
+                Se hvordan det virker
               </Button>
             </div>
 
-            <div className="mt-12 grid grid-cols-3 gap-8 max-w-md mx-auto lg:mx-0">
+            {/* Trust Points */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               {[
-                { value: "4", label: "Interne motorer" },
-                { value: "100%", label: "Data kontrol" },
-                { value: "∞", label: "Stickiness" },
-              ].map((stat, i) => (
-                <div key={i} className="text-center lg:text-left">
-                  <div className="font-display text-2xl sm:text-3xl font-bold text-gradient">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                "Ingen binding",
+                "Brug din egen betalingsløsning",
+                "Automatiske kontrakter",
+              ].map((point, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  {point}
                 </div>
               ))}
             </div>
