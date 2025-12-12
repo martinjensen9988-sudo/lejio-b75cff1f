@@ -32,3 +32,9 @@ verify_jwt = true
 
 [functions.platform-fee-webhook]
 verify_jwt = false
+
+[functions.send-payment-reminder]
+verify_jwt = false
+
+[functions.send-fee-payment-confirmation]
+verify_jwt = false
