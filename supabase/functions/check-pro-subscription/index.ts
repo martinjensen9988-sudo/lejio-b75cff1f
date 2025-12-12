@@ -65,14 +65,26 @@ serve(async (req) => {
     const trialDaysLeft = isInTrial 
       ? Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
       : 0;
+    
+    // Check if trial has expired without subscription
+    const trialExpired = profile?.trial_ends_at && new Date(profile.trial_ends_at) <= new Date() && profile?.subscription_status === 'trial';
 
-    logStep("Trial status", { isInTrial, trialDaysLeft, trialEndsAt: profile?.trial_ends_at });
+    logStep("Trial status", { isInTrial, trialDaysLeft, trialExpired, trialEndsAt: profile?.trial_ends_at });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
       logStep("No Stripe customer found");
+      
+      // Update profile if trial has expired
+      if (trialExpired) {
+        await supabaseClient
+          .from('profiles')
+          .update({ subscription_status: 'expired' })
+          .eq('id', user.id);
+      }
+
       return new Response(JSON.stringify({
         subscribed: false,
         tier: null,
@@ -83,6 +95,8 @@ serve(async (req) => {
         is_trial: isInTrial,
         trial_days_left: trialDaysLeft,
         trial_ends_at: profile?.trial_ends_at || null,
+        trial_expired: trialExpired,
+        can_create_bookings: isInTrial || profile?.user_type === 'privat', // Trial or private users can create bookings
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -102,10 +116,11 @@ serve(async (req) => {
       logStep("No active subscription found");
 
       // Update profile to reflect no subscription
+      const newStatus = isInTrial ? 'trial' : (trialExpired ? 'expired' : 'inactive');
       await supabaseClient
         .from('profiles')
         .update({
-          subscription_status: isInTrial ? 'trial' : 'inactive',
+          subscription_status: newStatus,
           stripe_customer_id: customerId,
           stripe_subscription_id: null,
         })
@@ -121,6 +136,8 @@ serve(async (req) => {
         is_trial: isInTrial,
         trial_days_left: trialDaysLeft,
         trial_ends_at: profile?.trial_ends_at || null,
+        trial_expired: trialExpired,
+        can_create_bookings: isInTrial || profile?.user_type === 'privat', // Trial or private users can create bookings
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -167,6 +184,8 @@ serve(async (req) => {
       is_trial: false,
       trial_days_left: 0,
       trial_ends_at: null,
+      trial_expired: false,
+      can_create_bookings: true, // Active subscribers can always create bookings
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
