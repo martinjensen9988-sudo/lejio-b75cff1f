@@ -27,6 +27,34 @@ const REASON_LABELS: Record<string, string> = {
   other: 'Anden årsag',
 };
 
+// HTML escape function to prevent XSS
+function escapeHtml(text: string | null | undefined): string {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Validate email format
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Validate URL is on trusted domain
+function isValidAppealUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const trustedDomains = ['lejio.dk', 'www.lejio.dk', 'localhost'];
+    return trustedDomains.some(domain => parsed.hostname === domain || parsed.hostname.endsWith('.' + domain));
+  } catch {
+    return false;
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -34,7 +62,37 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { renterEmail, renterName, warningId, reason, lessorName, appealUrl }: WarningNotificationRequest = await req.json();
-    const reasonLabel = REASON_LABELS[reason] || reason;
+    
+    // Validate required fields
+    if (!renterEmail || !warningId || !reason) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Validate email format
+    if (!isValidEmail(renterEmail)) {
+      return new Response(JSON.stringify({ error: "Invalid email format" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Validate appeal URL if provided
+    if (appealUrl && !isValidAppealUrl(appealUrl)) {
+      console.warn("Invalid appeal URL provided:", appealUrl);
+      // Don't include the URL in the email if it's invalid
+    }
+
+    const reasonLabel = REASON_LABELS[reason] || escapeHtml(reason);
+    const safeRenterName = escapeHtml(renterName) || 'Lejer';
+    const safeLessorName = escapeHtml(lessorName) || 'En udlejer';
+    const safeAppealUrl = appealUrl && isValidAppealUrl(appealUrl) ? appealUrl : null;
+
+    const appealLink = safeAppealUrl 
+      ? `<p><a href="${safeAppealUrl}">Indgiv klage her</a></p>`
+      : '<p>Kontakt venligst LEJIO support for at indgive en klage.</p>';
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -46,7 +104,7 @@ const handler = async (req: Request): Promise<Response> => {
         from: "LEJIO <noreply@lejio.dk>",
         to: [renterEmail],
         subject: "Vigtig besked: Der er oprettet en advarsel på din profil",
-        html: `<h1>Kære ${renterName || 'Lejer'}</h1><p>En udlejer (${lessorName}) har oprettet en advarsel på din profil. Årsag: ${reasonLabel}.</p><p><a href="${appealUrl}">Indgiv klage her</a></p>`,
+        html: `<h1>Kære ${safeRenterName}</h1><p>En udlejer (${safeLessorName}) har oprettet en advarsel på din profil. Årsag: ${reasonLabel}.</p>${appealLink}`,
       }),
     });
 
