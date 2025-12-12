@@ -515,6 +515,53 @@ export type Database = {
           },
         ]
       }
+      platform_fees: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          lessor_id: string
+          paid_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          booking_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          lessor_id: string
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          lessor_id?: string
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_fees_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           accepted_payment_methods: string[] | null

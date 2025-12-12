@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye
+  Plus, Search, MoreHorizontal, Eye, Receipt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import AdminDiscountCodes from '@/components/admin/AdminDiscountCodes';
 import AdminCreateBooking from '@/components/admin/AdminCreateBooking';
+import AdminPlatformFees from '@/components/admin/AdminPlatformFees';
 
 interface Customer {
   id: string;
@@ -269,6 +270,10 @@ const AdminDashboard = () => {
               <Calendar className="w-4 h-4 mr-2" />
               Bookinger
             </TabsTrigger>
+            <TabsTrigger value="fees">
+              <Receipt className="w-4 h-4 mr-2" />
+              Gebyrer
+            </TabsTrigger>
             <TabsTrigger value="discounts">
               <Tag className="w-4 h-4 mr-2" />
               Rabatkoder
@@ -415,6 +420,11 @@ const AdminDashboard = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Platform Fees Tab */}
+          <TabsContent value="fees">
+            <AdminPlatformFees />
           </TabsContent>
 
           {/* Discount Codes Tab */}
