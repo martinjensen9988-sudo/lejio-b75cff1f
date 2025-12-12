@@ -1,12 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SearchFilters from "@/components/search/SearchFilters";
 import VehicleSearchCard from "@/components/search/VehicleSearchCard";
 import SearchMap from "@/components/search/SearchMap";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Car, MapPin } from "lucide-react";
+import { Loader2, Car, MapPin, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type SortOption = 'price_asc' | 'price_desc' | 'date_desc' | 'date_asc' | 'rating_desc';
 
 // Public vehicle data - no sensitive fields like owner_id, vin, registration
 export interface SearchVehicle {
@@ -42,6 +51,7 @@ export interface SearchVehicle {
   owner_lessor_status: 'bronze' | 'silver' | 'gold' | 'platinum' | null;
   owner_average_rating: number | null;
   owner_company_name: string | null;
+  created_at: string | null;
   // For map compatibility
   lat?: number;
   lng?: number;
@@ -65,6 +75,7 @@ const Search = () => {
   const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('date_desc');
   const [filters, setFilters] = useState<SearchFiltersState>({
     priceMin: 0,
     priceMax: 5000,
@@ -74,6 +85,29 @@ const Search = () => {
     periodType: 'daily',
     periodCount: 1,
   });
+
+  // Sort vehicles based on selected option
+  const sortedVehicles = useMemo(() => {
+    const sorted = [...filteredVehicles];
+    switch (sortBy) {
+      case 'price_asc':
+        return sorted.sort((a, b) => (a.daily_price || 0) - (b.daily_price || 0));
+      case 'price_desc':
+        return sorted.sort((a, b) => (b.daily_price || 0) - (a.daily_price || 0));
+      case 'date_asc':
+        return sorted.sort((a, b) => 
+          new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+        );
+      case 'date_desc':
+        return sorted.sort((a, b) => 
+          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        );
+      case 'rating_desc':
+        return sorted.sort((a, b) => (b.owner_average_rating || 0) - (a.owner_average_rating || 0));
+      default:
+        return sorted;
+    }
+  }, [filteredVehicles, sortBy]);
 
   // Fetch available vehicles
   useEffect(() => {
@@ -236,17 +270,32 @@ const Search = () => {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Vehicle List - Shows by default */}
               <div className={`${!showMap ? 'block' : 'hidden'} md:block ${showMap ? 'md:w-1/2 lg:w-2/5' : 'md:w-full'}`}>
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                   <h2 className="font-semibold text-lg">{filteredVehicles.length} biler</h2>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowMap(!showMap)}
-                    className="hidden md:flex"
-                  >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {showMap ? 'Skjul kort' : 'Vis kort'}
-                  </Button>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <ArrowUpDown className="w-4 h-4 mr-2" />
+                        <SelectValue placeholder="Sorter efter" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="date_desc">Nyeste først</SelectItem>
+                        <SelectItem value="date_asc">Ældste først</SelectItem>
+                        <SelectItem value="price_asc">Pris: Lav til høj</SelectItem>
+                        <SelectItem value="price_desc">Pris: Høj til lav</SelectItem>
+                        <SelectItem value="rating_desc">Bedst bedømt</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowMap(!showMap)}
+                      className="hidden md:flex shrink-0"
+                    >
+                      <MapPin className="w-4 h-4 mr-2" />
+                      {showMap ? 'Skjul kort' : 'Vis kort'}
+                    </Button>
+                  </div>
                 </div>
                 <div className={`grid gap-4 ${!showMap ? 'md:grid-cols-2 lg:grid-cols-3' : ''}`}>
                   {filteredVehicles.length === 0 ? (
@@ -258,7 +307,7 @@ const Search = () => {
                       </p>
                     </div>
                   ) : (
-                    filteredVehicles.map((vehicle) => (
+                    sortedVehicles.map((vehicle) => (
                       <VehicleSearchCard
                         key={vehicle.id}
                         vehicle={vehicle}
