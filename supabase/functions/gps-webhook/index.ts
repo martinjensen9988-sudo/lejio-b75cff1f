@@ -215,6 +215,32 @@ const sendGeofenceNotification = async (
   }
 };
 
+// Validate GPS data ranges
+const validateGpsData = (data: GpsDataPoint): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+  
+  if (data.latitude < -90 || data.latitude > 90) {
+    errors.push(`Invalid latitude: ${data.latitude} (must be between -90 and 90)`);
+  }
+  if (data.longitude < -180 || data.longitude > 180) {
+    errors.push(`Invalid longitude: ${data.longitude} (must be between -180 and 180)`);
+  }
+  if (data.speed !== undefined && data.speed < 0) {
+    errors.push(`Invalid speed: ${data.speed} (must be >= 0)`);
+  }
+  if (data.heading !== undefined && (data.heading < 0 || data.heading > 360)) {
+    errors.push(`Invalid heading: ${data.heading} (must be between 0 and 360)`);
+  }
+  if (data.battery_level !== undefined && (data.battery_level < 0 || data.battery_level > 100)) {
+    errors.push(`Invalid battery level: ${data.battery_level} (must be between 0 and 100)`);
+  }
+  if (data.fuel_level !== undefined && (data.fuel_level < 0 || data.fuel_level > 100)) {
+    errors.push(`Invalid fuel level: ${data.fuel_level} (must be between 0 and 100)`);
+  }
+  
+  return { valid: errors.length === 0, errors };
+};
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -225,6 +251,9 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get webhook secret from header for authentication
+    const webhookSecret = req.headers.get('x-webhook-secret');
 
     // Get provider from query params or header
     const url = new URL(req.url);
@@ -250,16 +279,31 @@ serve(async (req) => {
         continue;
       }
 
-      // Look up device in database
+      // Validate GPS data ranges
+      const validation = validateGpsData(parsed);
+      if (!validation.valid) {
+        console.warn(`Invalid GPS data for device ${parsed.device_id}:`, validation.errors);
+        errors.push({ error: 'Invalid GPS data', device_id: parsed.device_id, validation_errors: validation.errors });
+        continue;
+      }
+
+      // Look up device in database (include webhook_secret for auth)
       const { data: device, error: deviceError } = await supabase
         .from('gps_devices')
-        .select('id, vehicle_id, is_active')
+        .select('id, vehicle_id, is_active, webhook_secret')
         .eq('device_id', parsed.device_id)
         .single();
 
       if (deviceError || !device) {
         console.log(`Unknown device: ${parsed.device_id}`);
         errors.push({ error: 'Unknown device', device_id: parsed.device_id });
+        continue;
+      }
+
+      // Validate webhook secret if configured for this device
+      if (device.webhook_secret && device.webhook_secret !== webhookSecret) {
+        console.warn(`Invalid webhook secret for device: ${parsed.device_id}`);
+        errors.push({ error: 'Unauthorized - invalid webhook secret', device_id: parsed.device_id });
         continue;
       }
 

@@ -861,6 +861,7 @@ export type Database = {
           provider: string
           updated_at: string
           vehicle_id: string
+          webhook_secret: string | null
         }
         Insert: {
           created_at?: string
@@ -872,6 +873,7 @@ export type Database = {
           provider?: string
           updated_at?: string
           vehicle_id: string
+          webhook_secret?: string | null
         }
         Update: {
           created_at?: string
@@ -883,6 +885,7 @@ export type Database = {
           provider?: string
           updated_at?: string
           vehicle_id?: string
+          webhook_secret?: string | null
         }
         Relationships: [
           {
