@@ -27,6 +27,26 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Validate CRON_SECRET for authorization (called from webhooks/internal services)
+    const authHeader = req.headers.get("Authorization");
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    
+    if (!cronSecret) {
+      console.error("CRON_SECRET not configured");
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+      console.error("Unauthorized: Invalid or missing CRON_SECRET");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const data: FeePaymentConfirmRequest = await req.json();
     console.log("Sending fee payment confirmation to:", data.lessorEmail);
 
