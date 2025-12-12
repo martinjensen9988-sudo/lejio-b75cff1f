@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { 
   Loader2, CheckCircle, CreditCard, Car, Crown, Sparkles, Settings
 } from 'lucide-react';
@@ -28,7 +30,8 @@ const TIERS = [
     id: 'starter',
     name: 'Starter',
     subtitle: '1-5 biler',
-    price: 299,
+    monthlyPrice: 299,
+    yearlyPrice: 3051, // 299 * 12 * 0.85 = 3051
     maxVehicles: 5,
     features: [
       'Op til 5 køretøjer',
@@ -41,7 +44,8 @@ const TIERS = [
     id: 'standard',
     name: 'Standard',
     subtitle: '6-15 biler',
-    price: 499,
+    monthlyPrice: 499,
+    yearlyPrice: 5090, // 499 * 12 * 0.85 = 5089.80
     maxVehicles: 15,
     popular: true,
     features: [
@@ -56,7 +60,8 @@ const TIERS = [
     id: 'enterprise',
     name: 'Enterprise',
     subtitle: '16+ biler',
-    price: 799,
+    monthlyPrice: 799,
+    yearlyPrice: 8150, // 799 * 12 * 0.85 = 8149.80
     maxVehicles: 999,
     features: [
       'Ubegrænsede køretøjer',
@@ -78,6 +83,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
 
   const checkSubscription = async () => {
     try {
@@ -145,7 +151,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
           companyName: profile.company_name || 'Virksomhed',
           fullName: profile.full_name,
           tier: tier,
-          amount: TIERS.find(t => t.id === tier)?.price || 299,
+          amount: TIERS.find(t => t.id === tier)?.monthlyPrice || 299,
           subscriptionStartDate: startDate,
           nextBillingDate: nextBillingDate,
         },
@@ -160,7 +166,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
     setCheckoutLoading(tier);
     try {
       const { data, error } = await supabase.functions.invoke('create-pro-checkout', {
-        body: { tier },
+        body: { tier, interval: billingInterval },
       });
 
       if (error) throw error;
@@ -303,8 +309,8 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
               <span className="font-semibold">{subscription.tier_name}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Månedlig pris</span>
-              <span className="font-semibold">{currentTier.price} kr/md</span>
+              <span className="text-sm text-muted-foreground">Pris</span>
+              <span className="font-semibold">{currentTier.monthlyPrice} kr/md</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Maks. køretøjer</span>
@@ -360,53 +366,101 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
             Vælg det abonnement der passer til din flåde. Ingen bindingsperiode - annuller når som helst.
           </CardDescription>
         </CardHeader>
+        <CardContent>
+          {/* Billing Interval Toggle */}
+          <div className="flex items-center justify-center gap-4 p-4 rounded-xl bg-muted/50">
+            <Label 
+              htmlFor="billing-toggle" 
+              className={`text-sm font-medium cursor-pointer transition-colors ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}
+            >
+              Månedlig
+            </Label>
+            <Switch
+              id="billing-toggle"
+              checked={billingInterval === 'yearly'}
+              onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
+            />
+            <div className="flex items-center gap-2">
+              <Label 
+                htmlFor="billing-toggle" 
+                className={`text-sm font-medium cursor-pointer transition-colors ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}
+              >
+                Årlig
+              </Label>
+              <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                Spar 15%
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {TIERS.map((tier) => (
-          <Card 
-            key={tier.id}
-            className={`relative ${tier.id === recommendedTier ? 'border-primary shadow-lg' : ''}`}
-          >
-            {tier.id === recommendedTier && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Anbefalet
-                </Badge>
-              </div>
-            )}
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-lg">{tier.name}</CardTitle>
-              <CardDescription>{tier.subtitle}</CardDescription>
-              <div className="pt-2">
-                <span className="text-3xl font-bold">{tier.price}</span>
-                <span className="text-muted-foreground"> kr/md</span>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-2">
-                {tier.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                onClick={() => handleCheckout(tier.id)}
-                disabled={checkoutLoading !== null}
-                className="w-full"
-                variant={tier.id === recommendedTier ? 'default' : 'outline'}
-              >
-                {checkoutLoading === tier.id ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
-                Vælg {tier.name}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+        {TIERS.map((tier) => {
+          const displayPrice = billingInterval === 'monthly' ? tier.monthlyPrice : tier.yearlyPrice;
+          const monthlyEquivalent = billingInterval === 'yearly' ? Math.round(tier.yearlyPrice / 12) : tier.monthlyPrice;
+          const savings = billingInterval === 'yearly' ? Math.round(tier.monthlyPrice * 12 - tier.yearlyPrice) : 0;
+          
+          return (
+            <Card 
+              key={tier.id}
+              className={`relative ${tier.id === recommendedTier ? 'border-primary shadow-lg' : ''}`}
+            >
+              {tier.id === recommendedTier && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Anbefalet
+                  </Badge>
+                </div>
+              )}
+              <CardHeader className="text-center pb-2">
+                <CardTitle className="text-lg">{tier.name}</CardTitle>
+                <CardDescription>{tier.subtitle}</CardDescription>
+                <div className="pt-2">
+                  {billingInterval === 'yearly' ? (
+                    <>
+                      <span className="text-3xl font-bold">{displayPrice}</span>
+                      <span className="text-muted-foreground"> kr/år</span>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        ({monthlyEquivalent} kr/md)
+                      </div>
+                      <div className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                        Spar {savings} kr/år
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-3xl font-bold">{displayPrice}</span>
+                      <span className="text-muted-foreground"> kr/md</span>
+                    </>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-2">
+                  {tier.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  onClick={() => handleCheckout(tier.id)}
+                  disabled={checkoutLoading !== null}
+                  className="w-full"
+                  variant={tier.id === recommendedTier ? 'default' : 'outline'}
+                >
+                  {checkoutLoading === tier.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : null}
+                  Vælg {tier.name}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <p className="text-xs text-center text-muted-foreground">
