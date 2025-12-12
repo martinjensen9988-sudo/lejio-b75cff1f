@@ -374,7 +374,225 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   // Add footer to page 1
   addFooter(currentPage, pageNumber);
 
-  // =============== PAGE 2: TERMS ===============
+  // =============== PAGE 2: DAMAGE REPORT ===============
+  pageNumber++;
+  currentPage = pdfDoc.addPage([595.28, 841.89]);
+  y = height - margin;
+
+  // Damage section header
+  drawSectionHeader('Tilstandsrapport', '🚗', rgb(1, 0.95, 0.9), rgb(0.9, 0.5, 0.2));
+  
+  // Draw vehicle damage diagram function
+  const drawVehicleDamageMap = (xStart: number, yStart: number, mapWidth: number, title: string, damages: Array<{position: string, type: string, severity: string}>) => {
+    const mapHeight = 180;
+    const carWidth = mapWidth - 20;
+    const carHeight = 140;
+    const carX = xStart + 10;
+    const carY = yStart - mapHeight + 30;
+    
+    // Background card
+    drawRoundedRect(xStart, yStart - mapHeight, mapWidth, mapHeight, COLORS.bgLight, COLORS.border);
+    
+    // Title
+    drawText(title, xStart + 10, yStart - 18, 11, helveticaBold, COLORS.text);
+    
+    // Draw simplified top-down car outline
+    const cx = carX + carWidth / 2;
+    const cy = carY + carHeight / 2;
+    
+    // Car body (rectangle with rounded look)
+    currentPage.drawRectangle({
+      x: cx - 30,
+      y: cy - 55,
+      width: 60,
+      height: 110,
+      color: rgb(0.95, 0.95, 0.95),
+      borderColor: COLORS.border,
+      borderWidth: 1,
+    });
+    
+    // Front (narrower)
+    currentPage.drawRectangle({
+      x: cx - 25,
+      y: cy + 45,
+      width: 50,
+      height: 20,
+      color: rgb(0.92, 0.92, 0.92),
+      borderColor: COLORS.border,
+      borderWidth: 0.5,
+    });
+    
+    // Rear (narrower)
+    currentPage.drawRectangle({
+      x: cx - 25,
+      y: cy - 65,
+      width: 50,
+      height: 15,
+      color: rgb(0.92, 0.92, 0.92),
+      borderColor: COLORS.border,
+      borderWidth: 0.5,
+    });
+    
+    // Windshield
+    currentPage.drawRectangle({
+      x: cx - 20,
+      y: cy + 25,
+      width: 40,
+      height: 18,
+      color: rgb(0.85, 0.9, 0.95),
+      borderColor: COLORS.border,
+      borderWidth: 0.5,
+    });
+    
+    // Rear window
+    currentPage.drawRectangle({
+      x: cx - 18,
+      y: cy - 45,
+      width: 36,
+      height: 15,
+      color: rgb(0.85, 0.9, 0.95),
+      borderColor: COLORS.border,
+      borderWidth: 0.5,
+    });
+    
+    // Side mirrors
+    currentPage.drawCircle({ x: cx - 32, y: cy + 30, size: 4, color: rgb(0.8, 0.8, 0.8) });
+    currentPage.drawCircle({ x: cx + 32, y: cy + 30, size: 4, color: rgb(0.8, 0.8, 0.8) });
+    
+    // Wheels
+    currentPage.drawRectangle({ x: cx - 35, y: cy + 15, width: 8, height: 20, color: rgb(0.3, 0.3, 0.3) });
+    currentPage.drawRectangle({ x: cx + 27, y: cy + 15, width: 8, height: 20, color: rgb(0.3, 0.3, 0.3) });
+    currentPage.drawRectangle({ x: cx - 35, y: cy - 35, width: 8, height: 20, color: rgb(0.3, 0.3, 0.3) });
+    currentPage.drawRectangle({ x: cx + 27, y: cy - 35, width: 8, height: 20, color: rgb(0.3, 0.3, 0.3) });
+    
+    // Position coordinates for damage markers (relative to car center)
+    const positionCoords: Record<string, {x: number, y: number}> = {
+      'front_left': { x: cx - 20, y: cy + 55 },
+      'front_center': { x: cx, y: cy + 55 },
+      'front_right': { x: cx + 20, y: cy + 55 },
+      'left_front': { x: cx - 35, y: cy + 25 },
+      'left_rear': { x: cx - 35, y: cy - 25 },
+      'right_front': { x: cx + 35, y: cy + 25 },
+      'right_rear': { x: cx + 35, y: cy - 25 },
+      'rear_left': { x: cx - 20, y: cy - 60 },
+      'rear_center': { x: cx, y: cy - 60 },
+      'rear_right': { x: cx + 20, y: cy - 60 },
+      'roof': { x: cx, y: cy },
+      'hood': { x: cx, y: cy + 35 },
+      'trunk': { x: cx, y: cy - 50 },
+    };
+    
+    // Severity colors
+    const severityColors: Record<string, typeof COLORS.primary> = {
+      'minor': rgb(0.95, 0.8, 0.2),    // Yellow
+      'moderate': rgb(0.95, 0.5, 0.2), // Orange
+      'severe': rgb(0.9, 0.25, 0.25),  // Red
+    };
+    
+    // Damage type labels
+    const typeLabels: Record<string, string> = {
+      'scratch': 'R',
+      'dent': 'B',
+      'crack': 'C',
+      'stain': 'P',
+    };
+    
+    // Draw damage markers
+    damages.forEach((damage) => {
+      const coords = positionCoords[damage.position];
+      if (coords) {
+        const color = severityColors[damage.severity] || severityColors.minor;
+        const label = typeLabels[damage.type] || '?';
+        
+        // Draw marker circle
+        currentPage.drawCircle({ x: coords.x, y: coords.y, size: 8, color: color });
+        
+        // Draw label
+        currentPage.drawText(label, { 
+          x: coords.x - 3, 
+          y: coords.y - 3, 
+          size: 8, 
+          font: helveticaBold, 
+          color: COLORS.white 
+        });
+      }
+    });
+    
+    // Damage count badge
+    if (damages.length > 0) {
+      currentPage.drawCircle({ x: xStart + mapWidth - 20, y: yStart - 18, size: 10, color: COLORS.danger });
+      currentPage.drawText(damages.length.toString(), { 
+        x: xStart + mapWidth - 23, 
+        y: yStart - 22, 
+        size: 9, 
+        font: helveticaBold, 
+        color: COLORS.white 
+      });
+    }
+  };
+
+  // Demo damage data
+  const pickupDamages = [
+    { position: 'front_left', type: 'scratch', severity: 'minor' },
+    { position: 'left_rear', type: 'dent', severity: 'moderate' },
+  ];
+  
+  const returnDamages = [
+    { position: 'front_left', type: 'scratch', severity: 'minor' },
+    { position: 'left_rear', type: 'dent', severity: 'moderate' },
+    { position: 'rear_right', type: 'scratch', severity: 'minor' },
+    { position: 'right_front', type: 'crack', severity: 'severe' },
+  ];
+  
+  // Draw two damage maps side by side
+  const dmgMapWidth = (contentWidth - 20) / 2;
+  drawCard(margin, y, contentWidth, 220, COLORS.bgLight);
+  
+  drawVehicleDamageMap(margin + 5, y - 10, dmgMapWidth, 'Ved udlevering', pickupDamages);
+  drawVehicleDamageMap(margin + dmgMapWidth + 15, y - 10, dmgMapWidth, 'Ved indlevering', returnDamages);
+  
+  y -= 200;
+  
+  // Legend
+  drawText('Forklaring på skadestyper:', margin + 10, y, 9, helveticaBold, COLORS.textMuted);
+  y -= 18;
+  
+  const legendItems = [
+    { color: rgb(0.95, 0.8, 0.2), label: 'R', text: 'Ridse' },
+    { color: rgb(0.95, 0.5, 0.2), label: 'B', text: 'Bule' },
+    { color: rgb(0.9, 0.25, 0.25), label: 'C', text: 'Revne' },
+    { color: rgb(0.6, 0.4, 0.8), label: 'P', text: 'Plet' },
+  ];
+  
+  let legendX = margin + 10;
+  legendItems.forEach(item => {
+    currentPage.drawCircle({ x: legendX + 5, y: y + 3, size: 6, color: item.color });
+    currentPage.drawText(item.label, { x: legendX + 2, y: y, size: 7, font: helveticaBold, color: COLORS.white });
+    drawText(item.text, legendX + 15, y, 9, helvetica, COLORS.text);
+    legendX += 55;
+  });
+  
+  legendX += 20;
+  drawText('|', legendX, y, 9, helvetica, COLORS.textMuted);
+  legendX += 15;
+  
+  // Severity legend
+  const severityLegend = [
+    { color: rgb(0.95, 0.8, 0.2), text: 'Mindre' },
+    { color: rgb(0.95, 0.5, 0.2), text: 'Moderat' },
+    { color: rgb(0.9, 0.25, 0.25), text: 'Alvorlig' },
+  ];
+  
+  severityLegend.forEach(item => {
+    currentPage.drawCircle({ x: legendX + 5, y: y + 3, size: 6, color: item.color });
+    drawText(item.text, legendX + 15, y, 9, helvetica, COLORS.text);
+    legendX += 60;
+  });
+  
+  y -= 40;
+  addFooter(currentPage, pageNumber);
+
+  // =============== PAGE 3: TERMS ===============
   pageNumber++;
   currentPage = pdfDoc.addPage([595.28, 841.89]);
   y = height - margin;
