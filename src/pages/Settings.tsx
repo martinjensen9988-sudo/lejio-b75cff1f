@@ -27,10 +27,13 @@ import {
   Upload,
   Image,
   Truck,
+  AlertTriangle,
 } from 'lucide-react';
 import { FleetDashboard } from '@/components/fleet/FleetDashboard';
 import { LessorRatingsCard } from '@/components/ratings/LessorRatingsCard';
+import { DamageRegistrationWizard } from '@/components/settings/DamageRegistrationWizard';
 import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface ProfileData {
   full_name: string;
@@ -290,7 +293,7 @@ const Settings = () => {
 
       <main className="container mx-auto px-6 py-8 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={cn("grid w-full", isProfessional ? "grid-cols-5" : "grid-cols-4")}>
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Profil</span>
@@ -302,6 +305,10 @@ const Settings = () => {
             <TabsTrigger value="insurance" className="gap-2">
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">Kontrakt</span>
+            </TabsTrigger>
+            <TabsTrigger value="damages" className="gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              <span className="hidden sm:inline">Skader</span>
             </TabsTrigger>
             {isProfessional && (
               <TabsTrigger value="fleet" className="gap-2">
@@ -845,6 +852,11 @@ const Settings = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Damages Tab */}
+          <TabsContent value="damages" className="space-y-6">
+            <DamageRegistrationWizard />
           </TabsContent>
 
           {/* Fleet Tab */}
