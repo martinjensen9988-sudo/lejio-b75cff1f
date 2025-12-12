@@ -8,12 +8,19 @@ export interface CVRData {
   city?: string;
   postalCode?: string;
   status?: string;
+  companyType?: string;
+  startDate?: string;
+  isActive: boolean;
+  phone?: string;
+  email?: string;
+  industry?: string;
 }
 
 interface UseCVRLookupReturn {
   data: CVRData | null;
   isLoading: boolean;
   error: string | null;
+  isCompanyActive: boolean;
   lookupCVR: (cvr: string) => Promise<CVRData | null>;
   reset: () => void;
 }
@@ -46,14 +53,22 @@ export const useCVRLookup = (): UseCVRLookupReturn => {
         return null;
       }
 
+      // Check for error in response (including inactive company)
       if (responseData?.error) {
         setError(responseData.error);
+        // Still set data if we have company info (for display purposes)
+        if (responseData.companyName) {
+          const cvrData = responseData as CVRData;
+          setData(cvrData);
+          return cvrData;
+        }
         setData(null);
         return null;
       }
 
-      setData(responseData as CVRData);
-      return responseData as CVRData;
+      const cvrData = responseData as CVRData;
+      setData(cvrData);
+      return cvrData;
     } catch (err) {
       console.error('CVR lookup error:', err);
       setError('Der opstod en fejl ved CVR-opslag');
@@ -70,5 +85,12 @@ export const useCVRLookup = (): UseCVRLookupReturn => {
     setIsLoading(false);
   }, []);
 
-  return { data, isLoading, error, lookupCVR, reset };
+  return { 
+    data, 
+    isLoading, 
+    error, 
+    isCompanyActive: data?.isActive ?? false,
+    lookupCVR, 
+    reset 
+  };
 };

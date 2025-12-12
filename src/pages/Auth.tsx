@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import LejioLogo from "@/components/LejioLogo";
 import { toast } from "sonner";
 import { z } from "zod";
-import { User, Building2, ArrowLeft, ArrowRight, Check, Mail, Lock, Phone, MapPin, Loader2 } from "lucide-react";
+import { User, Building2, ArrowLeft, ArrowRight, Check, Mail, Lock, Phone, MapPin, Loader2, CheckCircle, XCircle, Calendar, Briefcase } from "lucide-react";
 
 // Validation schemas
 const emailSchema = z.string().email("Ugyldig email adresse").max(255);
@@ -39,7 +39,7 @@ const Auth = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { lookupCVR, isLoading: cvrLoading, error: cvrError } = useCVRLookup();
+  const { data: cvrData, lookupCVR, isLoading: cvrLoading, error: cvrError, isCompanyActive } = useCVRLookup();
 
   // Auto-lookup CVR when 8 digits are entered
   useEffect(() => {
@@ -48,10 +48,15 @@ const Auth = () => {
     const cleanCvr = cvrNumber.replace(/\D/g, '');
     if (cleanCvr.length === 8) {
       lookupCVR(cleanCvr).then((result) => {
-        if (result?.companyName) {
+        if (result?.companyName && result.isActive) {
           setCompanyName(result.companyName);
           toast.success('Virksomhed fundet!', {
             description: result.companyName,
+          });
+        } else if (result?.companyName && !result.isActive) {
+          setCompanyName(result.companyName);
+          toast.error('Virksomheden er ikke aktiv', {
+            description: 'Kun aktive virksomheder kan registreres.',
           });
         }
       });
@@ -126,19 +131,27 @@ const Auth = () => {
     const emailError = validateField("email", email);
     const passwordError = validateField("password", password);
     const nameError = validateField("fullName", fullName);
-    const cvrError = userType === "professionel" ? validateField("cvrNumber", cvrNumber) : null;
+    const cvrValidationError = userType === "professionel" ? validateField("cvrNumber", cvrNumber) : null;
 
     if (password !== confirmPassword) {
       setErrors(prev => ({ ...prev, confirmPassword: "Adgangskoderne matcher ikke" }));
       return;
     }
 
-    if (emailError || passwordError || nameError || cvrError) {
+    if (emailError || passwordError || nameError || cvrValidationError) {
       setErrors({
         email: emailError || "",
         password: passwordError || "",
         fullName: nameError || "",
-        cvrNumber: cvrError || "",
+        cvrNumber: cvrValidationError || "",
+      });
+      return;
+    }
+
+    // Check if company is active for professional users
+    if (userType === "professionel" && cvrData && !cvrData.isActive) {
+      toast.error('Virksomheden er ikke aktiv', {
+        description: 'Kun aktive virksomheder kan registreres på platformen.',
       });
       return;
     }
@@ -514,6 +527,16 @@ const Auth = () => {
                               <Loader2 className="w-4 h-4 animate-spin text-primary" />
                             </div>
                           )}
+                          {!cvrLoading && cvrData?.isActive && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                            </div>
+                          )}
+                          {!cvrLoading && cvrData && !cvrData.isActive && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            </div>
+                          )}
                         </div>
                         {cvrError && <p className="text-sm text-destructive">{cvrError}</p>}
                         {errors.cvrNumber && <p className="text-sm text-destructive">{errors.cvrNumber}</p>}
@@ -522,9 +545,61 @@ const Auth = () => {
                         </p>
                       </div>
 
+                      {/* Company Info Display */}
+                      {cvrData && (
+                        <div className={`p-3 rounded-xl border ${cvrData.isActive ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800' : 'bg-destructive/10 border-destructive/30'}`}>
+                          <div className="flex items-center gap-2 mb-2">
+                            {cvrData.isActive ? (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            )}
+                            <span className={`text-sm font-semibold ${cvrData.isActive ? 'text-green-700 dark:text-green-400' : 'text-destructive'}`}>
+                              {cvrData.isActive ? 'Aktiv virksomhed' : 'Inaktiv virksomhed'}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-1 text-xs">
+                            <div className="flex items-start gap-2">
+                              <Building2 className="w-3 h-3 text-muted-foreground mt-0.5" />
+                              <div>
+                                <p className="font-medium">{cvrData.companyName}</p>
+                                {cvrData.companyType && (
+                                  <p className="text-muted-foreground">{cvrData.companyType}</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {(cvrData.address || cvrData.city) && (
+                              <div className="flex items-start gap-2">
+                                <MapPin className="w-3 h-3 text-muted-foreground mt-0.5" />
+                                <p>
+                                  {cvrData.address}
+                                  {cvrData.postalCode && cvrData.city && `, ${cvrData.postalCode} ${cvrData.city}`}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {cvrData.industry && (
+                              <div className="flex items-start gap-2">
+                                <Briefcase className="w-3 h-3 text-muted-foreground mt-0.5" />
+                                <p>{cvrData.industry}</p>
+                              </div>
+                            )}
+                            
+                            {cvrData.startDate && (
+                              <div className="flex items-start gap-2">
+                                <Calendar className="w-3 h-3 text-muted-foreground mt-0.5" />
+                                <p>Stiftet: {cvrData.startDate}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="space-y-2">
                         <Label htmlFor="company-name" className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-primary" />
+                          <Building2 className="w-4 h-4 text-primary" />
                           Firmanavn
                         </Label>
                         <Input
@@ -535,6 +610,7 @@ const Auth = () => {
                           placeholder="Dit firma ApS"
                           className="rounded-xl"
                           required
+                          disabled={cvrLoading}
                         />
                       </div>
                     </>
@@ -545,7 +621,7 @@ const Auth = () => {
                     variant={userType === "privat" ? "warm" : "hero"}
                     size="lg" 
                     className="w-full"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || (userType === "professionel" && cvrData && !cvrData.isActive)}
                   >
                     {isSubmitting ? "Opretter konto..." : "Opret konto 🎉"}
                   </Button>
