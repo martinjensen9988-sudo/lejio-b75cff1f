@@ -9,10 +9,18 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight, XCircle, MapPin, Phone, Mail, Calendar, Briefcase, Receipt, Save } from 'lucide-react';
+import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight, XCircle, MapPin, Phone, Mail, Calendar, Briefcase, Receipt, Save, Tag } from 'lucide-react';
 
 interface UpgradeToProCardProps {
   onUpgradeSuccess?: () => void;
+}
+
+interface DiscountCode {
+  id: string;
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  description: string | null;
 }
 
 const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
@@ -20,6 +28,10 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saveContactInfo, setSaveContactInfo] = useState(true);
+  const [discountCode, setDiscountCode] = useState('');
+  const [validatingCode, setValidatingCode] = useState(false);
+  const [validatedDiscount, setValidatedDiscount] = useState<DiscountCode | null>(null);
+  const [discountError, setDiscountError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     company_name: '',
     cvr_number: '',
@@ -50,6 +62,86 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
   if (profile?.user_type !== 'privat') {
     return null;
   }
+
+  const validateDiscountCode = async () => {
+    if (!discountCode.trim()) {
+      setDiscountError('Indtast en rabatkode');
+      return;
+    }
+
+    setValidatingCode(true);
+    setDiscountError(null);
+    setValidatedDiscount(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('discount_codes')
+        .select('id, code, discount_type, discount_value, description, is_active, valid_from, valid_until, max_uses, current_uses')
+        .eq('code', discountCode.toUpperCase().trim())
+        .single();
+
+      if (error || !data) {
+        setDiscountError('Rabatkoden findes ikke');
+        return;
+      }
+
+      if (!data.is_active) {
+        setDiscountError('Rabatkoden er ikke aktiv');
+        return;
+      }
+
+      // Check validity period
+      const now = new Date();
+      if (data.valid_from && new Date(data.valid_from) > now) {
+        setDiscountError('Rabatkoden er ikke gyldig endnu');
+        return;
+      }
+      if (data.valid_until && new Date(data.valid_until) < now) {
+        setDiscountError('Rabatkoden er udløbet');
+        return;
+      }
+
+      // Check max uses
+      if (data.max_uses && data.current_uses >= data.max_uses) {
+        setDiscountError('Rabatkoden er brugt op');
+        return;
+      }
+
+      // Check if user already redeemed this code
+      if (user) {
+        const { data: redemption } = await supabase
+          .from('discount_code_redemptions')
+          .select('id')
+          .eq('discount_code_id', data.id)
+          .eq('user_id', user.id)
+          .single();
+
+        if (redemption) {
+          setDiscountError('Du har allerede brugt denne rabatkode');
+          return;
+        }
+      }
+
+      setValidatedDiscount({
+        id: data.id,
+        code: data.code,
+        discount_type: data.discount_type,
+        discount_value: data.discount_value,
+        description: data.description,
+      });
+
+      toast.success('Rabatkode accepteret!', {
+        description: data.discount_type === 'percentage' 
+          ? `${data.discount_value}% rabat` 
+          : `${data.discount_value} kr rabat`,
+      });
+    } catch (error) {
+      console.error('Error validating discount code:', error);
+      setDiscountError('Kunne ikke validere rabatkode');
+    } finally {
+      setValidatingCode(false);
+    }
+  };
 
   const handleUpgrade = async () => {
     if (!user) return;
@@ -89,6 +181,26 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
         subscription_status: 'trial',
         trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       };
+
+      // If discount code is validated, record the redemption
+      if (validatedDiscount && user) {
+        const { error: redemptionError } = await supabase
+          .from('discount_code_redemptions')
+          .insert({
+            discount_code_id: validatedDiscount.id,
+            user_id: user.id,
+          });
+
+        if (redemptionError) {
+          console.error('Error recording discount redemption:', redemptionError);
+        }
+
+        // Increment current_uses
+        await supabase
+          .from('discount_codes')
+          .update({ current_uses: (await supabase.from('discount_codes').select('current_uses').eq('id', validatedDiscount.id).single()).data?.current_uses + 1 })
+          .eq('id', validatedDiscount.id);
+      }
 
       // Add CVR data to profile if checkbox is checked
       if (saveContactInfo && cvrData) {
@@ -340,6 +452,68 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   />
                 </div>
 
+                {/* Discount Code Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="discount_code" className="flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
+                    Har du en rabatkode? (valgfrit)
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="discount_code"
+                      value={discountCode}
+                      onChange={(e) => {
+                        setDiscountCode(e.target.value.toUpperCase());
+                        setDiscountError(null);
+                        setValidatedDiscount(null);
+                      }}
+                      placeholder="Indtast rabatkode"
+                      className="flex-1"
+                      disabled={validatingCode || !!validatedDiscount}
+                    />
+                    {validatedDiscount ? (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => {
+                          setDiscountCode('');
+                          setValidatedDiscount(null);
+                        }}
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={validateDiscountCode}
+                        disabled={validatingCode || !discountCode.trim()}
+                      >
+                        {validatingCode ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          'Anvend'
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                  {discountError && (
+                    <p className="text-xs text-destructive">{discountError}</p>
+                  )}
+                  {validatedDiscount && (
+                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>
+                        {validatedDiscount.discount_type === 'percentage' 
+                          ? `${validatedDiscount.discount_value}% rabat`
+                          : `${validatedDiscount.discount_value} kr rabat`}
+                        {validatedDiscount.description && ` - ${validatedDiscount.description}`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                   <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-primary" />
@@ -347,6 +521,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   </h4>
                   <p className="text-xs text-muted-foreground">
                     Under prøveperioden kan du udforske alle Pro-funktioner. Dine biler vil være skjulte for lejere indtil du aktiverer dit abonnement.
+                    {validatedDiscount && ' Din rabatkode vil blive anvendt når du aktiverer dit abonnement.'}
                   </p>
                 </div>
 
