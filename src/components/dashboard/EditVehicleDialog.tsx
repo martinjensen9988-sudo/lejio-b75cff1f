@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock } from 'lucide-react';
+import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VEHICLE_FEATURES = [
@@ -61,6 +61,10 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     prepaid_rent_enabled: vehicle.prepaid_rent_enabled || false,
     prepaid_rent_months: vehicle.prepaid_rent_months || 1,
     payment_schedule: (vehicle.payment_schedule || 'upfront') as PaymentScheduleType,
+    use_custom_location: vehicle.use_custom_location || false,
+    location_address: vehicle.location_address || '',
+    location_postal_code: vehicle.location_postal_code || '',
+    location_city: vehicle.location_city || '',
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -82,6 +86,10 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         prepaid_rent_enabled: vehicle.prepaid_rent_enabled || false,
         prepaid_rent_months: vehicle.prepaid_rent_months || 1,
         payment_schedule: (vehicle.payment_schedule || 'upfront') as PaymentScheduleType,
+        use_custom_location: vehicle.use_custom_location || false,
+        location_address: vehicle.location_address || '',
+        location_postal_code: vehicle.location_postal_code || '',
+        location_city: vehicle.location_city || '',
       });
     }
   };
@@ -424,6 +432,64 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
                 </div>
               </RadioGroup>
             </div>
+
+          {/* Custom Location */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Afhentningssted</Label>
+            
+            <div 
+              className="flex items-center space-x-3 p-3 rounded-xl bg-primary/10 border border-primary/20 cursor-pointer"
+              onClick={() => setFormData(prev => ({ ...prev, use_custom_location: !prev.use_custom_location }))}
+            >
+              <Checkbox
+                id="edit_use_custom_location"
+                checked={formData.use_custom_location || false}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, use_custom_location: !!checked }))}
+              />
+              <MapPin className="w-4 h-4 text-primary" />
+              <label htmlFor="edit_use_custom_location" className="text-sm font-medium cursor-pointer select-none">
+                Bilen står på en anden adresse
+              </label>
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              {formData.use_custom_location 
+                ? 'Indtast adressen hvor bilen kan afhentes' 
+                : 'Bilen vises på din firmaadresse på kortet'}
+            </p>
+
+            {formData.use_custom_location && (
+              <div className="space-y-3 pl-6 animate-in slide-in-from-top-2">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Adresse</Label>
+                  <Input
+                    value={formData.location_address || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location_address: e.target.value }))}
+                    placeholder="Gade og husnummer"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Postnummer</Label>
+                    <Input
+                      value={formData.location_postal_code || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, location_postal_code: e.target.value }))}
+                      placeholder="2100"
+                      maxLength={4}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">By</Label>
+                    <Input
+                      value={formData.location_city || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, location_city: e.target.value }))}
+                      placeholder="København"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Features */}
           <div className="space-y-3">

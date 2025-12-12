@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
-import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock } from 'lucide-react';
+import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin } from 'lucide-react';
 
 const AddVehicleDialog = () => {
   const [open, setOpen] = useState(false);
@@ -46,6 +46,10 @@ const AddVehicleDialog = () => {
         prepaid_rent_enabled: false,
         prepaid_rent_months: 1,
         payment_schedule: 'upfront' as const,
+        use_custom_location: false,
+        location_address: '',
+        location_postal_code: '',
+        location_city: '',
       });
       setStep('details');
     }
@@ -347,6 +351,64 @@ const AddVehicleDialog = () => {
                   </div>
                 </div>
               </RadioGroup>
+            </div>
+
+            {/* Custom Location */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Afhentningssted</Label>
+              
+              <div 
+                className="flex items-center space-x-3 p-3 rounded-xl bg-primary/10 border border-primary/20 cursor-pointer"
+                onClick={() => setVehicleDetails(prev => ({ ...prev, use_custom_location: !prev.use_custom_location }))}
+              >
+                <Checkbox
+                  id="use_custom_location"
+                  checked={vehicleDetails.use_custom_location || false}
+                  onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, use_custom_location: !!checked }))}
+                />
+                <MapPin className="w-4 h-4 text-primary" />
+                <label htmlFor="use_custom_location" className="text-sm font-medium cursor-pointer select-none">
+                  Bilen står på en anden adresse
+                </label>
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
+                {vehicleDetails.use_custom_location 
+                  ? 'Indtast adressen hvor bilen kan afhentes' 
+                  : 'Bilen vises på din firmaadresse på kortet'}
+              </p>
+
+              {vehicleDetails.use_custom_location && (
+                <div className="space-y-3 pl-6 animate-in slide-in-from-top-2">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Adresse</Label>
+                    <Input
+                      value={vehicleDetails.location_address || ''}
+                      onChange={(e) => setVehicleDetails(prev => ({ ...prev, location_address: e.target.value }))}
+                      placeholder="Gade og husnummer"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Postnummer</Label>
+                      <Input
+                        value={vehicleDetails.location_postal_code || ''}
+                        onChange={(e) => setVehicleDetails(prev => ({ ...prev, location_postal_code: e.target.value }))}
+                        placeholder="2100"
+                        maxLength={4}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">By</Label>
+                      <Input
+                        value={vehicleDetails.location_city || ''}
+                        onChange={(e) => setVehicleDetails(prev => ({ ...prev, location_city: e.target.value }))}
+                        placeholder="København"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 pt-4">

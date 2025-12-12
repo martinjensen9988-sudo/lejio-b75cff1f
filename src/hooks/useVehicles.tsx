@@ -31,6 +31,12 @@ export interface Vehicle {
   prepaid_rent_enabled: boolean;
   prepaid_rent_months: number | null;
   payment_schedule: PaymentScheduleType | null;
+  use_custom_location: boolean;
+  location_address: string | null;
+  location_postal_code: string | null;
+  location_city: string | null;
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -58,6 +64,12 @@ export interface VehicleInsert {
   prepaid_rent_enabled?: boolean;
   prepaid_rent_months?: number;
   payment_schedule?: PaymentScheduleType;
+  use_custom_location?: boolean;
+  location_address?: string;
+  location_postal_code?: string;
+  location_city?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export const useVehicles = () => {
