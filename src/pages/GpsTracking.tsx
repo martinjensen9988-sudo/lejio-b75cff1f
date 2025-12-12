@@ -12,7 +12,7 @@ import { GeofenceAlertsList } from '@/components/gps/GeofenceAlertsList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, MapPin, Shield, Bell, Navigation as NavIcon, Smartphone, HelpCircle, MessageCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Shield, Bell, Navigation as NavIcon, HelpCircle, MessageCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -70,145 +70,112 @@ const GpsTracking = () => {
           </div>
         </div>
 
-        {!hasDevices ? (
-          // Empty state - show simple getting started guide
-          <div className="max-w-2xl mx-auto">
-            <Card className="border-2 border-dashed">
-              <CardHeader className="text-center pb-2">
-                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                  <NavIcon className="w-8 h-8 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">Kom i gang med GPS-sporing</CardTitle>
-                <CardDescription className="text-base">
-                  Spor dine køretøjer i realtid og få besked når de forlader bestemte områder
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4">
-                  <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
-                    <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Smartphone className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">1. Køb en GPS-tracker</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Vi anbefaler Teltonika eller Ruptela trackere. Kontakt os for vejledning.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
-                    <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                      <MessageCircle className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">2. Kontakt LEJIO support</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Send os tracker-modellen og IMEI-nummeret, så sætter vi det op for dig.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
-                    <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">3. Begynd at spore</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Når vi har sat det op, kan du se dine køretøjer live på kortet.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+        <Tabs defaultValue="tracking" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="tracking" className="gap-2">
+              <MapPin className="w-4 h-4" />
+              Sporing
+            </TabsTrigger>
+            <TabsTrigger value="geofences" className="gap-2">
+              <Shield className="w-4 h-4" />
+              Zoner
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="gap-2">
+              <Bell className="w-4 h-4" />
+              Alarmer
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {unreadCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                  <Button className="flex-1" onClick={handleContactSupport} disabled={startingChat}>
-                    {startingChat ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                    )}
-                    Kontakt support
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => navigate('/faq')}>
-                    <HelpCircle className="w-4 h-4 mr-2" />
-                    Læs mere om GPS
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          // Has devices - show tracking interface
-          <Tabs defaultValue="tracking" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="tracking" className="gap-2">
-                <MapPin className="w-4 h-4" />
-                Sporing
-              </TabsTrigger>
-              <TabsTrigger value="geofences" className="gap-2">
-                <Shield className="w-4 h-4" />
-                Zoner
-              </TabsTrigger>
-              <TabsTrigger value="alerts" className="gap-2">
-                <Bell className="w-4 h-4" />
-                Alarmer
-                {unreadCount > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="tracking" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
+          <TabsContent value="tracking" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                {devices.length > 0 ? (
                   <GpsTrackingMap
                     devices={devices}
                     selectedDevice={selectedDevice}
                     onSelectDevice={setSelectedDevice}
                     geofences={geofences}
                   />
-                </div>
-                <div>
-                  <GpsDeviceList
-                    onSelectDevice={setSelectedDevice}
-                    selectedDeviceId={selectedDevice?.id}
-                    showAddButton={false}
-                  />
-                </div>
+                ) : (
+                  <Card className="h-[400px] flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <NavIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="font-semibold mb-2">Ingen GPS-enheder endnu</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Tilføj en GPS-tracker for at se dine køretøjer på kortet
+                      </p>
+                    </div>
+                  </Card>
+                )}
               </div>
-            </TabsContent>
-
-            <TabsContent value="geofences" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <GeofenceList />
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="w-5 h-5" />
-                      Hvad er en zone?
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground space-y-3">
-                    <p>
-                      En zone (geofence) er et virtuelt område på kortet. Du får automatisk en alarm, når et køretøj forlader eller ankommer til zonen.
-                    </p>
-                    <p>
-                      <strong>Eksempel:</strong> Opret en zone rundt om din adresse, så du får besked hvis bilen kører væk uden tilladelse.
-                    </p>
+              <div className="space-y-4">
+                <GpsDeviceList
+                  onSelectDevice={setSelectedDevice}
+                  selectedDeviceId={selectedDevice?.id}
+                  showAddButton={true}
+                />
+                
+                {/* Help card */}
+                <Card className="bg-muted/50">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <HelpCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          Brug for hjælp til opsætning? Vi kan sætte det op for dig.
+                        </p>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={handleContactSupport} 
+                          disabled={startingChat}
+                        >
+                          {startingChat ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                          )}
+                          Få hjælp til opsætning
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
+            </div>
+          </TabsContent>
 
-            <TabsContent value="alerts" className="space-y-6">
-              <GeofenceAlertsList />
-            </TabsContent>
-          </Tabs>
-        )}
+          <TabsContent value="geofences" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <GeofenceList />
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    Hvad er en zone?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground space-y-3">
+                  <p>
+                    En zone (geofence) er et virtuelt område på kortet. Du får automatisk en alarm, når et køretøj forlader eller ankommer til zonen.
+                  </p>
+                  <p>
+                    <strong>Eksempel:</strong> Opret en zone rundt om din adresse, så du får besked hvis bilen kører væk uden tilladelse.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="alerts" className="space-y-6">
+            <GeofenceAlertsList />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
