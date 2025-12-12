@@ -227,6 +227,61 @@ export const useDamageReports = (bookingId?: string) => {
     return reports.find(r => r.report_type === type);
   };
 
+  const generatePdfReport = async (reportId: string): Promise<{ pdfUrl?: string; fileName?: string } | null> => {
+    if (!user || !bookingId) {
+      toast.error('Mangler bruger eller booking');
+      return null;
+    }
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+
+      if (!accessToken) {
+        toast.error('Kunne ikke hente adgangstoken');
+        return null;
+      }
+
+      const response = await supabase.functions.invoke('generate-damage-report-pdf', {
+        body: { reportId, bookingId },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Kunne ikke generere PDF');
+      }
+
+      const { pdfBase64, pdfUrl, fileName } = response.data;
+
+      // Download the PDF
+      if (pdfBase64) {
+        const binaryString = atob(pdfBase64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName || 'skadesrapport.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        toast.success('Skadesrapport PDF downloadet');
+        return { pdfUrl, fileName };
+      }
+
+      return null;
+    } catch (err) {
+      console.error('Error generating PDF report:', err);
+      toast.error('Kunne ikke generere skadesrapport PDF');
+      return null;
+    }
+  };
+
   useEffect(() => {
     fetchReports();
   }, [user, bookingId]);
@@ -240,6 +295,7 @@ export const useDamageReports = (bookingId?: string) => {
     removeDamageItem,
     uploadDamagePhoto,
     getReportByType,
+    generatePdfReport,
     refetch: fetchReports,
   };
 };
