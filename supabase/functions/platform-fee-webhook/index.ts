@@ -4,8 +4,63 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
 };
+
+// Verify Stripe webhook signature
+async function verifyStripeSignature(payload: string, signature: string, secret: string): Promise<boolean> {
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    
+    // Extract timestamp and signatures from header
+    const elements = signature.split(',');
+    const timestampElement = elements.find(e => e.startsWith('t='));
+    const signatureElement = elements.find(e => e.startsWith('v1='));
+    
+    if (!timestampElement || !signatureElement) {
+      console.error('Missing timestamp or signature in header');
+      return false;
+    }
+    
+    const timestamp = timestampElement.split('=')[1];
+    const expectedSignature = signatureElement.split('=')[1];
+    
+    // Create signed payload
+    const signedPayload = `${timestamp}.${payload}`;
+    const signatureBytes = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(signedPayload)
+    );
+    
+    // Convert to hex
+    const computedSignature = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    // Timing-safe comparison
+    if (computedSignature.length !== expectedSignature.length) {
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < computedSignature.length; i++) {
+      result |= computedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+    }
+    
+    return result === 0;
+  } catch (error) {
+    console.error('Signature verification error:', error);
+    return false;
+  }
+}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
@@ -24,6 +79,24 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.text();
+    
+    // Verify webhook signature
+    const webhookSecret = Deno.env.get('PLATFORM_FEE_WEBHOOK_SECRET');
+    const signature = req.headers.get('stripe-signature');
+    
+    if (webhookSecret && signature) {
+      const isValid = await verifyStripeSignature(body, signature, webhookSecret);
+      if (!isValid) {
+        console.error('Invalid webhook signature');
+        return new Response('Invalid signature', { status: 401 });
+      }
+      console.log('Webhook signature verified successfully');
+    } else if (webhookSecret && !signature) {
+      console.error('Missing stripe-signature header');
+      return new Response('Missing signature', { status: 401 });
+    } else {
+      console.warn('PLATFORM_FEE_WEBHOOK_SECRET not configured - skipping signature verification');
+    }
 
     let event: Stripe.Event;
     
