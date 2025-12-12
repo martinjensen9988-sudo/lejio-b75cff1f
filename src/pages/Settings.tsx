@@ -298,7 +298,7 @@ const Settings = () => {
             </TabsTrigger>
             <TabsTrigger value="insurance" className="gap-2">
               <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Forsikring</span>
+              <span className="hidden sm:inline">Kontrakt</span>
             </TabsTrigger>
           </TabsList>
 
