@@ -11,6 +11,7 @@ import AddVehicleDialog from '@/components/dashboard/AddVehicleDialog';
 import VehicleCard from '@/components/dashboard/VehicleCard';
 import BookingsTable from '@/components/dashboard/BookingsTable';
 import CreateBookingDialog from '@/components/dashboard/CreateBookingDialog';
+import PendingFeesCard from '@/components/dashboard/PendingFeesCard';
 import { Car, Calendar, LogOut, Home, Loader2, Settings } from 'lucide-react';
 
 const Dashboard = () => {
@@ -84,6 +85,11 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-6 py-8">
+        {/* Pending Fees for Private Users */}
+        <div className="mb-6">
+          <PendingFeesCard />
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatCard
