@@ -1,9 +1,10 @@
 import { useMemo } from "react";
-import { Car, Fuel, Calendar, Gauge, Check } from "lucide-react";
+import { Car, Fuel, Calendar, Gauge, Check, Shield, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SearchVehicle, SearchFiltersState } from "@/pages/Search";
+import { LessorStatusBadge } from "@/components/ratings/LessorStatusBadge";
 
 interface VehicleSearchCardProps {
   vehicle: SearchVehicle;
@@ -86,6 +87,12 @@ const VehicleSearchCard = ({
                 Fri km
               </Badge>
             )}
+            {vehicle.owner_fleet_plan && (
+              <Badge className="absolute top-2 right-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md">
+                <Shield className="w-3 h-3 mr-1" />
+                LEJIO Varetager
+              </Badge>
+            )}
           </div>
 
           {/* Content */}
@@ -106,6 +113,19 @@ const VehicleSearchCard = ({
                 <span className="text-sm text-muted-foreground">{pricing.unitLabel}</span>
               </div>
             </div>
+
+            {/* Owner rating & status */}
+            {vehicle.owner_lessor_status && (
+              <div className="flex items-center gap-2 mb-2">
+                <LessorStatusBadge status={vehicle.owner_lessor_status} size="sm" />
+                {vehicle.owner_average_rating && vehicle.owner_average_rating > 0 && (
+                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    {vehicle.owner_average_rating.toFixed(1)}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Features */}
             <div className="flex flex-wrap gap-3 mb-3 text-sm text-muted-foreground">
