@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,17 +13,57 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface SubscriptionLimits {
+  max_vehicles: number;
+  subscribed: boolean;
+  is_trial: boolean;
+  tier: string | null;
+}
 
 const AddVehicleDialog = () => {
   const [open, setOpen] = useState(false);
   const [registration, setRegistration] = useState('');
   const [step, setStep] = useState<'lookup' | 'details'>('lookup');
   const [vehicleDetails, setVehicleDetails] = useState<Partial<VehicleInsert>>({});
+  const [subscriptionLimits, setSubscriptionLimits] = useState<SubscriptionLimits | null>(null);
+  const [checkingLimits, setCheckingLimits] = useState(false);
   
   const { vehicle, isLoading: lookupLoading, error, lookupVehicle, reset } = useVehicleLookup();
-  const { addVehicle, isLoading: addingVehicle } = useVehicles();
+  const { vehicles, addVehicle, isLoading: addingVehicle } = useVehicles();
+  const { profile } = useAuth();
+
+  const isProfessional = profile?.user_type === 'professionel';
+
+  // Check subscription limits for professional users
+  useEffect(() => {
+    const checkLimits = async () => {
+      if (!isProfessional) return;
+      
+      setCheckingLimits(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('check-pro-subscription');
+        if (!error && data) {
+          setSubscriptionLimits(data);
+        }
+      } catch (err) {
+        console.error('Error checking subscription limits:', err);
+      } finally {
+        setCheckingLimits(false);
+      }
+    };
+    
+    if (open && isProfessional) {
+      checkLimits();
+    }
+  }, [open, isProfessional]);
+
+  const isAtVehicleLimit = isProfessional && subscriptionLimits && vehicles.length >= subscriptionLimits.max_vehicles;
+  const canAddVehicle = !isProfessional || !isAtVehicleLimit;
 
   const handleLookup = async () => {
     const result = await lookupVehicle(registration);
@@ -59,6 +99,14 @@ const AddVehicleDialog = () => {
 
   const handleAddVehicle = async () => {
     if (!vehicleDetails.registration || !vehicleDetails.make || !vehicleDetails.model) return;
+    
+    // Check vehicle limit for professional users
+    if (!canAddVehicle) {
+      toast.error('Du har nået grænsen for antal biler på dit abonnement', {
+        description: 'Opgrader dit abonnement for at tilføje flere biler.',
+      });
+      return;
+    }
     
     let finalDetails = { ...vehicleDetails };
     
@@ -105,9 +153,9 @@ const AddVehicleDialog = () => {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="warm" className="gap-2">
-          <Plus className="w-4 h-4" />
-          Tilføj bil
+        <Button variant="warm" className="gap-2" disabled={isAtVehicleLimit}>
+          {isAtVehicleLimit ? <Lock className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          {isAtVehicleLimit ? 'Opgrader for flere biler' : 'Tilføj bil'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
@@ -116,6 +164,23 @@ const AddVehicleDialog = () => {
             {step === 'lookup' ? 'Find din bil' : 'Bekræft biloplysninger'}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Vehicle limit warning for professional users */}
+        {isProfessional && subscriptionLimits && (
+          <div className={`p-3 rounded-xl border ${isAtVehicleLimit ? 'bg-destructive/10 border-destructive/20' : 'bg-muted/50 border-border'}`}>
+            <div className="flex items-center gap-2 text-sm">
+              <Car className="w-4 h-4" />
+              <span>
+                {vehicles.length} af {subscriptionLimits.max_vehicles === 999 ? '∞' : subscriptionLimits.max_vehicles} biler brugt
+              </span>
+              {subscriptionLimits.is_trial && (
+                <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary">
+                  Prøveperiode
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         {step === 'lookup' ? (
           <div className="space-y-6 py-4">
