@@ -10,9 +10,10 @@ import LejioLogo from '@/components/LejioLogo';
 import AddVehicleDialog from '@/components/dashboard/AddVehicleDialog';
 import VehicleCard from '@/components/dashboard/VehicleCard';
 import BookingsTable from '@/components/dashboard/BookingsTable';
+import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import CreateBookingDialog from '@/components/dashboard/CreateBookingDialog';
 import PendingFeesCard from '@/components/dashboard/PendingFeesCard';
-import { Car, Calendar, LogOut, Home, Loader2, Settings } from 'lucide-react';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -127,6 +128,10 @@ const Dashboard = () => {
                 <Car className="w-4 h-4" />
                 Mine biler
               </TabsTrigger>
+              <TabsTrigger value="calendar" className="gap-2">
+                <CalendarDays className="w-4 h-4" />
+                Kalender
+              </TabsTrigger>
               <TabsTrigger value="bookings" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 Bookinger
@@ -174,6 +179,14 @@ const Dashboard = () => {
                   />
                 ))}
               </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="calendar" className="mt-6">
+            {bookingsLoading || vehiclesLoading ? (
+              <Skeleton className="h-[600px] rounded-2xl" />
+            ) : (
+              <BookingCalendar bookings={bookings} vehicles={vehicles} />
             )}
           </TabsContent>
 
