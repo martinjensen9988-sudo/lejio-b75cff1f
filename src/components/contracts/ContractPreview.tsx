@@ -1,7 +1,6 @@
 import { Contract } from '@/hooks/useContracts';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { FileText, Car, User, Shield, AlertTriangle, Calendar, CreditCard } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface ContractPreviewProps {
@@ -14,197 +13,332 @@ const ContractPreview = ({ contract }: ContractPreviewProps) => {
   };
 
   const formatCurrency = (amount: number | null) => {
-    if (amount === null) return 'Ikke angivet';
-    return new Intl.NumberFormat('da-DK', { style: 'currency', currency: 'DKK' }).format(amount);
+    if (amount === null || amount === undefined) return '-';
+    return new Intl.NumberFormat('da-DK', { style: 'currency', currency: 'DKK', maximumFractionDigits: 2 }).format(amount);
   };
 
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
+    <div className="bg-white text-gray-900 font-sans max-w-3xl mx-auto">
       {/* Header */}
-      <div className="bg-primary/5 p-6 border-b border-border">
+      <div className="border-b-4 border-primary pb-6 mb-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-display text-xl font-bold text-foreground">Lejekontrakt</h2>
-              <p className="text-sm text-muted-foreground">Nr. {contract.contract_number}</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-primary">Lejekontrakt {contract.contract_number}</h1>
+            <p className="text-sm text-gray-600 mt-1">LEJIO - Biludlejning</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Oprettet</p>
-            <p className="font-medium text-foreground">{formatDate(contract.created_at)}</p>
+            <p className="text-xs text-gray-500">Oprettet</p>
+            <p className="text-sm font-medium">{formatDate(contract.created_at)}</p>
           </div>
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Vehicle Section */}
-        <Section icon={Car} title="Køretøj">
-          <div className="grid grid-cols-2 gap-4">
-            <InfoItem label="Mærke & Model" value={`${contract.vehicle_make} ${contract.vehicle_model}`} />
-            <InfoItem label="Nummerplade" value={contract.vehicle_registration} mono />
-            {contract.vehicle_year && <InfoItem label="Årgang" value={contract.vehicle_year.toString()} />}
-            {contract.vehicle_vin && <InfoItem label="Stelnummer (VIN)" value={contract.vehicle_vin} mono />}
-            <InfoItem label="Køretøjets værdi" value={formatCurrency(contract.vehicle_value)} />
+      {/* Udlejer Section */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Udlejer</h2>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-500">Navn:</span>
+            <span className="ml-4 font-medium">{contract.lessor_name}</span>
           </div>
-        </Section>
-
-        <Separator />
-
-        {/* Rental Period */}
-        <Section icon={Calendar} title="Lejeperiode">
-          <div className="grid grid-cols-2 gap-4">
-            <InfoItem label="Fra" value={formatDate(contract.start_date)} />
-            <InfoItem label="Til" value={formatDate(contract.end_date)} />
-            <InfoItem label="Dagspris" value={formatCurrency(contract.daily_price)} />
-            <InfoItem label="Inkluderet km/dag" value={`${contract.included_km} km`} />
-            <InfoItem label="Ekstra km pris" value={`${contract.extra_km_price} kr/km`} />
-            <InfoItem label="Total pris" value={formatCurrency(contract.total_price)} highlight />
+          {contract.lessor_company_name && (
+            <div>
+              <span className="text-gray-500">Virksomhed:</span>
+              <span className="ml-4 font-medium">{contract.lessor_company_name}</span>
+            </div>
+          )}
+          {contract.lessor_cvr && (
+            <div>
+              <span className="text-gray-500">CVR. Nr.:</span>
+              <span className="ml-4 font-medium">{contract.lessor_cvr}</span>
+            </div>
+          )}
+          <div>
+            <span className="text-gray-500">Email:</span>
+            <span className="ml-4 font-medium">{contract.lessor_email}</span>
           </div>
-        </Section>
-
-        <Separator />
-
-        {/* Parties */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Section icon={User} title="Udlejer">
-            <InfoItem label="Navn" value={contract.lessor_name} />
-            <InfoItem label="Email" value={contract.lessor_email} />
-            {contract.lessor_phone && <InfoItem label="Telefon" value={contract.lessor_phone} />}
-            {contract.lessor_company_name && <InfoItem label="Virksomhed" value={contract.lessor_company_name} />}
-            {contract.lessor_cvr && <InfoItem label="CVR" value={contract.lessor_cvr} />}
-            {contract.lessor_address && <InfoItem label="Adresse" value={contract.lessor_address} />}
-          </Section>
-
-          <Section icon={User} title="Lejer">
-            <InfoItem label="Navn" value={contract.renter_name} />
-            <InfoItem label="Email" value={contract.renter_email || 'Afventer'} />
-            {contract.renter_phone && <InfoItem label="Telefon" value={contract.renter_phone} />}
-            {contract.renter_license_number && <InfoItem label="Kørekort nr." value={contract.renter_license_number} />}
-          </Section>
+          {contract.lessor_phone && (
+            <div>
+              <span className="text-gray-500">Telefon:</span>
+              <span className="ml-4 font-medium">{contract.lessor_phone}</span>
+            </div>
+          )}
+          {contract.lessor_address && (
+            <div className="col-span-2">
+              <span className="text-gray-500">Adresse:</span>
+              <span className="ml-4 font-medium">{contract.lessor_address}</span>
+            </div>
+          )}
         </div>
+      </section>
 
-        <Separator />
+      <Separator className="my-4" />
 
-        {/* Insurance */}
-        <Section icon={Shield} title="Forsikring">
-          <div className="grid grid-cols-2 gap-4">
-            <InfoItem label="Forsikringsselskab" value={contract.insurance_company || 'Ikke angivet'} />
-            <InfoItem label="Policenummer" value={contract.insurance_policy_number || 'Ikke angivet'} />
-            <InfoItem label="Selvrisiko" value={formatCurrency(contract.deductible_amount)} />
-            <InfoItem label="Depositum" value={formatCurrency(contract.deposit_amount)} />
+      {/* Lejer Section */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Lejer</h2>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-500">Navn:</span>
+            <span className="ml-4 font-medium">{contract.renter_name}</span>
           </div>
-        </Section>
+          <div>
+            <span className="text-gray-500">Email:</span>
+            <span className="ml-4 font-medium">{contract.renter_email || 'Afventer'}</span>
+          </div>
+          {contract.renter_phone && (
+            <div>
+              <span className="text-gray-500">Telefon:</span>
+              <span className="ml-4 font-medium">{contract.renter_phone}</span>
+            </div>
+          )}
+          {contract.renter_address && (
+            <div className="col-span-2">
+              <span className="text-gray-500">Adresse:</span>
+              <span className="ml-4 font-medium">{contract.renter_address}</span>
+            </div>
+          )}
+          {contract.renter_license_number && (
+            <div>
+              <span className="text-gray-500">Kørekort nr.:</span>
+              <span className="ml-4 font-medium font-mono">{contract.renter_license_number}</span>
+            </div>
+          )}
+        </div>
+      </section>
 
-        <Separator />
+      <Separator className="my-4" />
 
-        {/* Vanvidskørsel Clause */}
-        <div className="bg-destructive/5 rounded-xl p-5 border border-destructive/20">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
+      {/* Lejebil Section */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Lejebil</h2>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-500">Reg. nr.:</span>
+            <span className="ml-4 font-medium font-mono">{contract.vehicle_registration}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">Mærke, model:</span>
+            <span className="ml-4 font-medium">{contract.vehicle_make}, {contract.vehicle_model}</span>
+          </div>
+          {contract.vehicle_year && (
+            <div>
+              <span className="text-gray-500">Årgang:</span>
+              <span className="ml-4 font-medium">{contract.vehicle_year}</span>
+            </div>
+          )}
+          {contract.vehicle_vin && (
+            <div className="col-span-2">
+              <span className="text-gray-500">Stelnummer (VIN):</span>
+              <span className="ml-4 font-medium font-mono text-xs">{contract.vehicle_vin}</span>
+            </div>
+          )}
+          {contract.vehicle_value && (
+            <div>
+              <span className="text-gray-500">Køretøjets værdi:</span>
+              <span className="ml-4 font-medium">{formatCurrency(contract.vehicle_value)}</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Separator className="my-4" />
+
+      {/* Lejeaftale Section */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Lejeaftale</h2>
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Periode</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Fra dato:</span>
+              <span className="ml-4 font-medium">{formatDate(contract.start_date)}</span>
             </div>
             <div>
-              <h3 className="font-display font-bold text-foreground mb-2">Vanvidskørselsklausul</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Ved overtrædelse af færdselsloven, der medfører konfiskation af køretøjet i henhold til 
-                vanvidskørselsreglerne, hæfter lejer for køretøjets fulde værdi.
-              </p>
-              <div className="flex items-center justify-between bg-card rounded-lg p-3 border border-border">
-                <span className="text-sm font-medium text-foreground">Erstatningsbeløb ved vanvidskørsel:</span>
-                <span className="font-display font-bold text-destructive">
-                  {formatCurrency(contract.vanvidskørsel_liability_amount)}
-                </span>
-              </div>
-              {contract.vanvidskørsel_accepted && (
-                <div className="mt-3 flex items-center gap-2 text-sm text-mint">
-                  <div className="w-5 h-5 rounded-full bg-mint/20 flex items-center justify-center">✓</div>
-                  Accepteret af lejer
-                </div>
-              )}
+              <span className="text-gray-500">Til dato:</span>
+              <span className="ml-4 font-medium">{formatDate(contract.end_date)}</span>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Terms */}
-        <div className="bg-muted/50 rounded-xl p-5">
-          <h3 className="font-display font-bold text-foreground mb-3">Generelle vilkår</h3>
-          <ul className="text-sm text-muted-foreground space-y-2">
-            <li>• Køretøjet skal afleveres i samme stand som ved modtagelse</li>
-            <li>• Rygning i køretøjet er ikke tilladt</li>
-            <li>• Lejer er ansvarlig for at overholde færdselsreglerne</li>
-            <li>• Ved skader skal udlejer kontaktes omgående</li>
-            <li>• Lejer hæfter for selvrisiko ved forsikringsskader</li>
-            <li>• Ved overskridelse af inkluderede km beregnes ekstra km-pris</li>
-            <li>• Køretøjet må kun føres af den angivne lejer</li>
-          </ul>
-        </div>
+      <Separator className="my-4" />
 
-        {/* Signatures */}
-        <div className="grid md:grid-cols-2 gap-6 pt-4">
-          <SignatureBlock
-            label="Udlejers underskrift"
-            name={contract.lessor_name}
-            signature={contract.lessor_signature}
-            signedAt={contract.lessor_signed_at}
-          />
-          <SignatureBlock
-            label="Lejers underskrift"
-            name={contract.renter_name}
-            signature={contract.renter_signature}
-            signedAt={contract.renter_signed_at}
-          />
+      {/* Priser Section */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Priser</h2>
+        <div className="bg-gray-50 rounded-lg p-4">
+          <table className="w-full text-sm">
+            <tbody>
+              <tr className="border-b border-gray-200">
+                <td className="py-2 text-gray-600">Dagspris:</td>
+                <td className="py-2 text-right font-medium">{formatCurrency(contract.daily_price)}</td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <td className="py-2 text-gray-600">Km inkluderet pr. dag:</td>
+                <td className="py-2 text-right font-medium">{contract.included_km} km</td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <td className="py-2 text-gray-600">Pris pr. overkørt km:</td>
+                <td className="py-2 text-right font-medium">{contract.extra_km_price} kr inkl. moms</td>
+              </tr>
+              {contract.deposit_amount && contract.deposit_amount > 0 && (
+                <tr className="border-b border-gray-200">
+                  <td className="py-2 text-gray-600">Depositum:</td>
+                  <td className="py-2 text-right font-medium">{formatCurrency(contract.deposit_amount)}</td>
+                </tr>
+              )}
+              <tr className="bg-primary/5">
+                <td className="py-3 font-semibold">Total pris:</td>
+                <td className="py-3 text-right font-bold text-primary text-lg">{formatCurrency(contract.total_price)}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </section>
+
+      <Separator className="my-4" />
+
+      {/* Forsikringsforhold */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Forsikringsforhold</h2>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-500">Selvrisiko:</span>
+            <span className="ml-4 font-medium">{formatCurrency(contract.deductible_amount)} (momsfri)</span>
+          </div>
+          {contract.insurance_company && (
+            <div>
+              <span className="text-gray-500">Forsikringsselskab:</span>
+              <span className="ml-4 font-medium">{contract.insurance_company}</span>
+            </div>
+          )}
+          {contract.insurance_policy_number && (
+            <div className="col-span-2">
+              <span className="text-gray-500">Policenummer:</span>
+              <span className="ml-4 font-medium font-mono">{contract.insurance_policy_number}</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Separator className="my-4" />
+
+      {/* Førerforhold */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Førerforhold</h2>
+        <p className="text-sm text-gray-700 leading-relaxed">
+          Bilen må kun føres af den lejer, der har tegnet lejekontrakten samt personer – over 23 år – der hører til 
+          lejers husstand, hvis disse har et gyldigt dansk kørekort, og erklærer at overholde færdselslovens 
+          bestemmelser ved deres brug af bilen. Bilen må ikke fremlejes, benyttes til motorsport, eller til person- 
+          eller godstransport mod betaling.
+        </p>
+      </section>
+
+      <Separator className="my-4" />
+
+      {/* Vanvidskørsel */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-destructive border-b border-destructive/20 pb-2 mb-4">Vanvidskørsel</h2>
+        <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4">
+          <p className="text-sm text-gray-700 leading-relaxed mb-4">
+            Ved lejers underskrift, erklærer lejer, at lejer – og dem lejer måtte overlade bilen til – ikke tidligere 
+            har kørt i en bil, eller vil køre i denne bil, på en måde, der kan karakteriseres som vanvidskørsel, jf. 
+            færdselslovens § 133a, herunder f.eks. ved kørsel med hastighed over 200 km/t, mere end 100% overskridelse 
+            af hastighedsgrænsen eller spirituskørsel.
+          </p>
+          <p className="text-sm text-gray-700 leading-relaxed mb-4">
+            Lejer er indforstået med og accepterer, at lejer personligt kan blive pålagt det fulde erstatningsansvar 
+            ved konfiskation af bilen som følge af vanvidskørsel.
+          </p>
+          {contract.vanvidskørsel_liability_amount && (
+            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-destructive/20">
+              <span className="text-sm font-medium">Erstatningsansvar ved konfiskation:</span>
+              <span className="font-bold text-destructive text-lg">{formatCurrency(contract.vanvidskørsel_liability_amount)}</span>
+            </div>
+          )}
+          {contract.vanvidskørsel_accepted && (
+            <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
+              <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-xs">✓</div>
+              Accepteret af lejer
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Separator className="my-4" />
+
+      {/* Vilkår */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Generelle vilkår</h2>
+        <ul className="text-sm text-gray-700 space-y-2 list-disc list-inside">
+          <li>Køretøjet skal afleveres i samme stand som ved modtagelse</li>
+          <li>Rygning i køretøjet er ikke tilladt</li>
+          <li>Lejer er ansvarlig for at overholde færdselsreglerne</li>
+          <li>Ved skader skal udlejer kontaktes omgående</li>
+          <li>Lejer hæfter for selvrisiko ved forsikringsskader</li>
+          <li>Ved overskridelse af inkluderede km beregnes ekstra km-pris</li>
+          <li>Køretøjet må kun føres af den angivne lejer</li>
+          <li>Alle bøder og afgifter pålagt køretøjet i lejeperioden betales af lejer</li>
+        </ul>
+      </section>
+
+      <Separator className="my-4" />
+
+      {/* Underskrifter */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Underskrifter</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Udlejer underskrift */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-gray-700 mb-3">Udlejer v/ underskrift</p>
+            {contract.lessor_signature ? (
+              <div>
+                <img src={contract.lessor_signature} alt="Udlejer underskrift" className="h-16 object-contain mb-2" />
+                <p className="text-sm font-medium">{contract.lessor_name}</p>
+                {contract.lessor_signed_at && (
+                  <p className="text-xs text-gray-500">
+                    {format(new Date(contract.lessor_signed_at), 'd. MMM yyyy HH:mm', { locale: da })}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="h-20 border-b-2 border-dashed border-gray-300 flex items-end pb-2">
+                <p className="text-sm text-gray-400 italic">Afventer underskrift...</p>
+              </div>
+            )}
+          </div>
+
+          {/* Lejer underskrift */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-gray-700 mb-3">Lejer v/ underskrift</p>
+            {contract.renter_signature ? (
+              <div>
+                <img src={contract.renter_signature} alt="Lejer underskrift" className="h-16 object-contain mb-2" />
+                <p className="text-sm font-medium">{contract.renter_name}</p>
+                {contract.renter_signed_at && (
+                  <p className="text-xs text-gray-500">
+                    {format(new Date(contract.renter_signed_at), 'd. MMM yyyy HH:mm', { locale: da })}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="h-20 border-b-2 border-dashed border-gray-300 flex items-end pb-2">
+                <p className="text-sm text-gray-400 italic">Afventer underskrift...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <div className="border-t border-gray-200 pt-4 mt-8">
+        <p className="text-xs text-gray-400 text-center">
+          Genereret af LEJIO • lejio.dk • Kontrakt nr. {contract.contract_number}
+        </p>
       </div>
     </div>
   );
 };
-
-const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-  <div>
-    <div className="flex items-center gap-2 mb-3">
-      <Icon className="w-4 h-4 text-primary" />
-      <h3 className="font-display font-bold text-foreground">{title}</h3>
-    </div>
-    <div className="space-y-2">{children}</div>
-  </div>
-);
-
-const InfoItem = ({ label, value, mono, highlight }: { label: string; value: string; mono?: boolean; highlight?: boolean }) => (
-  <div>
-    <p className="text-xs text-muted-foreground">{label}</p>
-    <p className={`text-sm ${mono ? 'font-mono' : ''} ${highlight ? 'font-bold text-primary' : 'text-foreground'}`}>
-      {value}
-    </p>
-  </div>
-);
-
-const SignatureBlock = ({ label, name, signature, signedAt }: { 
-  label: string; 
-  name: string; 
-  signature: string | null; 
-  signedAt: string | null;
-}) => (
-  <div className="border border-border rounded-xl p-4">
-    <p className="text-sm text-muted-foreground mb-2">{label}</p>
-    {signature ? (
-      <div>
-        <img src={signature} alt="Underskrift" className="h-16 object-contain mb-2" />
-        <p className="text-sm font-medium text-foreground">{name}</p>
-        {signedAt && (
-          <p className="text-xs text-muted-foreground">
-            Underskrevet {format(new Date(signedAt), 'd. MMM yyyy HH:mm', { locale: da })}
-          </p>
-        )}
-      </div>
-    ) : (
-      <div className="h-20 border-b-2 border-dashed border-muted-foreground/30 flex items-end pb-2">
-        <p className="text-sm text-muted-foreground italic">Afventer underskrift...</p>
-      </div>
-    )}
-  </div>
-);
 
 export default ContractPreview;

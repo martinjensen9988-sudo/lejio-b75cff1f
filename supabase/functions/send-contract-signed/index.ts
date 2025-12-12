@@ -37,6 +37,7 @@ interface Contract {
   extra_km_price: number;
   total_price: number;
   deposit_amount: number | null;
+  deductible_amount: number | null;
   lessor_name: string;
   lessor_email: string;
   lessor_phone: string | null;
@@ -64,162 +65,232 @@ async function generateContractPDF(contract: Contract): Promise<Uint8Array> {
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   
-  const page = pdfDoc.addPage([595.28, 841.89]); // A4
-  const { width, height } = page.getSize();
+  const primaryColor = rgb(0.16, 0.38, 1); // #2962FF
+  const dangerColor = rgb(0.8, 0.2, 0.2);
+  const textColor = rgb(0.2, 0.2, 0.2);
+  const lightGray = rgb(0.5, 0.5, 0.5);
+  const lineColor = rgb(0.85, 0.85, 0.85);
+  
+  let currentPage = pdfDoc.addPage([595.28, 841.89]); // A4
+  const { width, height } = currentPage.getSize();
   
   const margin = 50;
   let y = height - margin;
   
-  const drawText = (text: string, x: number, yPos: number, size = 10, font = helvetica, color = rgb(0.2, 0.2, 0.2)) => {
-    page.drawText(text, { x, y: yPos, size, font, color });
+  const checkNewPage = () => {
+    if (y < 80) {
+      currentPage = pdfDoc.addPage([595.28, 841.89]);
+      y = height - margin;
+    }
+  };
+  
+  const drawText = (text: string, x: number, yPos: number, size = 10, font = helvetica, color = textColor) => {
+    currentPage.drawText(text, { x, y: yPos, size, font, color });
   };
   
   const drawLine = (yPos: number) => {
-    page.drawLine({
+    currentPage.drawLine({
       start: { x: margin, y: yPos },
       end: { x: width - margin, y: yPos },
       thickness: 0.5,
-      color: rgb(0.8, 0.8, 0.8),
+      color: lineColor,
     });
   };
 
+  const drawSectionHeader = (title: string, color = primaryColor) => {
+    checkNewPage();
+    drawLine(y + 5);
+    y -= 5;
+    drawText(title, margin, y, 12, helveticaBold, color);
+    y -= 20;
+  };
+
+  const drawLabelValue = (label: string, value: string, xOffset = 0) => {
+    drawText(label, margin + xOffset, y, 9, helvetica, lightGray);
+    drawText(value, margin + xOffset + 100, y, 10, helvetica, textColor);
+  };
+
   // Header
-  drawText('LEJEKONTRAKT', margin, y, 24, helveticaBold, rgb(0.16, 0.38, 1));
-  y -= 25;
-  drawText(`Kontrakt nr: ${contract.contract_number}`, margin, y, 12, helveticaBold);
+  drawText('LEJEKONTRAKT', margin, y, 24, helveticaBold, primaryColor);
+  drawText(contract.contract_number, margin + 200, y, 16, helveticaBold, textColor);
+  y -= 20;
+  drawText('LEJIO - Biludlejning', margin, y, 10, helvetica, lightGray);
   y -= 40;
   
-  // Contract dates
-  const startDate = new Date(contract.start_date).toLocaleDateString('da-DK');
-  const endDate = new Date(contract.end_date).toLocaleDateString('da-DK');
-  
-  drawLine(y + 15);
-  drawText('KØRETØJSOPLYSNINGER', margin, y, 12, helveticaBold, rgb(0.16, 0.38, 1));
-  y -= 20;
-  
-  drawText(`Mærke/Model: ${contract.vehicle_make} ${contract.vehicle_model}`, margin, y);
-  drawText(`Årgang: ${contract.vehicle_year || 'Ikke angivet'}`, width/2, y);
+  // Udlejer Section
+  drawSectionHeader('UDLEJER');
+  drawLabelValue('Navn:', contract.lessor_name);
   y -= 15;
-  drawText(`Registreringsnummer: ${contract.vehicle_registration}`, margin, y);
-  drawText(`Stelnummer (VIN): ${contract.vehicle_vin || 'Ikke angivet'}`, width/2, y);
-  y -= 15;
-  if (contract.vehicle_value) {
-    drawText(`Køretøjets værdi: ${contract.vehicle_value.toLocaleString('da-DK')} kr`, margin, y);
-    y -= 15;
-  }
-  
-  y -= 20;
-  drawLine(y + 15);
-  drawText('LEJEPERIODE', margin, y, 12, helveticaBold, rgb(0.16, 0.38, 1));
-  y -= 20;
-  drawText(`Fra: ${startDate}`, margin, y);
-  drawText(`Til: ${endDate}`, width/2, y);
-  y -= 30;
-  
-  drawLine(y + 15);
-  drawText('PRISER OG BETINGELSER', margin, y, 12, helveticaBold, rgb(0.16, 0.38, 1));
-  y -= 20;
-  drawText(`Dagspris: ${contract.daily_price} kr`, margin, y);
-  drawText(`Inkluderede km/dag: ${contract.included_km} km`, width/2, y);
-  y -= 15;
-  drawText(`Pris pr. ekstra km: ${contract.extra_km_price} kr`, margin, y);
-  drawText(`Total pris: ${contract.total_price.toLocaleString('da-DK')} kr`, width/2, y, 10, helveticaBold);
-  y -= 15;
-  if (contract.deposit_amount) {
-    drawText(`Depositum: ${contract.deposit_amount.toLocaleString('da-DK')} kr`, margin, y);
-    y -= 15;
-  }
-  
-  y -= 20;
-  drawLine(y + 15);
-  drawText('UDLEJER', margin, y, 12, helveticaBold, rgb(0.16, 0.38, 1));
-  y -= 20;
-  drawText(`Navn: ${contract.lessor_name}`, margin, y);
-  y -= 15;
-  drawText(`Email: ${contract.lessor_email}`, margin, y);
-  if (contract.lessor_phone) {
-    drawText(`Telefon: ${contract.lessor_phone}`, width/2, y);
-  }
-  y -= 15;
-  if (contract.lessor_address) {
-    drawText(`Adresse: ${contract.lessor_address}`, margin, y);
-    y -= 15;
-  }
   if (contract.lessor_company_name) {
-    drawText(`Firma: ${contract.lessor_company_name}`, margin, y);
-    if (contract.lessor_cvr) {
-      drawText(`CVR: ${contract.lessor_cvr}`, width/2, y);
-    }
+    drawLabelValue('Virksomhed:', contract.lessor_company_name);
     y -= 15;
   }
-  
-  y -= 20;
-  drawLine(y + 15);
-  drawText('LEJER', margin, y, 12, helveticaBold, rgb(0.16, 0.38, 1));
-  y -= 20;
-  drawText(`Navn: ${contract.renter_name}`, margin, y);
-  y -= 15;
-  drawText(`Email: ${contract.renter_email}`, margin, y);
-  if (contract.renter_phone) {
-    drawText(`Telefon: ${contract.renter_phone}`, width/2, y);
+  if (contract.lessor_cvr) {
+    drawLabelValue('CVR. Nr.:', contract.lessor_cvr);
+    y -= 15;
   }
+  drawLabelValue('Email:', contract.lessor_email);
   y -= 15;
+  if (contract.lessor_phone) {
+    drawLabelValue('Telefon:', contract.lessor_phone);
+    y -= 15;
+  }
+  if (contract.lessor_address) {
+    drawLabelValue('Adresse:', contract.lessor_address);
+    y -= 15;
+  }
+  y -= 10;
+
+  // Lejer Section
+  drawSectionHeader('LEJER');
+  drawLabelValue('Navn:', contract.renter_name);
+  y -= 15;
+  drawLabelValue('Email:', contract.renter_email);
+  y -= 15;
+  if (contract.renter_phone) {
+    drawLabelValue('Telefon:', contract.renter_phone);
+    y -= 15;
+  }
   if (contract.renter_address) {
-    drawText(`Adresse: ${contract.renter_address}`, margin, y);
+    drawLabelValue('Adresse:', contract.renter_address);
     y -= 15;
   }
   if (contract.renter_license_number) {
-    drawText(`Kørekortnummer: ${contract.renter_license_number}`, margin, y);
+    drawLabelValue('Kørekort nr.:', contract.renter_license_number);
     y -= 15;
   }
+  y -= 10;
+
+  // Lejebil Section
+  drawSectionHeader('LEJEBIL');
+  drawLabelValue('Reg. nr.:', contract.vehicle_registration);
+  y -= 15;
+  drawLabelValue('Mærke, model:', `${contract.vehicle_make}, ${contract.vehicle_model}`);
+  y -= 15;
+  if (contract.vehicle_year) {
+    drawLabelValue('Årgang:', contract.vehicle_year.toString());
+    y -= 15;
+  }
+  if (contract.vehicle_vin) {
+    drawLabelValue('Stelnummer:', contract.vehicle_vin);
+    y -= 15;
+  }
+  if (contract.vehicle_value) {
+    drawLabelValue('Køretøjets værdi:', `${contract.vehicle_value.toLocaleString('da-DK')} kr`);
+    y -= 15;
+  }
+  y -= 10;
+
+  // Lejeaftale Section
+  const startDate = new Date(contract.start_date).toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
+  const endDate = new Date(contract.end_date).toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
   
-  // Insurance
+  drawSectionHeader('LEJEAFTALE');
+  drawText('Periode', margin, y, 10, helveticaBold, textColor);
+  y -= 15;
+  drawLabelValue('Fra dato:', startDate);
+  y -= 15;
+  drawLabelValue('Til dato:', endDate);
+  y -= 20;
+
+  // Priser Section
+  drawSectionHeader('PRISER');
+  drawLabelValue('Dagspris:', `${contract.daily_price.toLocaleString('da-DK')} kr inkl. moms`);
+  y -= 15;
+  drawLabelValue('Km inkl. pr. dag:', `${contract.included_km} km`);
+  y -= 15;
+  drawLabelValue('Pris pr. overkørt km:', `${contract.extra_km_price} kr inkl. moms`);
+  y -= 15;
+  if (contract.deposit_amount && contract.deposit_amount > 0) {
+    drawLabelValue('Depositum:', `${contract.deposit_amount.toLocaleString('da-DK')} kr`);
+    y -= 15;
+  }
+  y -= 5;
+  drawText('Total pris:', margin, y, 11, helveticaBold, textColor);
+  drawText(`${contract.total_price.toLocaleString('da-DK')} kr inkl. moms`, margin + 100, y, 12, helveticaBold, primaryColor);
+  y -= 20;
+
+  // Forsikring Section
+  drawSectionHeader('FORSIKRINGSFORHOLD');
+  const deductible = contract.deductible_amount || 5000;
+  drawLabelValue('Selvrisiko:', `${deductible.toLocaleString('da-DK')} kr (momsfri)`);
+  y -= 15;
   if (contract.insurance_company) {
-    y -= 20;
-    drawLine(y + 15);
-    drawText('FORSIKRING', margin, y, 12, helveticaBold, rgb(0.16, 0.38, 1));
-    y -= 20;
-    drawText(`Forsikringsselskab: ${contract.insurance_company}`, margin, y);
-    if (contract.insurance_policy_number) {
-      drawText(`Policenummer: ${contract.insurance_policy_number}`, width/2, y);
-    }
+    drawLabelValue('Forsikringsselskab:', contract.insurance_company);
     y -= 15;
   }
-  
-  // Vanvidskørsel clause
-  if (contract.vanvidskørsel_accepted) {
-    y -= 20;
-    drawLine(y + 15);
-    drawText('VANVIDSKØRSEL-KLAUSUL', margin, y, 12, helveticaBold, rgb(0.8, 0.2, 0.2));
-    y -= 20;
-    drawText('Lejer har accepteret fuldt ansvar for køretøjets værdi ved skader', margin, y, 9);
+  if (contract.insurance_policy_number) {
+    drawLabelValue('Policenummer:', contract.insurance_policy_number);
+    y -= 15;
+  }
+  y -= 10;
+
+  // Førerforhold
+  checkNewPage();
+  drawSectionHeader('FØRERFORHOLD');
+  const forerText = 'Bilen må kun føres af den lejer, der har tegnet lejekontrakten samt personer over 23 år, der hører til lejers husstand, hvis disse har et gyldigt dansk kørekort. Bilen må ikke fremlejes, benyttes til motorsport, eller til person- eller godstransport mod betaling.';
+  const forerLines = splitTextToLines(forerText, 70);
+  for (const line of forerLines) {
+    drawText(line, margin, y, 9, helvetica, textColor);
     y -= 12;
-    drawText('forårsaget af vanvidskørsel eller grov uagtsomhed.', margin, y, 9);
-    if (contract.vanvidskørsel_liability_amount) {
-      y -= 12;
-      drawText(`Ansvarsbeløb: ${contract.vanvidskørsel_liability_amount.toLocaleString('da-DK')} kr`, margin, y, 9, helveticaBold);
-    }
+  }
+  y -= 10;
+
+  // Vanvidskørsel Section
+  checkNewPage();
+  drawSectionHeader('VANVIDSKØRSEL', dangerColor);
+  const vanvidText = 'Ved lejers underskrift erklærer lejer, at lejer og dem lejer måtte overlade bilen til, ikke tidligere har kørt vanvidskørsel og ikke vil køre i denne bil på en måde der kan karakteriseres som vanvidskørsel, jf. færdselslovens § 133a. Lejer accepterer fuldt erstatningsansvar ved konfiskation af bilen som følge af vanvidskørsel.';
+  const vanvidLines = splitTextToLines(vanvidText, 70);
+  for (const line of vanvidLines) {
+    drawText(line, margin, y, 9, helvetica, textColor);
+    y -= 12;
+  }
+  y -= 5;
+  if (contract.vanvidskørsel_liability_amount) {
+    drawText('Erstatningsansvar ved konfiskation:', margin, y, 9, helveticaBold, dangerColor);
+    drawText(`${contract.vanvidskørsel_liability_amount.toLocaleString('da-DK')} kr`, margin + 200, y, 10, helveticaBold, dangerColor);
     y -= 15;
   }
+  if (contract.vanvidskørsel_accepted) {
+    drawText('✓ Accepteret af lejer', margin, y, 9, helveticaBold, rgb(0, 0.6, 0.3));
+    y -= 15;
+  }
+  y -= 10;
+
+  // Vilkår Section
+  checkNewPage();
+  drawSectionHeader('GENERELLE VILKÅR');
+  const vilkaar = [
+    '• Køretøjet skal afleveres i samme stand som ved modtagelse',
+    '• Rygning i køretøjet er ikke tilladt',
+    '• Lejer er ansvarlig for at overholde færdselsreglerne',
+    '• Ved skader skal udlejer kontaktes omgående',
+    '• Lejer hæfter for selvrisiko ved forsikringsskader',
+    '• Ved overskridelse af inkluderede km beregnes ekstra km-pris',
+    '• Alle bøder og afgifter pålagt køretøjet betales af lejer',
+  ];
+  for (const v of vilkaar) {
+    checkNewPage();
+    drawText(v, margin, y, 9, helvetica, textColor);
+    y -= 14;
+  }
+  y -= 10;
+
+  // Underskrifter Section
+  checkNewPage();
+  drawSectionHeader('UNDERSKRIFTER');
   
-  // Signatures section
-  y -= 30;
-  drawLine(y + 15);
-  drawText('UNDERSKRIFTER', margin, y, 12, helveticaBold, rgb(0.16, 0.38, 1));
-  y -= 30;
+  // Udlejer underskrift
+  drawText('Udlejer:', margin, y, 10, helveticaBold, textColor);
+  y -= 15;
+  drawText(contract.lessor_name, margin, y, 10, helvetica, textColor);
+  y -= 15;
   
-  // Lessor signature
   const lessorSignedDate = contract.lessor_signed_at 
     ? new Date(contract.lessor_signed_at).toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : 'Ikke underskrevet';
+  drawText(`Dato: ${lessorSignedDate}`, margin, y, 9, helvetica, lightGray);
   
-  drawText('Udlejer:', margin, y, 10, helveticaBold);
-  y -= 15;
-  drawText(contract.lessor_name, margin, y);
-  y -= 15;
-  drawText(`Dato: ${lessorSignedDate}`, margin, y, 9);
-  
-  // Draw lessor signature image if exists
   if (contract.lessor_signature) {
     try {
       const signatureData = contract.lessor_signature.split(',')[1];
@@ -227,34 +298,41 @@ async function generateContractPDF(contract: Contract): Promise<Uint8Array> {
         const signatureBytes = Uint8Array.from(atob(signatureData), c => c.charCodeAt(0));
         const signatureImage = await pdfDoc.embedPng(signatureBytes);
         const signatureDims = signatureImage.scale(0.3);
-        page.drawImage(signatureImage, {
+        y -= 5;
+        currentPage.drawImage(signatureImage, {
           x: margin,
-          y: y - signatureDims.height - 5,
+          y: y - Math.min(signatureDims.height, 40),
           width: Math.min(signatureDims.width, 150),
           height: Math.min(signatureDims.height, 40),
         });
-        y -= 50;
+        y -= 45;
       }
     } catch (e) {
       console.log('Could not embed lessor signature:', e);
-      drawText('[Underskrift registreret digitalt]', margin, y - 20, 8, helvetica, rgb(0.5, 0.5, 0.5));
-      y -= 30;
+      y -= 15;
+      drawText('[Underskrift registreret digitalt]', margin, y, 8, helvetica, lightGray);
+      y -= 20;
     }
+  } else {
+    y -= 30;
+    drawLine(y);
+    y -= 5;
   }
   
-  // Renter signature
-  y -= 20;
+  y -= 15;
+  
+  // Lejer underskrift
+  checkNewPage();
+  drawText('Lejer:', margin, y, 10, helveticaBold, textColor);
+  y -= 15;
+  drawText(contract.renter_name, margin, y, 10, helvetica, textColor);
+  y -= 15;
+  
   const renterSignedDate = contract.renter_signed_at 
     ? new Date(contract.renter_signed_at).toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : 'Ikke underskrevet';
+  drawText(`Dato: ${renterSignedDate}`, margin, y, 9, helvetica, lightGray);
   
-  drawText('Lejer:', margin, y, 10, helveticaBold);
-  y -= 15;
-  drawText(contract.renter_name, margin, y);
-  y -= 15;
-  drawText(`Dato: ${renterSignedDate}`, margin, y, 9);
-  
-  // Draw renter signature image if exists
   if (contract.renter_signature) {
     try {
       const signatureData = contract.renter_signature.split(',')[1];
@@ -262,36 +340,64 @@ async function generateContractPDF(contract: Contract): Promise<Uint8Array> {
         const signatureBytes = Uint8Array.from(atob(signatureData), c => c.charCodeAt(0));
         const signatureImage = await pdfDoc.embedPng(signatureBytes);
         const signatureDims = signatureImage.scale(0.3);
-        page.drawImage(signatureImage, {
+        y -= 5;
+        currentPage.drawImage(signatureImage, {
           x: margin,
-          y: y - signatureDims.height - 5,
+          y: y - Math.min(signatureDims.height, 40),
           width: Math.min(signatureDims.width, 150),
           height: Math.min(signatureDims.height, 40),
         });
       }
     } catch (e) {
       console.log('Could not embed renter signature:', e);
-      drawText('[Underskrift registreret digitalt]', margin, y - 20, 8, helvetica, rgb(0.5, 0.5, 0.5));
+      y -= 15;
+      drawText('[Underskrift registreret digitalt]', margin, y, 8, helvetica, lightGray);
     }
+  } else {
+    y -= 30;
+    drawLine(y);
   }
   
-  // Footer
-  page.drawText('Genereret af LEJIO - lejio.dk', { 
-    x: margin, 
-    y: 30, 
-    size: 8, 
-    font: helvetica, 
-    color: rgb(0.6, 0.6, 0.6) 
-  });
-  page.drawText(`Dokument genereret: ${new Date().toLocaleDateString('da-DK')}`, { 
-    x: width - margin - 120, 
-    y: 30, 
-    size: 8, 
-    font: helvetica, 
-    color: rgb(0.6, 0.6, 0.6) 
-  });
+  // Footer on all pages
+  const pages = pdfDoc.getPages();
+  for (let i = 0; i < pages.length; i++) {
+    const p = pages[i];
+    p.drawText('Genereret af LEJIO • lejio.dk', { 
+      x: margin, 
+      y: 30, 
+      size: 8, 
+      font: helvetica, 
+      color: lightGray 
+    });
+    p.drawText(`Kontrakt: ${contract.contract_number} • Side ${i + 1} af ${pages.length}`, { 
+      x: width - margin - 150, 
+      y: 30, 
+      size: 8, 
+      font: helvetica, 
+      color: lightGray 
+    });
+  }
   
   return await pdfDoc.save();
+}
+
+// Helper function to split text into lines
+function splitTextToLines(text: string, maxCharsPerLine: number): string[] {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+  
+  for (const word of words) {
+    if ((currentLine + ' ' + word).trim().length <= maxCharsPerLine) {
+      currentLine = (currentLine + ' ' + word).trim();
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  
+  return lines;
 }
 
 const handler = async (req: Request): Promise<Response> => {
