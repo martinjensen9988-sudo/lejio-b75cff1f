@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCVRLookup } from '@/hooks/useCVRLookup';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight, Search } from 'lucide-react';
 
 interface UpgradeToProCardProps {
   onUpgradeSuccess?: () => void;
@@ -21,6 +22,22 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
     company_name: '',
     cvr_number: '',
   });
+  const { lookupCVR, isLoading: cvrLoading, error: cvrError } = useCVRLookup();
+
+  // Auto-lookup CVR when 8 digits are entered
+  useEffect(() => {
+    const cleanCvr = formData.cvr_number.replace(/\D/g, '');
+    if (cleanCvr.length === 8) {
+      lookupCVR(cleanCvr).then((result) => {
+        if (result?.companyName) {
+          setFormData(prev => ({ ...prev, company_name: result.companyName }));
+          toast.success('Virksomhed fundet!', {
+            description: result.companyName,
+          });
+        }
+      });
+    }
+  }, [formData.cvr_number, lookupCVR]);
 
   // Only show for private users
   if (profile?.user_type !== 'privat') {
@@ -147,15 +164,31 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cvr_number">CVR-nummer *</Label>
-                  <Input
-                    id="cvr_number"
-                    value={formData.cvr_number}
-                    onChange={(e) => setFormData(p => ({ ...p, cvr_number: e.target.value.replace(/\D/g, '').slice(0, 8) }))}
-                    placeholder="12345678"
-                    maxLength={8}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="cvr_number"
+                      value={formData.cvr_number}
+                      onChange={(e) => setFormData(p => ({ ...p, cvr_number: e.target.value.replace(/\D/g, '').slice(0, 8) }))}
+                      placeholder="12345678"
+                      maxLength={8}
+                      className="pr-10"
+                    />
+                    {cvrLoading && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      </div>
+                    )}
+                    {!cvrLoading && formData.cvr_number.length === 8 && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Search className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  {cvrError && (
+                    <p className="text-xs text-destructive">{cvrError}</p>
+                  )}
                   <p className="text-xs text-muted-foreground">
-                    8-cifret CVR-nummer fra CVR-registeret
+                    Indtast 8 cifre for automatisk virksomhedsopslag
                   </p>
                 </div>
 
