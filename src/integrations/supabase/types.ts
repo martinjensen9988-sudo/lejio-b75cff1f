@@ -291,6 +291,83 @@ export type Database = {
           },
         ]
       }
+      discount_code_redemptions: {
+        Row: {
+          discount_code_id: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          discount_code_id: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          discount_code_id?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_code_redemptions_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          current_uses: number | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       lessor_payment_settings: {
         Row: {
           bank_account: string | null
@@ -451,9 +528,17 @@ export type Database = {
           id: string
           insurance_company: string | null
           insurance_policy_number: string | null
+          manual_activation: boolean | null
+          manual_activation_notes: string | null
           payment_gateway: string | null
           phone: string | null
           postal_code: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          subscription_status: string
+          trial_ends_at: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
@@ -469,9 +554,17 @@ export type Database = {
           id: string
           insurance_company?: string | null
           insurance_policy_number?: string | null
+          manual_activation?: boolean | null
+          manual_activation_notes?: string | null
           payment_gateway?: string | null
           phone?: string | null
           postal_code?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }
@@ -487,9 +580,17 @@ export type Database = {
           id?: string
           insurance_company?: string | null
           insurance_policy_number?: string | null
+          manual_activation?: boolean | null
+          manual_activation_notes?: string | null
           payment_gateway?: string | null
           phone?: string | null
           postal_code?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }
@@ -586,6 +687,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
       }
       vehicles: {
         Row: {
@@ -708,50 +830,6 @@ export type Database = {
           weekly_price: number | null
           year: number | null
         }
-        Insert: {
-          color?: string | null
-          created_at?: string | null
-          daily_price?: number | null
-          deposit_amount?: number | null
-          deposit_required?: boolean | null
-          description?: string | null
-          extra_km_price?: number | null
-          features?: string[] | null
-          fuel_type?: string | null
-          id?: string | null
-          image_url?: string | null
-          included_km?: number | null
-          is_available?: boolean | null
-          make?: string | null
-          model?: string | null
-          monthly_price?: number | null
-          unlimited_km?: boolean | null
-          variant?: string | null
-          weekly_price?: number | null
-          year?: number | null
-        }
-        Update: {
-          color?: string | null
-          created_at?: string | null
-          daily_price?: number | null
-          deposit_amount?: number | null
-          deposit_required?: boolean | null
-          description?: string | null
-          extra_km_price?: number | null
-          features?: string[] | null
-          fuel_type?: string | null
-          id?: string | null
-          image_url?: string | null
-          included_km?: number | null
-          is_available?: boolean | null
-          make?: string | null
-          model?: string | null
-          monthly_price?: number | null
-          unlimited_km?: boolean | null
-          variant?: string | null
-          weekly_price?: number | null
-          year?: number | null
-        }
         Relationships: []
       }
     }
@@ -761,8 +839,16 @@ export type Database = {
         Returns: boolean
       }
       generate_contract_number: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "super_admin"
       payment_gateway_type:
         | "stripe"
         | "quickpay"
@@ -898,6 +984,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "super_admin"],
       payment_gateway_type: [
         "stripe",
         "quickpay",
