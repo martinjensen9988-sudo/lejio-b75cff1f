@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,7 @@ import AdminFleetManagement from '@/components/admin/AdminFleetManagement';
 import AdminWarnings from '@/components/admin/AdminWarnings';
 import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminLessorReports from '@/components/admin/AdminLessorReports';
+import AdminMessages from '@/components/admin/AdminMessages';
 
 interface Customer {
   id: string;
@@ -294,6 +295,10 @@ const AdminDashboard = () => {
               <Flag className="w-4 h-4 mr-2" />
               Rapporter (Udlejere)
             </TabsTrigger>
+            <TabsTrigger value="messages">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Beskeder
+            </TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
@@ -379,6 +384,11 @@ const AdminDashboard = () => {
           {/* Lessor Reports Tab */}
           <TabsContent value="lessor-reports">
             <AdminLessorReports />
+          </TabsContent>
+
+          {/* Messages Tab */}
+          <TabsContent value="messages">
+            <AdminMessages />
           </TabsContent>
         </Tabs>
 
