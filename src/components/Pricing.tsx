@@ -90,7 +90,7 @@ const Pricing = () => {
 
             <ul className="space-y-2 mb-6 text-sm">
               {[
-                "Bring Your Own Gateway",
+                "Brug din egen betalingsløsning",
                 "Din forsikring i kontrakten",
                 "B2B-kontrakt med CVR",
               ].map((feature, i) => (
