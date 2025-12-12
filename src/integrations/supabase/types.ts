@@ -1403,6 +1403,12 @@ export type Database = {
           unlimited_km: boolean
           updated_at: string
           use_custom_location: boolean
+          value_documentation_requested: boolean | null
+          value_documentation_requested_at: string | null
+          value_verification_notes: string | null
+          value_verified: boolean | null
+          value_verified_at: string | null
+          value_verified_by: string | null
           variant: string | null
           vehicle_value: number | null
           vin: string | null
@@ -1441,6 +1447,12 @@ export type Database = {
           unlimited_km?: boolean
           updated_at?: string
           use_custom_location?: boolean
+          value_documentation_requested?: boolean | null
+          value_documentation_requested_at?: string | null
+          value_verification_notes?: string | null
+          value_verified?: boolean | null
+          value_verified_at?: string | null
+          value_verified_by?: string | null
           variant?: string | null
           vehicle_value?: number | null
           vin?: string | null
@@ -1479,6 +1491,12 @@ export type Database = {
           unlimited_km?: boolean
           updated_at?: string
           use_custom_location?: boolean
+          value_documentation_requested?: boolean | null
+          value_documentation_requested_at?: string | null
+          value_verification_notes?: string | null
+          value_verified?: boolean | null
+          value_verified_at?: string | null
+          value_verified_by?: string | null
           variant?: string | null
           vehicle_value?: number | null
           vin?: string | null

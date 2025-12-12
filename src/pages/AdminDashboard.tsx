@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,7 @@ import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminLessorReports from '@/components/admin/AdminLessorReports';
 import AdminMessages from '@/components/admin/AdminMessages';
 import { AdminLiveChat } from '@/components/admin/AdminLiveChat';
+import AdminVehicleValueVerification from '@/components/admin/AdminVehicleValueVerification';
 
 interface Customer {
   id: string;
@@ -304,6 +305,10 @@ const AdminDashboard = () => {
               <Headphones className="w-4 h-4 mr-2" />
               Live Chat
             </TabsTrigger>
+            <TabsTrigger value="vehicle-values">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Bilværdier
+            </TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
@@ -399,6 +404,11 @@ const AdminDashboard = () => {
           {/* Live Chat Tab */}
           <TabsContent value="live-chat">
             <AdminLiveChat />
+          </TabsContent>
+
+          {/* Vehicle Value Verification Tab */}
+          <TabsContent value="vehicle-values">
+            <AdminVehicleValueVerification />
           </TabsContent>
         </Tabs>
 
