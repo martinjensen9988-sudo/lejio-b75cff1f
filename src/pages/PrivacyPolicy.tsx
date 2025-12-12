@@ -12,7 +12,7 @@ const PrivacyPolicy = () => {
           
           <div className="prose prose-lg max-w-none space-y-8 text-muted-foreground">
             <p className="text-lg">
-              Denne privatlivspolitik beskriver, hvordan LEJIO ApS ("vi", "os" eller "vores") indsamler, bruger og beskytter dine personoplysninger, når du bruger vores platform lejio.dk.
+              Denne privatlivspolitik beskriver, hvordan LEJIO ("vi", "os" eller "vores") indsamler, bruger og beskytter dine personoplysninger, når du bruger vores platform lejio.dk.
             </p>
             
             <p className="text-sm text-muted-foreground">
@@ -22,7 +22,7 @@ const PrivacyPolicy = () => {
             <section>
               <h2 className="font-display text-2xl font-semibold text-foreground mt-8 mb-4">1. Dataansvarlig</h2>
               <p>
-                LEJIO ApS er dataansvarlig for behandlingen af dine personoplysninger. Du kan kontakte os på:
+                LEJIO er dataansvarlig for behandlingen af dine personoplysninger. Du kan kontakte os på:
               </p>
               <ul className="list-disc pl-6 space-y-2 mt-4">
                 <li>E-mail: hej@lejio.dk</li>
