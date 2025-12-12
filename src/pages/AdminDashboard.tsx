@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,8 @@ import AdminCreateBooking from '@/components/admin/AdminCreateBooking';
 import AdminPlatformFees from '@/components/admin/AdminPlatformFees';
 import AdminFleetManagement from '@/components/admin/AdminFleetManagement';
 import AdminWarnings from '@/components/admin/AdminWarnings';
+import AdminUserManagement from '@/components/admin/AdminUserManagement';
+import AdminLessorReports from '@/components/admin/AdminLessorReports';
 
 interface Customer {
   id: string;
@@ -262,11 +264,11 @@ const AdminDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="customers" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="customers">
-              <Users className="w-4 h-4 mr-2" />
-              Kunder
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="flex-wrap h-auto gap-1">
+            <TabsTrigger value="users">
+              <UserCog className="w-4 h-4 mr-2" />
+              Brugerstyring
             </TabsTrigger>
             <TabsTrigger value="bookings">
               <Calendar className="w-4 h-4 mr-2" />
@@ -286,95 +288,17 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="warnings">
               <AlertTriangle className="w-4 h-4 mr-2" />
-              Advarsler
+              Advarsler (Lejere)
+            </TabsTrigger>
+            <TabsTrigger value="lessor-reports">
+              <Flag className="w-4 h-4 mr-2" />
+              Rapporter (Udlejere)
             </TabsTrigger>
           </TabsList>
 
-          {/* Customers Tab */}
-          <TabsContent value="customers">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Kunder</CardTitle>
-                    <CardDescription>Administrer alle kunder og abonnementer</CardDescription>
-                  </div>
-                  <div className="relative w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Søg kunder..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Kunde</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Prøveperiode slutter</TableHead>
-                      <TableHead>Oprettet</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCustomers.map((customer) => (
-                      <TableRow key={customer.id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{customer.full_name || customer.company_name || 'Ingen navn'}</p>
-                            <p className="text-sm text-muted-foreground">{customer.email}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {customer.user_type === 'professionel' ? 'Professionel' : 'Privat'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(customer.subscription_status, customer.manual_activation)}
-                        </TableCell>
-                        <TableCell>
-                          {customer.trial_ends_at 
-                            ? format(new Date(customer.trial_ends_at), 'dd. MMM yyyy', { locale: da })
-                            : '-'}
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(customer.created_at), 'dd. MMM yyyy', { locale: da })}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {!customer.manual_activation && customer.subscription_status !== 'active' ? (
-                                <DropdownMenuItem onClick={() => handleActivateCustomer(customer.id)}>
-                                  <CheckCircle className="w-4 h-4 mr-2" />
-                                  Aktivér manuelt
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem onClick={() => handleDeactivateCustomer(customer.id)}>
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Deaktivér
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          {/* User Management Tab */}
+          <TabsContent value="users">
+            <AdminUserManagement />
           </TabsContent>
 
           {/* Bookings Tab */}
@@ -450,6 +374,11 @@ const AdminDashboard = () => {
           {/* Warnings Tab */}
           <TabsContent value="warnings">
             <AdminWarnings />
+          </TabsContent>
+
+          {/* Lessor Reports Tab */}
+          <TabsContent value="lessor-reports">
+            <AdminLessorReports />
           </TabsContent>
         </Tabs>
 
