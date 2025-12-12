@@ -13,6 +13,7 @@ import BookingsTable from '@/components/dashboard/BookingsTable';
 import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import CreateBookingDialog from '@/components/dashboard/CreateBookingDialog';
 import PendingFeesCard from '@/components/dashboard/PendingFeesCard';
+import TrialStatusCard from '@/components/dashboard/TrialStatusCard';
 import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays } from 'lucide-react';
 
 const Dashboard = () => {
@@ -86,6 +87,11 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-6 py-8">
+        {/* Trial Status for Professional Users */}
+        <div className="mb-6">
+          <TrialStatusCard />
+        </div>
+
         {/* Pending Fees for Private Users */}
         <div className="mb-6">
           <PendingFeesCard />

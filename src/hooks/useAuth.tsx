@@ -17,6 +17,8 @@ interface Profile {
   payment_gateway: string | null;
   insurance_company: string | null;
   insurance_policy_number: string | null;
+  trial_ends_at: string | null;
+  subscription_status: string;
 }
 
 export interface PaymentSettings {
