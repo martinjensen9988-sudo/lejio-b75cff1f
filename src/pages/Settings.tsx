@@ -28,12 +28,14 @@ import {
   Image,
   Truck,
   AlertTriangle,
+  Crown,
 } from 'lucide-react';
 import { FleetDashboard } from '@/components/fleet/FleetDashboard';
 import { LessorRatingsCard } from '@/components/ratings/LessorRatingsCard';
 import { DamageRegistrationWizard } from '@/components/settings/DamageRegistrationWizard';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import ProSubscriptionCard from '@/components/settings/ProSubscriptionCard';
 
 interface ProfileData {
   full_name: string;
@@ -293,11 +295,17 @@ const Settings = () => {
 
       <main className="container mx-auto px-6 py-8 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className={cn("grid w-full", isProfessional ? "grid-cols-5" : "grid-cols-4")}>
+          <TabsList className={cn("grid w-full", isProfessional ? "grid-cols-6" : "grid-cols-4")}>
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Profil</span>
             </TabsTrigger>
+            {isProfessional && (
+              <TabsTrigger value="subscription" className="gap-2">
+                <Crown className="w-4 h-4" />
+                <span className="hidden sm:inline">Abonnement</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="payment" className="gap-2">
               <CreditCard className="w-4 h-4" />
               <span className="hidden sm:inline">Betaling</span>
@@ -858,6 +866,13 @@ const Settings = () => {
           <TabsContent value="damages" className="space-y-6">
             <DamageRegistrationWizard />
           </TabsContent>
+
+          {/* Subscription Tab (Pro only) */}
+          {isProfessional && (
+            <TabsContent value="subscription" className="space-y-6">
+              <ProSubscriptionCard vehicleCount={0} />
+            </TabsContent>
+          )}
 
           {/* Fleet Tab */}
           {isProfessional && (

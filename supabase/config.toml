@@ -62,3 +62,12 @@ verify_jwt = true
 
 [functions.send-admin-email]
 verify_jwt = true
+
+[functions.create-pro-checkout]
+verify_jwt = true
+
+[functions.check-pro-subscription]
+verify_jwt = true
+
+[functions.pro-customer-portal]
+verify_jwt = true
