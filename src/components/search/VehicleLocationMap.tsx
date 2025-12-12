@@ -77,17 +77,41 @@ const VehicleLocationMap = ({
 
     // Add marker if we have coordinates
     if (latitude && longitude) {
+      // Create marker using safe DOM manipulation (no innerHTML)
       const el = document.createElement('div');
       el.className = 'vehicle-location-marker';
-      el.innerHTML = `
-        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.8-4.2A2 2 0 0 0 13.5 5h-3a2 2 0 0 0-1.7 1L6 10l-2.5 1.1C2.7 11.8 2 12.6 2 13.5V16c0 .6.4 1 1 1h2"/>
-            <circle cx="7" cy="17" r="2"/>
-            <circle cx="17" cy="17" r="2"/>
-          </svg>
-        </div>
-      `;
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg border-2 border-white';
+      
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '20');
+      svg.setAttribute('height', '20');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'white');
+      svg.setAttribute('stroke-width', '2');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.8-4.2A2 2 0 0 0 13.5 5h-3a2 2 0 0 0-1.7 1L6 10l-2.5 1.1C2.7 11.8 2 12.6 2 13.5V16c0 .6.4 1 1 1h2');
+      
+      const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle1.setAttribute('cx', '7');
+      circle1.setAttribute('cy', '17');
+      circle1.setAttribute('r', '2');
+      
+      const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle2.setAttribute('cx', '17');
+      circle2.setAttribute('cy', '17');
+      circle2.setAttribute('r', '2');
+      
+      svg.appendChild(path);
+      svg.appendChild(circle1);
+      svg.appendChild(circle2);
+      wrapper.appendChild(svg);
+      el.appendChild(wrapper);
 
       marker.current = new mapboxgl.Marker(el)
         .setLngLat([longitude, latitude])
