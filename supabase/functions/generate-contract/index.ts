@@ -155,6 +155,15 @@ serve(async (req) => {
       vanvidskørsel_accepted: false,
       vanvidskørsel_liability_amount: calculatedVehicleValue,
       
+      // Roadside assistance
+      roadside_assistance_provider: lessorProfile?.roadside_assistance_provider || null,
+      roadside_assistance_phone: lessorProfile?.roadside_assistance_phone || null,
+      
+      // Fuel policy
+      fuel_policy_enabled: lessorProfile?.fuel_policy_enabled || false,
+      fuel_missing_fee: lessorProfile?.fuel_missing_fee || 0,
+      fuel_price_per_liter: lessorProfile?.fuel_price_per_liter || 0,
+      
       status: 'pending_renter_signature',
     };
 

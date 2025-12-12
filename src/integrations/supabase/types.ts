@@ -139,6 +139,9 @@ export type Database = {
           deposit_amount: number | null
           end_date: string
           extra_km_price: number
+          fuel_missing_fee: number | null
+          fuel_policy_enabled: boolean | null
+          fuel_price_per_liter: number | null
           id: string
           included_km: number
           insurance_company: string | null
@@ -161,6 +164,8 @@ export type Database = {
           renter_phone: string | null
           renter_signature: string | null
           renter_signed_at: string | null
+          roadside_assistance_phone: string | null
+          roadside_assistance_provider: string | null
           start_date: string
           status: string
           total_price: number
@@ -185,6 +190,9 @@ export type Database = {
           deposit_amount?: number | null
           end_date: string
           extra_km_price?: number
+          fuel_missing_fee?: number | null
+          fuel_policy_enabled?: boolean | null
+          fuel_price_per_liter?: number | null
           id?: string
           included_km?: number
           insurance_company?: string | null
@@ -207,6 +215,8 @@ export type Database = {
           renter_phone?: string | null
           renter_signature?: string | null
           renter_signed_at?: string | null
+          roadside_assistance_phone?: string | null
+          roadside_assistance_provider?: string | null
           start_date: string
           status?: string
           total_price: number
@@ -231,6 +241,9 @@ export type Database = {
           deposit_amount?: number | null
           end_date?: string
           extra_km_price?: number
+          fuel_missing_fee?: number | null
+          fuel_policy_enabled?: boolean | null
+          fuel_price_per_liter?: number | null
           id?: string
           included_km?: number
           insurance_company?: string | null
@@ -253,6 +266,8 @@ export type Database = {
           renter_phone?: string | null
           renter_signature?: string | null
           renter_signed_at?: string | null
+          roadside_assistance_phone?: string | null
+          roadside_assistance_provider?: string | null
           start_date?: string
           status?: string
           total_price?: number
@@ -692,6 +707,9 @@ export type Database = {
           created_at: string
           cvr_number: string | null
           email: string
+          fuel_missing_fee: number | null
+          fuel_policy_enabled: boolean | null
+          fuel_price_per_liter: number | null
           full_name: string | null
           id: string
           insurance_company: string | null
@@ -703,6 +721,8 @@ export type Database = {
           per_booking_fee: number | null
           phone: string | null
           postal_code: string | null
+          roadside_assistance_phone: string | null
+          roadside_assistance_provider: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_ends_at: string | null
@@ -724,6 +744,9 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email: string
+          fuel_missing_fee?: number | null
+          fuel_policy_enabled?: boolean | null
+          fuel_price_per_liter?: number | null
           full_name?: string | null
           id: string
           insurance_company?: string | null
@@ -735,6 +758,8 @@ export type Database = {
           per_booking_fee?: number | null
           phone?: string | null
           postal_code?: string | null
+          roadside_assistance_phone?: string | null
+          roadside_assistance_provider?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_ends_at?: string | null
@@ -756,6 +781,9 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email?: string
+          fuel_missing_fee?: number | null
+          fuel_policy_enabled?: boolean | null
+          fuel_price_per_liter?: number | null
           full_name?: string | null
           id?: string
           insurance_company?: string | null
@@ -767,6 +795,8 @@ export type Database = {
           per_booking_fee?: number | null
           phone?: string | null
           postal_code?: string | null
+          roadside_assistance_phone?: string | null
+          roadside_assistance_provider?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_ends_at?: string | null

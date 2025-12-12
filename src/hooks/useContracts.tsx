@@ -48,6 +48,13 @@ export interface Contract {
   status: 'draft' | 'pending_renter_signature' | 'pending_lessor_signature' | 'signed' | 'cancelled';
   created_at: string;
   updated_at: string;
+  // Roadside assistance
+  roadside_assistance_provider: string | null;
+  roadside_assistance_phone: string | null;
+  // Fuel policy
+  fuel_policy_enabled: boolean;
+  fuel_missing_fee: number | null;
+  fuel_price_per_liter: number | null;
 }
 
 export const useContracts = () => {

@@ -42,6 +42,11 @@ interface ProfileData {
   mobilepay_number: string;
   bank_account_number: string;
   bank_reg_number: string;
+  roadside_assistance_provider: string;
+  roadside_assistance_phone: string;
+  fuel_policy_enabled: boolean;
+  fuel_missing_fee: number;
+  fuel_price_per_liter: number;
 }
 
 interface PaymentFormData {
@@ -90,6 +95,11 @@ const Settings = () => {
     mobilepay_number: '',
     bank_account_number: '',
     bank_reg_number: '',
+    roadside_assistance_provider: '',
+    roadside_assistance_phone: '',
+    fuel_policy_enabled: false,
+    fuel_missing_fee: 0,
+    fuel_price_per_liter: 0,
   });
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentFormData>({
@@ -122,6 +132,11 @@ const Settings = () => {
         mobilepay_number: (profile as any).mobilepay_number || '',
         bank_account_number: (profile as any).bank_account_number || '',
         bank_reg_number: (profile as any).bank_reg_number || '',
+        roadside_assistance_provider: (profile as any).roadside_assistance_provider || '',
+        roadside_assistance_phone: (profile as any).roadside_assistance_phone || '',
+        fuel_policy_enabled: (profile as any).fuel_policy_enabled || false,
+        fuel_missing_fee: (profile as any).fuel_missing_fee || 0,
+        fuel_price_per_liter: (profile as any).fuel_price_per_liter || 0,
       });
     }
   }, [profile]);
@@ -159,6 +174,11 @@ const Settings = () => {
           mobilepay_number: formData.mobilepay_number || null,
           bank_account_number: formData.bank_account_number || null,
           bank_reg_number: formData.bank_reg_number || null,
+          roadside_assistance_provider: formData.roadside_assistance_provider || null,
+          roadside_assistance_phone: formData.roadside_assistance_phone || null,
+          fuel_policy_enabled: formData.fuel_policy_enabled,
+          fuel_missing_fee: formData.fuel_missing_fee || 0,
+          fuel_price_per_liter: formData.fuel_price_per_liter || 0,
         })
         .eq('id', user.id);
 
@@ -589,6 +609,124 @@ const Settings = () => {
                     Kontakt dit forsikringsselskab for at bekræfte dette.
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Roadside Assistance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  Vejhjælp
+                </CardTitle>
+                <CardDescription>
+                  Oplysninger om vejhjælp der vises i lejekontrakten
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="roadside_assistance_provider">Vejhjælp udbyder</Label>
+                  <Input
+                    id="roadside_assistance_provider"
+                    value={formData.roadside_assistance_provider}
+                    onChange={(e) => setFormData(p => ({ ...p, roadside_assistance_provider: e.target.value }))}
+                    placeholder="F.eks. Falck, SOS, Viking..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="roadside_assistance_phone">Telefonnummer til vejhjælp</Label>
+                  <Input
+                    id="roadside_assistance_phone"
+                    value={formData.roadside_assistance_phone}
+                    onChange={(e) => setFormData(p => ({ ...p, roadside_assistance_phone: e.target.value }))}
+                    placeholder="+45 70 10 20 30"
+                  />
+                </div>
+
+                <div className="p-4 bg-accent/10 rounded-xl border border-accent/30">
+                  <p className="text-sm text-foreground">
+                    <strong>Tip:</strong> Disse oplysninger vises i lejekontrakten så lejeren ved hvem de skal kontakte ved behov for vejhjælp.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Fuel Policy */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  Brændstofpolitik
+                </CardTitle>
+                <CardDescription>
+                  Indstillinger for brændstofniveau ved aflevering
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="fuel_policy_enabled"
+                    checked={formData.fuel_policy_enabled}
+                    onCheckedChange={(checked) => 
+                      setFormData(p => ({ ...p, fuel_policy_enabled: checked === true }))
+                    }
+                  />
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="fuel_policy_enabled"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Aktiver brændstofpolitik
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Bilen udlejes med fuld tank og skal afleveres med fuld tank
+                    </p>
+                  </div>
+                </div>
+
+                {formData.fuel_policy_enabled && (
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="fuel_missing_fee">Gebyr ved manglende tank (kr)</Label>
+                        <Input
+                          id="fuel_missing_fee"
+                          type="number"
+                          min="0"
+                          value={formData.fuel_missing_fee || ''}
+                          onChange={(e) => setFormData(p => ({ ...p, fuel_missing_fee: parseFloat(e.target.value) || 0 }))}
+                          placeholder="F.eks. 250"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Fast gebyr hvis tanken ikke er fyldt op
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="fuel_price_per_liter">Pris pr. liter brændstof (kr)</Label>
+                        <Input
+                          id="fuel_price_per_liter"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData.fuel_price_per_liter || ''}
+                          onChange={(e) => setFormData(p => ({ ...p, fuel_price_per_liter: parseFloat(e.target.value) || 0 }))}
+                          placeholder="F.eks. 18.50"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Pris pr. liter manglende brændstof
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-accent/10 rounded-xl border border-accent/30">
+                      <p className="text-sm text-foreground">
+                        <strong>Eksempel:</strong> Hvis tanken ikke er fuld ved aflevering, betaler lejeren {formData.fuel_missing_fee || 0} kr i gebyr plus {formData.fuel_price_per_liter || 0} kr pr. manglende liter.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
