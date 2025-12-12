@@ -1222,6 +1222,116 @@ export type Database = {
         }
         Relationships: []
       }
+      recurring_rentals: {
+        Row: {
+          billing_day: number
+          booking_id: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          deposit_amount: number | null
+          extra_km_price: number | null
+          id: string
+          included_km: number | null
+          last_renewal_at: string | null
+          last_renewal_booking_id: string | null
+          lessor_id: string
+          monthly_price: number
+          next_billing_date: string
+          paused_at: string | null
+          renter_email: string
+          renter_id: string | null
+          renter_name: string | null
+          renter_phone: string | null
+          started_at: string
+          status: string
+          total_renewals: number | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          billing_day?: number
+          booking_id: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          deposit_amount?: number | null
+          extra_km_price?: number | null
+          id?: string
+          included_km?: number | null
+          last_renewal_at?: string | null
+          last_renewal_booking_id?: string | null
+          lessor_id: string
+          monthly_price: number
+          next_billing_date: string
+          paused_at?: string | null
+          renter_email: string
+          renter_id?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          started_at?: string
+          status?: string
+          total_renewals?: number | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          billing_day?: number
+          booking_id?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          deposit_amount?: number | null
+          extra_km_price?: number | null
+          id?: string
+          included_km?: number | null
+          last_renewal_at?: string | null
+          last_renewal_booking_id?: string | null
+          lessor_id?: string
+          monthly_price?: number
+          next_billing_date?: string
+          paused_at?: string | null
+          renter_email?: string
+          renter_id?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          started_at?: string
+          status?: string
+          total_renewals?: number | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_rentals_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_rentals_last_renewal_booking_id_fkey"
+            columns: ["last_renewal_booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_rentals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_rentals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       renter_ratings: {
         Row: {
           booking_id: string
