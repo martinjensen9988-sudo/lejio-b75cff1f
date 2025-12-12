@@ -66,13 +66,6 @@ const Navigation = () => {
             {!user && (
               <a href="/faq" onClick={(e) => { e.preventDefault(); navigate("/faq"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">FAQ</a>
             )}
-            
-            {user && (
-              <>
-                <a href="/my-rentals" onClick={(e) => { e.preventDefault(); navigate("/my-rentals"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">Mine lejeaftaler</a>
-                <a href="/beskeder" onClick={(e) => { e.preventDefault(); navigate("/beskeder"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">Beskeder</a>
-              </>
-            )}
           </div>
 
           {/* Desktop Auth Section */}
