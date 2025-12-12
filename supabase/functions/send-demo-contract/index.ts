@@ -142,9 +142,11 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
     checkNewPage(150);
     y -= 25;
     
-    // Icon circle
+    // Icon circle with simple letter (emojis not supported in PDF fonts)
     currentPage.drawCircle({ x: margin + 12, y: y + 3, size: 12, color: bgColor });
-    drawText(iconLabel, margin + 8, y - 1, 8, helveticaBold, iconColor);
+    // Use first letter of icon label or fallback
+    const safeLabel = iconLabel.length === 1 && iconLabel.charCodeAt(0) < 128 ? iconLabel : title.charAt(0).toUpperCase();
+    drawText(safeLabel, margin + 8, y - 1, 8, helveticaBold, iconColor);
     
     // Title
     drawText(title, margin + 30, y, 13, helveticaBold, COLORS.text);
@@ -244,7 +246,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   y -= 150;
 
   // =============== VEHICLE SECTION ===============
-  drawSectionHeader('Køretøj', '🚗', COLORS.primaryLight, COLORS.primary);
+  drawSectionHeader('Køretøj', 'K', COLORS.primaryLight, COLORS.primary);
   
   // Vehicle info cards in a row
   const vCardWidth = (contentWidth - 30) / 3;
@@ -280,7 +282,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   // Period section
   drawCard(margin, y, halfWidth, 100, COLORS.white);
   currentPage.drawCircle({ x: margin + 17, y: y - 15, size: 12, color: rgb(0.93, 0.9, 0.98) });
-  drawText('📅', margin + 10, y - 18, 10, helvetica, COLORS.purple);
+  drawText('P', margin + 13, y - 18, 10, helveticaBold, COLORS.purple);
   drawText('Lejeperiode', margin + 35, y - 20, 12, helveticaBold, COLORS.text);
   
   // From/To boxes
@@ -289,7 +291,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   drawText('FRA', margin + 20, y - 50, 8, helvetica, COLORS.textMuted);
   drawText(demoContract.start_date, margin + 20, y - 70, 10, helveticaBold, COLORS.text);
   
-  drawText('→', margin + 10 + periodBoxW + 5, y - 65, 12, helvetica, COLORS.textMuted);
+  drawText('->', margin + 10 + periodBoxW + 5, y - 65, 12, helvetica, COLORS.textMuted);
   
   drawRoundedRect(margin + 10 + periodBoxW + 20, y - 90, periodBoxW, 50, COLORS.bgLight, COLORS.border);
   drawText('TIL', margin + 20 + periodBoxW + 20, y - 50, 8, helvetica, COLORS.textMuted);
@@ -299,7 +301,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   const priceX = margin + halfWidth + 15;
   drawCard(priceX, y, halfWidth, 100, COLORS.white);
   currentPage.drawCircle({ x: priceX + 17, y: y - 15, size: 12, color: COLORS.amberLight });
-  drawText('💳', priceX + 10, y - 18, 10, helvetica, COLORS.amber);
+  drawText('$', priceX + 13, y - 18, 10, helveticaBold, COLORS.amber);
   drawText('Priser', priceX + 35, y - 20, 12, helveticaBold, COLORS.text);
   
   // Price rows
@@ -322,7 +324,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   y -= 120;
 
   // =============== INSURANCE SECTION ===============
-  drawSectionHeader('Forsikring', '🛡', COLORS.primaryLight, COLORS.primary);
+  drawSectionHeader('Forsikring', 'F', COLORS.primaryLight, COLORS.primary);
   
   const insCardW = (contentWidth - 30) / 3;
   drawCard(margin, y, insCardW, 55, COLORS.primaryLight);
@@ -341,7 +343,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   y -= 75;
 
   // =============== ROADSIDE ASSISTANCE ===============
-  drawSectionHeader('Vejhjælp', '📞', COLORS.successLight, COLORS.success);
+  drawSectionHeader('Vejhjælp', 'V', COLORS.successLight, COLORS.success);
   
   drawCard(margin, y, contentWidth / 2, 50, COLORS.successLight);
   drawText('Udbyder:', margin + 10, y - 18, 9, helvetica, COLORS.textMuted);
@@ -353,7 +355,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
 
   // =============== FUEL POLICY ===============
   if (demoContract.fuel_policy_enabled) {
-    drawSectionHeader('Brændstofpolitik', '⛽', COLORS.amberLight, COLORS.amber);
+    drawSectionHeader('Brændstofpolitik', 'B', COLORS.amberLight, COLORS.amber);
     
     drawCard(margin, y, contentWidth, 85, COLORS.amberLight);
     y -= 5;
@@ -380,7 +382,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   y = height - margin;
 
   // Damage section header
-  drawSectionHeader('Tilstandsrapport', '🚗', rgb(1, 0.95, 0.9), rgb(0.9, 0.5, 0.2));
+  drawSectionHeader('Tilstandsrapport', 'T', rgb(1, 0.95, 0.9), rgb(0.9, 0.5, 0.2));
   
   // Draw vehicle damage diagram function
   const drawVehicleDamageMap = (xStart: number, yStart: number, mapWidth: number, title: string, damages: Array<{position: string, type: string, severity: string}>) => {
@@ -597,7 +599,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   currentPage = pdfDoc.addPage([595.28, 841.89]);
   y = height - margin;
 
-  drawSectionHeader('Vilkår & Betingelser', '📄', COLORS.bgLight, COLORS.text);
+  drawSectionHeader('Vilkår & Betingelser', 'V', COLORS.bgLight, COLORS.text);
   
   // Terms sections
   const drawTermsSection = (title: string, content: string) => {
@@ -673,7 +675,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   drawRoundedRect(margin, y - 200, contentWidth, 215, COLORS.dangerLight, COLORS.danger);
   
   currentPage.drawCircle({ x: margin + 17, y: y - 15, size: 12, color: rgb(1, 0.9, 0.9) });
-  drawText('⚠', margin + 11, y - 18, 10, helvetica, COLORS.danger);
+  drawText('!', margin + 14, y - 18, 10, helveticaBold, COLORS.danger);
   drawText('Vanvidskørsel', margin + 35, y - 20, 13, helveticaBold, COLORS.danger);
   
   y -= 40;
@@ -717,7 +719,7 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   currentPage = pdfDoc.addPage([595.28, 841.89]);
   y = height - margin;
 
-  drawSectionHeader('Underskrifter', '✍', rgb(0.93, 0.9, 0.98), COLORS.purple);
+  drawSectionHeader('Underskrifter', 'U', rgb(0.93, 0.9, 0.98), COLORS.purple);
   
   const sigWidth = (contentWidth - 20) / 2;
   
@@ -838,11 +840,11 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Initialize SMTP client
+    // Initialize SMTP client with SSL
     const client = new SMTPClient({
       connection: {
         hostname: smtpHost,
-        port: 587,
+        port: 465,
         tls: true,
         auth: {
           username: smtpUser,
