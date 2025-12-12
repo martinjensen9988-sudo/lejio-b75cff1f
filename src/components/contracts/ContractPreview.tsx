@@ -2,12 +2,16 @@ import { Contract } from '@/hooks/useContracts';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { Separator } from '@/components/ui/separator';
+import { VehicleDamageMap } from './VehicleDamageMap';
+import { DamageReport } from '@/hooks/useDamageReports';
 
 interface ContractPreviewProps {
   contract: Contract;
+  pickupDamageReport?: DamageReport | null;
+  returnDamageReport?: DamageReport | null;
 }
 
-const ContractPreview = ({ contract }: ContractPreviewProps) => {
+const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: ContractPreviewProps) => {
   const formatDate = (dateStr: string) => {
     return format(new Date(dateStr), 'd. MMMM yyyy', { locale: da });
   };
@@ -233,6 +237,61 @@ const ContractPreview = ({ contract }: ContractPreviewProps) => {
               <span className="ml-4 font-medium font-mono">{contract.insurance_policy_number}</span>
             </div>
           )}
+        </div>
+      </section>
+
+      <Separator className="my-4" />
+
+      {/* Skader Section - Vehicle Damage Diagrams */}
+      <section className="mb-6">
+        <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Skader</h2>
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div className="grid grid-cols-2 gap-6">
+            {/* Pickup / Udlevering */}
+            <VehicleDamageMap
+              title="v/ udlevering"
+              damages={pickupDamageReport?.damage_items || []}
+              className="border-r border-gray-200 pr-4"
+            />
+            
+            {/* Return / Indlevering */}
+            <VehicleDamageMap
+              title="v/ indlevering"
+              damages={returnDamageReport?.damage_items || []}
+              className="pl-4"
+            />
+          </div>
+          
+          {/* Legend */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500 mb-2 font-medium">Forklaring:</p>
+            <div className="flex flex-wrap gap-3 text-xs">
+              <div className="flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center text-white text-[9px] font-bold">R</span>
+                <span>Ridse</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center text-white text-[9px] font-bold">B</span>
+                <span>Bule</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center text-white text-[9px] font-bold">C</span>
+                <span>Revne</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-yellow-400" />
+                <span>Mindre</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-orange-500" />
+                <span>Moderat</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-red-500" />
+                <span>Alvorlig</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
