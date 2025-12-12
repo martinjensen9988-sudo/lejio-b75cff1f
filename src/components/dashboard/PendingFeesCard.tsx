@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Receipt, CreditCard, AlertCircle } from 'lucide-react';
+import { Receipt, CreditCard, AlertCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { usePlatformFeePayment } from '@/hooks/usePlatformFeePayment';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
+import { useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface PlatformFee {
   id: string;
@@ -20,6 +23,18 @@ const PendingFeesCard = () => {
   const { user, profile } = useAuth();
   const [fees, setFees] = useState<PlatformFee[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isProcessing, payFees } = usePlatformFeePayment();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Check for payment status in URL
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      toast.success('Betaling gennemført! Dine gebyrer er nu betalt.');
+    } else if (paymentStatus === 'cancelled') {
+      toast.info('Betaling annulleret');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (user && profile?.user_type === 'privat') {
@@ -41,6 +56,11 @@ const PendingFeesCard = () => {
       setFees(data || []);
     }
     setLoading(false);
+  };
+
+  const handlePayAllFees = async () => {
+    const feeIds = fees.map(f => f.id);
+    await payFees(feeIds);
   };
 
   // Only show for private users
@@ -107,11 +127,25 @@ const PendingFeesCard = () => {
             </p>
           )}
         </div>
-        <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border">
-          <p className="text-sm text-muted-foreground">
-            <strong>Sådan betaler du:</strong> Overfør beløbet til LEJIO's konto med dit bruger-ID som reference. 
-            Kontakt os på support@lejio.dk for betalingsoplysninger.
-          </p>
+        
+        <div className="mt-4">
+          <Button 
+            onClick={handlePayAllFees}
+            disabled={isProcessing}
+            className="w-full bg-warm hover:bg-warm/90 text-white"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Behandler...
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4 mr-2" />
+                Betal {totalPending} kr nu
+              </>
+            )}
+          </Button>
         </div>
       </CardContent>
     </Card>
