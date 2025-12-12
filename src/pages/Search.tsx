@@ -5,8 +5,9 @@ import SearchFilters from "@/components/search/SearchFilters";
 import VehicleSearchCard from "@/components/search/VehicleSearchCard";
 import SearchMap from "@/components/search/SearchMap";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Car, MapPin, ArrowUpDown } from "lucide-react";
+import { Loader2, Car, MapPin, ArrowUpDown, Search as SearchIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -76,6 +77,7 @@ const Search = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('date_desc');
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<SearchFiltersState>({
     priceMin: 0,
     priceMax: 5000,
@@ -202,6 +204,17 @@ const Search = () => {
   useEffect(() => {
     let result = [...vehicles];
 
+    // Search query filter (make/model)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter((v) => {
+        const make = (v.make || '').toLowerCase();
+        const model = (v.model || '').toLowerCase();
+        const variant = (v.variant || '').toLowerCase();
+        return make.includes(query) || model.includes(query) || variant.includes(query);
+      });
+    }
+
     // Price filter
     result = result.filter((v) => {
       const price = v.daily_price || 0;
@@ -214,7 +227,7 @@ const Search = () => {
     }
 
     setFilteredVehicles(result);
-  }, [filters, vehicles]);
+  }, [filters, vehicles, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -270,33 +283,57 @@ const Search = () => {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Vehicle List - Shows by default */}
               <div className={`${!showMap ? 'block' : 'hidden'} md:block ${showMap ? 'md:w-1/2 lg:w-2/5' : 'md:w-full'}`}>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                  <h2 className="font-semibold text-lg">{filteredVehicles.length} biler</h2>
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                      <SelectTrigger className="w-full sm:w-[180px]">
-                        <ArrowUpDown className="w-4 h-4 mr-2" />
-                        <SelectValue placeholder="Sorter efter" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="date_desc">Nyeste først</SelectItem>
-                        <SelectItem value="date_asc">Ældste først</SelectItem>
-                        <SelectItem value="price_asc">Pris: Lav til høj</SelectItem>
-                        <SelectItem value="price_desc">Pris: Høj til lav</SelectItem>
-                        <SelectItem value="rating_desc">Bedst bedømt</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowMap(!showMap)}
-                      className="hidden md:flex shrink-0"
-                    >
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {showMap ? 'Skjul kort' : 'Vis kort'}
-                    </Button>
+                <div className="flex flex-col gap-3 mb-4">
+                  {/* Search Input */}
+                  <div className="relative">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Søg efter mærke eller model..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 pr-10"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Sort and Map Toggle */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <h2 className="font-semibold text-lg">{filteredVehicles.length} biler</h2>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                          <ArrowUpDown className="w-4 h-4 mr-2" />
+                          <SelectValue placeholder="Sorter efter" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date_desc">Nyeste først</SelectItem>
+                          <SelectItem value="date_asc">Ældste først</SelectItem>
+                          <SelectItem value="price_asc">Pris: Lav til høj</SelectItem>
+                          <SelectItem value="price_desc">Pris: Høj til lav</SelectItem>
+                          <SelectItem value="rating_desc">Bedst bedømt</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowMap(!showMap)}
+                        className="hidden md:flex shrink-0"
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {showMap ? 'Skjul kort' : 'Vis kort'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
+                
                 <div className={`grid gap-4 ${!showMap ? 'md:grid-cols-2 lg:grid-cols-3' : ''}`}>
                   {filteredVehicles.length === 0 ? (
                     <div className="text-center py-12 bg-card rounded-2xl border border-border col-span-full">
