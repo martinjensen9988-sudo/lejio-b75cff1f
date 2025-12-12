@@ -3,9 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-// VAPID public key - in production this should be generated and stored securely
-const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
-
 function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -26,6 +23,7 @@ export interface PushNotificationState {
   isSubscribed: boolean;
   isLoading: boolean;
   permission: NotificationPermission | 'default';
+  vapidPublicKey: string | null;
 }
 
 export const usePushNotifications = () => {
@@ -35,19 +33,38 @@ export const usePushNotifications = () => {
     isSubscribed: false,
     isLoading: true,
     permission: 'default',
+    vapidPublicKey: null,
   });
 
-  // Check if push notifications are supported
+  // Fetch VAPID public key and check support
   useEffect(() => {
-    const isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
-    const permission = 'Notification' in window ? Notification.permission : 'default';
+    const init = async () => {
+      const isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
+      const permission = 'Notification' in window ? Notification.permission : 'default';
+      
+      let vapidPublicKey: string | null = null;
+      
+      if (isSupported) {
+        try {
+          const { data, error } = await supabase.functions.invoke('get-vapid-public-key');
+          if (!error && data?.publicKey) {
+            vapidPublicKey = data.publicKey;
+          }
+        } catch (err) {
+          console.error('Failed to fetch VAPID public key:', err);
+        }
+      }
+      
+      setState(prev => ({
+        ...prev,
+        isSupported,
+        permission,
+        vapidPublicKey,
+        isLoading: isSupported && !!user,
+      }));
+    };
     
-    setState(prev => ({
-      ...prev,
-      isSupported,
-      permission,
-      isLoading: isSupported && !!user,
-    }));
+    init();
   }, [user]);
 
   // Check subscription status
@@ -82,6 +99,11 @@ export const usePushNotifications = () => {
       return false;
     }
 
+    if (!state.vapidPublicKey) {
+      toast.error('Push notifikationer er ikke konfigureret');
+      return false;
+    }
+
     setState(prev => ({ ...prev, isLoading: true }));
 
     try {
@@ -101,7 +123,7 @@ export const usePushNotifications = () => {
       // Subscribe to push
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(state.vapidPublicKey),
       });
 
       const subscriptionJson = subscription.toJSON();
@@ -139,7 +161,7 @@ export const usePushNotifications = () => {
       setState(prev => ({ ...prev, isLoading: false }));
       return false;
     }
-  }, [state.isSupported, user]);
+  }, [state.isSupported, state.vapidPublicKey, user]);
 
   const unsubscribe = useCallback(async () => {
     if (!user) return false;
