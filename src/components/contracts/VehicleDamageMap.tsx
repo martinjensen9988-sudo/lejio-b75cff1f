@@ -1,5 +1,3 @@
-import { DamageItem } from '@/hooks/useDamageReports';
-
 interface DamageMarker {
   id: string;
   position: string;
@@ -16,24 +14,24 @@ interface VehicleDamageMapProps {
 
 // Map positions to SVG coordinates (percentages)
 const POSITION_COORDS: Record<string, { x: number; y: number }> = {
-  'front-left': { x: 18, y: 12 },
-  'front-center': { x: 50, y: 8 },
-  'front-right': { x: 82, y: 12 },
-  'left-side': { x: 8, y: 50 },
-  'right-side': { x: 92, y: 50 },
-  'rear-left': { x: 18, y: 88 },
-  'rear-center': { x: 50, y: 92 },
-  'rear-right': { x: 82, y: 88 },
+  'front-left': { x: 22, y: 15 },
+  'front-center': { x: 50, y: 10 },
+  'front-right': { x: 78, y: 15 },
+  'left-side': { x: 12, y: 50 },
+  'right-side': { x: 88, y: 50 },
+  'rear-left': { x: 22, y: 85 },
+  'rear-center': { x: 50, y: 90 },
+  'rear-right': { x: 78, y: 85 },
   'roof': { x: 50, y: 50 },
-  'interior-front': { x: 50, y: 35 },
-  'interior-rear': { x: 50, y: 65 },
-  'trunk': { x: 50, y: 82 },
+  'interior-front': { x: 50, y: 38 },
+  'interior-rear': { x: 50, y: 62 },
+  'trunk': { x: 50, y: 78 },
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  minor: '#facc15', // yellow
-  moderate: '#f97316', // orange
-  severe: '#ef4444', // red
+  minor: '#facc15',
+  moderate: '#f97316',
+  severe: '#ef4444',
 };
 
 const DAMAGE_TYPE_LABELS: Record<string, string> = {
@@ -45,131 +43,6 @@ const DAMAGE_TYPE_LABELS: Record<string, string> = {
   missing: 'M',
   broken: 'Ø',
   other: 'X',
-};
-
-export const VehicleDamageMap = ({ title, damages, className = '' }: VehicleDamageMapProps) => {
-  return (
-    <div className={`${className}`}>
-      <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">{title}</h4>
-      <div className="relative w-full max-w-[220px] mx-auto">
-        {/* Car SVG - Top-down view */}
-        <svg viewBox="0 0 100 150" className="w-full h-auto">
-          {/* Car body outline */}
-          <g fill="none" stroke="#374151" strokeWidth="1.5">
-            {/* Main body */}
-            <path d="M 20,25 
-                     C 20,15 35,10 50,10 
-                     C 65,10 80,15 80,25 
-                     L 85,40 
-                     L 85,110 
-                     C 85,120 80,130 75,135 
-                     C 65,140 35,140 25,135 
-                     C 20,130 15,120 15,110 
-                     L 15,40 
-                     Z" />
-            
-            {/* Windshield */}
-            <path d="M 25,28 L 50,22 L 75,28 L 72,42 L 28,42 Z" />
-            
-            {/* Rear window */}
-            <path d="M 28,108 L 72,108 L 75,122 L 50,128 L 25,122 Z" />
-            
-            {/* Left front wheel */}
-            <ellipse cx="15" cy="35" rx="6" ry="12" />
-            
-            {/* Right front wheel */}
-            <ellipse cx="85" cy="35" rx="6" ry="12" />
-            
-            {/* Left rear wheel */}
-            <ellipse cx="15" cy="105" rx="6" ry="12" />
-            
-            {/* Right rear wheel */}
-            <ellipse cx="85" cy="105" rx="6" ry="12" />
-            
-            {/* Side mirrors */}
-            <ellipse cx="12" cy="45" rx="4" ry="2" />
-            <ellipse cx="88" cy="45" rx="4" ry="2" />
-            
-            {/* Hood line */}
-            <line x1="30" y1="42" x2="70" y2="42" />
-            
-            {/* Trunk line */}
-            <line x1="30" y1="108" x2="70" y2="108" />
-            
-            {/* Center console line */}
-            <line x1="50" y1="48" x2="50" y2="100" strokeDasharray="3,3" strokeWidth="0.5" />
-            
-            {/* Front seats */}
-            <rect x="30" y="48" width="15" height="20" rx="3" strokeWidth="0.8" />
-            <rect x="55" y="48" width="15" height="20" rx="3" strokeWidth="0.8" />
-            
-            {/* Rear seats */}
-            <rect x="28" y="75" width="44" height="18" rx="3" strokeWidth="0.8" />
-          </g>
-          
-          {/* Damage markers */}
-          {damages.map((damage, index) => {
-            const coords = POSITION_COORDS[damage.position];
-            if (!coords) return null;
-            
-            const color = SEVERITY_COLORS[damage.severity] || SEVERITY_COLORS.moderate;
-            const label = DAMAGE_TYPE_LABELS[damage.damage_type] || 'X';
-            
-            return (
-              <g key={damage.id || index}>
-                <circle
-                  cx={coords.x}
-                  cy={coords.y * 1.5}
-                  r="6"
-                  fill={color}
-                  stroke="#ffffff"
-                  strokeWidth="1.5"
-                />
-                <text
-                  x={coords.x}
-                  y={coords.y * 1.5 + 3}
-                  textAnchor="middle"
-                  fontSize="7"
-                  fontWeight="bold"
-                  fill="#ffffff"
-                >
-                  {label}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-        
-        {/* Damage count indicator */}
-        {damages.length > 0 && (
-          <div className="absolute -top-1 -right-1 bg-destructive text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-            {damages.length}
-          </div>
-        )}
-      </div>
-      
-      {/* Damage list */}
-      {damages.length > 0 ? (
-        <div className="mt-3 space-y-1">
-          {damages.map((damage, index) => (
-            <div key={damage.id || index} className="flex items-center gap-2 text-xs">
-              <span 
-                className="w-4 h-4 rounded-full flex items-center justify-center text-white font-bold text-[10px]"
-                style={{ backgroundColor: SEVERITY_COLORS[damage.severity] || SEVERITY_COLORS.moderate }}
-              >
-                {DAMAGE_TYPE_LABELS[damage.damage_type] || 'X'}
-              </span>
-              <span className="text-gray-600">
-                {POSITION_LABELS[damage.position] || damage.position}: {DAMAGE_TYPE_FULL_LABELS[damage.damage_type] || damage.damage_type}
-              </span>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-xs text-gray-400 text-center mt-3">Ingen skader registreret</p>
-      )}
-    </div>
-  );
 };
 
 const POSITION_LABELS: Record<string, string> = {
@@ -196,6 +69,146 @@ const DAMAGE_TYPE_FULL_LABELS: Record<string, string> = {
   missing: 'Mangler',
   broken: 'Ødelagt',
   other: 'Andet',
+};
+
+export const VehicleDamageMap = ({ title, damages, className = '' }: VehicleDamageMapProps) => {
+  return (
+    <div className={`flex flex-col ${className}`}>
+      <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">{title}</h4>
+      
+      <div className="flex-1 flex flex-col items-center">
+        {/* Car SVG - Top-down view */}
+        <div className="relative w-[180px] h-[240px]">
+          <svg viewBox="0 0 100 130" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+            {/* Background */}
+            <rect x="0" y="0" width="100" height="130" fill="#fafafa" rx="4" />
+            
+            {/* Car body outline */}
+            <g fill="none" stroke="#9ca3af" strokeWidth="1.2">
+              {/* Main body */}
+              <path d="M 25,20 
+                       C 25,12 38,8 50,8 
+                       C 62,8 75,12 75,20 
+                       L 78,32 
+                       L 78,95 
+                       C 78,102 74,108 70,112 
+                       C 62,116 38,116 30,112 
+                       C 26,108 22,102 22,95 
+                       L 22,32 
+                       Z" 
+                    fill="#f8fafc" />
+              
+              {/* Windshield */}
+              <path d="M 30,22 L 50,17 L 70,22 L 67,34 L 33,34 Z" fill="#e2e8f0" stroke="#94a3b8" />
+              
+              {/* Rear window */}
+              <path d="M 33,92 L 67,92 L 70,103 L 50,108 L 30,103 Z" fill="#e2e8f0" stroke="#94a3b8" />
+              
+              {/* Left front wheel */}
+              <ellipse cx="22" cy="30" rx="5" ry="10" fill="#374151" stroke="#1f2937" />
+              
+              {/* Right front wheel */}
+              <ellipse cx="78" cy="30" rx="5" ry="10" fill="#374151" stroke="#1f2937" />
+              
+              {/* Left rear wheel */}
+              <ellipse cx="22" cy="90" rx="5" ry="10" fill="#374151" stroke="#1f2937" />
+              
+              {/* Right rear wheel */}
+              <ellipse cx="78" cy="90" rx="5" ry="10" fill="#374151" stroke="#1f2937" />
+              
+              {/* Side mirrors */}
+              <ellipse cx="18" cy="38" rx="4" ry="2.5" fill="#6b7280" stroke="#4b5563" />
+              <ellipse cx="82" cy="38" rx="4" ry="2.5" fill="#6b7280" stroke="#4b5563" />
+              
+              {/* Hood line */}
+              <line x1="35" y1="34" x2="65" y2="34" stroke="#cbd5e1" />
+              
+              {/* Trunk line */}
+              <line x1="35" y1="92" x2="65" y2="92" stroke="#cbd5e1" />
+              
+              {/* Center console line */}
+              <line x1="50" y1="40" x2="50" y2="86" strokeDasharray="2,2" strokeWidth="0.5" stroke="#d1d5db" />
+              
+              {/* Front seats */}
+              <rect x="35" y="42" width="12" height="16" rx="2" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="0.6" />
+              <rect x="53" y="42" width="12" height="16" rx="2" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="0.6" />
+              
+              {/* Rear seats */}
+              <rect x="33" y="66" width="34" height="14" rx="2" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="0.6" />
+            </g>
+            
+            {/* Damage markers */}
+            {damages.map((damage, index) => {
+              const coords = POSITION_COORDS[damage.position];
+              if (!coords) return null;
+              
+              const color = SEVERITY_COLORS[damage.severity] || SEVERITY_COLORS.moderate;
+              const label = DAMAGE_TYPE_LABELS[damage.damage_type] || 'X';
+              
+              return (
+                <g key={damage.id || index}>
+                  <circle
+                    cx={coords.x}
+                    cy={coords.y * 1.3}
+                    r="7"
+                    fill={color}
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                    className="drop-shadow-md"
+                  />
+                  <text
+                    x={coords.x}
+                    y={coords.y * 1.3 + 3.5}
+                    textAnchor="middle"
+                    fontSize="8"
+                    fontWeight="bold"
+                    fill="#ffffff"
+                  >
+                    {label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+          
+          {/* Damage count badge */}
+          {damages.length > 0 && (
+            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg border-2 border-white">
+              {damages.length}
+            </div>
+          )}
+        </div>
+        
+        {/* Damage list */}
+        <div className="mt-4 w-full">
+          {damages.length > 0 ? (
+            <div className="space-y-1.5">
+              {damages.slice(0, 4).map((damage, index) => (
+                <div key={damage.id || index} className="flex items-center gap-2 text-xs bg-white rounded-lg px-2 py-1.5 border border-gray-100">
+                  <span 
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white font-bold text-[10px] shrink-0"
+                    style={{ backgroundColor: SEVERITY_COLORS[damage.severity] || SEVERITY_COLORS.moderate }}
+                  >
+                    {DAMAGE_TYPE_LABELS[damage.damage_type] || 'X'}
+                  </span>
+                  <span className="text-gray-600 truncate">
+                    {POSITION_LABELS[damage.position] || damage.position}: {DAMAGE_TYPE_FULL_LABELS[damage.damage_type] || damage.damage_type}
+                  </span>
+                </div>
+              ))}
+              {damages.length > 4 && (
+                <p className="text-xs text-gray-400 text-center">+{damages.length - 4} flere skader</p>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-3 bg-green-50 rounded-lg border border-green-200">
+              <p className="text-xs text-green-600 font-medium">✓ Ingen skader registreret</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default VehicleDamageMap;
