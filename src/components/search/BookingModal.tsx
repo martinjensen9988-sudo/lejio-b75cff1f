@@ -110,11 +110,23 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
     setLoading(true);
 
     try {
+      // Fetch full vehicle data including owner_id and registration (not in public view)
+      const { data: vehicleData, error: vehicleError } = await supabase
+        .from('vehicles')
+        .select('owner_id, registration')
+        .eq('id', vehicle.id)
+        .single();
+
+      if (vehicleError || !vehicleData) {
+        console.error('Error fetching vehicle data:', vehicleError);
+        throw new Error('Kunne ikke finde køretøj');
+      }
+
       // Fetch vehicle owner's profile for email
       const { data: ownerProfile, error: profileError } = await supabase
         .from('profiles')
         .select('email, full_name')
-        .eq('id', vehicle.owner_id)
+        .eq('id', vehicleData.owner_id)
         .single();
 
       if (profileError) {
@@ -127,7 +139,7 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
         .from('bookings')
         .insert({
           vehicle_id: vehicle.id,
-          lessor_id: vehicle.owner_id,
+          lessor_id: vehicleData.owner_id,
           start_date: format(filters.startDate!, 'yyyy-MM-dd'),
           end_date: format(filters.endDate!, 'yyyy-MM-dd'),
           total_price: pricing.totalPrice,
@@ -153,7 +165,7 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
           renterPhone: formData.phone,
           vehicleMake: vehicle.make,
           vehicleModel: vehicle.model,
-          vehicleRegistration: vehicle.registration,
+          vehicleRegistration: vehicleData.registration,
           startDate: format(filters.startDate!, 'dd. MMMM yyyy', { locale: da }),
           endDate: format(filters.endDate!, 'dd. MMMM yyyy', { locale: da }),
           totalPrice: pricing.totalPrice,

@@ -8,9 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Car, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Public vehicle data - no sensitive fields like owner_id, vin, registration
 export interface SearchVehicle {
   id: string;
-  owner_id: string;
   make: string;
   model: string;
   variant: string | null;
@@ -25,7 +25,8 @@ export interface SearchVehicle {
   extra_km_price: number | null;
   unlimited_km: boolean;
   features: string[] | null;
-  registration: string;
+  deposit_required: boolean;
+  deposit_amount: number | null;
   // Simulated location for demo (in production, add lat/lng to vehicles table)
   lat?: number;
   lng?: number;
@@ -63,10 +64,10 @@ const Search = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true);
+      // Use public view that only exposes non-sensitive fields
       const { data, error } = await supabase
-        .from("vehicles")
-        .select("*")
-        .eq("is_available", true);
+        .from("vehicles_public")
+        .select("*");
 
       if (error) {
         console.error("Error fetching vehicles:", error);
