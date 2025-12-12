@@ -14,7 +14,9 @@ import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import CreateBookingDialog from '@/components/dashboard/CreateBookingDialog';
 import PendingFeesCard from '@/components/dashboard/PendingFeesCard';
 import TrialStatusCard from '@/components/dashboard/TrialStatusCard';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays } from 'lucide-react';
+import AnalyticsDashboard from '@/components/dashboard/AnalyticsDashboard';
+import RecurringRentalsTable from '@/components/dashboard/RecurringRentalsTable';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -129,23 +131,31 @@ const Dashboard = () => {
         {/* Tabs */}
         <Tabs defaultValue="vehicles" className="space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <TabsList>
+            <TabsList className="flex-wrap">
               <TabsTrigger value="vehicles" className="gap-2">
                 <Car className="w-4 h-4" />
-                Mine biler
+                <span className="hidden sm:inline">Mine biler</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="gap-2">
                 <CalendarDays className="w-4 h-4" />
-                Kalender
+                <span className="hidden sm:inline">Kalender</span>
               </TabsTrigger>
               <TabsTrigger value="bookings" className="gap-2">
                 <Calendar className="w-4 h-4" />
-                Bookinger
+                <span className="hidden sm:inline">Bookinger</span>
                 {pendingBookings > 0 && (
                   <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-accent text-accent-foreground">
                     {pendingBookings}
                   </span>
                 )}
+              </TabsTrigger>
+              <TabsTrigger value="recurring" className="gap-2">
+                <Repeat className="w-4 h-4" />
+                <span className="hidden sm:inline">Abonnementer</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2">
+                <BarChart3 className="w-4 h-4" />
+                <span className="hidden sm:inline">Analytics</span>
               </TabsTrigger>
             </TabsList>
 
@@ -202,6 +212,14 @@ const Dashboard = () => {
             ) : (
               <BookingsTable bookings={bookings} onUpdateStatus={updateBookingStatus} />
             )}
+          </TabsContent>
+
+          <TabsContent value="recurring" className="mt-6">
+            <RecurringRentalsTable />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <AnalyticsDashboard />
           </TabsContent>
         </Tabs>
       </main>
