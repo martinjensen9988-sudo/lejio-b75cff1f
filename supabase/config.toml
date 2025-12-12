@@ -10,13 +10,13 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.send-booking-notification]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-booking-confirmation]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-contract-signed]
-verify_jwt = false
+verify_jwt = true
 
 [functions.process-payment]
 verify_jwt = true

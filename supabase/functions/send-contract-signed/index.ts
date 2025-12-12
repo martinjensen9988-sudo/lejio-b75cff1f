@@ -8,6 +8,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// HTML escape function to prevent XSS/injection
+function escapeHtml(text: string | null | undefined): string {
+  if (!text) return '';
+  return text.replace(/[&<>"']/g, char => 
+    ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[char] || char
+  );
+}
+
 interface ContractSignedRequest {
   contractId: string;
   signerRole: 'lessor' | 'renter';
@@ -292,16 +300,42 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify JWT token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('No authorization header');
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    // Verify user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Use service role for data access after verifying user
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const { contractId, signerRole }: ContractSignedRequest = await req.json();
 
     console.log(`Sending contract signed email for contract: ${contractId}, signer: ${signerRole}`);
 
     // Fetch contract details
-    const { data: contract, error: contractError } = await supabase
+    const { data: contract, error: contractError } = await supabaseAdmin
       .from('contracts')
       .select('*')
       .eq('id', contractId)
@@ -382,6 +416,18 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // Escape user-provided data for email HTML
+    const safeContractNumber = escapeHtml(contract.contract_number);
+    const safeVehicleMake = escapeHtml(contract.vehicle_make);
+    const safeVehicleModel = escapeHtml(contract.vehicle_model);
+    const safeVehicleRegistration = escapeHtml(contract.vehicle_registration);
+    const safeLessorName = escapeHtml(contract.lessor_name);
+    const safeLessorEmail = escapeHtml(contract.lessor_email);
+    const safeLessorPhone = escapeHtml(contract.lessor_phone);
+    const safeRenterName = escapeHtml(contract.renter_name);
+    const safeRenterEmail = escapeHtml(contract.renter_email);
+    const safeRenterPhone = escapeHtml(contract.renter_phone);
+
     // Build contract details HTML
     const contractDetailsHtml = `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0;">
@@ -389,15 +435,15 @@ const handler = async (req: Request): Promise<Response> => {
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 8px 0; color: #666;">Kontraktnummer:</td>
-            <td style="padding: 8px 0; font-weight: bold;">${contract.contract_number}</td>
+            <td style="padding: 8px 0; font-weight: bold;">${safeContractNumber}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #666;">Køretøj:</td>
-            <td style="padding: 8px 0; font-weight: bold;">${contract.vehicle_make} ${contract.vehicle_model}</td>
+            <td style="padding: 8px 0; font-weight: bold;">${safeVehicleMake} ${safeVehicleModel}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #666;">Registreringsnummer:</td>
-            <td style="padding: 8px 0; font-weight: bold;">${contract.vehicle_registration}</td>
+            <td style="padding: 8px 0; font-weight: bold;">${safeVehicleRegistration}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #666;">Lejeperiode:</td>
@@ -467,17 +513,17 @@ const handler = async (req: Request): Promise<Response> => {
         <div style="display: table; width: 100%; margin: 20px 0;">
           <div style="display: table-cell; width: 48%; background-color: #e3f2fd; padding: 15px; border-radius: 8px; vertical-align: top;">
             <h4 style="color: #2962FF; margin-top: 0;">Udlejer</h4>
-            <p style="margin: 5px 0;"><strong>${contract.lessor_name}</strong></p>
-            <p style="margin: 5px 0; color: #666;">${contract.lessor_email}</p>
-            ${contract.lessor_phone ? `<p style="margin: 5px 0; color: #666;">${contract.lessor_phone}</p>` : ''}
+            <p style="margin: 5px 0;"><strong>${safeLessorName}</strong></p>
+            <p style="margin: 5px 0; color: #666;">${safeLessorEmail}</p>
+            ${safeLessorPhone ? `<p style="margin: 5px 0; color: #666;">${safeLessorPhone}</p>` : ''}
             ${contract.lessor_signature ? `<p style="margin: 5px 0; color: #00E676;">✓ Underskrevet</p>` : ''}
           </div>
           <div style="display: table-cell; width: 4%;"></div>
           <div style="display: table-cell; width: 48%; background-color: #fff3e0; padding: 15px; border-radius: 8px; vertical-align: top;">
             <h4 style="color: #FF8A65; margin-top: 0;">Lejer</h4>
-            <p style="margin: 5px 0;"><strong>${contract.renter_name}</strong></p>
-            <p style="margin: 5px 0; color: #666;">${contract.renter_email}</p>
-            ${contract.renter_phone ? `<p style="margin: 5px 0; color: #666;">${contract.renter_phone}</p>` : ''}
+            <p style="margin: 5px 0;"><strong>${safeRenterName}</strong></p>
+            <p style="margin: 5px 0; color: #666;">${safeRenterEmail}</p>
+            ${safeRenterPhone ? `<p style="margin: 5px 0; color: #666;">${safeRenterPhone}</p>` : ''}
             ${contract.renter_signature ? `<p style="margin: 5px 0; color: #00E676;">✓ Underskrevet</p>` : ''}
           </div>
         </div>
@@ -559,7 +605,7 @@ const handler = async (req: Request): Promise<Response> => {
     // If fully signed, also notify the lessor
     if (isFullySigned) {
       const lessorEmailHtml = emailHtml
-        .replace('Du har underskrevet lejekontrakten', `${contract.renter_name} har underskrevet lejekontrakten`)
+        .replace('Du har underskrevet lejekontrakten', `${safeRenterName} har underskrevet lejekontrakten`)
         .replace('Se mine lejeaftaler', 'Se mine udlejninger');
 
       await client.send({

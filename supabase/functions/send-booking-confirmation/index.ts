@@ -1,10 +1,19 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// HTML escape function to prevent XSS/injection
+function escapeHtml(text: string | null | undefined): string {
+  if (!text) return '';
+  return text.replace(/[&<>"']/g, char => 
+    ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[char] || char
+  );
+}
 
 interface BookingConfirmationRequest {
   renterEmail: string;
@@ -28,6 +37,32 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify JWT token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('No authorization header');
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    // Verify user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     const data: BookingConfirmationRequest = await req.json();
     console.log("Sending booking confirmation to renter:", data.renterEmail);
 
@@ -35,7 +70,6 @@ serve(async (req: Request): Promise<Response> => {
     const smtpUser = Deno.env.get("SMTP_USER");
     const smtpPassword = Deno.env.get("SMTP_PASSWORD");
     const smtpFromEmail = Deno.env.get("SMTP_FROM_EMAIL");
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
 
     if (!smtpHost || !smtpUser || !smtpPassword || !smtpFromEmail) {
       console.error("Missing SMTP configuration");
@@ -54,9 +88,22 @@ serve(async (req: Request): Promise<Response> => {
       },
     });
 
+    // Escape all user-provided data
+    const safeRenterName = escapeHtml(data.renterName);
+    const safeLessorName = escapeHtml(data.lessorName);
+    const safeLessorPhone = escapeHtml(data.lessorPhone);
+    const safeLessorEmail = escapeHtml(data.lessorEmail);
+    const safeVehicleMake = escapeHtml(data.vehicleMake);
+    const safeVehicleModel = escapeHtml(data.vehicleModel);
+    const safeVehicleRegistration = escapeHtml(data.vehicleRegistration);
+    const safeStartDate = escapeHtml(data.startDate);
+    const safeEndDate = escapeHtml(data.endDate);
+    const safeContractNumber = escapeHtml(data.contractNumber);
+    const safeContractId = escapeHtml(data.contractId);
+
     // Generate contract signing link - use the app domain
-    const appDomain = "https://lejio.dk"; // Production domain
-    const contractLink = `${appDomain}/my-rentals?contractId=${data.contractId}`;
+    const appDomain = "https://lejio.dk";
+    const contractLink = `${appDomain}/my-rentals?contractId=${encodeURIComponent(data.contractId)}`;
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -94,18 +141,18 @@ serve(async (req: Request): Promise<Response> => {
       <h1>✅ Din booking er bekræftet!</h1>
     </div>
     <div class="content">
-      <p>Hej ${data.renterName},</p>
+      <p>Hej ${safeRenterName},</p>
       <p>Gode nyheder! Din bookingforespørgsel er blevet godkendt af udlejeren.</p>
       
       <div class="info-box">
         <h3 style="margin-top: 0; color: #00E676;">🚙 Din lejebil</h3>
         <div class="info-row">
           <span class="label">Bil:</span>
-          <span class="value">${data.vehicleMake} ${data.vehicleModel}</span>
+          <span class="value">${safeVehicleMake} ${safeVehicleModel}</span>
         </div>
         <div class="info-row">
           <span class="label">Registrering:</span>
-          <span class="value">${data.vehicleRegistration}</span>
+          <span class="value">${safeVehicleRegistration}</span>
         </div>
       </div>
 
@@ -113,11 +160,11 @@ serve(async (req: Request): Promise<Response> => {
         <h3 style="margin-top: 0; color: #00E676;">📅 Lejeperiode</h3>
         <div class="info-row">
           <span class="label">Fra:</span>
-          <span class="value">${data.startDate}</span>
+          <span class="value">${safeStartDate}</span>
         </div>
         <div class="info-row">
           <span class="label">Til:</span>
-          <span class="value">${data.endDate}</span>
+          <span class="value">${safeEndDate}</span>
         </div>
       </div>
 
@@ -128,7 +175,7 @@ serve(async (req: Request): Promise<Response> => {
       <div class="contract-box">
         <h3>📋 Underskriv din lejekontrakt</h3>
         <p>Før du kan afhente bilen, skal du underskrive lejekontrakten digitalt.</p>
-        <p class="contract-number">Kontrakt: ${data.contractNumber}</p>
+        <p class="contract-number">Kontrakt: ${safeContractNumber}</p>
         <a href="${contractLink}" class="cta-button" style="display: inline-block; margin-top: 15px;">
           ✍️ Underskriv kontrakt nu
         </a>
@@ -136,9 +183,9 @@ serve(async (req: Request): Promise<Response> => {
 
       <div class="contact-box">
         <h3>📞 Kontakt udlejeren</h3>
-        <p style="margin-bottom: 5px;"><strong>${data.lessorName}</strong></p>
-        ${data.lessorPhone ? `<p style="margin: 5px 0;">Telefon: <a href="tel:${data.lessorPhone}">${data.lessorPhone}</a></p>` : ''}
-        <p style="margin: 5px 0;">Email: <a href="mailto:${data.lessorEmail}">${data.lessorEmail}</a></p>
+        <p style="margin-bottom: 5px;"><strong>${safeLessorName}</strong></p>
+        ${safeLessorPhone ? `<p style="margin: 5px 0;">Telefon: <a href="tel:${safeLessorPhone}">${safeLessorPhone}</a></p>` : ''}
+        <p style="margin: 5px 0;">Email: <a href="mailto:${safeLessorEmail}">${safeLessorEmail}</a></p>
         <p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Kontakt udlejeren for at aftale afhentning efter kontrakten er underskrevet.</p>
       </div>
 
@@ -165,7 +212,7 @@ serve(async (req: Request): Promise<Response> => {
     await client.send({
       from: smtpFromEmail,
       to: data.renterEmail,
-      subject: `🎉 Din booking er bekræftet: ${data.vehicleMake} ${data.vehicleModel} - Underskriv kontrakt`,
+      subject: `🎉 Din booking er bekræftet: ${safeVehicleMake} ${safeVehicleModel} - Underskriv kontrakt`,
       content: emailHtml,
       html: emailHtml,
     });
