@@ -44,6 +44,7 @@ const App = () => (
             <Route path="/handelsbetingelser" element={<Terms />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/beskeder" element={<Messages />} />
+            <Route path="/messages" element={<Messages />} />
             <Route path="/install" element={<Install />} />
             <Route path="/gps" element={<GpsTracking />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
