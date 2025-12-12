@@ -80,7 +80,7 @@ const Navigation = () => {
         </div>
 
         {isOpen && (
-          <div className="md:hidden mt-4 pb-4 flex flex-col gap-4 animate-fade-in">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-card border-b border-border shadow-soft px-6 pb-4 flex flex-col gap-4 animate-fade-in">
             <a href="/search" onClick={(e) => { e.preventDefault(); navigate("/search"); setIsOpen(false); }} className="text-muted-foreground hover:text-primary font-medium py-2">Find bil</a>
             <a href="#features" className="text-muted-foreground hover:text-primary font-medium py-2">Funktioner</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary font-medium py-2">Sådan virker det</a>
