@@ -12,14 +12,20 @@ interface Profile {
   city: string | null;
   postal_code: string | null;
   avatar_url: string | null;
-  bank_account: string | null;
   cvr_number: string | null;
   company_name: string | null;
   payment_gateway: string | null;
-  gateway_api_key: string | null;
-  gateway_merchant_id: string | null;
   insurance_company: string | null;
   insurance_policy_number: string | null;
+}
+
+export interface PaymentSettings {
+  id: string;
+  lessor_id: string;
+  payment_gateway: string | null;
+  gateway_api_key: string | null;
+  gateway_merchant_id: string | null;
+  bank_account: string | null;
 }
 
 interface AuthContextType {

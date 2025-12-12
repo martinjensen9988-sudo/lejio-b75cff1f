@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,11 +32,14 @@ interface ProfileData {
   city: string;
   company_name: string;
   cvr_number: string;
+  insurance_company: string;
+  insurance_policy_number: string;
+}
+
+interface PaymentFormData {
   payment_gateway: string;
   gateway_api_key: string;
   gateway_merchant_id: string;
-  insurance_company: string;
-  insurance_policy_number: string;
   bank_account: string;
 }
 
@@ -51,6 +55,7 @@ const PAYMENT_GATEWAYS = [
 const Settings = () => {
   const navigate = useNavigate();
   const { user, profile, loading: authLoading } = useAuth();
+  const { paymentSettings, updatePaymentSettings, loading: paymentLoading } = usePaymentSettings();
   const { toast } = useToast();
 
   const [saving, setSaving] = useState(false);
@@ -64,11 +69,14 @@ const Settings = () => {
     city: '',
     company_name: '',
     cvr_number: '',
+    insurance_company: '',
+    insurance_policy_number: '',
+  });
+
+  const [paymentFormData, setPaymentFormData] = useState<PaymentFormData>({
     payment_gateway: 'none',
     gateway_api_key: '',
     gateway_merchant_id: '',
-    insurance_company: '',
-    insurance_policy_number: '',
     bank_account: '',
   });
 
@@ -89,22 +97,30 @@ const Settings = () => {
         city: profile.city || '',
         company_name: profile.company_name || '',
         cvr_number: profile.cvr_number || '',
-        payment_gateway: profile.payment_gateway || 'none',
-        gateway_api_key: profile.gateway_api_key || '',
-        gateway_merchant_id: profile.gateway_merchant_id || '',
         insurance_company: profile.insurance_company || '',
         insurance_policy_number: profile.insurance_policy_number || '',
-        bank_account: profile.bank_account || '',
       });
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (paymentSettings) {
+      setPaymentFormData({
+        payment_gateway: paymentSettings.payment_gateway || 'none',
+        gateway_api_key: paymentSettings.gateway_api_key || '',
+        gateway_merchant_id: paymentSettings.gateway_merchant_id || '',
+        bank_account: paymentSettings.bank_account || '',
+      });
+    }
+  }, [paymentSettings]);
 
   const handleSave = async () => {
     if (!user) return;
 
     setSaving(true);
     try {
-      const { error } = await supabase
+      // Save profile data
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           full_name: formData.full_name,
@@ -114,16 +130,22 @@ const Settings = () => {
           city: formData.city,
           company_name: formData.company_name,
           cvr_number: formData.cvr_number,
-          payment_gateway: formData.payment_gateway === 'none' ? null : formData.payment_gateway,
-          gateway_api_key: formData.gateway_api_key || null,
-          gateway_merchant_id: formData.gateway_merchant_id || null,
           insurance_company: formData.insurance_company || null,
           insurance_policy_number: formData.insurance_policy_number || null,
-          bank_account: formData.bank_account || null,
         })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Save payment settings separately
+      const { error: paymentError } = await updatePaymentSettings({
+        payment_gateway: paymentFormData.payment_gateway === 'none' ? null : paymentFormData.payment_gateway,
+        gateway_api_key: paymentFormData.gateway_api_key || null,
+        gateway_merchant_id: paymentFormData.gateway_merchant_id || null,
+        bank_account: paymentFormData.bank_account || null,
+      });
+
+      if (paymentError) throw paymentError;
 
       toast({
         title: 'Indstillinger gemt',
@@ -237,8 +259,8 @@ const Settings = () => {
                     <Label htmlFor="bank_account">Bankkonto (til udbetalinger)</Label>
                     <Input
                       id="bank_account"
-                      value={formData.bank_account}
-                      onChange={(e) => setFormData(p => ({ ...p, bank_account: e.target.value }))}
+                      value={paymentFormData.bank_account}
+                      onChange={(e) => setPaymentFormData(p => ({ ...p, bank_account: e.target.value }))}
                       placeholder="1234-0012345678"
                     />
                   </div>
@@ -332,8 +354,8 @@ const Settings = () => {
                 <div className="space-y-2">
                   <Label htmlFor="payment_gateway">Vælg gateway</Label>
                   <Select
-                    value={formData.payment_gateway}
-                    onValueChange={(v) => setFormData(p => ({ ...p, payment_gateway: v }))}
+                    value={paymentFormData.payment_gateway}
+                    onValueChange={(v) => setPaymentFormData(p => ({ ...p, payment_gateway: v }))}
                     disabled={!isProfessional}
                   >
                     <SelectTrigger>
@@ -349,7 +371,7 @@ const Settings = () => {
                   </Select>
                 </div>
 
-                {isProfessional && formData.payment_gateway !== 'none' && (
+                {isProfessional && paymentFormData.payment_gateway !== 'none' && (
                   <>
                     <div className="space-y-2">
                       <Label htmlFor="gateway_api_key">API-nøgle</Label>
@@ -357,8 +379,8 @@ const Settings = () => {
                         <Input
                           id="gateway_api_key"
                           type={showApiKey ? 'text' : 'password'}
-                          value={formData.gateway_api_key}
-                          onChange={(e) => setFormData(p => ({ ...p, gateway_api_key: e.target.value }))}
+                          value={paymentFormData.gateway_api_key}
+                          onChange={(e) => setPaymentFormData(p => ({ ...p, gateway_api_key: e.target.value }))}
                           placeholder="Din API-nøgle fra gateway"
                           className="pr-10"
                         />
@@ -373,7 +395,7 @@ const Settings = () => {
                         </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Find din API-nøgle i din {PAYMENT_GATEWAYS.find(g => g.value === formData.payment_gateway)?.label} konto
+                        Find din API-nøgle i din {PAYMENT_GATEWAYS.find(g => g.value === paymentFormData.payment_gateway)?.label} konto
                       </p>
                     </div>
 
@@ -381,8 +403,8 @@ const Settings = () => {
                       <Label htmlFor="gateway_merchant_id">Merchant ID</Label>
                       <Input
                         id="gateway_merchant_id"
-                        value={formData.gateway_merchant_id}
-                        onChange={(e) => setFormData(p => ({ ...p, gateway_merchant_id: e.target.value }))}
+                        value={paymentFormData.gateway_merchant_id}
+                        onChange={(e) => setPaymentFormData(p => ({ ...p, gateway_merchant_id: e.target.value }))}
                         placeholder="Dit Merchant ID"
                       />
                     </div>

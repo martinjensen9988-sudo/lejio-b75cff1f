@@ -277,6 +277,39 @@ export type Database = {
           },
         ]
       }
+      lessor_payment_settings: {
+        Row: {
+          bank_account: string | null
+          created_at: string
+          gateway_api_key: string | null
+          gateway_merchant_id: string | null
+          id: string
+          lessor_id: string
+          payment_gateway: string | null
+          updated_at: string
+        }
+        Insert: {
+          bank_account?: string | null
+          created_at?: string
+          gateway_api_key?: string | null
+          gateway_merchant_id?: string | null
+          id?: string
+          lessor_id: string
+          payment_gateway?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bank_account?: string | null
+          created_at?: string
+          gateway_api_key?: string | null
+          gateway_merchant_id?: string | null
+          id?: string
+          lessor_id?: string
+          payment_gateway?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           card_brand: string | null
@@ -395,15 +428,12 @@ export type Database = {
         Row: {
           address: string | null
           avatar_url: string | null
-          bank_account: string | null
           city: string | null
           company_name: string | null
           created_at: string
           cvr_number: string | null
           email: string
           full_name: string | null
-          gateway_api_key: string | null
-          gateway_merchant_id: string | null
           id: string
           insurance_company: string | null
           insurance_policy_number: string | null
@@ -416,15 +446,12 @@ export type Database = {
         Insert: {
           address?: string | null
           avatar_url?: string | null
-          bank_account?: string | null
           city?: string | null
           company_name?: string | null
           created_at?: string
           cvr_number?: string | null
           email: string
           full_name?: string | null
-          gateway_api_key?: string | null
-          gateway_merchant_id?: string | null
           id: string
           insurance_company?: string | null
           insurance_policy_number?: string | null
@@ -437,15 +464,12 @@ export type Database = {
         Update: {
           address?: string | null
           avatar_url?: string | null
-          bank_account?: string | null
           city?: string | null
           company_name?: string | null
           created_at?: string
           cvr_number?: string | null
           email?: string
           full_name?: string | null
-          gateway_api_key?: string | null
-          gateway_merchant_id?: string | null
           id?: string
           insurance_company?: string | null
           insurance_policy_number?: string | null
@@ -643,6 +667,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_vehicle_sensitive_data: {
+        Args: { vehicle_id: string }
+        Returns: boolean
+      }
       generate_contract_number: { Args: never; Returns: string }
     }
     Enums: {
