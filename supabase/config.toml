@@ -56,3 +56,6 @@ verify_jwt = true
 
 [functions.live-chat-ai]
 verify_jwt = false
+
+[functions.send-damage-report]
+verify_jwt = true
