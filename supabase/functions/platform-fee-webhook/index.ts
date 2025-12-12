@@ -148,9 +148,13 @@ const handler = async (req: Request): Promise<Response> => {
             
             // Send confirmation email
             try {
+              const cronSecret = Deno.env.get('CRON_SECRET');
               await fetch(`${supabaseUrl}/functions/v1/send-fee-payment-confirmation`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${cronSecret}`,
+                },
                 body: JSON.stringify({
                   lessorEmail: profile.email,
                   lessorName: profile.full_name || 'Udlejer',

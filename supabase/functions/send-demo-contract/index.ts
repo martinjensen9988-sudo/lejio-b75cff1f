@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,6 +10,34 @@ const corsHeaders = {
 
 interface DemoContractRequest {
   recipientEmail: string;
+}
+
+// Simple in-memory rate limiting
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_MAX_REQUESTS = 3; // Max 3 demo contracts per hour per email
+
+function isRateLimited(email: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(email);
+  
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(email, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return true;
+  }
+  
+  entry.count++;
+  return false;
+}
+
+// Email validation
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 254;
 }
 
 // Colors matching the LEJIO design system
@@ -771,6 +800,27 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { recipientEmail }: DemoContractRequest = await req.json();
+
+    // Validate email format
+    if (!recipientEmail || !isValidEmail(recipientEmail)) {
+      console.error("Invalid email format:", recipientEmail);
+      return new Response(JSON.stringify({ error: "Invalid email format" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check rate limit
+    if (isRateLimited(recipientEmail.toLowerCase())) {
+      console.error("Rate limit exceeded for:", recipientEmail);
+      return new Response(JSON.stringify({ 
+        error: "Too many requests. Please try again later.",
+        retryAfterMinutes: 60 
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     console.log(`Generating and sending demo contract to: ${recipientEmail}`);
 
