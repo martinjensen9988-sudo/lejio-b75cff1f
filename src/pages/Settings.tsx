@@ -56,7 +56,6 @@ const PAYMENT_METHODS = [
   { value: 'bank_transfer', label: 'Bankoverførsel', description: 'Direkte til din konto' },
   { value: 'mobilepay', label: 'MobilePay', description: 'Via dit MobilePay nummer' },
   { value: 'gateway', label: 'Betalingsgateway', description: 'Kortbetaling via gateway' },
-  { value: 'lejio_handled', label: 'LEJIO håndterer', description: 'LEJIO modtager og overfører' },
 ];
 
 const PAYMENT_GATEWAYS = [

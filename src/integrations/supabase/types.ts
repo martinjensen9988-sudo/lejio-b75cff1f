@@ -535,6 +535,7 @@ export type Database = {
           manual_activation_notes: string | null
           mobilepay_number: string | null
           payment_gateway: string | null
+          per_booking_fee: number | null
           phone: string | null
           postal_code: string | null
           stripe_customer_id: string | null
@@ -566,6 +567,7 @@ export type Database = {
           manual_activation_notes?: string | null
           mobilepay_number?: string | null
           payment_gateway?: string | null
+          per_booking_fee?: number | null
           phone?: string | null
           postal_code?: string | null
           stripe_customer_id?: string | null
@@ -597,6 +599,7 @@ export type Database = {
           manual_activation_notes?: string | null
           mobilepay_number?: string | null
           payment_gateway?: string | null
+          per_booking_fee?: number | null
           phone?: string | null
           postal_code?: string | null
           stripe_customer_id?: string | null
