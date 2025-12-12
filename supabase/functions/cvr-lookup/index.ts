@@ -18,6 +18,8 @@ interface CVRData {
   phone?: string;
   email?: string;
   industry?: string;
+  vatRegistered: boolean;
+  vatNumber?: string;
 }
 
 serve(async (req) => {
@@ -86,6 +88,13 @@ serve(async (req) => {
     const statusText = (data.companydesc || '').toLowerCase();
     const isActive = !inactiveTerms.some(term => statusText.includes(term)) && data.name;
 
+    // Check VAT registration - Danish VAT number is "DK" + CVR number
+    // Companies with VAT registration will have vat field set to true or have a valid VAT number
+    const vatRegistered = data.vat === true || data.vatregistered === true;
+    const vatNumber = vatRegistered ? `DK${cleanCvr}` : undefined;
+
+    console.log('VAT registration status:', { vatRegistered, vatNumber, rawVat: data.vat });
+
     // Map the response to our format with extended info
     const cvrData: CVRData = {
       cvr: cleanCvr,
@@ -100,6 +109,8 @@ serve(async (req) => {
       phone: data.phone || '',
       email: data.email || '',
       industry: data.industrydesc || '',
+      vatRegistered: vatRegistered,
+      vatNumber: vatNumber,
     };
 
     console.log('Returning CVR data:', JSON.stringify(cvrData));

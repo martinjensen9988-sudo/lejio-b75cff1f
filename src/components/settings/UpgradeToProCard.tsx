@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight, XCircle, MapPin, Phone, Mail, Calendar, Briefcase } from 'lucide-react';
+import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight, XCircle, MapPin, Phone, Mail, Calendar, Briefcase, Receipt, Save } from 'lucide-react';
 
 interface UpgradeToProCardProps {
   onUpgradeSuccess?: () => void;
@@ -18,6 +19,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
   const { user, profile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [saveContactInfo, setSaveContactInfo] = useState(true);
   const [formData, setFormData] = useState({
     company_name: '',
     cvr_number: '',
@@ -70,17 +72,35 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
       return;
     }
 
+    // Check if company is VAT registered
+    if (cvrData && !cvrData.vatRegistered) {
+      toast.error('Virksomheden er ikke momsregistreret', {
+        description: 'Kun momsregistrerede virksomheder kan registreres som Pro.',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      const updateData: Record<string, any> = {
+        user_type: 'professionel',
+        company_name: formData.company_name.trim(),
+        cvr_number: formData.cvr_number.trim(),
+        subscription_status: 'trial',
+        trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      };
+
+      // Add CVR data to profile if checkbox is checked
+      if (saveContactInfo && cvrData) {
+        if (cvrData.address) updateData.address = cvrData.address;
+        if (cvrData.postalCode) updateData.postal_code = cvrData.postalCode;
+        if (cvrData.city) updateData.city = cvrData.city;
+        if (cvrData.phone) updateData.phone = cvrData.phone;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          user_type: 'professionel',
-          company_name: formData.company_name.trim(),
-          cvr_number: formData.cvr_number.trim(),
-          subscription_status: 'trial',
-          trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        })
+        .update(updateData)
         .eq('id', user.id);
 
       if (error) throw error;
@@ -264,12 +284,48 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                         </div>
                       )}
 
+                      {/* VAT Registration Status */}
+                      <div className="flex items-start gap-2">
+                        <Receipt className="w-4 h-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          {cvrData.vatRegistered ? (
+                            <p className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3" />
+                              Momsregistreret {cvrData.vatNumber && `(${cvrData.vatNumber})`}
+                            </p>
+                          ) : (
+                            <p className="text-destructive flex items-center gap-1">
+                              <XCircle className="w-3 h-3" />
+                              Ikke momsregistreret
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
                       {cvrData.status && (
                         <div className="pt-2 border-t border-border/50 mt-2">
                           <p className="text-xs text-muted-foreground">Status: {cvrData.status}</p>
                         </div>
                       )}
                     </div>
+
+                    {/* Save contact info checkbox */}
+                    {(cvrData.address || cvrData.phone) && cvrData.isActive && cvrData.vatRegistered && (
+                      <div className="flex items-center gap-2 pt-3 mt-3 border-t border-border/50">
+                        <Checkbox 
+                          id="saveContactInfo" 
+                          checked={saveContactInfo}
+                          onCheckedChange={(checked) => setSaveContactInfo(checked === true)}
+                        />
+                        <label 
+                          htmlFor="saveContactInfo" 
+                          className="text-xs text-muted-foreground cursor-pointer flex items-center gap-1"
+                        >
+                          <Save className="w-3 h-3" />
+                          Gem adresse og telefon til min profil
+                        </label>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -298,7 +354,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   onClick={handleUpgrade} 
                   className="w-full" 
                   size="lg"
-                  disabled={loading || cvrLoading || (cvrData && !cvrData.isActive)}
+                  disabled={loading || cvrLoading || (cvrData && !cvrData.isActive) || (cvrData && !cvrData.vatRegistered)}
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -307,6 +363,12 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   )}
                   {loading ? 'Opgraderer...' : 'Bekræft og opgrader'}
                 </Button>
+
+                {cvrData && !cvrData.vatRegistered && cvrData.isActive && (
+                  <p className="text-xs text-destructive text-center mt-2">
+                    Kun momsregistrerede virksomheder kan registreres som Pro-udlejer.
+                  </p>
+                )}
               </div>
             </DialogContent>
           </Dialog>
