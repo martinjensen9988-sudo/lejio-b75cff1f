@@ -17,7 +17,7 @@ import PendingFeesCard from '@/components/dashboard/PendingFeesCard';
 import TrialStatusCard from '@/components/dashboard/TrialStatusCard';
 import AnalyticsDashboard from '@/components/dashboard/AnalyticsDashboard';
 import RecurringRentalsTable from '@/components/dashboard/RecurringRentalsTable';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search } from 'lucide-react';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -175,6 +175,10 @@ const Dashboard = () => {
               <TabsTrigger value="analytics" className="gap-2">
                 <BarChart3 className="w-4 h-4" />
                 <span className="hidden sm:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="gps" className="gap-2" onClick={() => navigate('/gps')}>
+                <MapPin className="w-4 h-4" />
+                <span className="hidden sm:inline">GPS</span>
               </TabsTrigger>
             </TabsList>
 
