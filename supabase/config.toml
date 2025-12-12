@@ -74,3 +74,6 @@ verify_jwt = true
 
 [functions.send-trial-reminder]
 verify_jwt = false
+
+[functions.send-subscription-confirmation]
+verify_jwt = true

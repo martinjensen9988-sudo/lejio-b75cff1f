@@ -102,8 +102,11 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
       });
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
-      // Refresh subscription status
-      setTimeout(checkSubscription, 2000);
+      // Refresh subscription status and send confirmation email
+      setTimeout(async () => {
+        await checkSubscription();
+        sendSubscriptionConfirmationEmail();
+      }, 2000);
     } else if (params.get('subscription') === 'cancelled') {
       toast.info('Abonnement afbrudt', {
         description: 'Du kan altid vende tilbage og aktivere dit abonnement.',
@@ -111,6 +114,47 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
+
+  const sendSubscriptionConfirmationEmail = async () => {
+    try {
+      // Get user profile for email details
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, full_name, company_name')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile) return;
+
+      // Get subscription info
+      const { data: subData } = await supabase.functions.invoke('check-pro-subscription');
+      if (!subData?.subscribed) return;
+
+      const tier = subData.tier || 'starter';
+      const startDate = format(new Date(), 'd. MMMM yyyy', { locale: da });
+      const nextBillingDate = subData.subscription_end 
+        ? format(new Date(subData.subscription_end), 'd. MMMM yyyy', { locale: da })
+        : format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'd. MMMM yyyy', { locale: da });
+
+      await supabase.functions.invoke('send-subscription-confirmation', {
+        body: {
+          email: profile.email,
+          companyName: profile.company_name || 'Virksomhed',
+          fullName: profile.full_name,
+          tier: tier,
+          amount: TIERS.find(t => t.id === tier)?.price || 299,
+          subscriptionStartDate: startDate,
+          nextBillingDate: nextBillingDate,
+        },
+      });
+      console.log('Subscription confirmation email sent');
+    } catch (error) {
+      console.error('Failed to send subscription confirmation email:', error);
+    }
+  };
 
   const handleCheckout = async (tier: string) => {
     setCheckoutLoading(tier);
