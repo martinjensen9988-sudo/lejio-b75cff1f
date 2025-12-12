@@ -24,6 +24,7 @@ export type Database = {
           extra_driver_license_country: string | null
           extra_driver_license_issue_date: string | null
           extra_driver_license_number: string | null
+          fuel_fee: number | null
           has_extra_driver: boolean | null
           id: string
           lessor_id: string
@@ -56,6 +57,7 @@ export type Database = {
           extra_driver_license_country?: string | null
           extra_driver_license_issue_date?: string | null
           extra_driver_license_number?: string | null
+          fuel_fee?: number | null
           has_extra_driver?: boolean | null
           id?: string
           lessor_id: string
@@ -88,6 +90,7 @@ export type Database = {
           extra_driver_license_country?: string | null
           extra_driver_license_issue_date?: string | null
           extra_driver_license_number?: string | null
+          fuel_fee?: number | null
           has_extra_driver?: boolean | null
           id?: string
           lessor_id?: string

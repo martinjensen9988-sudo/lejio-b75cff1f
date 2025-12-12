@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle } from 'lucide-react';
+import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle, Save } from 'lucide-react';
 import { useDamageReports, DamageReport, DamageItem, CreateDamageItemInput } from '@/hooks/useDamageReports';
 import { useContracts, Contract } from '@/hooks/useContracts';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface DamageReportModalProps {
@@ -143,6 +144,24 @@ export const DamageReportModal = ({
     };
   }, [reportType, contract, fuelLevel]);
 
+  // Save fuel fee to booking
+  const saveFuelFeeToBooking = async (feeAmount: number) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ fuel_fee: feeAmount })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+      toast.success('Brændstofgebyr gemt på booking');
+      return true;
+    } catch (err) {
+      console.error('Error saving fuel fee:', err);
+      toast.error('Kunne ikke gemme brændstofgebyr');
+      return false;
+    }
+  };
+
   const handleCreateReport = async () => {
     setIsCreating(true);
     try {
@@ -160,6 +179,11 @@ export const DamageReportModal = ({
       
       if (newReport) {
         setReport(newReport);
+        
+        // Auto-save fuel fee for return reports
+        if (reportType === 'return' && fuelFeeCalculation && fuelFeeCalculation.totalFee > 0) {
+          await saveFuelFeeToBooking(fuelFeeCalculation.totalFee);
+        }
       }
     } finally {
       setIsCreating(false);
@@ -176,6 +200,17 @@ export const DamageReportModal = ({
       interior_clean: interiorClean,
       notes: notes || undefined,
     });
+
+    // Update fuel fee for return reports
+    if (reportType === 'return' && fuelFeeCalculation) {
+      await saveFuelFeeToBooking(fuelFeeCalculation.totalFee);
+    }
+  };
+
+  const handleSaveFuelFee = async () => {
+    if (fuelFeeCalculation) {
+      await saveFuelFeeToBooking(fuelFeeCalculation.totalFee);
+    }
   };
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -346,6 +381,18 @@ export const DamageReportModal = ({
                           <span className="text-amber-700">{fuelFeeCalculation.totalFee.toFixed(2)} kr</span>
                         </div>
                       </div>
+                    )}
+                    
+                    {report && (
+                      <Button 
+                        onClick={handleSaveFuelFee} 
+                        size="sm" 
+                        className="mt-3 gap-2"
+                        variant={fuelFeeCalculation.totalFee > 0 ? "default" : "outline"}
+                      >
+                        <Save className="w-4 h-4" />
+                        Gem brændstofgebyr på booking
+                      </Button>
                     )}
                   </div>
                 </div>
