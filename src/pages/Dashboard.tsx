@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useVehicles } from '@/hooks/useVehicles';
 import { useBookings } from '@/hooks/useBookings';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,13 +17,14 @@ import PendingFeesCard from '@/components/dashboard/PendingFeesCard';
 import TrialStatusCard from '@/components/dashboard/TrialStatusCard';
 import AnalyticsDashboard from '@/components/dashboard/AnalyticsDashboard';
 import RecurringRentalsTable from '@/components/dashboard/RecurringRentalsTable';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat } from 'lucide-react';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, profile, loading: authLoading, signOut } = useAuth();
   const { vehicles, isLoading: vehiclesLoading, updateVehicle, deleteVehicle } = useVehicles();
   const { bookings, isLoading: bookingsLoading, updateBookingStatus, refetch: refetchBookings } = useBookings();
+  const { unreadCount } = useUnreadMessages();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -64,7 +66,21 @@ const Dashboard = () => {
               <h1 className="hidden sm:block font-display font-bold text-foreground">Dashboard</h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/search')}>
+                <Search className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/my-rentals')}>
+                <FileText className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/beskeder')} className="relative">
+                <MessageCircle className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Button>
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 border border-border">
                 <div className={`w-2 h-2 rounded-full ${profile?.user_type === 'professionel' ? 'bg-primary' : 'bg-accent'}`} />
                 <span className="text-sm font-medium text-foreground">
