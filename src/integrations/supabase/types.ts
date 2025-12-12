@@ -686,6 +686,116 @@ export type Database = {
         }
         Relationships: []
       }
+      gps_data_points: {
+        Row: {
+          altitude: number | null
+          battery_level: number | null
+          created_at: string
+          device_id: string
+          fuel_level: number | null
+          heading: number | null
+          id: string
+          ignition_on: boolean | null
+          latitude: number
+          longitude: number
+          odometer: number | null
+          raw_data: Json | null
+          recorded_at: string
+          speed: number | null
+        }
+        Insert: {
+          altitude?: number | null
+          battery_level?: number | null
+          created_at?: string
+          device_id: string
+          fuel_level?: number | null
+          heading?: number | null
+          id?: string
+          ignition_on?: boolean | null
+          latitude: number
+          longitude: number
+          odometer?: number | null
+          raw_data?: Json | null
+          recorded_at?: string
+          speed?: number | null
+        }
+        Update: {
+          altitude?: number | null
+          battery_level?: number | null
+          created_at?: string
+          device_id?: string
+          fuel_level?: number | null
+          heading?: number | null
+          id?: string
+          ignition_on?: boolean | null
+          latitude?: number
+          longitude?: number
+          odometer?: number | null
+          raw_data?: Json | null
+          recorded_at?: string
+          speed?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gps_data_points_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "gps_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gps_devices: {
+        Row: {
+          created_at: string
+          device_id: string
+          device_name: string | null
+          id: string
+          is_active: boolean
+          last_seen_at: string | null
+          provider: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          device_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string | null
+          provider?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          device_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string | null
+          provider?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gps_devices_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gps_devices_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessor_payment_settings: {
         Row: {
           bank_account: string | null
