@@ -22,10 +22,88 @@ interface CVRData {
   vatNumber?: string;
 }
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute per IP
+
+// In-memory rate limiting store (resets on cold start)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function getClientIP(req: Request): string {
+  // Try to get real IP from various headers
+  const xForwardedFor = req.headers.get('x-forwarded-for');
+  if (xForwardedFor) {
+    return xForwardedFor.split(',')[0].trim();
+  }
+  const xRealIP = req.headers.get('x-real-ip');
+  if (xRealIP) {
+    return xRealIP;
+  }
+  const cfConnectingIP = req.headers.get('cf-connecting-ip');
+  if (cfConnectingIP) {
+    return cfConnectingIP;
+  }
+  return 'unknown';
+}
+
+function checkRateLimit(clientIP: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(clientIP);
+
+  // Clean up expired entries
+  if (record && now > record.resetTime) {
+    rateLimitStore.delete(clientIP);
+  }
+
+  const currentRecord = rateLimitStore.get(clientIP);
+
+  if (!currentRecord) {
+    // First request from this IP
+    rateLimitStore.set(clientIP, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return { allowed: true };
+  }
+
+  if (currentRecord.count >= MAX_REQUESTS_PER_WINDOW) {
+    const retryAfter = Math.ceil((currentRecord.resetTime - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+
+  // Increment count
+  currentRecord.count++;
+  rateLimitStore.set(clientIP, currentRecord);
+  return { allowed: true };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limiting check
+  const clientIP = getClientIP(req);
+  const rateLimitResult = checkRateLimit(clientIP);
+
+  if (!rateLimitResult.allowed) {
+    console.log(`Rate limit exceeded for IP: ${clientIP}`);
+    return new Response(
+      JSON.stringify({ 
+        error: 'For mange forespørgsler. Prøv igen om lidt.', 
+        code: 'RATE_LIMITED',
+        retryAfter: rateLimitResult.retryAfter 
+      }),
+      { 
+        status: 429, 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimitResult.retryAfter || 60)
+        } 
+      }
+    );
   }
 
   try {
@@ -50,7 +128,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Looking up CVR:', cleanCvr);
+    console.log(`Looking up CVR: ${cleanCvr} from IP: ${clientIP}`);
 
     // Use the Danish CVR API (cvrapi.dk - free for basic lookups)
     const apiUrl = `https://cvrapi.dk/api?search=${cleanCvr}&country=dk`;
