@@ -224,6 +224,64 @@ const ContractPreview = ({ contract }: ContractPreviewProps) => {
 
       <Separator className="my-4" />
 
+      {/* Vejhjælp Section */}
+      {(contract.roadside_assistance_provider || contract.roadside_assistance_phone) && (
+        <section className="mb-6">
+          <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Vejhjælp</h2>
+          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {contract.roadside_assistance_provider && (
+                <div>
+                  <span className="text-gray-500">Udbyder:</span>
+                  <span className="ml-4 font-medium">{contract.roadside_assistance_provider}</span>
+                </div>
+              )}
+              {contract.roadside_assistance_phone && (
+                <div>
+                  <span className="text-gray-500">Telefon:</span>
+                  <span className="ml-4 font-medium font-mono">{contract.roadside_assistance_phone}</span>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-600 mt-3">
+              Ved behov for vejhjælp kontakt venligst ovenstående nummer.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* Brændstofpolitik Section */}
+      {contract.fuel_policy_enabled && (
+        <>
+          <Separator className="my-4" />
+          <section className="mb-6">
+            <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Brændstofpolitik</h2>
+            <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+              <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                Køretøjet udleveres med fuld tank og skal afleveres med fuld tank. Såfremt tanken ikke er fyldt ved aflevering, 
+                gælder følgende:
+              </p>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                {contract.fuel_missing_fee && contract.fuel_missing_fee > 0 && (
+                  <div className="bg-white rounded p-3 border border-amber-200">
+                    <span className="text-gray-500 block text-xs">Gebyr ved manglende optankning:</span>
+                    <span className="font-bold text-lg">{formatCurrency(contract.fuel_missing_fee)}</span>
+                  </div>
+                )}
+                {contract.fuel_price_per_liter && contract.fuel_price_per_liter > 0 && (
+                  <div className="bg-white rounded p-3 border border-amber-200">
+                    <span className="text-gray-500 block text-xs">Pris pr. liter manglende brændstof:</span>
+                    <span className="font-bold text-lg">{formatCurrency(contract.fuel_price_per_liter)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
+      <Separator className="my-4" />
+
       {/* Førerforhold */}
       <section className="mb-6">
         <h2 className="text-lg font-bold text-primary border-b border-gray-200 pb-2 mb-4">Førerforhold</h2>
