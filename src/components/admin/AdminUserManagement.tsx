@@ -178,7 +178,7 @@ const AdminUserManagement = () => {
       manual_activation: editForm.manual_activation,
     };
 
-    if (editForm.fleet_plan) {
+    if (editForm.fleet_plan && editForm.fleet_plan !== 'none') {
       updateData.fleet_plan = editForm.fleet_plan;
     } else {
       updateData.fleet_plan = null;
@@ -500,7 +500,7 @@ const AdminUserManagement = () => {
                   <SelectValue placeholder="Ingen fleet plan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Ingen</SelectItem>
+                  <SelectItem value="none">Ingen</SelectItem>
                   <SelectItem value="fleet_basic">Fleet Basic</SelectItem>
                   <SelectItem value="fleet_premium">Fleet Premium</SelectItem>
                 </SelectContent>
