@@ -29,6 +29,7 @@ import {
   RefreshCw,
   Download,
   CreditCard,
+  Navigation2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,6 +51,12 @@ interface RentalBooking {
     model: string;
     registration: string;
     image_url: string | null;
+    use_custom_location: boolean;
+    location_address: string | null;
+    location_postal_code: string | null;
+    location_city: string | null;
+    latitude: number | null;
+    longitude: number | null;
   };
 }
 
@@ -96,7 +103,7 @@ const MyRentals = () => {
           .from("bookings")
           .select(`
             *,
-            vehicle:vehicles(id, make, model, registration, image_url)
+            vehicle:vehicles(id, make, model, registration, image_url, use_custom_location, location_address, location_postal_code, location_city, latitude, longitude)
           `)
           .eq("renter_email", user.email)
           .order("created_at", { ascending: false });
@@ -141,6 +148,47 @@ const MyRentals = () => {
 
   const handlePayment = async (bookingId: string) => {
     await redirectToPayment(bookingId);
+  };
+
+  const openDirections = (booking: RentalBooking) => {
+    const vehicle = booking.vehicle;
+    if (!vehicle) return;
+
+    // Get address or coordinates
+    let destination = '';
+    
+    if (vehicle.latitude && vehicle.longitude) {
+      destination = `${vehicle.latitude},${vehicle.longitude}`;
+    } else if (vehicle.use_custom_location && vehicle.location_address) {
+      destination = encodeURIComponent(
+        [vehicle.location_address, vehicle.location_postal_code, vehicle.location_city, 'Denmark']
+          .filter(Boolean)
+          .join(', ')
+      );
+    } else {
+      toast.error('Ingen adresse tilgængelig for dette køretøj');
+      return;
+    }
+
+    // Detect platform and open appropriate maps app
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    
+    if (isIOS || isMac) {
+      // Apple Maps
+      window.open(`https://maps.apple.com/?daddr=${destination}`, '_blank');
+    } else {
+      // Google Maps
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
+    }
+  };
+
+  const canShowDirections = (booking: RentalBooking, contract: Contract | undefined) => {
+    // Only show directions if contract is signed by both parties
+    return contract?.renter_signature && contract?.lessor_signature && 
+           booking.vehicle && 
+           (booking.vehicle.latitude && booking.vehicle.longitude || 
+            (booking.vehicle.use_custom_location && booking.vehicle.location_address));
   };
 
   if (authLoading || isLoading) {
@@ -332,6 +380,18 @@ const MyRentals = () => {
                                     >
                                       <Download className="w-4 h-4" />
                                       Download PDF
+                                    </Button>
+                                  )}
+                                  {/* Directions button - only when contract is fully signed */}
+                                  {canShowDirections(booking, contract) && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="gap-1 text-primary border-primary/30 hover:bg-primary/10"
+                                      onClick={() => openDirections(booking)}
+                                    >
+                                      <Navigation2 className="w-4 h-4" />
+                                      Rutevejledning
                                     </Button>
                                   )}
                                 </>
