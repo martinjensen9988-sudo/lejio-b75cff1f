@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.send-subscription-confirmation]
 verify_jwt = true
+
+[functions.cvr-lookup]
+verify_jwt = false
