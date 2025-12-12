@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,7 @@ import AdminWarnings from '@/components/admin/AdminWarnings';
 import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminLessorReports from '@/components/admin/AdminLessorReports';
 import AdminMessages from '@/components/admin/AdminMessages';
+import { AdminLiveChat } from '@/components/admin/AdminLiveChat';
 
 interface Customer {
   id: string;
@@ -299,6 +300,10 @@ const AdminDashboard = () => {
               <MessageCircle className="w-4 h-4 mr-2" />
               Beskeder
             </TabsTrigger>
+            <TabsTrigger value="live-chat">
+              <Headphones className="w-4 h-4 mr-2" />
+              Live Chat
+            </TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
@@ -389,6 +394,11 @@ const AdminDashboard = () => {
           {/* Messages Tab */}
           <TabsContent value="messages">
             <AdminMessages />
+          </TabsContent>
+
+          {/* Live Chat Tab */}
+          <TabsContent value="live-chat">
+            <AdminLiveChat />
           </TabsContent>
         </Tabs>
 

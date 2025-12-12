@@ -6,6 +6,7 @@ import HowItWorks from "@/components/HowItWorks";
 import Pricing from "@/components/Pricing";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
+import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
       </main>
       <Footer />
       <CookieBanner />
+      <LiveChatWidget />
     </div>
   );
 };
