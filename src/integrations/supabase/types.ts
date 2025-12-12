@@ -1016,6 +1016,9 @@ export type Database = {
           deposit_amount: number | null
           deposit_required: boolean | null
           description: string | null
+          display_address: string | null
+          display_city: string | null
+          display_postal_code: string | null
           extra_km_price: number | null
           features: string[] | null
           fuel_type: string | null
@@ -1023,10 +1026,16 @@ export type Database = {
           image_url: string | null
           included_km: number | null
           is_available: boolean | null
+          latitude: number | null
+          location_address: string | null
+          location_city: string | null
+          location_postal_code: string | null
+          longitude: number | null
           make: string | null
           model: string | null
           monthly_price: number | null
           unlimited_km: boolean | null
+          use_custom_location: boolean | null
           variant: string | null
           weekly_price: number | null
           year: number | null
