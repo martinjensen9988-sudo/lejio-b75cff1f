@@ -36,6 +36,7 @@ import { DamageRegistrationWizard } from '@/components/settings/DamageRegistrati
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import ProSubscriptionCard from '@/components/settings/ProSubscriptionCard';
+import UpgradeToProCard from '@/components/settings/UpgradeToProCard';
 
 interface ProfileData {
   full_name: string;
@@ -328,6 +329,10 @@ const Settings = () => {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
+            {/* Upgrade to Pro Card for Private Users */}
+            {!isProfessional && (
+              <UpgradeToProCard />
+            )}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
