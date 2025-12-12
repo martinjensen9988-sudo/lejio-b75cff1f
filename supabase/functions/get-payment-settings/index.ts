@@ -81,21 +81,23 @@ serve(async (req) => {
       throw new Error('No authorization header');
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    // Extract the token from the header
+    const token = authHeader.replace('Bearer ', '');
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Use service role client to verify the token and get user
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get authenticated user by verifying the JWT token
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     if (authError || !user) {
+      console.error('[GET-PAYMENT-SETTINGS] Auth error:', authError?.message);
       throw new Error('Not authenticated');
     }
 
     console.log('[GET-PAYMENT-SETTINGS] Fetching settings for user:', user.id);
 
-    // Use service role to fetch data
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    // Fetch data using the existing admin client
 
     const { data, error } = await supabaseAdmin
       .from('lessor_payment_settings')
