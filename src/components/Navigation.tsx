@@ -79,6 +79,10 @@ const Navigation = () => {
               <div className="w-24 h-9 bg-muted rounded-xl animate-pulse" />
             ) : user ? (
               <>
+                <Button variant="outline" size="sm" onClick={() => navigate("/beskeder")}>
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Beskeder
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
                   Dashboard
                 </Button>
