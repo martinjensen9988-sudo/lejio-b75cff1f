@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X } from 'lucide-react';
+import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle } from 'lucide-react';
 import { useDamageReports, DamageReport, DamageItem, CreateDamageItemInput } from '@/hooks/useDamageReports';
+import { useContracts, Contract } from '@/hooks/useContracts';
 import { toast } from 'sonner';
 
 interface DamageReportModalProps {
@@ -62,6 +63,18 @@ const SEVERITY_COLORS: Record<string, string> = {
   severe: 'bg-red-100 text-red-800',
 };
 
+// Fuel level numeric values for calculations (in percentage of tank)
+const FUEL_LEVEL_VALUES: Record<string, number> = {
+  empty: 0,
+  quarter: 25,
+  half: 50,
+  three_quarters: 75,
+  full: 100,
+};
+
+// Estimate tank size in liters (average car tank)
+const ESTIMATED_TANK_SIZE = 50;
+
 export const DamageReportModal = ({
   open,
   onOpenChange,
@@ -72,6 +85,7 @@ export const DamageReportModal = ({
   existingReport,
 }: DamageReportModalProps) => {
   const { createReport, updateReport, addDamageItem, removeDamageItem, uploadDamagePhoto } = useDamageReports(bookingId);
+  const { getContractByBookingId, contracts } = useContracts();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [report, setReport] = useState<DamageReport | null>(existingReport || null);
@@ -95,6 +109,39 @@ export const DamageReportModal = ({
   });
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [pendingPhotoPreview, setPendingPhotoPreview] = useState<string | null>(null);
+
+  // Get contract for fuel policy
+  const contract = useMemo(() => getContractByBookingId(bookingId), [bookingId, contracts]);
+
+  // Calculate fuel fee for return reports
+  const fuelFeeCalculation = useMemo(() => {
+    if (reportType !== 'return' || !contract || !contract.fuel_policy_enabled || !fuelLevel) {
+      return null;
+    }
+
+    const currentLevelPercent = FUEL_LEVEL_VALUES[fuelLevel] ?? 100;
+    
+    // If tank is full, no fee
+    if (currentLevelPercent === 100) {
+      return { totalFee: 0, missingLiters: 0, baseFee: 0, literFee: 0, description: 'Tank er fuld - ingen gebyr' };
+    }
+
+    const missingPercent = 100 - currentLevelPercent;
+    const missingLiters = Math.round((missingPercent / 100) * ESTIMATED_TANK_SIZE);
+    
+    const baseFee = contract.fuel_missing_fee || 0;
+    const literFee = missingLiters * (contract.fuel_price_per_liter || 0);
+    const totalFee = baseFee + literFee;
+
+    return {
+      totalFee,
+      missingLiters,
+      baseFee,
+      literFee,
+      pricePerLiter: contract.fuel_price_per_liter || 0,
+      description: `Mangler ca. ${missingLiters} liter brændstof`,
+    };
+  }, [reportType, contract, fuelLevel]);
 
   const handleCreateReport = async () => {
     setIsCreating(true);
@@ -263,6 +310,47 @@ export const DamageReportModal = ({
                 <Label htmlFor="interior-clean">Indvendig ren</Label>
               </div>
             </div>
+
+            {/* Fuel Fee Calculation for Return Reports */}
+            {reportType === 'return' && contract?.fuel_policy_enabled && fuelLevel && fuelFeeCalculation && (
+              <div className={`rounded-lg p-4 border ${fuelFeeCalculation.totalFee > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                <div className="flex items-start gap-3">
+                  {fuelFeeCalculation.totalFee > 0 ? (
+                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <Fuel className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm mb-2">
+                      {fuelFeeCalculation.totalFee > 0 ? 'Brændstofgebyr' : 'Ingen brændstofgebyr'}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-3">{fuelFeeCalculation.description}</p>
+                    
+                    {fuelFeeCalculation.totalFee > 0 && (
+                      <div className="bg-white rounded p-3 space-y-2">
+                        {fuelFeeCalculation.baseFee > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span>Fast gebyr:</span>
+                            <span className="font-medium">{fuelFeeCalculation.baseFee.toFixed(2)} kr</span>
+                          </div>
+                        )}
+                        {fuelFeeCalculation.literFee > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span>{fuelFeeCalculation.missingLiters} liter × {fuelFeeCalculation.pricePerLiter?.toFixed(2)} kr:</span>
+                            <span className="font-medium">{fuelFeeCalculation.literFee.toFixed(2)} kr</span>
+                          </div>
+                        )}
+                        <Separator className="my-2" />
+                        <div className="flex justify-between font-bold">
+                          <span>Total brændstofgebyr:</span>
+                          <span className="text-amber-700">{fuelFeeCalculation.totalFee.toFixed(2)} kr</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="notes">Bemaerkninger</Label>
