@@ -11,7 +11,24 @@ interface DemoContractRequest {
   recipientEmail: string;
 }
 
-// Helper function to split text into lines
+// Colors matching the LEJIO design system
+const COLORS = {
+  primary: rgb(0.16, 0.38, 1),        // #2962FF
+  primaryLight: rgb(0.9, 0.93, 1),    // Light blue background
+  danger: rgb(0.8, 0.2, 0.2),         // Red
+  dangerLight: rgb(1, 0.95, 0.95),    // Light red background
+  success: rgb(0.1, 0.7, 0.4),        // Green
+  successLight: rgb(0.93, 0.99, 0.96),// Light green background
+  amber: rgb(0.85, 0.55, 0.1),        // Amber
+  amberLight: rgb(1, 0.98, 0.93),     // Light amber background
+  purple: rgb(0.5, 0.3, 0.7),         // Purple
+  text: rgb(0.15, 0.15, 0.15),        // Dark text
+  textMuted: rgb(0.45, 0.45, 0.45),   // Muted text
+  border: rgb(0.9, 0.9, 0.9),         // Border
+  bgLight: rgb(0.98, 0.98, 0.98),     // Light background
+  white: rgb(1, 1, 1),
+};
+
 function splitTextToLines(text: string, maxCharsPerLine: number): string[] {
   const words = text.split(' ');
   const lines: string[] = [];
@@ -35,63 +52,14 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   
-  const primaryColor = rgb(0.16, 0.38, 1); // #2962FF
-  const dangerColor = rgb(0.8, 0.2, 0.2);
-  const textColor = rgb(0.2, 0.2, 0.2);
-  const lightGray = rgb(0.5, 0.5, 0.5);
-  const lineColor = rgb(0.85, 0.85, 0.85);
-  
   let currentPage = pdfDoc.addPage([595.28, 841.89]); // A4
   const { width, height } = currentPage.getSize();
   
-  const margin = 50;
+  const margin = 40;
+  const contentWidth = width - margin * 2;
   let y = height - margin;
+  let pageNumber = 1;
   
-  const checkNewPage = () => {
-    if (y < 100) {
-      currentPage = pdfDoc.addPage([595.28, 841.89]);
-      y = height - margin;
-    }
-  };
-  
-  const drawText = (text: string, x: number, yPos: number, size = 10, font = helvetica, color = textColor) => {
-    currentPage.drawText(text, { x, y: yPos, size, font, color });
-  };
-  
-  const drawLine = (yPos: number) => {
-    currentPage.drawLine({
-      start: { x: margin, y: yPos },
-      end: { x: width - margin, y: yPos },
-      thickness: 0.5,
-      color: lineColor,
-    });
-  };
-
-  const drawSectionHeader = (title: string, color = primaryColor) => {
-    checkNewPage();
-    y -= 10;
-    drawLine(y + 5);
-    y -= 5;
-    drawText(title, margin, y, 12, helveticaBold, color);
-    y -= 20;
-  };
-
-  const drawLabelValue = (label: string, value: string) => {
-    drawText(label, margin, y, 9, helvetica, lightGray);
-    drawText(value, margin + 120, y, 10, helvetica, textColor);
-    y -= 15;
-  };
-
-  const drawParagraph = (text: string, fontSize = 9) => {
-    const lines = splitTextToLines(text, 85);
-    for (const line of lines) {
-      checkNewPage();
-      drawText(line, margin, y, fontSize, helvetica, textColor);
-      y -= 12;
-    }
-    y -= 5;
-  };
-
   // Demo data
   const demoContract = {
     contract_number: '2025-000001',
@@ -124,7 +92,6 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
     insurance_company: 'Tryg Forsikring',
     insurance_policy_number: 'POL-2024-123456',
     vanvidskorsel_liability_amount: 250000,
-    // New fields
     roadside_assistance_provider: 'Falck',
     roadside_assistance_phone: '+45 70 10 20 30',
     fuel_policy_enabled: true,
@@ -132,132 +99,336 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
     fuel_price_per_liter: 18.50,
   };
 
-  // Header with LEJIO logo text
-  drawText('LEJIO', margin, y, 28, helveticaBold, primaryColor);
-  drawText('LEJEKONTRAKT', margin + 100, y, 18, helveticaBold, textColor);
-  y -= 15;
-  drawText(`Kontrakt nr.: ${demoContract.contract_number}`, margin, y, 10, helvetica, lightGray);
-  drawText(`Oprettet: ${demoContract.created_at}`, margin + 200, y, 10, helvetica, lightGray);
-  y -= 25;
+  const formatCurrency = (amount: number) => `${amount.toLocaleString('da-DK')} kr`;
   
-  // Udlejer Section
-  drawSectionHeader('UDLEJER');
-  drawLabelValue('Navn:', demoContract.lessor_name);
-  drawLabelValue('Virksomhed:', demoContract.lessor_company_name);
-  drawLabelValue('CVR. Nr.:', demoContract.lessor_cvr);
-  drawLabelValue('Email:', demoContract.lessor_email);
-  drawLabelValue('Telefon:', demoContract.lessor_phone);
-  drawLabelValue('Adresse:', demoContract.lessor_address);
+  const checkNewPage = (requiredSpace: number = 100) => {
+    if (y < requiredSpace) {
+      // Add footer to current page
+      addFooter(currentPage, pageNumber);
+      pageNumber++;
+      currentPage = pdfDoc.addPage([595.28, 841.89]);
+      y = height - margin;
+    }
+  };
 
-  // Lejer Section
-  drawSectionHeader('LEJER');
-  drawLabelValue('Navn:', demoContract.renter_name);
-  drawLabelValue('Email:', demoContract.renter_email);
-  drawLabelValue('Telefon:', demoContract.renter_phone);
-  drawLabelValue('Adresse:', demoContract.renter_address);
-  drawLabelValue('Kørekort nr.:', demoContract.renter_license_number);
+  const addFooter = (page: typeof currentPage, pNum: number) => {
+    const totalPages = 4; // Approximate
+    page.drawRectangle({
+      x: margin,
+      y: 20,
+      width: contentWidth,
+      height: 30,
+      color: COLORS.bgLight,
+    });
+    page.drawText('LEJIO', { x: margin + 10, y: 30, size: 10, font: helveticaBold, color: COLORS.primary });
+    page.drawText('• lejio.dk', { x: margin + 50, y: 30, size: 9, font: helvetica, color: COLORS.textMuted });
+    page.drawText(`Kontrakt nr. ${demoContract.contract_number}  •  Side ${pNum}`, { 
+      x: width - margin - 150, y: 30, size: 9, font: helvetica, color: COLORS.textMuted 
+    });
+  };
 
-  // Lejebil Section
-  drawSectionHeader('LEJEBIL');
-  drawLabelValue('Reg. nr.:', demoContract.vehicle_registration);
-  drawLabelValue('Mærke, model:', `${demoContract.vehicle_make}, ${demoContract.vehicle_model}`);
-  drawLabelValue('Årgang:', demoContract.vehicle_year.toString());
-  drawLabelValue('Stelnummer (VIN):', demoContract.vehicle_vin);
-  drawLabelValue('Køretøjets værdi:', `${demoContract.vehicle_value.toLocaleString('da-DK')} kr`);
+  const drawText = (text: string, x: number, yPos: number, size = 10, font = helvetica, color = COLORS.text) => {
+    currentPage.drawText(text, { x, y: yPos, size, font, color });
+  };
 
-  // Lejeaftale Section
-  drawSectionHeader('LEJEAFTALE');
-  drawText('Periode', margin, y, 10, helveticaBold, textColor);
-  y -= 15;
-  drawLabelValue('Fra dato:', demoContract.start_date);
-  drawLabelValue('Til dato:', demoContract.end_date);
+  const drawRoundedRect = (x: number, yPos: number, w: number, h: number, color: typeof COLORS.white, borderColor?: typeof COLORS.border) => {
+    currentPage.drawRectangle({ x, y: yPos, width: w, height: h, color });
+    if (borderColor) {
+      currentPage.drawRectangle({ x, y: yPos, width: w, height: h, borderColor, borderWidth: 0.5 });
+    }
+  };
 
-  // Priser Section
-  drawSectionHeader('PRISER');
-  drawLabelValue('Dagspris:', `${demoContract.daily_price.toLocaleString('da-DK')} kr inkl. moms`);
-  drawLabelValue('Km inkl. pr. dag:', `${demoContract.included_km} km`);
-  drawLabelValue('Pris pr. overkørt km:', `${demoContract.extra_km_price} kr inkl. moms`);
-  drawLabelValue('Depositum:', `${demoContract.deposit_amount.toLocaleString('da-DK')} kr`);
-  y -= 5;
-  drawText('Total pris:', margin, y, 11, helveticaBold, textColor);
-  drawText(`${demoContract.total_price.toLocaleString('da-DK')} kr inkl. moms`, margin + 120, y, 12, helveticaBold, primaryColor);
-  y -= 20;
+  const drawSectionHeader = (title: string, iconLabel: string, bgColor: typeof COLORS.primaryLight, iconColor: typeof COLORS.primary) => {
+    checkNewPage(150);
+    y -= 25;
+    
+    // Icon circle
+    currentPage.drawCircle({ x: margin + 12, y: y + 3, size: 12, color: bgColor });
+    drawText(iconLabel, margin + 8, y - 1, 8, helveticaBold, iconColor);
+    
+    // Title
+    drawText(title, margin + 30, y, 13, helveticaBold, COLORS.text);
+    y -= 20;
+  };
 
-  // Forsikring Section
-  drawSectionHeader('FORSIKRINGSFORHOLD');
-  drawLabelValue('Selvrisiko:', `${demoContract.deductible_amount.toLocaleString('da-DK')} kr (momsfri)`);
-  drawLabelValue('Forsikringsselskab:', demoContract.insurance_company);
-  drawLabelValue('Policenummer:', demoContract.insurance_policy_number);
+  const drawInfoRow = (label: string, value: string, xStart: number = margin, colWidth: number = contentWidth / 2 - 10) => {
+    drawText(label, xStart + 10, y, 9, helvetica, COLORS.textMuted);
+    drawText(value, xStart + colWidth - 10 - helveticaBold.widthOfTextAtSize(value, 10), y, 10, helveticaBold, COLORS.text);
+    y -= 16;
+  };
 
-  // Vejhjælp Section (NEW)
-  checkNewPage();
-  drawSectionHeader('VEJHJÆLP');
-  drawLabelValue('Udbyder:', demoContract.roadside_assistance_provider);
-  drawLabelValue('Telefon:', demoContract.roadside_assistance_phone);
-  drawParagraph('Ved behov for vejhjælp kontakt venligst ovenstående nummer.');
+  const drawCard = (x: number, yPos: number, w: number, h: number, bgColor: typeof COLORS.white = COLORS.white) => {
+    drawRoundedRect(x, yPos - h, w, h, bgColor, COLORS.border);
+  };
 
-  // Brændstofpolitik Section (NEW)
+  const drawParagraph = (text: string, fontSize = 9, maxWidth = 85) => {
+    const lines = splitTextToLines(text, maxWidth);
+    for (const line of lines) {
+      checkNewPage(80);
+      drawText(line, margin + 10, y, fontSize, helvetica, COLORS.text);
+      y -= 13;
+    }
+  };
+
+  // =============== PAGE 1: HEADER & MAIN INFO ===============
+  
+  // Professional gradient header (simulated with rectangles)
+  const headerHeight = 100;
+  currentPage.drawRectangle({
+    x: 0,
+    y: height - headerHeight,
+    width: width,
+    height: headerHeight,
+    color: COLORS.primary,
+  });
+  
+  // Logo box
+  drawRoundedRect(margin, height - 75, 80, 45, COLORS.white);
+  drawText('LEJIO', margin + 10, height - 60, 22, helveticaBold, COLORS.primary);
+  
+  // Title
+  drawText('Lejekontrakt', margin + 100, height - 45, 24, helveticaBold, COLORS.white);
+  currentPage.drawText('Billejeaftale mellem udlejer og lejer', { x: margin + 100, y: height - 62, size: 10, font: helvetica, color: rgb(0.9, 0.9, 1) });
+  
+  // Contract number box
+  const cnBoxWidth = 130;
+  currentPage.drawRectangle({ x: width - margin - cnBoxWidth, y: height - 80, width: cnBoxWidth, height: 50, color: rgb(0.3, 0.5, 1) });
+  currentPage.drawText('KONTRAKT NR.', { x: width - margin - cnBoxWidth + 15, y: height - 45, size: 8, font: helvetica, color: rgb(0.8, 0.85, 1) });
+  drawText(demoContract.contract_number, width - margin - cnBoxWidth + 15, height - 60, 14, helveticaBold, COLORS.white);
+  currentPage.drawText(demoContract.created_at, { x: width - margin - cnBoxWidth + 15, y: height - 75, size: 8, font: helvetica, color: rgb(0.8, 0.85, 1) });
+  
+  y = height - headerHeight - 25;
+
+  // =============== PARTIES SECTION (2 columns) ===============
+  const colWidth = (contentWidth - 15) / 2;
+  
+  // Udlejer Card
+  drawCard(margin, y, colWidth, 130, COLORS.white);
+  const udlejerY = y - 5;
+  currentPage.drawCircle({ x: margin + 17, y: udlejerY - 10, size: 12, color: COLORS.primaryLight });
+  drawText('U', margin + 13, udlejerY - 14, 10, helveticaBold, COLORS.primary);
+  drawText('Udlejer', margin + 35, udlejerY - 15, 12, helveticaBold, COLORS.text);
+  
+  let tempY = udlejerY - 35;
+  const drawLV = (label: string, value: string, tx: number) => {
+    drawText(label, tx, tempY, 8, helvetica, COLORS.textMuted);
+    drawText(value, tx + 70, tempY, 9, helvetica, COLORS.text);
+    tempY -= 14;
+  };
+  drawLV('Navn', demoContract.lessor_name, margin + 10);
+  drawLV('Virksomhed', demoContract.lessor_company_name, margin + 10);
+  drawLV('CVR', demoContract.lessor_cvr, margin + 10);
+  drawLV('Email', demoContract.lessor_email, margin + 10);
+  drawLV('Telefon', demoContract.lessor_phone, margin + 10);
+  drawLV('Adresse', demoContract.lessor_address.substring(0, 30), margin + 10);
+  
+  // Lejer Card
+  drawCard(margin + colWidth + 15, y, colWidth, 130, COLORS.white);
+  const lejerX = margin + colWidth + 15;
+  currentPage.drawCircle({ x: lejerX + 17, y: udlejerY - 10, size: 12, color: COLORS.successLight });
+  drawText('L', lejerX + 14, udlejerY - 14, 10, helveticaBold, COLORS.success);
+  drawText('Lejer', lejerX + 35, udlejerY - 15, 12, helveticaBold, COLORS.text);
+  
+  tempY = udlejerY - 35;
+  const drawLV2 = (label: string, value: string) => {
+    drawText(label, lejerX + 10, tempY, 8, helvetica, COLORS.textMuted);
+    drawText(value, lejerX + 70, tempY, 9, helvetica, COLORS.text);
+    tempY -= 14;
+  };
+  drawLV2('Navn', demoContract.renter_name);
+  drawLV2('Email', demoContract.renter_email);
+  drawLV2('Telefon', demoContract.renter_phone);
+  drawLV2('Adresse', demoContract.renter_address.substring(0, 30));
+  drawLV2('Kørekort nr.', demoContract.renter_license_number);
+  
+  y -= 150;
+
+  // =============== VEHICLE SECTION ===============
+  drawSectionHeader('Køretøj', '🚗', COLORS.primaryLight, COLORS.primary);
+  
+  // Vehicle info cards in a row
+  const vCardWidth = (contentWidth - 30) / 3;
+  
+  // Reg card
+  drawCard(margin, y, vCardWidth, 55, COLORS.bgLight);
+  drawText('REGISTRERING', margin + 10, y - 15, 8, helvetica, COLORS.textMuted);
+  drawText(demoContract.vehicle_registration, margin + 10, y - 35, 18, helveticaBold, COLORS.primary);
+  
+  // Make/model card
+  drawCard(margin + vCardWidth + 15, y, vCardWidth, 55, COLORS.bgLight);
+  drawText('MÆRKE & MODEL', margin + vCardWidth + 25, y - 15, 8, helvetica, COLORS.textMuted);
+  drawText(`${demoContract.vehicle_make} ${demoContract.vehicle_model}`, margin + vCardWidth + 25, y - 32, 11, helveticaBold, COLORS.text);
+  drawText(`Årgang ${demoContract.vehicle_year}`, margin + vCardWidth + 25, y - 45, 9, helvetica, COLORS.textMuted);
+  
+  // Value card
+  drawCard(margin + (vCardWidth + 15) * 2, y, vCardWidth, 55, COLORS.bgLight);
+  drawText('KØRETØJETS VÆRDI', margin + (vCardWidth + 15) * 2 + 10, y - 15, 8, helvetica, COLORS.textMuted);
+  drawText(formatCurrency(demoContract.vehicle_value), margin + (vCardWidth + 15) * 2 + 10, y - 35, 14, helveticaBold, COLORS.text);
+  
+  y -= 70;
+  
+  // VIN
+  drawText('Stelnummer (VIN):', margin + 10, y, 9, helvetica, COLORS.textMuted);
+  drawRoundedRect(margin + 100, y - 5, 180, 18, COLORS.bgLight);
+  drawText(demoContract.vehicle_vin, margin + 105, y, 9, helvetica, COLORS.text);
+  
+  y -= 30;
+
+  // =============== PERIOD & PRICING ===============
+  const halfWidth = (contentWidth - 15) / 2;
+  
+  // Period section
+  drawCard(margin, y, halfWidth, 100, COLORS.white);
+  currentPage.drawCircle({ x: margin + 17, y: y - 15, size: 12, color: rgb(0.93, 0.9, 0.98) });
+  drawText('📅', margin + 10, y - 18, 10, helvetica, COLORS.purple);
+  drawText('Lejeperiode', margin + 35, y - 20, 12, helveticaBold, COLORS.text);
+  
+  // From/To boxes
+  const periodBoxW = (halfWidth - 40) / 2;
+  drawRoundedRect(margin + 10, y - 90, periodBoxW, 50, COLORS.bgLight, COLORS.border);
+  drawText('FRA', margin + 20, y - 50, 8, helvetica, COLORS.textMuted);
+  drawText(demoContract.start_date, margin + 20, y - 70, 10, helveticaBold, COLORS.text);
+  
+  drawText('→', margin + 10 + periodBoxW + 5, y - 65, 12, helvetica, COLORS.textMuted);
+  
+  drawRoundedRect(margin + 10 + periodBoxW + 20, y - 90, periodBoxW, 50, COLORS.bgLight, COLORS.border);
+  drawText('TIL', margin + 20 + periodBoxW + 20, y - 50, 8, helvetica, COLORS.textMuted);
+  drawText(demoContract.end_date, margin + 20 + periodBoxW + 20, y - 70, 10, helveticaBold, COLORS.text);
+  
+  // Pricing section
+  const priceX = margin + halfWidth + 15;
+  drawCard(priceX, y, halfWidth, 100, COLORS.white);
+  currentPage.drawCircle({ x: priceX + 17, y: y - 15, size: 12, color: COLORS.amberLight });
+  drawText('💳', priceX + 10, y - 18, 10, helvetica, COLORS.amber);
+  drawText('Priser', priceX + 35, y - 20, 12, helveticaBold, COLORS.text);
+  
+  // Price rows
+  let priceY = y - 40;
+  const drawPriceRow = (label: string, value: string, isBold = false) => {
+    drawText(label, priceX + 10, priceY, 9, helvetica, COLORS.text);
+    drawText(value, priceX + halfWidth - 20, priceY, isBold ? 11 : 9, isBold ? helveticaBold : helvetica, isBold ? COLORS.primary : COLORS.text);
+    priceY -= 14;
+  };
+  drawPriceRow('Dagspris:', `${formatCurrency(demoContract.daily_price)} inkl. moms`);
+  drawPriceRow('Inkluderet km/dag:', `${demoContract.included_km} km`);
+  drawPriceRow('Pris pr. overkørt km:', `${demoContract.extra_km_price} kr`);
+  drawPriceRow('Depositum:', formatCurrency(demoContract.deposit_amount));
+  
+  // Total highlight
+  drawRoundedRect(priceX, y - 100, halfWidth, 25, COLORS.primaryLight);
+  drawText('Total pris', priceX + 10, y - 93, 10, helveticaBold, COLORS.text);
+  drawText(formatCurrency(demoContract.total_price), priceX + halfWidth - 80, y - 93, 14, helveticaBold, COLORS.primary);
+  
+  y -= 120;
+
+  // =============== INSURANCE SECTION ===============
+  drawSectionHeader('Forsikring', '🛡', COLORS.primaryLight, COLORS.primary);
+  
+  const insCardW = (contentWidth - 30) / 3;
+  drawCard(margin, y, insCardW, 55, COLORS.primaryLight);
+  drawText('SELVRISIKO', margin + 10, y - 15, 8, helvetica, COLORS.textMuted);
+  drawText(formatCurrency(demoContract.deductible_amount), margin + 10, y - 35, 14, helveticaBold, COLORS.text);
+  drawText('momsfri', margin + 10, y - 48, 8, helvetica, COLORS.textMuted);
+  
+  drawCard(margin + insCardW + 15, y, insCardW, 55, COLORS.primaryLight);
+  drawText('FORSIKRINGSSELSKAB', margin + insCardW + 25, y - 15, 8, helvetica, COLORS.textMuted);
+  drawText(demoContract.insurance_company, margin + insCardW + 25, y - 35, 11, helveticaBold, COLORS.text);
+  
+  drawCard(margin + (insCardW + 15) * 2, y, insCardW, 55, COLORS.primaryLight);
+  drawText('POLICENUMMER', margin + (insCardW + 15) * 2 + 10, y - 15, 8, helvetica, COLORS.textMuted);
+  drawText(demoContract.insurance_policy_number, margin + (insCardW + 15) * 2 + 10, y - 35, 10, helvetica, COLORS.text);
+  
+  y -= 75;
+
+  // =============== ROADSIDE ASSISTANCE ===============
+  drawSectionHeader('Vejhjælp', '📞', COLORS.successLight, COLORS.success);
+  
+  drawCard(margin, y, contentWidth / 2, 50, COLORS.successLight);
+  drawText('Udbyder:', margin + 10, y - 18, 9, helvetica, COLORS.textMuted);
+  drawText(demoContract.roadside_assistance_provider, margin + 10, y - 35, 11, helveticaBold, COLORS.text);
+  drawText('Kontakt:', margin + contentWidth / 4, y - 18, 9, helvetica, COLORS.textMuted);
+  drawText(demoContract.roadside_assistance_phone, margin + contentWidth / 4, y - 35, 14, helveticaBold, COLORS.success);
+  
+  y -= 70;
+
+  // =============== FUEL POLICY ===============
   if (demoContract.fuel_policy_enabled) {
-    drawSectionHeader('BRÆNDSTOFPOLITIK');
-    drawParagraph('Køretøjet udleveres med fuld tank og skal afleveres med fuld tank. Såfremt tanken ikke er fyldt ved aflevering, gælder følgende:');
-    drawLabelValue('Gebyr ved manglende optankning:', `${demoContract.fuel_missing_fee.toLocaleString('da-DK')} kr`);
-    drawLabelValue('Pris pr. liter manglende brændstof:', `${demoContract.fuel_price_per_liter.toFixed(2)} kr`);
+    drawSectionHeader('Brændstofpolitik', '⛽', COLORS.amberLight, COLORS.amber);
+    
+    drawCard(margin, y, contentWidth, 85, COLORS.amberLight);
     y -= 5;
+    drawParagraph('Køretøjet udleveres med fuld tank og skal afleveres med fuld tank. Såfremt tanken ikke er fyldt ved aflevering, gælder følgende gebyrer:', 9, 90);
+    
+    const fuelCardW = (contentWidth - 30) / 2;
+    drawRoundedRect(margin + 10, y - 25, fuelCardW, 35, COLORS.white, COLORS.border);
+    drawText('Fast gebyr', margin + 20, y - 10, 8, helvetica, COLORS.textMuted);
+    drawText(formatCurrency(demoContract.fuel_missing_fee), margin + 20, y - 25, 14, helveticaBold, COLORS.text);
+    
+    drawRoundedRect(margin + fuelCardW + 25, y - 25, fuelCardW, 35, COLORS.white, COLORS.border);
+    drawText('Pris pr. liter', margin + fuelCardW + 35, y - 10, 8, helvetica, COLORS.textMuted);
+    drawText(`${demoContract.fuel_price_per_liter.toFixed(2)} kr`, margin + fuelCardW + 35, y - 25, 14, helveticaBold, COLORS.text);
+    
+    y -= 45;
   }
+  
+  // Add footer to page 1
+  addFooter(currentPage, pageNumber);
 
-  // Førerforhold - NEW PAGE
-  checkNewPage();
-  drawSectionHeader('FØRERFORHOLD');
-  drawParagraph('Bilen må kun føres af den lejer, der har tegnet lejekontrakten samt personer – over 23 år – der hører til lejers husstand, hvis disse har et gyldigt dansk kørekort, og erklærer at overholde færdselslovens bestemmelser ved deres brug af bilen. Bilen må ikke fremlejes, benyttes til motorsport, eller til person- eller godstransport mod betaling. Bilen må kun anvendes til kørsel i Danmark, hvis ikke andet er aftalt med udlejer.');
+  // =============== PAGE 2: TERMS ===============
+  pageNumber++;
+  currentPage = pdfDoc.addPage([595.28, 841.89]);
+  y = height - margin;
 
-  // Betaling
-  drawSectionHeader('BETALING');
-  drawParagraph('Betaling sker i henhold til den aftalte betalingsplan. Ved manglende betaling fremsendes rykkerskrivelse med gebyr. Udlejer er berettiget til at ophæve lejeaftalen og tilbagetage bilen straks, såfremt lejer misligholder lejeaftalen.');
+  drawSectionHeader('Vilkår & Betingelser', '📄', COLORS.bgLight, COLORS.text);
+  
+  // Terms sections
+  const drawTermsSection = (title: string, content: string) => {
+    checkNewPage(120);
+    drawCard(margin, y, contentWidth, 10, COLORS.white); // Min height, will expand
+    drawText(title, margin + 10, y - 15, 11, helveticaBold, COLORS.text);
+    y -= 30;
+    drawParagraph(content, 9, 95);
+    y -= 15;
+  };
+  
+  drawTermsSection('Førerforhold', 
+    'Bilen må kun føres af den lejer, der har tegnet lejekontrakten samt personer – over 23 år – der hører til lejers husstand, hvis disse har et gyldigt dansk kørekort, og erklærer at overholde færdselslovens bestemmelser ved deres brug af bilen. Bilen må ikke fremlejes, benyttes til motorsport, eller til person- eller godstransport mod betaling. Bilen må kun anvendes til kørsel i Danmark, hvis ikke andet er aftalt med udlejer.');
+  
+  drawTermsSection('Betaling', 
+    'Betaling sker i henhold til den aftalte betalingsplan. Ved manglende betaling fremsendes rykkerskrivelse med gebyr. Udlejer er berettiget til at ophæve lejeaftalen og tilbagetage bilen straks, såfremt lejer misligholder lejeaftalen.');
 
-  // Vanvidskørsel
-  checkNewPage();
-  drawSectionHeader('VANVIDSKØRSEL', dangerColor);
-  drawParagraph('Ved lejers underskrift, erklærer lejer, at lejer – og dem lejer måtte overlade bilen til, jf. ovenstående – ikke tidligere har kørt i en bil, eller vil køre i denne bil, på en måde, der kan karakteriseres som vanvidskørsel, jf. færdselslovens § 133a, herunder f.eks. ved kørsel med hastighed over 200 km/t, mere end 100% overskridelse af hastighedsgrænsen eller spirituskørsel.');
-  drawParagraph('Lejer er indforstået med og accepterer, at lejer personligt kan blive pålagt det fulde erstatningsansvar ved konfiskation af bilen som følge af vanvidskørsel.');
-  y -= 5;
-  drawText('Erstatningsansvar ved konfiskation:', margin, y, 10, helveticaBold, dangerColor);
-  drawText(`${demoContract.vanvidskorsel_liability_amount.toLocaleString('da-DK')} kr`, margin + 200, y, 11, helveticaBold, dangerColor);
-  y -= 20;
+  drawTermsSection('Overholdelse af forskrifter', 
+    'Lejer er ansvarlig for, at såvel private som offentlige forskrifter, der gælder for benyttelse af køretøjet, overholdes. Dette indebærer tillige, at det påhviler lejer at betale eventuelle parkeringsafgifter, der måtte blive pålagt køretøjet. Hvis lejer forsømmer at betale eventuelt pålagte afgifter (fx standsnings- og parkeringsafgifter) vil udlejer opkræve sådanne afgifter hos lejer med tillæg af gebyrer.');
 
-  // Overholdelse af forskrifter
-  drawSectionHeader('OVERHOLDELSE AF FORSKRIFTER');
-  drawParagraph('Lejer er ansvarlig for, at såvel private som offentlige forskrifter, der gælder for benyttelse af køretøjet, overholdes. Dette indebærer tillige, at det påhviler lejer at betale eventuelle parkeringsafgifter, der måtte blive pålagt køretøjet. Hvis lejer forsømmer at betale eventuelt pålagte afgifter (fx standsnings- og parkeringsafgifter) vil udlejer opkræve sådanne afgifter hos lejer med tillæg af gebyrer.');
+  drawTermsSection('P-Bøder', 
+    'Bøderne skal betales med det samme. Ellers pålægges der ekstra gebyr og ekspeditionsgebyr oveni den oprindelige bøde. Har du mere end 2 ubetalte p-bøder, ophører samarbejdet og lejekontrakten er ikke længere gyldig.');
 
-  // P-Bøder
-  checkNewPage();
-  drawSectionHeader('P-BØDER');
-  drawParagraph('Bøderne skal betales med det samme. Ellers pålægges der ekstra gebyr og ekspeditionsgebyr oveni den oprindelige bøde. Har du mere end 2 ubetalte p-bøder, ophører samarbejdet og lejekontrakten er ikke længere gyldig.');
+  drawTermsSection('Ingen rygning', 
+    'Rygning er ikke tilladt i bilen. Overtrædes dette, vil udlejer opkræve gebyrer i overensstemmelse med gældende gebyroversigt. Lejer er oplyst om, at det sædvanligvis er særdeles omkostningsfyldt at få renset en bil, hvori der har været røget.');
 
-  // Ingen rygning
-  drawSectionHeader('INGEN RYGNING');
-  drawParagraph('Rygning er ikke tilladt i bilen. Overtrædes dette, vil udlejer opkræve gebyrer i overensstemmelse med gældende gebyroversigt. Lejer er oplyst om, at det sædvanligvis er særdeles omkostningsfyldt at få renset en bil, hvori der har været røget.');
+  drawTermsSection('Service, syn og vedligeholdelse', 
+    'Lejer skal vedligeholde bilen, således at bilen til enhver tid er i god og brugbar stand og ikke udviser anden forringelse end, hvad der følger af almindeligt slid og ælde. Det er lejers ansvar, at bilen får gennemført regelmæssige services og synsgennemgange.');
 
-  // Service og vedligeholdelse
-  drawSectionHeader('SERVICE, SYN OG VEDLIGEHOLDELSE');
-  drawParagraph('Lejer skal vedligeholde bilen, således at bilen til enhver tid er i god og brugbar stand og ikke udviser anden forringelse end, hvad der følger af almindeligt slid og ælde. Det er lejers ansvar, at bilen får gennemført regelmæssige services og synsgennemgange. Service, syn og reparationer af bilen, skal altid ske hos udlejer (medmindre andet er aftalt).');
+  drawTermsSection('Kaskoforsikring, skader og øvrige udgifter', 
+    'Lejer hæfter for alle skader, som ikke er eller ville være dækket af en tegnet kaskoforsikring. Bemærk: Stenslag og evt. udskift af rude er ikke inkluderet i forsikringen. Øvrige udgifter i forbindelse med uheld under udlejningen betales af lejer.');
 
-  // Kaskoforsikring
-  checkNewPage();
-  drawSectionHeader('KASKOFORSIKRING, SKADER OG ØVRIGE UDGIFTER');
-  drawParagraph('Lejer hæfter for alle skader, som ikke er eller ville være dækket af en tegnet kaskoforsikring. Bemærk: Stenslag og evt. udskift af rude er ikke inkluderet i forsikringen. Øvrige udgifter i forbindelse med uheld under udlejningen betales af lejer. Alle skader der er foretaget i lejeperioden skal oplyses til udlejer.');
+  drawTermsSection('Ophør', 
+    'Opsigelsen er løbende måned + en måned. Udlejer er berettiget til at ophæve lejeaftalen og tilbagetage bilen straks, såfremt lejer misligholder lejeaftalen. Ved lejeaftalens udløb eller dennes ophør, er lejer forpligtet til at tilbagelevere bilen på udlejers adresse.');
 
-  // Ophør
-  drawSectionHeader('OPHØR');
-  drawParagraph('Opsigelsen er løbende måned + en måned. Udlejer er berettiget til at ophæve lejeaftalen og tilbagetage bilen straks, såfremt lejer misligholder lejeaftalen. Ved lejeaftalens udløb eller dennes ophør, er lejer forpligtet til at tilbagelevere bilen på udlejers adresse. Lejer kan ikke udøve tilbageholdsret i køretøjet.');
+  drawTermsSection('Tilbagelevering', 
+    'Tilbagelevering skal ske inden kl. 15.00 på sidste dag i din kontrakt. Overtrædelse medfører ekstra dages leje og omkostninger. Bilen afleveres i rengjort og vasket stand. Betalt depositum refunderes 1 måned efter indlevering af bilen.');
 
-  // Tilbagelevering
-  drawSectionHeader('TILBAGELEVERING');
-  drawParagraph('Tilbagelevering skal ske inden kl. 15.00 på sidste dag i din kontrakt. Overtrædelse medfører ekstra dages leje og omkostninger, hvis der er overkørte km. Bilen afleveres i rengjort og vasket stand og tømt for private effekter. Såfremt en gennemgang af bilen har påvist skader, der dækkes af bilens kaskoforsikring, er lejer forpligtet til at udfylde en skadesanmeldelse. Lejer hæfter for eventuelle konstaterede skader og mangler. Ved mangel på rengøring af køretøjet foreligger der en ekstra udgift.');
-  drawParagraph('Betalt depositum refunderes 1 måned efter indlevering af bilen.');
+  addFooter(currentPage, pageNumber);
+
+  // =============== PAGE 3: FEES & RECKLESS DRIVING ===============
+  pageNumber++;
+  currentPage = pdfDoc.addPage([595.28, 841.89]);
+  y = height - margin;
 
   // Gebyroversigt
-  checkNewPage();
-  drawSectionHeader('GEBYROVERSIGT');
+  drawSectionHeader('Gebyroversigt', '💰', COLORS.bgLight, COLORS.text);
+  
+  drawCard(margin, y, contentWidth, 150, COLORS.bgLight);
   const gebyrer = [
     ['Kopi af aftale', '100 kr pr. aftale'],
     ['Dokumentændringer', '500 kr pr. aftale'],
@@ -269,23 +440,44 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
     ['Udeblivelse fra værkstedstid', '500 kr'],
   ];
   
+  let gY = y - 15;
   for (const [gebyr, pris] of gebyrer) {
-    checkNewPage();
-    drawText(`• ${gebyr}:`, margin, y, 9, helvetica, textColor);
-    drawText(pris, margin + 250, y, 9, helveticaBold, textColor);
-    y -= 14;
+    drawText(`• ${gebyr}`, margin + 15, gY, 9, helvetica, COLORS.text);
+    drawText(pris, margin + contentWidth - 150, gY, 9, helveticaBold, COLORS.text);
+    gY -= 16;
   }
+  
+  y -= 170;
 
-  // Tro og love erklæring
-  checkNewPage();
-  drawSectionHeader('TRO- OG LOVEERKLÆRING – VANVIDSKØRSEL');
-  drawParagraph('Jeg erklærer på tro og love, at jeg eller dem jeg måtte overlade køretøjet til, ikke vil køre i bilen på en sådan måde, at kørslen er i strid med lov om vanvidskørsel (L127), hvorefter politiet vil være berettiget til at beslaglægge og herefter konfiskere køretøjet.');
-  drawParagraph('Ved min underskrift på denne tro- og loveerklæring accepterer jeg at være fuldt erstatningsansvarlig over for ejeren af denne bil, hvis jeg eller den jeg overlader bilen til, overtræder lov om vanvidskørsel.');
-  drawParagraph('Jeg anerkender ved min underskrift at være blevet orienteret om risikoen for at blive pålagt at betale en erstatningssum til sælger på det lejede køretøjs værdi i tilfælde af, at køretøjet konfiskeres af politiet, jf. lov om vanvidskørsel.');
+  // Vanvidskørsel section - with danger styling
+  checkNewPage(250);
+  y -= 15;
+  drawRoundedRect(margin, y - 200, contentWidth, 215, COLORS.dangerLight, COLORS.danger);
+  
+  currentPage.drawCircle({ x: margin + 17, y: y - 15, size: 12, color: rgb(1, 0.9, 0.9) });
+  drawText('⚠', margin + 11, y - 18, 10, helvetica, COLORS.danger);
+  drawText('Vanvidskørsel', margin + 35, y - 20, 13, helveticaBold, COLORS.danger);
+  
+  y -= 40;
+  const vanvidText = 'Ved lejers underskrift, erklærer lejer, at lejer – og dem lejer måtte overlade bilen til – ikke tidligere har kørt, eller vil køre i denne bil, på en måde, der kan karakteriseres som vanvidskørsel, jf. færdselslovens § 133a.';
+  drawParagraph(vanvidText, 9, 92);
+  
+  y -= 5;
+  const vanvidText2 = 'Lejer accepterer personligt det fulde erstatningsansvar ved konfiskation af bilen som følge af vanvidskørsel.';
+  const lines2 = splitTextToLines(vanvidText2, 92);
+  for (const line of lines2) {
+    drawText(line, margin + 15, y, 9, helveticaBold, COLORS.text);
+    y -= 13;
+  }
   
   y -= 10;
-  drawText('Følgende overtrædelser betragtes som vanvidskørsel:', margin, y, 10, helveticaBold, dangerColor);
-  y -= 15;
+  drawRoundedRect(margin + 15, y - 30, contentWidth - 30, 35, rgb(1, 0.95, 0.95), COLORS.danger);
+  drawText('Erstatningsansvar ved konfiskation', margin + 25, y - 15, 10, helveticaBold, COLORS.danger);
+  drawText(formatCurrency(demoContract.vanvidskorsel_liability_amount), margin + contentWidth - 150, y - 15, 16, helveticaBold, COLORS.danger);
+  
+  y -= 50;
+  drawText('Følgende overtrædelser betragtes som vanvidskørsel:', margin + 15, y, 10, helveticaBold, COLORS.danger);
+  y -= 18;
   const vanvidsRules = [
     'Uagtsomt manddrab under særligt skærpende omstændigheder',
     'Særlig hensynsløs kørsel',
@@ -294,52 +486,60 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
     'Spirituskørsel med en promille over 2,00',
   ];
   for (const rule of vanvidsRules) {
-    checkNewPage();
-    drawText(`• ${rule}`, margin + 10, y, 9, helvetica, textColor);
-    y -= 12;
+    drawText(`• ${rule}`, margin + 20, y, 9, helvetica, COLORS.text);
+    y -= 14;
   }
+  
+  y -= 30;
+  
+  addFooter(currentPage, pageNumber);
 
-  // Underskrifter
-  checkNewPage();
-  y -= 20;
-  drawSectionHeader('UNDERSKRIFTER');
+  // =============== PAGE 4: SIGNATURES ===============
+  pageNumber++;
+  currentPage = pdfDoc.addPage([595.28, 841.89]);
+  y = height - margin;
+
+  drawSectionHeader('Underskrifter', '✍', rgb(0.93, 0.9, 0.98), COLORS.purple);
   
-  drawText('Udlejer:', margin, y, 10, helveticaBold, textColor);
-  y -= 15;
-  drawText(demoContract.lessor_name, margin, y, 10, helvetica, textColor);
-  y -= 15;
-  drawText('Dato: [Afventer underskrift]', margin, y, 9, helvetica, lightGray);
-  y -= 30;
-  drawLine(y);
-  y -= 30;
+  const sigWidth = (contentWidth - 20) / 2;
   
-  drawText('Lejer:', margin, y, 10, helveticaBold, textColor);
-  y -= 15;
-  drawText(demoContract.renter_name, margin, y, 10, helvetica, textColor);
-  y -= 15;
-  drawText('Dato: [Afventer underskrift]', margin, y, 9, helvetica, lightGray);
-  y -= 30;
-  drawLine(y);
+  // Udlejer signature
+  drawCard(margin, y, sigWidth, 130, COLORS.bgLight);
+  drawText('Udlejer', margin + 15, y - 20, 11, helveticaBold, COLORS.text);
   
-  // Footer on all pages
-  const pages = pdfDoc.getPages();
-  for (let i = 0; i < pages.length; i++) {
-    const p = pages[i];
-    p.drawText('Genereret af LEJIO • lejio.dk', { 
-      x: margin, 
-      y: 30, 
-      size: 8, 
-      font: helvetica, 
-      color: lightGray 
-    });
-    p.drawText(`Kontrakt: ${demoContract.contract_number} • Side ${i + 1} af ${pages.length}`, { 
-      x: width - margin - 160, 
-      y: 30, 
-      size: 8, 
-      font: helvetica, 
-      color: lightGray 
-    });
-  }
+  // Signature placeholder
+  currentPage.drawRectangle({
+    x: margin + 15,
+    y: y - 85,
+    width: sigWidth - 30,
+    height: 45,
+    borderColor: COLORS.border,
+    borderWidth: 1,
+  });
+  drawText('Afventer underskrift', margin + sigWidth / 2 - 40, y - 65, 9, helvetica, COLORS.textMuted);
+  
+  drawText(demoContract.lessor_name, margin + 15, y - 105, 10, helveticaBold, COLORS.text);
+  drawText('Dato: [Afventer]', margin + 15, y - 120, 9, helvetica, COLORS.textMuted);
+  
+  // Lejer signature
+  drawCard(margin + sigWidth + 20, y, sigWidth, 130, COLORS.bgLight);
+  drawText('Lejer', margin + sigWidth + 35, y - 20, 11, helveticaBold, COLORS.text);
+  
+  // Signature placeholder
+  currentPage.drawRectangle({
+    x: margin + sigWidth + 35,
+    y: y - 85,
+    width: sigWidth - 30,
+    height: 45,
+    borderColor: COLORS.border,
+    borderWidth: 1,
+  });
+  drawText('Afventer underskrift', margin + sigWidth + sigWidth / 2 - 20, y - 65, 9, helvetica, COLORS.textMuted);
+  
+  drawText(demoContract.renter_name, margin + sigWidth + 35, y - 105, 10, helveticaBold, COLORS.text);
+  drawText('Dato: [Afventer]', margin + sigWidth + 35, y - 120, 9, helvetica, COLORS.textMuted);
+  
+  addFooter(currentPage, pageNumber);
   
   return await pdfDoc.save();
 }
@@ -388,63 +588,43 @@ const handler = async (req: Request): Promise<Response> => {
           <p style="color: #666; margin: 5px 0;">Danmarks bedste biludlejningsplatform</p>
         </div>
         
-        <div style="background: linear-gradient(135deg, #2962FF 0%, #448AFF 100%); color: white; padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 20px;">
-          <h2 style="margin: 0 0 10px 0;">Demo Lejekontrakt 📄</h2>
-          <p style="margin: 0; opacity: 0.9;">Her er et eksempel på en lejekontrakt fra LEJIO</p>
+        <div style="background: linear-gradient(135deg, #2962FF 0%, #1e4bd8 100%); color: white; padding: 30px; border-radius: 16px; margin-bottom: 25px;">
+          <h2 style="margin: 0 0 10px 0; font-size: 24px;">Din demo lejekontrakt</h2>
+          <p style="margin: 0; opacity: 0.9;">Tak for din interesse i LEJIO!</p>
         </div>
-
-        <div style="background-color: #e3f2fd; border-left: 4px solid #2962FF; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-          <p style="margin: 0; color: #1565c0;">
-            <strong>📎 Vedhæftet: Demo Lejekontrakt</strong><br>
-            Den vedhæftede PDF viser hvordan en komplet lejekontrakt ser ud i LEJIO-systemet.
-          </p>
-        </div>
-
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0;">
-          <h3 style="color: #333; margin-top: 0;">Kontrakten indeholder:</h3>
-          <ul style="color: #666; margin: 0; padding-left: 20px;">
-            <li>Udlejer- og lejeroplysninger</li>
-            <li>Køretøjsdetaljer og værdi</li>
-            <li>Lejeperiode og priser</li>
-            <li>Forsikringsforhold og selvrisiko</li>
-            <li>Førerforhold og betingelser</li>
-            <li>Vanvidskørselsklausul med erstatningsansvar</li>
-            <li>P-bøder og gebyrer</li>
-            <li>Tilbagelevering og afslutning</li>
-            <li>Komplet gebyroversigt</li>
-            <li>Tro- og loveerklæring</li>
-            <li>Underskriftsfelter</li>
+        
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
+          <h3 style="margin: 0 0 15px 0; color: #333;">Hvad er inkluderet?</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #555;">
+            <li style="margin-bottom: 8px;">Professionelt designet lejekontrakt</li>
+            <li style="margin-bottom: 8px;">Alle nødvendige juridiske vilkår</li>
+            <li style="margin-bottom: 8px;">Digital underskrift sektion</li>
+            <li style="margin-bottom: 8px;">Vanvidskørsel erklæring</li>
+            <li style="margin-bottom: 8px;">Gebyroversigt</li>
           </ul>
         </div>
-
-        <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-          <p style="margin: 0; color: #2e7d32;">
-            <strong>✓ Juridisk korrekt</strong><br>
-            Kontrakten er baseret på danske standardvilkår for biludlejning og indeholder alle nødvendige juridiske klausuler.
-          </p>
+        
+        <p style="color: #555;">Vedhæftet finder du en demo-version af vores lejekontrakt. Denne viser, hvordan dine kontrakter vil se ud, når du bruger LEJIO til at administrere dine biludlejninger.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://lejio.dk" style="display: inline-block; background: #2962FF; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Kom i gang med LEJIO</a>
         </div>
-
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="https://lejio.dk" style="display: inline-block; background-color: #2962FF; color: white; padding: 14px 28px; text-decoration: none; border-radius: 25px; font-weight: bold;">
-            Besøg LEJIO
-          </a>
-        </div>
-
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
-          <p>Dette er en demo-email fra LEJIO.</p>
-          <p style="margin-top: 10px;">
-            <a href="https://lejio.dk" style="color: #2962FF;">lejio.dk</a>
-          </p>
-        </div>
+        
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        
+        <p style="color: #888; font-size: 12px; text-align: center;">
+          © ${new Date().getFullYear()} LEJIO • Danmarks bedste biludlejningsplatform<br>
+          <a href="https://lejio.dk" style="color: #2962FF;">lejio.dk</a>
+        </p>
       </body>
       </html>
     `;
 
-    // Create SMTP client - try port 465 with SSL
+    // Initialize SMTP client
     const client = new SMTPClient({
       connection: {
         hostname: smtpHost,
-        port: 465,
+        port: 587,
         tls: true,
         auth: {
           username: smtpUser,
@@ -457,32 +637,31 @@ const handler = async (req: Request): Promise<Response> => {
     await client.send({
       from: fromEmail,
       to: recipientEmail,
-      subject: 'LEJIO Demo Lejekontrakt - Eksempel på komplet kontrakt',
-      content: emailHtml,
+      subject: "Din LEJIO Demo Lejekontrakt",
+      content: "auto",
       html: emailHtml,
       attachments: [
         {
-          filename: 'LEJIO-Demo-Lejekontrakt-2025-000001.pdf',
+          filename: `LEJIO-Demo-Lejekontrakt-2025-000001.pdf`,
           content: pdfBase64,
-          encoding: 'base64',
-          contentType: 'application/pdf',
+          encoding: "base64",
+          contentType: "application/pdf",
         },
       ],
     });
 
-    console.log("Demo contract email sent to:", recipientEmail);
-
     await client.close();
 
-    return new Response(JSON.stringify({ success: true, message: 'Demo contract sent successfully' }), {
+    console.log(`Demo contract email sent to: ${recipientEmail}`);
+
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in send-demo-contract function:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
