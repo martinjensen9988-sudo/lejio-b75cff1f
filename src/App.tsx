@@ -18,6 +18,7 @@ import Terms from "./pages/Terms";
 import FAQ from "./pages/FAQ";
 import Messages from "./pages/Messages";
 import Install from "./pages/Install";
+import GpsTracking from "./pages/GpsTracking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/beskeder" element={<Messages />} />
             <Route path="/install" element={<Install />} />
+            <Route path="/gps" element={<GpsTracking />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
