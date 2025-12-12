@@ -13,7 +13,11 @@ import {
   ArrowLeft, 
   Headphones,
   User,
-  Building2
+  Building2,
+  Paperclip,
+  X,
+  FileText,
+  Image as ImageIcon
 } from "lucide-react";
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
@@ -28,12 +32,16 @@ const Messages = () => {
     activeConversation,
     setActiveConversation,
     sendMessage,
+    uploadAttachment,
     startConversation,
   } = useMessages();
 
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -46,12 +54,39 @@ const Messages = () => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!activeConversation || !newMessage.trim() || sending) return;
+    if (!activeConversation || (!newMessage.trim() && !selectedFile) || sending) return;
 
     setSending(true);
-    await sendMessage(activeConversation, newMessage);
+    
+    let attachment = undefined;
+    if (selectedFile) {
+      setUploading(true);
+      attachment = await uploadAttachment(selectedFile);
+      setUploading(false);
+    }
+
+    await sendMessage(activeConversation, newMessage, attachment || undefined);
     setNewMessage("");
+    setSelectedFile(null);
     setSending(false);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Filen er for stor. Maks 10 MB.");
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const isImageFile = (type?: string | null) => type?.startsWith('image/');
+
+  const getAttachmentIcon = (type?: string | null) => {
+    if (isImageFile(type)) return <ImageIcon className="w-4 h-4" />;
+    return <FileText className="w-4 h-4" />;
   };
 
   const handleStartCustomerServiceChat = async () => {
@@ -222,7 +257,34 @@ const Messages = () => {
                                     : "bg-muted text-foreground"
                                 }`}
                               >
-                                <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                {message.attachment_url && (
+                                  <div className="mb-2">
+                                    {isImageFile(message.attachment_type) ? (
+                                      <a href={message.attachment_url} target="_blank" rel="noopener noreferrer">
+                                        <img 
+                                          src={message.attachment_url} 
+                                          alt={message.attachment_name || "Billede"} 
+                                          className="max-w-full rounded-lg max-h-48 object-cover"
+                                        />
+                                      </a>
+                                    ) : (
+                                      <a 
+                                        href={message.attachment_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center gap-2 p-2 rounded-lg ${
+                                          isOwn ? "bg-primary-foreground/10" : "bg-background"
+                                        }`}
+                                      >
+                                        {getAttachmentIcon(message.attachment_type)}
+                                        <span className="text-sm truncate">{message.attachment_name || "Fil"}</span>
+                                      </a>
+                                    )}
+                                  </div>
+                                )}
+                                {message.content && !message.content.startsWith('📎 ') && (
+                                  <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                )}
                                 <p
                                   className={`text-xs mt-1 ${
                                     isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
@@ -241,6 +303,22 @@ const Messages = () => {
 
                   {/* Message input */}
                   <div className="p-4 border-t border-border">
+                    {selectedFile && (
+                      <div className="mb-2 p-2 bg-muted rounded-lg flex items-center justify-between">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {getAttachmentIcon(selectedFile.type)}
+                          <span className="text-sm truncate">{selectedFile.name}</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setSelectedFile(null)}
+                          className="shrink-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -248,14 +326,30 @@ const Messages = () => {
                       }}
                       className="flex gap-2"
                     >
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept="image/*,.pdf,.doc,.docx,.txt"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={sending || uploading}
+                      >
+                        <Paperclip className="w-4 h-4" />
+                      </Button>
                       <Input
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Skriv en besked..."
                         className="flex-1"
-                        disabled={sending}
+                        disabled={sending || uploading}
                       />
-                      <Button type="submit" disabled={!newMessage.trim() || sending}>
+                      <Button type="submit" disabled={(!newMessage.trim() && !selectedFile) || sending || uploading}>
                         <Send className="w-4 h-4" />
                       </Button>
                     </form>
