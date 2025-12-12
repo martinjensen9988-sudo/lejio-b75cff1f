@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle, Save, MapPin } from 'lucide-react';
+import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle, Save, MapPin, Download, Loader2 } from 'lucide-react';
 import { useDamageReports, DamageReport, DamageItem, CreateDamageItemInput } from '@/hooks/useDamageReports';
 import { useContracts, Contract } from '@/hooks/useContracts';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,7 +87,7 @@ export const DamageReportModal = ({
   reportType,
   existingReport,
 }: DamageReportModalProps) => {
-  const { createReport, updateReport, addDamageItem, removeDamageItem, uploadDamagePhoto } = useDamageReports(bookingId);
+  const { createReport, updateReport, addDamageItem, removeDamageItem, uploadDamagePhoto, generatePdfReport } = useDamageReports(bookingId);
   const { getContractByBookingId, contracts } = useContracts();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -95,6 +95,7 @@ export const DamageReportModal = ({
   const [isCreating, setIsCreating] = useState(false);
   const [isAddingDamage, setIsAddingDamage] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   
   // Form state
   const [odometerReading, setOdometerReading] = useState(existingReport?.odometer_reading?.toString() || '');
@@ -417,9 +418,36 @@ export const DamageReportModal = ({
                 {isCreating ? 'Opretter...' : 'Opret skadesrapport'}
               </Button>
             ) : (
-              <Button onClick={handleUpdateReport} variant="outline" className="w-full">
-                Gem aendringer
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={handleUpdateReport} variant="outline" className="flex-1">
+                  Gem aendringer
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    setIsGeneratingPdf(true);
+                    try {
+                      await generatePdfReport(report.id);
+                    } finally {
+                      setIsGeneratingPdf(false);
+                    }
+                  }} 
+                  variant="default"
+                  disabled={isGeneratingPdf}
+                  className="gap-2"
+                >
+                  {isGeneratingPdf ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Genererer...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Download PDF
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
 

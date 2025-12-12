@@ -41,3 +41,15 @@ verify_jwt = false
 
 [functions.send-demo-contract]
 verify_jwt = false
+
+[functions.send-message-notification]
+verify_jwt = true
+
+[functions.send-warning-notification]
+verify_jwt = true
+
+[functions.geocode-address]
+verify_jwt = true
+
+[functions.generate-damage-report-pdf]
+verify_jwt = true
