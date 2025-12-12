@@ -80,15 +80,13 @@ export const LiveChatWidget = () => {
     const storedSessionId = localStorage.getItem('lejio_chat_session');
     
     if (storedSessionId) {
+      // Use RPC function for secure session access
       const { data: existingSession } = await supabase
-        .from('visitor_chat_sessions')
-        .select('*')
-        .eq('id', storedSessionId)
-        .single();
+        .rpc('get_visitor_chat_session', { session_id_param: storedSessionId });
       
-      if (existingSession) {
-        setSession(existingSession as ChatSession);
-        loadMessages(existingSession.id);
+      if (existingSession && existingSession.length > 0) {
+        setSession(existingSession[0] as ChatSession);
+        loadMessages(existingSession[0].id);
         return;
       }
     }
@@ -115,11 +113,9 @@ export const LiveChatWidget = () => {
   };
 
   const loadMessages = async (sessionId: string) => {
+    // Use RPC function for secure message access
     const { data } = await supabase
-      .from('visitor_chat_messages')
-      .select('*')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true });
+      .rpc('get_visitor_chat_messages', { session_id_param: sessionId });
 
     if (data && data.length > 0) {
       setMessages(data as Message[]);
