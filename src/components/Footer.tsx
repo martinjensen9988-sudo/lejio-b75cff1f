@@ -68,8 +68,8 @@ const Footer = () => {
             © {new Date().getFullYear()} LEJIO. Lavet med <Heart className="w-4 h-4 text-accent inline" /> i Danmark
           </p>
           <div className="flex gap-6 text-sm text-primary-foreground/70">
-            <a href="#" className="hover:text-secondary transition-colors">Privatlivspolitik</a>
-            <a href="#" className="hover:text-secondary transition-colors">Handelsbetingelser</a>
+            <a href="/privatlivspolitik" className="hover:text-secondary transition-colors">Privatlivspolitik</a>
+            <a href="/handelsbetingelser" className="hover:text-secondary transition-colors">Handelsbetingelser</a>
           </div>
         </div>
       </div>
