@@ -11,6 +11,8 @@ import Settings from "./pages/Settings";
 import Search from "./pages/Search";
 import Booking from "./pages/Booking";
 import MyRentals from "./pages/MyRentals";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/search" element={<Search />} />
             <Route path="/booking/:vehicleId" element={<Booking />} />
             <Route path="/my-rentals" element={<MyRentals />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
