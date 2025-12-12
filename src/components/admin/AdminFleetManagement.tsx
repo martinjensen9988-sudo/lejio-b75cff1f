@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { format, startOfMonth, subMonths } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Table, TableBody, TableCell, TableHead, 
   TableHeader, TableRow 
@@ -18,6 +19,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -32,12 +34,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import { 
   Truck, Search, MoreHorizontal, Plus, 
   Loader2, CheckCircle, DollarSign, TrendingUp,
-  Building2, Calendar
+  Building2, Calendar, Car, UserPlus
 } from 'lucide-react';
 import { LessorStatusBadge } from '@/components/ratings/LessorStatusBadge';
 import { RatingStars } from '@/components/ratings/RatingStars';
@@ -69,17 +78,32 @@ interface FleetSettlement {
   lessor?: FleetCustomer;
 }
 
+interface FleetVehicle {
+  id: string;
+  make: string;
+  model: string;
+  registration: string;
+  year: number | null;
+  daily_price: number | null;
+  weekly_price: number | null;
+  monthly_price: number | null;
+  owner_id: string;
+}
+
 const FLEET_PLAN_LABELS: Record<string, string> = {
-  fleet_basic: 'Fleet Basic',
-  fleet_premium: 'Fleet Premium',
+  fleet_basic: 'LEJIO Varetager',
+  fleet_premium: 'LEJIO Varetager Pro',
 };
 
 const AdminFleetManagement = () => {
   const [customers, setCustomers] = useState<FleetCustomer[]>([]);
   const [settlements, setSettlements] = useState<FleetSettlement[]>([]);
+  const [vehicles, setVehicles] = useState<FleetVehicle[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateSettlement, setShowCreateSettlement] = useState(false);
+  const [showCreateCustomer, setShowCreateCustomer] = useState(false);
+  const [showCreateVehicle, setShowCreateVehicle] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<FleetCustomer | null>(null);
   const [settlementData, setSettlementData] = useState({
     settlement_month: format(startOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd'),
@@ -87,6 +111,28 @@ const AdminFleetManagement = () => {
     bookings_count: 0,
   });
   const [isCreating, setIsCreating] = useState(false);
+  
+  // New customer form
+  const [newCustomerForm, setNewCustomerForm] = useState({
+    email: '',
+    company_name: '',
+    full_name: '',
+    fleet_plan: 'fleet_basic' as 'fleet_basic' | 'fleet_premium',
+    fleet_commission_rate: 15,
+  });
+  
+  // New vehicle form
+  const [newVehicleForm, setNewVehicleForm] = useState({
+    owner_id: '',
+    registration: '',
+    make: '',
+    model: '',
+    year: new Date().getFullYear(),
+    daily_price: 0,
+    weekly_price: 0,
+    monthly_price: 0,
+    description: '',
+  });
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -116,6 +162,18 @@ const AdminFleetManagement = () => {
       setSettlements(settlementsData || []);
     }
 
+    // Fetch fleet vehicles
+    const { data: vehiclesData, error: vehiclesError } = await supabase
+      .from('vehicles')
+      .select('id, make, model, registration, year, daily_price, weekly_price, monthly_price, owner_id')
+      .in('owner_id', (customersData || []).map(c => c.id));
+
+    if (vehiclesError) {
+      console.error('Error fetching fleet vehicles:', vehiclesError);
+    } else {
+      setVehicles(vehiclesData || []);
+    }
+
     setIsLoading(false);
   };
 
@@ -128,6 +186,101 @@ const AdminFleetManagement = () => {
     c.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.company_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleCreateCustomer = async () => {
+    if (!newCustomerForm.email || !newCustomerForm.company_name) {
+      toast.error('Udfyld venligst email og firmanavn');
+      return;
+    }
+
+    setIsCreating(true);
+
+    // First check if user exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', newCustomerForm.email)
+      .single();
+
+    if (existingProfile) {
+      // Update existing profile to fleet customer
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          company_name: newCustomerForm.company_name,
+          full_name: newCustomerForm.full_name || null,
+          fleet_plan: newCustomerForm.fleet_plan,
+          fleet_commission_rate: newCustomerForm.fleet_commission_rate,
+          user_type: 'professionel',
+        })
+        .eq('id', existingProfile.id);
+
+      if (error) {
+        toast.error('Kunne ikke opdatere bruger til fleet-kunde');
+      } else {
+        toast.success('Bruger opdateret til fleet-kunde!');
+        setShowCreateCustomer(false);
+        setNewCustomerForm({
+          email: '',
+          company_name: '',
+          full_name: '',
+          fleet_plan: 'fleet_basic',
+          fleet_commission_rate: 15,
+        });
+        fetchData();
+      }
+    } else {
+      toast.error('Bruger med denne email findes ikke. Bed kunden oprette en konto først.');
+    }
+
+    setIsCreating(false);
+  };
+
+  const handleCreateVehicle = async () => {
+    if (!newVehicleForm.owner_id || !newVehicleForm.registration || !newVehicleForm.make || !newVehicleForm.model) {
+      toast.error('Udfyld venligst alle påkrævede felter');
+      return;
+    }
+
+    setIsCreating(true);
+
+    const { error } = await supabase
+      .from('vehicles')
+      .insert({
+        owner_id: newVehicleForm.owner_id,
+        registration: newVehicleForm.registration.toUpperCase(),
+        make: newVehicleForm.make,
+        model: newVehicleForm.model,
+        year: newVehicleForm.year,
+        daily_price: newVehicleForm.daily_price || null,
+        weekly_price: newVehicleForm.weekly_price || null,
+        monthly_price: newVehicleForm.monthly_price || null,
+        description: newVehicleForm.description || null,
+        is_available: true,
+      });
+
+    if (error) {
+      console.error('Error creating vehicle:', error);
+      toast.error('Kunne ikke oprette køretøj');
+    } else {
+      toast.success('Køretøj oprettet!');
+      setShowCreateVehicle(false);
+      setNewVehicleForm({
+        owner_id: '',
+        registration: '',
+        make: '',
+        model: '',
+        year: new Date().getFullYear(),
+        daily_price: 0,
+        weekly_price: 0,
+        monthly_price: 0,
+        description: '',
+      });
+      fetchData();
+    }
+
+    setIsCreating(false);
+  };
 
   const handleCreateSettlement = async () => {
     if (!selectedCustomer) return;
@@ -200,7 +353,11 @@ const AdminFleetManagement = () => {
     totalPendingPayout: settlements
       .filter(s => s.status === 'pending')
       .reduce((sum, s) => sum + s.net_payout, 0),
+    totalVehicles: vehicles.length,
   };
+
+  const getVehiclesForCustomer = (customerId: string) => 
+    vehicles.filter(v => v.owner_id === customerId);
 
   if (isLoading) {
     return (
@@ -270,29 +427,59 @@ const AdminFleetManagement = () => {
         </Card>
       </div>
 
-      {/* Fleet Customers */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Truck className="w-5 h-5" />
-                Fleet Kunder
-              </CardTitle>
-              <CardDescription>Virksomheder med Fleet-planer</CardDescription>
-            </div>
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Søg fleet kunder..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+      {/* Fleet Management Tabs */}
+      <Tabs defaultValue="customers">
+        <div className="flex items-center justify-between mb-4">
+          <TabsList>
+            <TabsTrigger value="customers">
+              <Building2 className="w-4 h-4 mr-2" />
+              Kunder ({customers.length})
+            </TabsTrigger>
+            <TabsTrigger value="vehicles">
+              <Car className="w-4 h-4 mr-2" />
+              Køretøjer ({vehicles.length})
+            </TabsTrigger>
+            <TabsTrigger value="settlements">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Opgørelser ({settlements.length})
+            </TabsTrigger>
+          </TabsList>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowCreateCustomer(true)}>
+              <UserPlus className="w-4 h-4 mr-2" />
+              Tilføj kunde
+            </Button>
+            <Button onClick={() => setShowCreateVehicle(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Tilføj køretøj
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+
+        {/* Customers Tab */}
+        <TabsContent value="customers">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Truck className="w-5 h-5" />
+                    Fleet Kunder
+                  </CardTitle>
+                  <CardDescription>Virksomheder med LEJIO Varetager-planer</CardDescription>
+                </div>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Søg fleet kunder..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
           {filteredCustomers.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Truck className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -305,7 +492,7 @@ const AdminFleetManagement = () => {
                   <TableHead>Virksomhed</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Kommission</TableHead>
-                  <TableHead>Rating</TableHead>
+                  <TableHead>Køretøjer</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -329,9 +516,8 @@ const AdminFleetManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <RatingStars rating={customer.average_rating || 0} size="sm" />
                         <span className="text-sm text-muted-foreground">
-                          ({customer.total_rating_count || 0})
+                          {getVehiclesForCustomer(customer.id).length} biler
                         </span>
                       </div>
                     </TableCell>
@@ -356,6 +542,14 @@ const AdminFleetManagement = () => {
                             <Plus className="w-4 h-4 mr-2" />
                             Opret opgørelse
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => {
+                            setNewVehicleForm(prev => ({ ...prev, owner_id: customer.id }));
+                            setShowCreateVehicle(true);
+                          }}>
+                            <Car className="w-4 h-4 mr-2" />
+                            Tilføj køretøj
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -366,8 +560,66 @@ const AdminFleetManagement = () => {
           )}
         </CardContent>
       </Card>
+    </TabsContent>
 
-      {/* Settlements */}
+    {/* Vehicles Tab */}
+    <TabsContent value="vehicles">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Car className="w-5 h-5" />
+            Fleet Køretøjer
+          </CardTitle>
+          <CardDescription>Køretøjer tilhørende Fleet-kunder</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {vehicles.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Car className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Ingen køretøjer endnu</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Køretøj</TableHead>
+                  <TableHead>Registrering</TableHead>
+                  <TableHead>Ejer</TableHead>
+                  <TableHead>Dagspris</TableHead>
+                  <TableHead>Ugepris</TableHead>
+                  <TableHead>Månedspris</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {vehicles.map((vehicle) => {
+                  const owner = getCustomerById(vehicle.owner_id);
+                  return (
+                    <TableRow key={vehicle.id}>
+                      <TableCell>
+                        <p className="font-medium">{vehicle.make} {vehicle.model}</p>
+                        {vehicle.year && <p className="text-sm text-muted-foreground">{vehicle.year}</p>}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{vehicle.registration}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {owner?.company_name || owner?.full_name || 'Ukendt'}
+                      </TableCell>
+                      <TableCell>{vehicle.daily_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
+                      <TableCell>{vehicle.weekly_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
+                      <TableCell>{vehicle.monthly_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </TabsContent>
+
+    {/* Settlements Tab */}
+    <TabsContent value="settlements">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -445,6 +697,8 @@ const AdminFleetManagement = () => {
           )}
         </CardContent>
       </Card>
+    </TabsContent>
+  </Tabs>
 
       {/* Create Settlement Dialog */}
       <Dialog open={showCreateSettlement} onOpenChange={setShowCreateSettlement}>
@@ -534,6 +788,217 @@ const AdminFleetManagement = () => {
               Opret opgørelse
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Customer Dialog */}
+      <Dialog open={showCreateCustomer} onOpenChange={setShowCreateCustomer}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tilføj Fleet-kunde</DialogTitle>
+            <DialogDescription>
+              Opgrader en eksisterende bruger til Fleet-kunde
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Brugerens email *</Label>
+              <Input
+                type="email"
+                value={newCustomerForm.email}
+                onChange={(e) => setNewCustomerForm(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="bruger@firma.dk"
+              />
+              <p className="text-xs text-muted-foreground">Brugeren skal allerede have en konto</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Firmanavn *</Label>
+              <Input
+                value={newCustomerForm.company_name}
+                onChange={(e) => setNewCustomerForm(prev => ({ ...prev, company_name: e.target.value }))}
+                placeholder="Firma ApS"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Kontaktperson</Label>
+              <Input
+                value={newCustomerForm.full_name}
+                onChange={(e) => setNewCustomerForm(prev => ({ ...prev, full_name: e.target.value }))}
+                placeholder="Fulde navn"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Fleet Plan</Label>
+              <Select
+                value={newCustomerForm.fleet_plan}
+                onValueChange={(value: 'fleet_basic' | 'fleet_premium') => 
+                  setNewCustomerForm(prev => ({ ...prev, fleet_plan: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fleet_basic">LEJIO Varetager (Basis)</SelectItem>
+                  <SelectItem value="fleet_premium">LEJIO Varetager Pro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Kommissionssats (%)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={newCustomerForm.fleet_commission_rate}
+                onChange={(e) => setNewCustomerForm(prev => ({ 
+                  ...prev, 
+                  fleet_commission_rate: parseInt(e.target.value) || 0 
+                }))}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateCustomer(false)}>
+              Annuller
+            </Button>
+            <Button 
+              onClick={handleCreateCustomer}
+              disabled={isCreating || !newCustomerForm.email || !newCustomerForm.company_name}
+            >
+              {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Tilføj kunde
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Vehicle Dialog */}
+      <Dialog open={showCreateVehicle} onOpenChange={setShowCreateVehicle}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tilføj køretøj</DialogTitle>
+            <DialogDescription>
+              Opret et nyt køretøj til en Fleet-kunde
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Fleet-kunde *</Label>
+              <Select
+                value={newVehicleForm.owner_id}
+                onValueChange={(value) => setNewVehicleForm(prev => ({ ...prev, owner_id: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Vælg kunde" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.company_name || c.full_name || c.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Nummerplade *</Label>
+                <Input
+                  value={newVehicleForm.registration}
+                  onChange={(e) => setNewVehicleForm(prev => ({ ...prev, registration: e.target.value.toUpperCase() }))}
+                  placeholder="AB12345"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Årgang</Label>
+                <Input
+                  type="number"
+                  value={newVehicleForm.year}
+                  onChange={(e) => setNewVehicleForm(prev => ({ ...prev, year: parseInt(e.target.value) || 0 }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Mærke *</Label>
+                <Input
+                  value={newVehicleForm.make}
+                  onChange={(e) => setNewVehicleForm(prev => ({ ...prev, make: e.target.value }))}
+                  placeholder="Toyota"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Model *</Label>
+                <Input
+                  value={newVehicleForm.model}
+                  onChange={(e) => setNewVehicleForm(prev => ({ ...prev, model: e.target.value }))}
+                  placeholder="Corolla"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Dagspris (kr)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={newVehicleForm.daily_price || ''}
+                  onChange={(e) => setNewVehicleForm(prev => ({ ...prev, daily_price: parseFloat(e.target.value) || 0 }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Ugepris (kr)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={newVehicleForm.weekly_price || ''}
+                  onChange={(e) => setNewVehicleForm(prev => ({ ...prev, weekly_price: parseFloat(e.target.value) || 0 }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Månedspris (kr)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={newVehicleForm.monthly_price || ''}
+                  onChange={(e) => setNewVehicleForm(prev => ({ ...prev, monthly_price: parseFloat(e.target.value) || 0 }))}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Beskrivelse</Label>
+              <Textarea
+                value={newVehicleForm.description}
+                onChange={(e) => setNewVehicleForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Beskriv køretøjet..."
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateVehicle(false)}>
+              Annuller
+            </Button>
+            <Button 
+              onClick={handleCreateVehicle}
+              disabled={isCreating || !newVehicleForm.owner_id || !newVehicleForm.registration || !newVehicleForm.make || !newVehicleForm.model}
+            >
+              {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Opret køretøj
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
