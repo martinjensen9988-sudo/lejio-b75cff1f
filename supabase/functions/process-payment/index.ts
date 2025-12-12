@@ -337,14 +337,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing payment for booking: ${bookingId}`);
 
-    // Fetch booking with vehicle and lessor profile
+    // Fetch booking with vehicle
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
-      .select(`
-        *,
-        vehicle:vehicles(*),
-        lessor:profiles!bookings_lessor_id_fkey1(*)
-      `)
+      .select(`*, vehicle:vehicles(*)`)
       .eq('id', bookingId)
       .single();
 
@@ -356,10 +352,25 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const vehicle = booking.vehicle;
-    const lessor = booking.lessor;
+    // Fetch lessor profile separately
+    const { data: lessor, error: lessorError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', booking.lessor_id)
+      .single();
 
-    if (!lessor) {
+    if (bookingError || !booking) {
+      console.error('Booking not found:', bookingError);
+      return new Response(JSON.stringify({ error: 'Booking not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const vehicle = booking.vehicle;
+
+    if (lessorError || !lessor) {
+      console.error('Lessor profile not found:', lessorError);
       return new Response(JSON.stringify({ error: 'Lessor profile not found' }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
