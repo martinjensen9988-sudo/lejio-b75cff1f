@@ -11,6 +11,9 @@ interface Message {
   is_read: boolean;
   is_from_support: boolean;
   created_at: string;
+  attachment_url?: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
 }
 
 interface Conversation {
@@ -126,17 +129,29 @@ export const useMessages = () => {
     }
   };
 
-  const sendMessage = async (conversationId: string, content: string) => {
-    if (!user || !content.trim()) return;
+  const sendMessage = async (
+    conversationId: string, 
+    content: string,
+    attachment?: { url: string; type: string; name: string }
+  ) => {
+    if (!user || (!content.trim() && !attachment)) return;
 
     try {
+      const messageData: any = {
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: content.trim() || (attachment ? `📎 ${attachment.name}` : ''),
+      };
+
+      if (attachment) {
+        messageData.attachment_url = attachment.url;
+        messageData.attachment_type = attachment.type;
+        messageData.attachment_name = attachment.name;
+      }
+
       const { data, error } = await supabase
         .from("messages")
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: content.trim(),
-        })
+        .insert(messageData)
         .select()
         .single();
 
@@ -148,12 +163,65 @@ export const useMessages = () => {
         .update({ updated_at: new Date().toISOString() })
         .eq("id", conversationId);
 
+      // Send notification to other participant
+      const conv = conversations.find(c => c.id === conversationId);
+      if (conv && conv.other_participant?.email) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, company_name")
+          .eq("id", user.id)
+          .single();
+
+        supabase.functions.invoke("send-message-notification", {
+          body: {
+            recipientEmail: conv.other_participant.email,
+            recipientName: conv.other_participant.full_name || conv.other_participant.email,
+            senderName: profile?.company_name || profile?.full_name || "En bruger",
+            messagePreview: content.trim() || attachment?.name || "",
+            conversationId,
+          },
+        }).catch(console.error);
+      }
+
       return data;
     } catch (error: any) {
       console.error("Error sending message:", error);
       toast({
         title: "Fejl",
         description: "Kunne ikke sende besked",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
+  const uploadAttachment = async (file: File) => {
+    if (!user) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("message-attachments")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("message-attachments")
+        .getPublicUrl(fileName);
+
+      return {
+        url: urlData.publicUrl,
+        type: file.type,
+        name: file.name,
+      };
+    } catch (error: any) {
+      console.error("Error uploading attachment:", error);
+      toast({
+        title: "Fejl",
+        description: "Kunne ikke uploade fil",
         variant: "destructive",
       });
       return null;
@@ -256,6 +324,7 @@ export const useMessages = () => {
     activeConversation,
     setActiveConversation,
     sendMessage,
+    uploadAttachment,
     startConversation,
     fetchConversations,
     fetchMessages,
