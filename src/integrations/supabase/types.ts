@@ -686,6 +686,111 @@ export type Database = {
         }
         Relationships: []
       }
+      geofence_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          device_id: string
+          geofence_id: string
+          id: string
+          is_read: boolean
+          latitude: number
+          longitude: number
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          device_id: string
+          geofence_id: string
+          id?: string
+          is_read?: boolean
+          latitude: number
+          longitude: number
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          device_id?: string
+          geofence_id?: string
+          id?: string
+          is_read?: boolean
+          latitude?: number
+          longitude?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofence_alerts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "gps_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_alerts_geofence_id_fkey"
+            columns: ["geofence_id"]
+            isOneToOne: false
+            referencedRelation: "geofences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geofences: {
+        Row: {
+          alert_on_enter: boolean
+          alert_on_exit: boolean
+          center_latitude: number
+          center_longitude: number
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          radius_meters: number
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          alert_on_enter?: boolean
+          alert_on_exit?: boolean
+          center_latitude: number
+          center_longitude: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          radius_meters?: number
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          alert_on_enter?: boolean
+          alert_on_exit?: boolean
+          center_latitude?: number
+          center_longitude?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          radius_meters?: number
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofences_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofences_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gps_data_points: {
         Row: {
           altitude: number | null
