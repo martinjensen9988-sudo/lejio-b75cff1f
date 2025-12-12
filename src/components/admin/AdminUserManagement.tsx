@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/select';
 import { 
   Users, Search, MoreHorizontal, CheckCircle, XCircle, 
-  Pause, Ban, Edit, Eye, Loader2, AlertTriangle, Building2
+  Pause, Ban, Edit, Eye, Loader2, AlertTriangle, Building2, Mail, Send
 } from 'lucide-react';
 
 interface UserProfile {
@@ -77,6 +77,14 @@ const AdminUserManagement = () => {
   const [actionType, setActionType] = useState<'pause' | 'ban' | 'activate' | null>(null);
   const [actionReason, setActionReason] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Email dialog state
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    subject: '',
+    message: '',
+  });
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -122,6 +130,42 @@ const AdminUserManagement = () => {
     setActionType(type);
     setActionReason('');
     setShowActionDialog(true);
+  };
+
+  const handleOpenEmail = (user: UserProfile) => {
+    setSelectedUser(user);
+    setEmailForm({ subject: '', message: '' });
+    setShowEmailDialog(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!selectedUser || !emailForm.subject.trim() || !emailForm.message.trim()) return;
+    setIsSendingEmail(true);
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('send-admin-email', {
+        body: {
+          recipientEmail: selectedUser.email,
+          recipientName: selectedUser.full_name || selectedUser.company_name || 'Bruger',
+          subject: emailForm.subject,
+          message: emailForm.message,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      toast.success(`Email sendt til ${selectedUser.email}`);
+      setShowEmailDialog(false);
+    } catch (error: any) {
+      console.error('Error sending email:', error);
+      toast.error('Kunne ikke sende email: ' + (error.message || 'Ukendt fejl'));
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -367,6 +411,10 @@ const AdminUserManagement = () => {
                           <Edit className="w-4 h-4 mr-2" />
                           Rediger bruger
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenEmail(user)}>
+                          <Mail className="w-4 h-4 mr-2" />
+                          Send email
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {user.account_status === 'active' && (
                           <>
@@ -515,6 +563,56 @@ const AdminUserManagement = () => {
               {actionType === 'pause' && 'Sæt på pause'}
               {actionType === 'ban' && 'Udeluk'}
               {actionType === 'activate' && 'Genaktiver'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Dialog */}
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5" />
+              Send email til bruger
+            </DialogTitle>
+            <DialogDescription>
+              {selectedUser?.full_name || selectedUser?.company_name || 'Bruger'} ({selectedUser?.email})
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Emne</Label>
+              <Input
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm(prev => ({ ...prev, subject: e.target.value }))}
+                placeholder="Skriv emailens emne..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Besked</Label>
+              <Textarea
+                value={emailForm.message}
+                onChange={(e) => setEmailForm(prev => ({ ...prev, message: e.target.value }))}
+                placeholder="Skriv din besked her..."
+                rows={8}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
+              Annuller
+            </Button>
+            <Button 
+              onClick={handleSendEmail} 
+              disabled={isSendingEmail || !emailForm.subject.trim() || !emailForm.message.trim()}
+            >
+              {isSendingEmail ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
+              Send email
             </Button>
           </DialogFooter>
         </DialogContent>
