@@ -80,3 +80,15 @@ verify_jwt = true
 
 [functions.cvr-lookup]
 verify_jwt = false
+
+[functions.calculate-fleet-settlement]
+verify_jwt = false
+
+[functions.generate-monthly-invoices]
+verify_jwt = false
+
+[functions.send-appeal-decision]
+verify_jwt = true
+
+[functions.check-trial-expiration]
+verify_jwt = false
