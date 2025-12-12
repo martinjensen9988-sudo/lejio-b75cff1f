@@ -119,6 +119,13 @@ export type Database = {
             referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contracts: {
@@ -273,6 +280,13 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -564,6 +578,13 @@ export type Database = {
             referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "subscriptions_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vehicles: {
@@ -664,7 +685,75 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vehicles_public: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          daily_price: number | null
+          deposit_amount: number | null
+          deposit_required: boolean | null
+          description: string | null
+          extra_km_price: number | null
+          features: string[] | null
+          fuel_type: string | null
+          id: string | null
+          image_url: string | null
+          included_km: number | null
+          is_available: boolean | null
+          make: string | null
+          model: string | null
+          monthly_price: number | null
+          unlimited_km: boolean | null
+          variant: string | null
+          weekly_price: number | null
+          year: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          daily_price?: number | null
+          deposit_amount?: number | null
+          deposit_required?: boolean | null
+          description?: string | null
+          extra_km_price?: number | null
+          features?: string[] | null
+          fuel_type?: string | null
+          id?: string | null
+          image_url?: string | null
+          included_km?: number | null
+          is_available?: boolean | null
+          make?: string | null
+          model?: string | null
+          monthly_price?: number | null
+          unlimited_km?: boolean | null
+          variant?: string | null
+          weekly_price?: number | null
+          year?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          daily_price?: number | null
+          deposit_amount?: number | null
+          deposit_required?: boolean | null
+          description?: string | null
+          extra_km_price?: number | null
+          features?: string[] | null
+          fuel_type?: string | null
+          id?: string | null
+          image_url?: string | null
+          included_km?: number | null
+          is_available?: boolean | null
+          make?: string | null
+          model?: string | null
+          monthly_price?: number | null
+          unlimited_km?: boolean | null
+          variant?: string | null
+          weekly_price?: number | null
+          year?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_view_vehicle_sensitive_data: {
