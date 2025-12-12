@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Receipt, CheckCircle, XCircle, Search } from 'lucide-react';
+import { Loader2, Receipt, CheckCircle, XCircle, Search, Mail, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,6 +114,35 @@ const AdminPlatformFees = () => {
     fetchFees();
   };
 
+  const [sendingReminders, setSendingReminders] = useState(false);
+
+  const handleSendReminders = async () => {
+    setSendingReminders(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-payment-reminder`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sendToAll: true }),
+        }
+      );
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(`Påmindelser sendt til ${data.emailsSent} udlejere`);
+      } else {
+        toast.error(data.error || 'Kunne ikke sende påmindelser');
+      }
+    } catch (error) {
+      console.error('Error sending reminders:', error);
+      toast.error('Kunne ikke sende påmindelser');
+    } finally {
+      setSendingReminders(false);
+    }
+  };
+
   const filteredFees = fees.filter(fee => {
     const profile = fee.profiles;
     if (!profile) return true;
@@ -194,14 +223,31 @@ const AdminPlatformFees = () => {
               </CardTitle>
               <CardDescription>49 kr per booking for private udlejere</CardDescription>
             </div>
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Søg udlejer..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Søg udlejer..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              {stats.pending > 0 && (
+                <Button 
+                  onClick={handleSendReminders}
+                  disabled={sendingReminders}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {sendingReminders ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Mail className="w-4 h-4" />
+                  )}
+                  Send påmindelser
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>

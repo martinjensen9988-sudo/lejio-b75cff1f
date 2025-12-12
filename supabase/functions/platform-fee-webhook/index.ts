@@ -24,10 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.text();
-    const signature = req.headers.get('stripe-signature');
 
-    // For now, we'll parse the event directly without signature verification
-    // In production, you should add STRIPE_WEBHOOK_SECRET and verify the signature
     let event: Stripe.Event;
     
     try {
@@ -42,7 +39,6 @@ const handler = async (req: Request): Promise<Response> => {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       
-      // Check if this is a platform fees payment
       if (session.metadata?.type === 'platform_fees') {
         const feeIds = session.metadata.fee_ids?.split(',') || [];
         const userId = session.metadata.user_id;
@@ -66,6 +62,34 @@ const handler = async (req: Request): Promise<Response> => {
           }
 
           console.log(`Successfully marked ${feeIds.length} fees as paid`);
+
+          // Get lessor profile and send confirmation email
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', userId)
+            .single();
+
+          if (profile) {
+            const totalAmount = session.amount_total ? session.amount_total / 100 : 0;
+            
+            // Send confirmation email
+            try {
+              await fetch(`${supabaseUrl}/functions/v1/send-fee-payment-confirmation`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  lessorEmail: profile.email,
+                  lessorName: profile.full_name || 'Udlejer',
+                  amount: totalAmount,
+                  feeCount: feeIds.length,
+                }),
+              });
+              console.log('Payment confirmation email sent');
+            } catch (emailError) {
+              console.error('Failed to send confirmation email:', emailError);
+            }
+          }
         }
       }
     }
