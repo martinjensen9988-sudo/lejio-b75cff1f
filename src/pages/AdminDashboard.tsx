@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,7 @@ import { da } from 'date-fns/locale';
 import AdminDiscountCodes from '@/components/admin/AdminDiscountCodes';
 import AdminCreateBooking from '@/components/admin/AdminCreateBooking';
 import AdminPlatformFees from '@/components/admin/AdminPlatformFees';
+import AdminFleetManagement from '@/components/admin/AdminFleetManagement';
 
 interface Customer {
   id: string;
@@ -278,6 +279,10 @@ const AdminDashboard = () => {
               <Tag className="w-4 h-4 mr-2" />
               Rabatkoder
             </TabsTrigger>
+            <TabsTrigger value="fleet">
+              <Truck className="w-4 h-4 mr-2" />
+              Fleet
+            </TabsTrigger>
           </TabsList>
 
           {/* Customers Tab */}
@@ -430,6 +435,11 @@ const AdminDashboard = () => {
           {/* Discount Codes Tab */}
           <TabsContent value="discounts">
             <AdminDiscountCodes />
+          </TabsContent>
+
+          {/* Fleet Management Tab */}
+          <TabsContent value="fleet">
+            <AdminFleetManagement />
           </TabsContent>
         </Tabs>
 
