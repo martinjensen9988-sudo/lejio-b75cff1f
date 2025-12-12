@@ -1192,6 +1192,53 @@ export type Database = {
         }
         Relationships: []
       }
+      renter_ratings: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          lessor_id: string
+          rating: number
+          renter_email: string
+          renter_id: string | null
+          renter_name: string | null
+          review_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          lessor_id: string
+          rating: number
+          renter_email: string
+          renter_id?: string | null
+          renter_name?: string | null
+          review_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          lessor_id?: string
+          rating?: number
+          renter_email?: string
+          renter_id?: string | null
+          renter_name?: string | null
+          review_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renter_ratings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       renter_warnings: {
         Row: {
           booking_id: string | null
@@ -1676,6 +1723,13 @@ export type Database = {
         Returns: boolean
       }
       generate_contract_number: { Args: never; Returns: string }
+      get_renter_rating_stats: {
+        Args: { renter_email_input: string }
+        Returns: {
+          average_rating: number
+          total_ratings: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

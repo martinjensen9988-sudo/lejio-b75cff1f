@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Booking } from '@/hooks/useBookings';
 import { Contract, useContracts } from '@/hooks/useContracts';
 import { useDamageReports } from '@/hooks/useDamageReports';
+import { useRenterRatings } from '@/hooks/useRenterRatings';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -16,9 +17,11 @@ import {
 } from '@/components/ui/table';
 import ContractSigningModal from '@/components/contracts/ContractSigningModal';
 import DamageReportModal from '@/components/damage/DamageReportModal';
+import { RenterRatingModal } from '@/components/ratings/RenterRatingModal';
+import { RenterRatingBadge } from '@/components/ratings/RenterRatingBadge';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck } from 'lucide-react';
+import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BookingsTableProps {
@@ -45,7 +48,31 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   // Damage report state
   const [damageReportOpen, setDamageReportOpen] = useState(false);
   const [selectedBookingForDamage, setSelectedBookingForDamage] = useState<Booking | null>(null);
+  
+  // Renter rating state
+  const [renterRatingOpen, setRenterRatingOpen] = useState(false);
+  const [selectedBookingForRating, setSelectedBookingForRating] = useState<Booking | null>(null);
+  const [ratedBookings, setRatedBookings] = useState<Set<string>>(new Set());
+  const { hasRatedBooking } = useRenterRatings();
   const [damageReportType, setDamageReportType] = useState<'pickup' | 'return'>('pickup');
+
+  // Check which completed bookings have been rated
+  useEffect(() => {
+    const checkRatedBookings = async () => {
+      const completedBookings = bookings.filter(b => b.status === 'completed');
+      const rated = new Set<string>();
+      
+      for (const booking of completedBookings) {
+        const isRated = await hasRatedBooking(booking.id);
+        if (isRated) {
+          rated.add(booking.id);
+        }
+      }
+      setRatedBookings(rated);
+    };
+    
+    checkRatedBookings();
+  }, [bookings]);
 
   const handleConfirmBooking = async (booking: Booking) => {
     setConfirmingBooking(booking.id);
@@ -171,9 +198,14 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <p className="font-medium text-foreground">{booking.renter_name || 'Ukendt'}</p>
-                      <p className="text-xs text-muted-foreground">{booking.renter_email}</p>
+                    <div className="space-y-1">
+                      <div>
+                        <p className="font-medium text-foreground">{booking.renter_name || 'Ukendt'}</p>
+                        <p className="text-xs text-muted-foreground">{booking.renter_email}</p>
+                      </div>
+                      {booking.renter_email && (
+                        <RenterRatingBadge renterEmail={booking.renter_email} size="sm" />
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -308,6 +340,29 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                         </Button>
                       </div>
                     )}
+                    {booking.status === 'completed' && booking.renter_email && (
+                      <div className="flex items-center gap-1">
+                        {ratedBookings.has(booking.id) ? (
+                          <Badge variant="outline" className="text-mint">
+                            <Star className="w-3 h-3 mr-1 fill-mint" />
+                            Vurderet
+                          </Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedBookingForRating(booking);
+                              setRenterRatingOpen(true);
+                            }}
+                            title="Vurder lejeren"
+                          >
+                            <Star className="w-4 h-4 mr-1" />
+                            Vurder
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -335,6 +390,25 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
           vehicleId={selectedBookingForDamage.vehicle_id}
           contractId={getContractForBooking(selectedBookingForDamage.id)?.id}
           reportType={damageReportType}
+        />
+      )}
+
+      {/* Renter Rating Modal */}
+      {selectedBookingForRating && selectedBookingForRating.renter_email && (
+        <RenterRatingModal
+          isOpen={renterRatingOpen}
+          onClose={() => {
+            setRenterRatingOpen(false);
+            setSelectedBookingForRating(null);
+            // Mark as rated
+            if (selectedBookingForRating) {
+              setRatedBookings(prev => new Set([...prev, selectedBookingForRating.id]));
+            }
+          }}
+          bookingId={selectedBookingForRating.id}
+          renterEmail={selectedBookingForRating.renter_email}
+          renterName={selectedBookingForRating.renter_name}
+          renterId={selectedBookingForRating.renter_id}
         />
       )}
     </>
