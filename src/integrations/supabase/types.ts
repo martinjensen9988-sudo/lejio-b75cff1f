@@ -507,6 +507,51 @@ export type Database = {
         }
         Relationships: []
       }
+      fleet_settlements: {
+        Row: {
+          bookings_count: number
+          commission_amount: number
+          commission_rate: number
+          created_at: string
+          id: string
+          lessor_id: string
+          net_payout: number
+          paid_at: string | null
+          settlement_month: string
+          status: string
+          total_revenue: number
+          updated_at: string
+        }
+        Insert: {
+          bookings_count?: number
+          commission_amount?: number
+          commission_rate: number
+          created_at?: string
+          id?: string
+          lessor_id: string
+          net_payout?: number
+          paid_at?: string | null
+          settlement_month: string
+          status?: string
+          total_revenue?: number
+          updated_at?: string
+        }
+        Update: {
+          bookings_count?: number
+          commission_amount?: number
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          lessor_id?: string
+          net_payout?: number
+          paid_at?: string | null
+          settlement_month?: string
+          status?: string
+          total_revenue?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lessor_payment_settings: {
         Row: {
           bank_account: string | null
@@ -539,6 +584,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      lessor_ratings: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          lessor_id: string
+          rating: number
+          renter_id: string
+          review_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          lessor_id: string
+          rating: number
+          renter_id: string
+          review_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          lessor_id?: string
+          rating?: number
+          renter_id?: string
+          review_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessor_ratings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_methods: {
         Row: {
@@ -706,6 +792,7 @@ export type Database = {
           accepted_payment_methods: string[] | null
           address: string | null
           avatar_url: string | null
+          average_rating: number | null
           bank_account_number: string | null
           bank_reg_number: string | null
           city: string | null
@@ -714,6 +801,8 @@ export type Database = {
           created_at: string
           cvr_number: string | null
           email: string
+          fleet_commission_rate: number | null
+          fleet_plan: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee: number | null
           fuel_policy_enabled: boolean | null
           fuel_price_per_liter: number | null
@@ -721,6 +810,7 @@ export type Database = {
           id: string
           insurance_company: string | null
           insurance_policy_number: string | null
+          lessor_status: Database["public"]["Enums"]["lessor_status"] | null
           manual_activation: boolean | null
           manual_activation_notes: string | null
           mobilepay_number: string | null
@@ -736,6 +826,8 @@ export type Database = {
           subscription_started_at: string | null
           subscription_status: string
           subscription_tier: string | null
+          total_rating_count: number | null
+          total_rating_sum: number | null
           trial_ends_at: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
@@ -744,6 +836,7 @@ export type Database = {
           accepted_payment_methods?: string[] | null
           address?: string | null
           avatar_url?: string | null
+          average_rating?: number | null
           bank_account_number?: string | null
           bank_reg_number?: string | null
           city?: string | null
@@ -752,6 +845,8 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email: string
+          fleet_commission_rate?: number | null
+          fleet_plan?: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee?: number | null
           fuel_policy_enabled?: boolean | null
           fuel_price_per_liter?: number | null
@@ -759,6 +854,7 @@ export type Database = {
           id: string
           insurance_company?: string | null
           insurance_policy_number?: string | null
+          lessor_status?: Database["public"]["Enums"]["lessor_status"] | null
           manual_activation?: boolean | null
           manual_activation_notes?: string | null
           mobilepay_number?: string | null
@@ -774,6 +870,8 @@ export type Database = {
           subscription_started_at?: string | null
           subscription_status?: string
           subscription_tier?: string | null
+          total_rating_count?: number | null
+          total_rating_sum?: number | null
           trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
@@ -782,6 +880,7 @@ export type Database = {
           accepted_payment_methods?: string[] | null
           address?: string | null
           avatar_url?: string | null
+          average_rating?: number | null
           bank_account_number?: string | null
           bank_reg_number?: string | null
           city?: string | null
@@ -790,6 +889,8 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email?: string
+          fleet_commission_rate?: number | null
+          fleet_plan?: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee?: number | null
           fuel_policy_enabled?: boolean | null
           fuel_price_per_liter?: number | null
@@ -797,6 +898,7 @@ export type Database = {
           id?: string
           insurance_company?: string | null
           insurance_policy_number?: string | null
+          lessor_status?: Database["public"]["Enums"]["lessor_status"] | null
           manual_activation?: boolean | null
           manual_activation_notes?: string | null
           mobilepay_number?: string | null
@@ -812,6 +914,8 @@ export type Database = {
           subscription_started_at?: string | null
           subscription_status?: string
           subscription_tier?: string | null
+          total_rating_count?: number | null
+          total_rating_sum?: number | null
           trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
@@ -1098,6 +1202,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "super_admin"
+      fleet_plan_type: "fleet_basic" | "fleet_premium"
+      lessor_status: "bronze" | "silver" | "gold" | "platinum"
       payment_gateway_type:
         | "stripe"
         | "quickpay"
@@ -1234,6 +1340,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "super_admin"],
+      fleet_plan_type: ["fleet_basic", "fleet_premium"],
+      lessor_status: ["bronze", "silver", "gold", "platinum"],
       payment_gateway_type: [
         "stripe",
         "quickpay",
