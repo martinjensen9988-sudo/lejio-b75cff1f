@@ -12,6 +12,12 @@ interface CVRData {
   city?: string;
   postalCode?: string;
   status?: string;
+  companyType?: string;
+  startDate?: string;
+  isActive: boolean;
+  phone?: string;
+  email?: string;
+  industry?: string;
 }
 
 serve(async (req) => {
@@ -59,13 +65,13 @@ serve(async (req) => {
       
       if (response.status === 404) {
         return new Response(
-          JSON.stringify({ error: 'CVR-nummer ikke fundet' }),
+          JSON.stringify({ error: 'CVR-nummer ikke fundet', isActive: false }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       return new Response(
-        JSON.stringify({ error: 'Kunne ikke slå CVR op' }),
+        JSON.stringify({ error: 'Kunne ikke slå CVR op', isActive: false }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -73,17 +79,41 @@ serve(async (req) => {
     const data = await response.json();
     console.log('CVR API response:', JSON.stringify(data));
 
-    // Map the response to our format
+    // Check if company is active based on companydesc or other indicators
+    // Danish companies that are dissolved/inactive typically have terms like:
+    // "Ophørt", "Under konkurs", "Tvangsopløst", "Under frivillig likvidation"
+    const inactiveTerms = ['ophørt', 'konkurs', 'tvangsopløst', 'likvidation', 'opløst', 'afmeldt'];
+    const statusText = (data.companydesc || '').toLowerCase();
+    const isActive = !inactiveTerms.some(term => statusText.includes(term)) && data.name;
+
+    // Map the response to our format with extended info
     const cvrData: CVRData = {
       cvr: cleanCvr,
       companyName: data.name || '',
       address: data.address || '',
       city: data.city || '',
       postalCode: data.zipcode?.toString() || '',
-      status: data.companydesc || '',
+      status: data.companydesc || 'Aktiv',
+      companyType: data.companytype || '',
+      startDate: data.startdate || '',
+      isActive: isActive,
+      phone: data.phone || '',
+      email: data.email || '',
+      industry: data.industrydesc || '',
     };
 
     console.log('Returning CVR data:', JSON.stringify(cvrData));
+
+    // If company is not active, return error with data
+    if (!isActive) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Virksomheden er ikke aktiv. Kun aktive virksomheder kan registreres.',
+          ...cvrData 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(
       JSON.stringify(cvrData),
@@ -93,7 +123,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('CVR lookup error:', error);
     return new Response(
-      JSON.stringify({ error: 'Der opstod en fejl ved CVR-opslag' }),
+      JSON.stringify({ error: 'Der opstod en fejl ved CVR-opslag', isActive: false }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

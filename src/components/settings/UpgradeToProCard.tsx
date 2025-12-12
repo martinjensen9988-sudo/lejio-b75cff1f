@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight, Search } from 'lucide-react';
+import { Loader2, Sparkles, Building2, CheckCircle, ArrowRight, XCircle, MapPin, Phone, Mail, Calendar, Briefcase } from 'lucide-react';
 
 interface UpgradeToProCardProps {
   onUpgradeSuccess?: () => void;
@@ -22,17 +22,22 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
     company_name: '',
     cvr_number: '',
   });
-  const { lookupCVR, isLoading: cvrLoading, error: cvrError } = useCVRLookup();
+  const { data: cvrData, lookupCVR, isLoading: cvrLoading, error: cvrError, isCompanyActive } = useCVRLookup();
 
   // Auto-lookup CVR when 8 digits are entered
   useEffect(() => {
     const cleanCvr = formData.cvr_number.replace(/\D/g, '');
     if (cleanCvr.length === 8) {
       lookupCVR(cleanCvr).then((result) => {
-        if (result?.companyName) {
+        if (result?.companyName && result.isActive) {
           setFormData(prev => ({ ...prev, company_name: result.companyName }));
           toast.success('Virksomhed fundet!', {
             description: result.companyName,
+          });
+        } else if (result?.companyName && !result.isActive) {
+          setFormData(prev => ({ ...prev, company_name: result.companyName }));
+          toast.error('Virksomheden er ikke aktiv', {
+            description: 'Kun aktive virksomheder kan registreres.',
           });
         }
       });
@@ -54,6 +59,14 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
 
     if (!formData.cvr_number.trim() || formData.cvr_number.length < 8) {
       toast.error('Indtast venligst et gyldigt CVR-nummer (8 cifre)');
+      return;
+    }
+
+    // Check if company is active
+    if (cvrData && !cvrData.isActive) {
+      toast.error('Virksomheden er ikke aktiv', {
+        description: 'Kun aktive virksomheder kan registreres på platformen.',
+      });
       return;
     }
 
@@ -141,7 +154,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                 Opgrader din profil til Pro
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-primary" />
@@ -153,15 +166,6 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
               </DialogHeader>
 
               <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="company_name">Virksomhedsnavn *</Label>
-                  <Input
-                    id="company_name"
-                    value={formData.company_name}
-                    onChange={(e) => setFormData(p => ({ ...p, company_name: e.target.value }))}
-                    placeholder="Dit firma ApS"
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="cvr_number">CVR-nummer *</Label>
                   <div className="relative">
@@ -178,9 +182,14 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                         <Loader2 className="w-4 h-4 animate-spin text-primary" />
                       </div>
                     )}
-                    {!cvrLoading && formData.cvr_number.length === 8 && (
+                    {!cvrLoading && cvrData?.isActive && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Search className="w-4 h-4 text-muted-foreground" />
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      </div>
+                    )}
+                    {!cvrLoading && cvrData && !cvrData.isActive && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <XCircle className="w-4 h-4 text-destructive" />
                       </div>
                     )}
                   </div>
@@ -190,6 +199,89 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   <p className="text-xs text-muted-foreground">
                     Indtast 8 cifre for automatisk virksomhedsopslag
                   </p>
+                </div>
+
+                {/* Company Info Display */}
+                {cvrData && (
+                  <div className={`p-4 rounded-xl border ${cvrData.isActive ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800' : 'bg-destructive/10 border-destructive/30'}`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      {cvrData.isActive ? (
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-destructive" />
+                      )}
+                      <span className={`font-semibold ${cvrData.isActive ? 'text-green-700 dark:text-green-400' : 'text-destructive'}`}>
+                        {cvrData.isActive ? 'Aktiv virksomhed' : 'Inaktiv virksomhed'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-start gap-2">
+                        <Building2 className="w-4 h-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          <p className="font-medium">{cvrData.companyName}</p>
+                          {cvrData.companyType && (
+                            <p className="text-xs text-muted-foreground">{cvrData.companyType}</p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {(cvrData.address || cvrData.city) && (
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
+                          <p>
+                            {cvrData.address}
+                            {cvrData.postalCode && cvrData.city && `, ${cvrData.postalCode} ${cvrData.city}`}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {cvrData.industry && (
+                        <div className="flex items-start gap-2">
+                          <Briefcase className="w-4 h-4 text-muted-foreground mt-0.5" />
+                          <p>{cvrData.industry}</p>
+                        </div>
+                      )}
+                      
+                      {cvrData.startDate && (
+                        <div className="flex items-start gap-2">
+                          <Calendar className="w-4 h-4 text-muted-foreground mt-0.5" />
+                          <p>Stiftet: {cvrData.startDate}</p>
+                        </div>
+                      )}
+                      
+                      {cvrData.phone && (
+                        <div className="flex items-start gap-2">
+                          <Phone className="w-4 h-4 text-muted-foreground mt-0.5" />
+                          <p>{cvrData.phone}</p>
+                        </div>
+                      )}
+                      
+                      {cvrData.email && (
+                        <div className="flex items-start gap-2">
+                          <Mail className="w-4 h-4 text-muted-foreground mt-0.5" />
+                          <p>{cvrData.email}</p>
+                        </div>
+                      )}
+
+                      {cvrData.status && (
+                        <div className="pt-2 border-t border-border/50 mt-2">
+                          <p className="text-xs text-muted-foreground">Status: {cvrData.status}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="company_name">Virksomhedsnavn *</Label>
+                  <Input
+                    id="company_name"
+                    value={formData.company_name}
+                    onChange={(e) => setFormData(p => ({ ...p, company_name: e.target.value }))}
+                    placeholder="Dit firma ApS"
+                    disabled={cvrLoading}
+                  />
                 </div>
 
                 <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
@@ -206,7 +298,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   onClick={handleUpgrade} 
                   className="w-full" 
                   size="lg"
-                  disabled={loading}
+                  disabled={loading || cvrLoading || (cvrData && !cvrData.isActive)}
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
