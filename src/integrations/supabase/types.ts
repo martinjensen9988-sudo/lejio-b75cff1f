@@ -517,8 +517,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accepted_payment_methods: string[] | null
           address: string | null
           avatar_url: string | null
+          bank_account_number: string | null
+          bank_reg_number: string | null
           city: string | null
           company_name: string | null
           created_at: string
@@ -530,6 +533,7 @@ export type Database = {
           insurance_policy_number: string | null
           manual_activation: boolean | null
           manual_activation_notes: string | null
+          mobilepay_number: string | null
           payment_gateway: string | null
           phone: string | null
           postal_code: string | null
@@ -538,13 +542,17 @@ export type Database = {
           subscription_ends_at: string | null
           subscription_started_at: string | null
           subscription_status: string
+          subscription_tier: string | null
           trial_ends_at: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
+          accepted_payment_methods?: string[] | null
           address?: string | null
           avatar_url?: string | null
+          bank_account_number?: string | null
+          bank_reg_number?: string | null
           city?: string | null
           company_name?: string | null
           created_at?: string
@@ -556,6 +564,7 @@ export type Database = {
           insurance_policy_number?: string | null
           manual_activation?: boolean | null
           manual_activation_notes?: string | null
+          mobilepay_number?: string | null
           payment_gateway?: string | null
           phone?: string | null
           postal_code?: string | null
@@ -564,13 +573,17 @@ export type Database = {
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string
+          subscription_tier?: string | null
           trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }
         Update: {
+          accepted_payment_methods?: string[] | null
           address?: string | null
           avatar_url?: string | null
+          bank_account_number?: string | null
+          bank_reg_number?: string | null
           city?: string | null
           company_name?: string | null
           created_at?: string
@@ -582,6 +595,7 @@ export type Database = {
           insurance_policy_number?: string | null
           manual_activation?: boolean | null
           manual_activation_notes?: string | null
+          mobilepay_number?: string | null
           payment_gateway?: string | null
           phone?: string | null
           postal_code?: string | null
@@ -590,6 +604,7 @@ export type Database = {
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string
+          subscription_tier?: string | null
           trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]

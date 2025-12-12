@@ -21,7 +21,11 @@ import {
   Save,
   Eye,
   EyeOff,
+  Smartphone,
+  Banknote,
+  Wallet,
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ProfileData {
   full_name: string;
@@ -34,6 +38,10 @@ interface ProfileData {
   cvr_number: string;
   insurance_company: string;
   insurance_policy_number: string;
+  accepted_payment_methods: string[];
+  mobilepay_number: string;
+  bank_account_number: string;
+  bank_reg_number: string;
 }
 
 interface PaymentFormData {
@@ -42,6 +50,14 @@ interface PaymentFormData {
   gateway_merchant_id: string;
   bank_account: string;
 }
+
+const PAYMENT_METHODS = [
+  { value: 'cash', label: 'Kontant', description: 'Betaling ved afhentning' },
+  { value: 'bank_transfer', label: 'Bankoverførsel', description: 'Direkte til din konto' },
+  { value: 'mobilepay', label: 'MobilePay', description: 'Via dit MobilePay nummer' },
+  { value: 'gateway', label: 'Betalingsgateway', description: 'Kortbetaling via gateway' },
+  { value: 'lejio_handled', label: 'LEJIO håndterer', description: 'LEJIO modtager og overfører' },
+];
 
 const PAYMENT_GATEWAYS = [
   { value: 'none', label: 'Ingen (P2P via LEJIO)' },
@@ -71,6 +87,10 @@ const Settings = () => {
     cvr_number: '',
     insurance_company: '',
     insurance_policy_number: '',
+    accepted_payment_methods: ['cash', 'bank_transfer', 'mobilepay'],
+    mobilepay_number: '',
+    bank_account_number: '',
+    bank_reg_number: '',
   });
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentFormData>({
@@ -99,6 +119,10 @@ const Settings = () => {
         cvr_number: profile.cvr_number || '',
         insurance_company: profile.insurance_company || '',
         insurance_policy_number: profile.insurance_policy_number || '',
+        accepted_payment_methods: (profile as any).accepted_payment_methods || ['cash', 'bank_transfer', 'mobilepay'],
+        mobilepay_number: (profile as any).mobilepay_number || '',
+        bank_account_number: (profile as any).bank_account_number || '',
+        bank_reg_number: (profile as any).bank_reg_number || '',
       });
     }
   }, [profile]);
@@ -132,6 +156,10 @@ const Settings = () => {
           cvr_number: formData.cvr_number,
           insurance_company: formData.insurance_company || null,
           insurance_policy_number: formData.insurance_policy_number || null,
+          accepted_payment_methods: formData.accepted_payment_methods,
+          mobilepay_number: formData.mobilepay_number || null,
+          bank_account_number: formData.bank_account_number || null,
+          bank_reg_number: formData.bank_reg_number || null,
         })
         .eq('id', user.id);
 
@@ -338,89 +366,189 @@ const Settings = () => {
 
           {/* Payment Tab */}
           <TabsContent value="payment" className="space-y-6">
+            {/* Accepted Payment Methods */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  Betalingsgateway
+                  <Wallet className="w-5 h-5" />
+                  Accepterede betalingsmetoder
                 </CardTitle>
                 <CardDescription>
-                  {isProfessional 
-                    ? 'Tilslut din egen betalingsgateway for at modtage betalinger direkte'
-                    : 'Som privat udlejer håndterer LEJIO betalinger for dig (15% gebyr)'}
+                  Vælg hvilke betalingsmetoder du accepterer fra lejere
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="payment_gateway">Vælg gateway</Label>
-                  <Select
-                    value={paymentFormData.payment_gateway}
-                    onValueChange={(v) => setPaymentFormData(p => ({ ...p, payment_gateway: v }))}
-                    disabled={!isProfessional}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Vælg betalingsgateway" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_GATEWAYS.map(gw => (
-                        <SelectItem key={gw.value} value={gw.value}>
-                          {gw.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {PAYMENT_METHODS.map((method) => (
+                    <div
+                      key={method.value}
+                      className={`flex items-start space-x-3 p-4 rounded-xl border transition-colors ${
+                        formData.accepted_payment_methods.includes(method.value)
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border bg-card'
+                      }`}
+                    >
+                      <Checkbox
+                        id={`method-${method.value}`}
+                        checked={formData.accepted_payment_methods.includes(method.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData(p => ({
+                              ...p,
+                              accepted_payment_methods: [...p.accepted_payment_methods, method.value]
+                            }));
+                          } else {
+                            setFormData(p => ({
+                              ...p,
+                              accepted_payment_methods: p.accepted_payment_methods.filter(m => m !== method.value)
+                            }));
+                          }
+                        }}
+                      />
+                      <div className="space-y-1">
+                        <label
+                          htmlFor={`method-${method.value}`}
+                          className="text-sm font-medium cursor-pointer"
+                        >
+                          {method.label}
+                        </label>
+                        <p className="text-xs text-muted-foreground">
+                          {method.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {isProfessional && paymentFormData.payment_gateway !== 'none' && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="gateway_api_key">API-nøgle</Label>
-                      <div className="relative">
-                        <Input
-                          id="gateway_api_key"
-                          type={showApiKey ? 'text' : 'password'}
-                          value={paymentFormData.gateway_api_key}
-                          onChange={(e) => setPaymentFormData(p => ({ ...p, gateway_api_key: e.target.value }))}
-                          placeholder="Din API-nøgle fra gateway"
-                          className="pr-10"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3"
-                          onClick={() => setShowApiKey(!showApiKey)}
-                        >
-                          {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Find din API-nøgle i din {PAYMENT_GATEWAYS.find(g => g.value === paymentFormData.payment_gateway)?.label} konto
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="gateway_merchant_id">Merchant ID</Label>
-                      <Input
-                        id="gateway_merchant_id"
-                        value={paymentFormData.gateway_merchant_id}
-                        onChange={(e) => setPaymentFormData(p => ({ ...p, gateway_merchant_id: e.target.value }))}
-                        placeholder="Dit Merchant ID"
-                      />
-                    </div>
-                  </>
+                {/* MobilePay settings */}
+                {formData.accepted_payment_methods.includes('mobilepay') && (
+                  <div className="space-y-2 pt-4 border-t border-border">
+                    <Label htmlFor="mobilepay_number" className="flex items-center gap-2">
+                      <Smartphone className="w-4 h-4" />
+                      MobilePay nummer
+                    </Label>
+                    <Input
+                      id="mobilepay_number"
+                      value={formData.mobilepay_number}
+                      onChange={(e) => setFormData(p => ({ ...p, mobilepay_number: e.target.value }))}
+                      placeholder="+45 12 34 56 78"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Dit MobilePay nummer som lejere kan betale til
+                    </p>
+                  </div>
                 )}
 
-                {!isProfessional && (
-                  <div className="p-4 bg-muted/50 rounded-xl border border-border">
-                    <p className="text-sm text-muted-foreground">
-                      Som privat udlejer håndterer LEJIO alle betalinger for dig. Pengene overføres til din bankkonto efter endt leje.
-                      For at bruge din egen betalingsgateway skal du opgradere til en professionel konto med CVR.
+                {/* Bank transfer settings */}
+                {formData.accepted_payment_methods.includes('bank_transfer') && (
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <Label className="flex items-center gap-2">
+                      <Banknote className="w-4 h-4" />
+                      Bankoplysninger
+                    </Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="bank_reg_number">Reg.nr.</Label>
+                        <Input
+                          id="bank_reg_number"
+                          value={formData.bank_reg_number}
+                          onChange={(e) => setFormData(p => ({ ...p, bank_reg_number: e.target.value }))}
+                          placeholder="1234"
+                          maxLength={4}
+                        />
+                      </div>
+                      <div className="col-span-2 space-y-2">
+                        <Label htmlFor="bank_account_number">Kontonummer</Label>
+                        <Input
+                          id="bank_account_number"
+                          value={formData.bank_account_number}
+                          onChange={(e) => setFormData(p => ({ ...p, bank_account_number: e.target.value }))}
+                          placeholder="0012345678"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Kontooplysninger som lejere kan overføre til
                     </p>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Payment Gateway */}
+            {formData.accepted_payment_methods.includes('gateway') && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Betalingsgateway
+                  </CardTitle>
+                  <CardDescription>
+                    Tilslut din betalingsgateway for at modtage kortbetalinger
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="payment_gateway">Vælg gateway</Label>
+                    <Select
+                      value={paymentFormData.payment_gateway}
+                      onValueChange={(v) => setPaymentFormData(p => ({ ...p, payment_gateway: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Vælg betalingsgateway" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAYMENT_GATEWAYS.filter(gw => gw.value !== 'none').map(gw => (
+                          <SelectItem key={gw.value} value={gw.value}>
+                            {gw.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {paymentFormData.payment_gateway && paymentFormData.payment_gateway !== 'none' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="gateway_api_key">API-nøgle</Label>
+                        <div className="relative">
+                          <Input
+                            id="gateway_api_key"
+                            type={showApiKey ? 'text' : 'password'}
+                            value={paymentFormData.gateway_api_key}
+                            onChange={(e) => setPaymentFormData(p => ({ ...p, gateway_api_key: e.target.value }))}
+                            placeholder="Din API-nøgle fra gateway"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3"
+                            onClick={() => setShowApiKey(!showApiKey)}
+                          >
+                            {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Find din API-nøgle i din {PAYMENT_GATEWAYS.find(g => g.value === paymentFormData.payment_gateway)?.label} konto
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="gateway_merchant_id">Merchant ID</Label>
+                        <Input
+                          id="gateway_merchant_id"
+                          value={paymentFormData.gateway_merchant_id}
+                          onChange={(e) => setPaymentFormData(p => ({ ...p, gateway_merchant_id: e.target.value }))}
+                          placeholder="Dit Merchant ID"
+                        />
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Insurance Tab */}
