@@ -5,6 +5,7 @@ import LicensePlateHook from "@/components/LicensePlateHook";
 import HowItWorks from "@/components/HowItWorks";
 import Pricing from "@/components/Pricing";
 import Footer from "@/components/Footer";
+import CookieBanner from "@/components/CookieBanner";
 
 const Index = () => {
   return (
@@ -18,6 +19,7 @@ const Index = () => {
         <Pricing />
       </main>
       <Footer />
+      <CookieBanner />
     </div>
   );
 };
