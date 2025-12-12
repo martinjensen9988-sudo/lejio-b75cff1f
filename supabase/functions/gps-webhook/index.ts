@@ -21,6 +21,36 @@ interface GpsDataPoint {
   raw_data?: Record<string, unknown>;
 }
 
+interface Geofence {
+  id: string;
+  vehicle_id: string;
+  name: string;
+  center_latitude: number;
+  center_longitude: number;
+  radius_meters: number;
+  is_active: boolean;
+  alert_on_exit: boolean;
+  alert_on_enter: boolean;
+}
+
+// Haversine formula to calculate distance between two points
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371000; // Earth's radius in meters
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+// Check if point is inside geofence
+const isInsideGeofence = (lat: number, lon: number, geofence: Geofence): boolean => {
+  const distance = calculateDistance(lat, lon, geofence.center_latitude, geofence.center_longitude);
+  return distance <= geofence.radius_meters;
+};
+
 // Provider-specific data parsers
 const parseProviderData = (provider: string, data: Record<string, unknown>): GpsDataPoint | null => {
   try {
@@ -97,7 +127,7 @@ const parseAutoPi = (data: Record<string, unknown>): GpsDataPoint => {
   };
 };
 
-// Generic parser - works with any provider that sends standard fields
+// Generic parser
 const parseGeneric = (data: Record<string, unknown>): GpsDataPoint => {
   return {
     device_id: String(data.device_id || data.deviceId || data.imei || data.id || data.tracker_id),
@@ -201,7 +231,7 @@ serve(async (req) => {
         .update({ last_seen_at: new Date().toISOString() })
         .eq('id', device.id);
 
-      // Update vehicle coordinates if available
+      // Update vehicle coordinates
       await supabase
         .from('vehicles')
         .update({ 
@@ -209,6 +239,55 @@ serve(async (req) => {
           longitude: parsed.longitude 
         })
         .eq('id', device.vehicle_id);
+
+      // Check geofences for this vehicle
+      const { data: geofences } = await supabase
+        .from('geofences')
+        .select('*')
+        .eq('vehicle_id', device.vehicle_id)
+        .eq('is_active', true);
+
+      if (geofences && geofences.length > 0) {
+        // Get the previous GPS point to determine if we crossed a boundary
+        const { data: prevPoints } = await supabase
+          .from('gps_data_points')
+          .select('latitude, longitude')
+          .eq('device_id', device.id)
+          .neq('id', insertedPoint.id)
+          .order('recorded_at', { ascending: false })
+          .limit(1);
+
+        const prevPoint = prevPoints?.[0];
+
+        for (const geofence of geofences as Geofence[]) {
+          const isCurrentlyInside = isInsideGeofence(parsed.latitude, parsed.longitude, geofence);
+          const wasInside = prevPoint ? isInsideGeofence(prevPoint.latitude, prevPoint.longitude, geofence) : isCurrentlyInside;
+
+          // Check for exit
+          if (geofence.alert_on_exit && wasInside && !isCurrentlyInside) {
+            console.log(`Vehicle exited geofence: ${geofence.name}`);
+            await supabase.from('geofence_alerts').insert({
+              geofence_id: geofence.id,
+              device_id: device.id,
+              alert_type: 'exit',
+              latitude: parsed.latitude,
+              longitude: parsed.longitude,
+            });
+          }
+
+          // Check for enter
+          if (geofence.alert_on_enter && !wasInside && isCurrentlyInside) {
+            console.log(`Vehicle entered geofence: ${geofence.name}`);
+            await supabase.from('geofence_alerts').insert({
+              geofence_id: geofence.id,
+              device_id: device.id,
+              alert_type: 'enter',
+              latitude: parsed.latitude,
+              longitude: parsed.longitude,
+            });
+          }
+        }
+      }
 
       results.push({
         device_id: parsed.device_id,
