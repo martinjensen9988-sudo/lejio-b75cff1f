@@ -21,21 +21,32 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Vehicle } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, CalendarIcon, Loader2 } from 'lucide-react';
+import { Plus, CalendarIcon, Loader2, AlertTriangle } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface CreateBookingDialogProps {
   vehicles: Vehicle[];
   onBookingCreated: () => void;
 }
 
+interface SubscriptionStatus {
+  subscribed: boolean;
+  is_trial: boolean;
+  trial_expired: boolean;
+  can_create_bookings: boolean;
+}
+
 const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialogProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
+  const [checkingSubscription, setCheckingSubscription] = useState(false);
   
   const [formData, setFormData] = useState({
     vehicle_id: '',
@@ -90,6 +101,32 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
       notes: '',
     });
   };
+
+  // Check subscription status when dialog opens (only for professional users)
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (!open || profile?.user_type !== 'professionel') {
+        // Private users can always create bookings
+        if (profile?.user_type === 'privat') {
+          setSubscriptionStatus({ subscribed: false, is_trial: false, trial_expired: false, can_create_bookings: true });
+        }
+        return;
+      }
+
+      setCheckingSubscription(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('check-pro-subscription');
+        if (error) throw error;
+        setSubscriptionStatus(data);
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+      } finally {
+        setCheckingSubscription(false);
+      }
+    };
+
+    checkSubscription();
+  }, [open, profile?.user_type]);
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
@@ -148,6 +185,39 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
           </DialogTitle>
         </DialogHeader>
 
+        {/* Show loading while checking subscription */}
+        {checkingSubscription && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        )}
+
+        {/* Show blocked message if trial expired */}
+        {!checkingSubscription && subscriptionStatus?.trial_expired && !subscriptionStatus?.can_create_bookings && (
+          <div className="py-6 space-y-4">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/20">
+              <AlertTriangle className="w-6 h-6 text-destructive shrink-0" />
+              <div>
+                <p className="font-semibold text-destructive">Prøveperiode udløbet</p>
+                <p className="text-sm text-muted-foreground">
+                  Din prøveperiode er udløbet. Aktivér et abonnement for at oprette nye bookinger.
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => {
+                setOpen(false);
+                navigate('/settings?tab=subscription');
+              }}
+              className="w-full"
+            >
+              Aktivér abonnement
+            </Button>
+          </div>
+        )}
+
+        {/* Show form if user can create bookings */}
+        {!checkingSubscription && (subscriptionStatus?.can_create_bookings !== false) && (
         <div className="space-y-5 py-4">
           {/* Vehicle Selection */}
           <div className="space-y-2">
@@ -317,6 +387,7 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
             </Button>
           </div>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );
