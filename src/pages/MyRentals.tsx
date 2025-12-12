@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Contract, useContracts } from "@/hooks/useContracts";
+import { usePayments } from "@/hooks/usePayments";
 import ContractSigningModal from "@/components/contracts/ContractSigningModal";
 import {
   Car,
@@ -27,6 +28,7 @@ import {
   MapPin,
   RefreshCw,
   Download,
+  CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,7 +66,7 @@ const MyRentals = () => {
   const [searchParams] = useSearchParams();
   const { user, profile, loading: authLoading } = useAuth();
   const { contracts, signContract, downloadContractPdf, refetch: refetchContracts } = useContracts();
-  
+  const { redirectToPayment, isProcessing: isPaymentProcessing } = usePayments();
   const [bookings, setBookings] = useState<RentalBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
@@ -135,6 +137,10 @@ const MyRentals = () => {
     if (booking.vehicle?.id) {
       navigate(`/booking/${booking.vehicle.id}`);
     }
+  };
+
+  const handlePayment = async (bookingId: string) => {
+    await redirectToPayment(bookingId);
   };
 
   if (authLoading || isLoading) {
@@ -279,6 +285,24 @@ const MyRentals = () => {
 
                             {/* Contract Actions */}
                             <div className="flex flex-wrap gap-2 pt-2">
+                              {/* Payment button for pending bookings */}
+                              {booking.status === "pending" && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className="gap-1 bg-primary hover:bg-primary/90"
+                                  onClick={() => handlePayment(booking.id)}
+                                  disabled={isPaymentProcessing}
+                                >
+                                  {isPaymentProcessing ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <CreditCard className="w-4 h-4" />
+                                  )}
+                                  Betal nu
+                                </Button>
+                              )}
+                              
                               {contract ? (
                                 <>
                                   <Button
