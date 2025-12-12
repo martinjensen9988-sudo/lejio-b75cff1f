@@ -25,6 +25,19 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Validate CRON_SECRET for security
+    const cronSecret = Deno.env.get('CRON_SECRET');
+    const authHeader = req.headers.get('Authorization');
+    const providedSecret = authHeader?.replace('Bearer ', '');
+    
+    if (!cronSecret || providedSecret !== cronSecret) {
+      console.error('[TRIAL-EXPIRATION] Unauthorized: Invalid or missing CRON_SECRET');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     logStep("Function started");
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
