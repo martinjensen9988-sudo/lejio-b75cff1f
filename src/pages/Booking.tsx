@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { usePayments } from "@/hooks/usePayments";
 import {
   Car,
   Calendar as CalendarIcon,
@@ -32,6 +33,8 @@ import {
   CreditCard as IdCard,
   UserPlus,
   Globe,
+  CheckCircle,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -64,11 +67,13 @@ const Booking = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { redirectToPayment, isProcessing: isPaymentProcessing } = usePayments();
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
 
   // Step 1: Booking details
   const [periodType, setPeriodType] = useState<PeriodType>("daily");
@@ -280,7 +285,7 @@ const Booking = () => {
       }
 
       // Create booking
-      const { error: bookingError } = await supabase.from("bookings").insert({
+      const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
         vehicle_id: vehicle.id,
         lessor_id: vehicle.owner_id,
         start_date: format(startDate, "yyyy-MM-dd"),
@@ -309,9 +314,12 @@ const Booking = () => {
         extra_driver_license_number: hasExtraDriver ? extraDriver.licenseNumber : null,
         extra_driver_license_issue_date: hasExtraDriver && extraDriver.licenseIssueDate ? extraDriver.licenseIssueDate : null,
         extra_driver_license_country: hasExtraDriver ? extraDriver.licenseCountry : null,
-      });
+      }).select("id").single();
 
       if (bookingError) throw new Error("Kunne ikke oprette booking");
+      
+      // Store the booking ID for payment step
+      setCreatedBookingId(bookingData.id);
 
       // Send notification
       await supabase.functions.invoke("send-booking-notification", {
@@ -332,11 +340,12 @@ const Booking = () => {
       });
 
       toast({
-        title: "Booking sendt!",
-        description: "Udlejeren vil kontakte dig snarest",
+        title: "Booking oprettet!",
+        description: "Du kan nu betale for din booking",
       });
 
-      navigate("/search");
+      // Move to step 4 (confirmation/payment)
+      setCurrentStep(4);
     } catch (error) {
       console.error("Booking error:", error);
       toast({
@@ -363,7 +372,21 @@ const Booking = () => {
     { number: 1, title: "Vælg periode", icon: CalendarIcon },
     { number: 2, title: "Dokumenter", icon: Upload },
     { number: 3, title: "Bekræft", icon: CreditCard },
+    { number: 4, title: "Betal", icon: Wallet },
   ];
+
+  const handlePayment = async () => {
+    if (!createdBookingId) {
+      toast({
+        title: "Fejl",
+        description: "Ingen booking fundet",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    await redirectToPayment(createdBookingId);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -910,36 +933,105 @@ const Booking = () => {
                   </div>
                 )}
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-border">
-                  <Button
-                    variant="outline"
-                    onClick={currentStep === 1 ? () => navigate("/search") : prevStep}
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    {currentStep === 1 ? "Tilbage til søgning" : "Tilbage"}
-                  </Button>
+                {/* Step 4: Confirmation & Payment */}
+                {currentStep === 4 && (
+                  <div className="space-y-6">
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle className="w-8 h-8 text-accent" />
+                      </div>
+                      <h2 className="text-2xl font-bold mb-2">Booking oprettet!</h2>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        Din booking er oprettet og udlejeren er blevet notificeret.
+                        Betal nu for at bekræfte din reservation.
+                      </p>
+                    </div>
 
-                  {currentStep < 3 ? (
-                    <Button variant="warm" onClick={nextStep}>
-                      Næste
-                      <ChevronRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  ) : (
+                    {pricing && (
+                      <div className="bg-muted/50 rounded-xl p-6 space-y-4">
+                        <h3 className="font-semibold">Betalingsoversigt</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              {vehicle.make} {vehicle.model}
+                            </span>
+                          </div>
+                          {startDate && endDate && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Periode</span>
+                              <span>
+                                {format(startDate, "d. MMM", { locale: da })} - {format(endDate, "d. MMM yyyy", { locale: da })}
+                              </span>
+                            </div>
+                          )}
+                          <hr className="border-border my-2" />
+                          <div className="flex justify-between text-lg font-bold">
+                            <span>Total</span>
+                            <span className="text-primary">
+                              {pricing.grandTotal.toLocaleString("da-DK")} kr
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => navigate("/my-rentals")}
+                      >
+                        Se mine lejeaftaler
+                      </Button>
+                      <Button
+                        variant="warm"
+                        className="flex-1 gap-2"
+                        onClick={handlePayment}
+                        disabled={isPaymentProcessing}
+                      >
+                        {isPaymentProcessing ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <CreditCard className="w-4 h-4" />
+                        )}
+                        Betal nu
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Navigation Buttons */}
+                {currentStep < 4 && (
+                  <div className="flex justify-between mt-8 pt-6 border-t border-border">
                     <Button
-                      variant="warm"
-                      onClick={handleSubmit}
-                      disabled={submitting}
+                      variant="outline"
+                      onClick={currentStep === 1 ? () => navigate("/search") : prevStep}
                     >
-                      {submitting ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      ) : (
-                        <Check className="w-4 h-4 mr-2" />
-                      )}
-                      Bekræft booking
+                      <ChevronLeft className="w-4 h-4 mr-2" />
+                      {currentStep === 1 ? "Tilbage til søgning" : "Tilbage"}
                     </Button>
-                  )}
-                </div>
+
+                    {currentStep < 3 ? (
+                      <Button variant="warm" onClick={nextStep}>
+                        Næste
+                        <ChevronRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="warm"
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        ) : (
+                          <Check className="w-4 h-4 mr-2" />
+                        )}
+                        Bekræft booking
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
