@@ -29,6 +29,7 @@ import {
   Truck,
   AlertTriangle,
   Crown,
+  Bell,
 } from 'lucide-react';
 import { FleetDashboard } from '@/components/fleet/FleetDashboard';
 import { LessorRatingsCard } from '@/components/ratings/LessorRatingsCard';
@@ -37,6 +38,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import ProSubscriptionCard from '@/components/settings/ProSubscriptionCard';
 import UpgradeToProCard from '@/components/settings/UpgradeToProCard';
+import PushNotificationSettings from '@/components/settings/PushNotificationSettings';
 
 interface ProfileData {
   full_name: string;
@@ -296,10 +298,14 @@ const Settings = () => {
 
       <main className="container mx-auto px-6 py-8 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className={cn("grid w-full", isProfessional ? "grid-cols-6" : "grid-cols-4")}>
+          <TabsList className={cn("grid w-full", isProfessional ? "grid-cols-7" : "grid-cols-5")}>
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Profil</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="gap-2">
+              <Bell className="w-4 h-4" />
+              <span className="hidden sm:inline">Notifikationer</span>
             </TabsTrigger>
             {isProfessional && (
               <TabsTrigger value="subscription" className="gap-2">
@@ -517,6 +523,11 @@ const Settings = () => {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-6">
+            <PushNotificationSettings />
           </TabsContent>
 
           {/* Payment Tab */}
