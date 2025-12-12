@@ -1404,6 +1404,7 @@ export type Database = {
           updated_at: string
           use_custom_location: boolean
           variant: string | null
+          vehicle_value: number | null
           vin: string | null
           weekly_price: number | null
           year: number | null
@@ -1441,6 +1442,7 @@ export type Database = {
           updated_at?: string
           use_custom_location?: boolean
           variant?: string | null
+          vehicle_value?: number | null
           vin?: string | null
           weekly_price?: number | null
           year?: number | null
@@ -1478,6 +1480,7 @@ export type Database = {
           updated_at?: string
           use_custom_location?: boolean
           variant?: string | null
+          vehicle_value?: number | null
           vin?: string | null
           weekly_price?: number | null
           year?: number | null
