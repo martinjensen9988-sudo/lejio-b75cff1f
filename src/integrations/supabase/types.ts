@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_messages: {
+        Row: {
+          appeal_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          recipient_id: string | null
+          recipient_type: string | null
+          sender_id: string
+          sender_type: string
+          warning_id: string | null
+        }
+        Insert: {
+          appeal_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          recipient_id?: string | null
+          recipient_type?: string | null
+          sender_id: string
+          sender_type: string
+          warning_id?: string | null
+        }
+        Update: {
+          appeal_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          recipient_id?: string | null
+          recipient_type?: string | null
+          sender_id?: string
+          sender_type?: string
+          warning_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_messages_appeal_id_fkey"
+            columns: ["appeal_id"]
+            isOneToOne: false
+            referencedRelation: "warning_appeals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_messages_warning_id_fkey"
+            columns: ["warning_id"]
+            isOneToOne: false
+            referencedRelation: "renter_warnings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           created_at: string
@@ -922,6 +976,71 @@ export type Database = {
         }
         Relationships: []
       }
+      renter_warnings: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          damage_amount: number | null
+          description: string
+          expires_at: string
+          id: string
+          reason: Database["public"]["Enums"]["warning_reason"]
+          renter_email: string
+          renter_license_number: string | null
+          renter_name: string | null
+          renter_phone: string | null
+          reported_by: string
+          severity: number
+          status: Database["public"]["Enums"]["warning_status"]
+          unpaid_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          damage_amount?: number | null
+          description: string
+          expires_at?: string
+          id?: string
+          reason: Database["public"]["Enums"]["warning_reason"]
+          renter_email: string
+          renter_license_number?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          reported_by: string
+          severity?: number
+          status?: Database["public"]["Enums"]["warning_status"]
+          unpaid_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          damage_amount?: number | null
+          description?: string
+          expires_at?: string
+          id?: string
+          reason?: Database["public"]["Enums"]["warning_reason"]
+          renter_email?: string
+          renter_license_number?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          reported_by?: string
+          severity?: number
+          status?: Database["public"]["Enums"]["warning_status"]
+          unpaid_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renter_warnings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number
@@ -1149,6 +1268,59 @@ export type Database = {
         }
         Relationships: []
       }
+      warning_appeals: {
+        Row: {
+          admin_notes: string | null
+          appeal_reason: string
+          appellant_email: string
+          appellant_name: string | null
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["appeal_status"]
+          supporting_info: string | null
+          updated_at: string
+          warning_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          appeal_reason: string
+          appellant_email: string
+          appellant_name?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["appeal_status"]
+          supporting_info?: string | null
+          updated_at?: string
+          warning_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          appeal_reason?: string
+          appellant_email?: string
+          appellant_name?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["appeal_status"]
+          supporting_info?: string | null
+          updated_at?: string
+          warning_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warning_appeals_warning_id_fkey"
+            columns: ["warning_id"]
+            isOneToOne: false
+            referencedRelation: "renter_warnings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       vehicles_public: {
@@ -1209,6 +1381,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "super_admin"
+      appeal_status: "pending" | "reviewing" | "approved" | "rejected"
       fleet_plan_type: "fleet_basic" | "fleet_premium"
       lessor_status: "bronze" | "silver" | "gold" | "platinum"
       payment_gateway_type:
@@ -1219,6 +1392,16 @@ export type Database = {
         | "onpay"
       payment_schedule_type: "upfront" | "monthly"
       user_type: "privat" | "professionel"
+      warning_reason:
+        | "damage"
+        | "non_payment"
+        | "contract_violation"
+        | "fraud"
+        | "reckless_driving"
+        | "late_return"
+        | "cleanliness"
+        | "other"
+      warning_status: "active" | "under_review" | "dismissed" | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1347,6 +1530,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "super_admin"],
+      appeal_status: ["pending", "reviewing", "approved", "rejected"],
       fleet_plan_type: ["fleet_basic", "fleet_premium"],
       lessor_status: ["bronze", "silver", "gold", "platinum"],
       payment_gateway_type: [
@@ -1358,6 +1542,17 @@ export const Constants = {
       ],
       payment_schedule_type: ["upfront", "monthly"],
       user_type: ["privat", "professionel"],
+      warning_reason: [
+        "damage",
+        "non_payment",
+        "contract_violation",
+        "fraud",
+        "reckless_driving",
+        "late_return",
+        "cleanliness",
+        "other",
+      ],
+      warning_status: ["active", "under_review", "dismissed", "expired"],
     },
   },
 } as const

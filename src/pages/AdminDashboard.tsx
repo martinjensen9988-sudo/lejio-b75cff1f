@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ import AdminDiscountCodes from '@/components/admin/AdminDiscountCodes';
 import AdminCreateBooking from '@/components/admin/AdminCreateBooking';
 import AdminPlatformFees from '@/components/admin/AdminPlatformFees';
 import AdminFleetManagement from '@/components/admin/AdminFleetManagement';
+import AdminWarnings from '@/components/admin/AdminWarnings';
 
 interface Customer {
   id: string;
@@ -283,6 +284,10 @@ const AdminDashboard = () => {
               <Truck className="w-4 h-4 mr-2" />
               Fleet
             </TabsTrigger>
+            <TabsTrigger value="warnings">
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Advarsler
+            </TabsTrigger>
           </TabsList>
 
           {/* Customers Tab */}
@@ -440,6 +445,11 @@ const AdminDashboard = () => {
           {/* Fleet Management Tab */}
           <TabsContent value="fleet">
             <AdminFleetManagement />
+          </TabsContent>
+
+          {/* Warnings Tab */}
+          <TabsContent value="warnings">
+            <AdminWarnings />
           </TabsContent>
         </Tabs>
 
