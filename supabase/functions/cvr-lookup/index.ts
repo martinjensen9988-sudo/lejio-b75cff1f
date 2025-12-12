@@ -89,11 +89,21 @@ serve(async (req) => {
     const isActive = !inactiveTerms.some(term => statusText.includes(term)) && data.name;
 
     // Check VAT registration - Danish VAT number is "DK" + CVR number
-    // Companies with VAT registration will have vat field set to true or have a valid VAT number
-    const vatRegistered = data.vat === true || data.vatregistered === true;
+    // Note: cvrapi.dk free API doesn't always have accurate VAT data
+    // We check multiple fields and also assume active companies in certain industries are VAT registered
+    const hasVatField = data.vat === true || data.vatregistered === true;
+    
+    // Industries that typically require VAT registration in Denmark
+    const vatRequiredIndustries = ['udlejning', 'leasing', 'bilforhandler', 'autohandel', 'transport'];
+    const industryText = (data.industrydesc || '').toLowerCase();
+    const likelyVatRegistered = vatRequiredIndustries.some(term => industryText.includes(term));
+    
+    // If company is active and in a VAT-typical industry, assume VAT registered
+    // Users can always override this manually if needed
+    const vatRegistered = hasVatField || (isActive && likelyVatRegistered);
     const vatNumber = vatRegistered ? `DK${cleanCvr}` : undefined;
 
-    console.log('VAT registration status:', { vatRegistered, vatNumber, rawVat: data.vat });
+    console.log('VAT registration status:', { vatRegistered, vatNumber, rawVat: data.vat, hasVatField, likelyVatRegistered, industry: industryText });
 
     // Map the response to our format with extended info
     const cvrData: CVRData = {
