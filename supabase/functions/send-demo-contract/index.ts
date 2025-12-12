@@ -124,16 +124,21 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
     insurance_company: 'Tryg Forsikring',
     insurance_policy_number: 'POL-2024-123456',
     vanvidskorsel_liability_amount: 250000,
+    // New fields
+    roadside_assistance_provider: 'Falck',
+    roadside_assistance_phone: '+45 70 10 20 30',
+    fuel_policy_enabled: true,
+    fuel_missing_fee: 250,
+    fuel_price_per_liter: 18.50,
   };
 
-  // Header
-  drawText('LEJEKONTRAKT', margin, y, 24, helveticaBold, primaryColor);
-  drawText(demoContract.contract_number, margin + 200, y, 16, helveticaBold, textColor);
-  y -= 20;
-  drawText('LEJIO - Danmarks bedste biludlejningsplatform', margin, y, 10, helvetica, lightGray);
-  y -= 10;
-  drawText(`Oprettet: ${demoContract.created_at}`, margin, y, 9, helvetica, lightGray);
-  y -= 30;
+  // Header with LEJIO logo text
+  drawText('LEJIO', margin, y, 28, helveticaBold, primaryColor);
+  drawText('LEJEKONTRAKT', margin + 100, y, 18, helveticaBold, textColor);
+  y -= 15;
+  drawText(`Kontrakt nr.: ${demoContract.contract_number}`, margin, y, 10, helvetica, lightGray);
+  drawText(`Oprettet: ${demoContract.created_at}`, margin + 200, y, 10, helvetica, lightGray);
+  y -= 25;
   
   // Udlejer Section
   drawSectionHeader('UDLEJER');
@@ -183,6 +188,22 @@ async function generateDemoContractPDF(): Promise<Uint8Array> {
   drawLabelValue('Selvrisiko:', `${demoContract.deductible_amount.toLocaleString('da-DK')} kr (momsfri)`);
   drawLabelValue('Forsikringsselskab:', demoContract.insurance_company);
   drawLabelValue('Policenummer:', demoContract.insurance_policy_number);
+
+  // Vejhjælp Section (NEW)
+  checkNewPage();
+  drawSectionHeader('VEJHJÆLP');
+  drawLabelValue('Udbyder:', demoContract.roadside_assistance_provider);
+  drawLabelValue('Telefon:', demoContract.roadside_assistance_phone);
+  drawParagraph('Ved behov for vejhjælp kontakt venligst ovenstående nummer.');
+
+  // Brændstofpolitik Section (NEW)
+  if (demoContract.fuel_policy_enabled) {
+    drawSectionHeader('BRÆNDSTOFPOLITIK');
+    drawParagraph('Køretøjet udleveres med fuld tank og skal afleveres med fuld tank. Såfremt tanken ikke er fyldt ved aflevering, gælder følgende:');
+    drawLabelValue('Gebyr ved manglende optankning:', `${demoContract.fuel_missing_fee.toLocaleString('da-DK')} kr`);
+    drawLabelValue('Pris pr. liter manglende brændstof:', `${demoContract.fuel_price_per_liter.toFixed(2)} kr`);
+    y -= 5;
+  }
 
   // Førerforhold - NEW PAGE
   checkNewPage();

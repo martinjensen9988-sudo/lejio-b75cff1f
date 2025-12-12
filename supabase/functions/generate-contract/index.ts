@@ -164,6 +164,11 @@ serve(async (req) => {
       fuel_missing_fee: lessorProfile?.fuel_missing_fee || 0,
       fuel_price_per_liter: lessorProfile?.fuel_price_per_liter || 0,
       
+      // Logo - use company logo for professionals, otherwise null (LEJIO logo in frontend)
+      logo_url: lessorProfile?.user_type === 'professionel' && lessorProfile?.company_logo_url 
+        ? lessorProfile.company_logo_url 
+        : null,
+      
       status: 'pending_renter_signature',
     };
 

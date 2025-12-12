@@ -17,18 +17,32 @@ const ContractPreview = ({ contract }: ContractPreviewProps) => {
     return new Intl.NumberFormat('da-DK', { style: 'currency', currency: 'DKK', maximumFractionDigits: 2 }).format(amount);
   };
 
+  // LEJIO logo as SVG data URL for fallback
+  const lejioLogoUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40'%3E%3Ctext x='0' y='30' font-family='Arial, sans-serif' font-size='28' font-weight='bold' fill='%232962FF'%3ELEJIO%3C/text%3E%3C/svg%3E";
+
   return (
     <div className="bg-white text-gray-900 font-sans max-w-3xl mx-auto">
       {/* Header */}
       <div className="border-b-4 border-primary pb-6 mb-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-primary">Lejekontrakt {contract.contract_number}</h1>
-            <p className="text-sm text-gray-600 mt-1">LEJIO - Biludlejning</p>
+          <div className="flex items-center gap-4">
+            {/* Logo */}
+            {contract.logo_url ? (
+              <img 
+                src={contract.logo_url} 
+                alt="Virksomhedslogo" 
+                className="h-12 max-w-[160px] object-contain"
+              />
+            ) : (
+              <div className="flex items-center">
+                <span className="text-3xl font-bold text-primary tracking-tight">LEJIO</span>
+              </div>
+            )}
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">Oprettet</p>
-            <p className="text-sm font-medium">{formatDate(contract.created_at)}</p>
+            <h1 className="text-xl font-bold text-primary">Lejekontrakt</h1>
+            <p className="text-sm font-mono text-gray-600">{contract.contract_number}</p>
+            <p className="text-xs text-gray-500 mt-1">Oprettet: {formatDate(contract.created_at)}</p>
           </div>
         </div>
       </div>

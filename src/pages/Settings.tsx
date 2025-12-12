@@ -24,6 +24,8 @@ import {
   Smartphone,
   Banknote,
   Wallet,
+  Upload,
+  Image,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -47,6 +49,7 @@ interface ProfileData {
   fuel_policy_enabled: boolean;
   fuel_missing_fee: number;
   fuel_price_per_liter: number;
+  company_logo_url: string;
 }
 
 interface PaymentFormData {
@@ -100,7 +103,9 @@ const Settings = () => {
     fuel_policy_enabled: false,
     fuel_missing_fee: 0,
     fuel_price_per_liter: 0,
+    company_logo_url: '',
   });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentFormData>({
     payment_gateway: 'none',
@@ -137,9 +142,47 @@ const Settings = () => {
         fuel_policy_enabled: (profile as any).fuel_policy_enabled || false,
         fuel_missing_fee: (profile as any).fuel_missing_fee || 0,
         fuel_price_per_liter: (profile as any).fuel_price_per_liter || 0,
+        company_logo_url: (profile as any).company_logo_url || '',
       });
     }
   }, [profile]);
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploadingLogo(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/company-logo.${fileExt}`;
+
+      // Upload to avatars bucket (reusing existing public bucket)
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      setFormData(p => ({ ...p, company_logo_url: publicUrl }));
+      toast({
+        title: 'Logo uploadet',
+        description: 'Dit virksomhedslogo er blevet uploadet',
+      });
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: 'Fejl',
+        description: 'Kunne ikke uploade logo',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   useEffect(() => {
     if (paymentSettings) {
@@ -179,6 +222,7 @@ const Settings = () => {
           fuel_policy_enabled: formData.fuel_policy_enabled,
           fuel_missing_fee: formData.fuel_missing_fee || 0,
           fuel_price_per_liter: formData.fuel_price_per_liter || 0,
+          company_logo_url: formData.company_logo_url || null,
         })
         .eq('id', user.id);
 
@@ -376,6 +420,69 @@ const Settings = () => {
                         onChange={(e) => setFormData(p => ({ ...p, cvr_number: e.target.value }))}
                         placeholder="12345678"
                       />
+                    </div>
+                  </div>
+
+                  {/* Company Logo Upload */}
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <Label className="flex items-center gap-2">
+                      <Image className="w-4 h-4" />
+                      Virksomhedslogo
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Dit logo vises på lejekontrakter i stedet for LEJIO-logoet
+                    </p>
+                    
+                    <div className="flex items-center gap-4">
+                      {formData.company_logo_url ? (
+                        <div className="relative">
+                          <img 
+                            src={formData.company_logo_url} 
+                            alt="Virksomhedslogo" 
+                            className="h-16 max-w-[200px] object-contain rounded border border-border bg-white p-2"
+                          />
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                            onClick={() => setFormData(p => ({ ...p, company_logo_url: '' }))}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="h-16 w-32 border-2 border-dashed border-border rounded flex items-center justify-center text-muted-foreground text-xs">
+                          Intet logo
+                        </div>
+                      )}
+                      
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                          id="logo-upload"
+                        />
+                        <label htmlFor="logo-upload">
+                          <Button variant="outline" size="sm" asChild disabled={uploadingLogo}>
+                            <span className="cursor-pointer">
+                              {uploadingLogo ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                              )}
+                              {uploadingLogo ? 'Uploader...' : 'Upload logo'}
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-accent/10 rounded-lg border border-accent/30">
+                      <p className="text-xs text-foreground">
+                        <strong>Tip:</strong> Brug et logo med transparent baggrund (PNG) for bedste resultat. Anbefalet størrelse: 300x100 pixels.
+                      </p>
                     </div>
                   </div>
                 </CardContent>
