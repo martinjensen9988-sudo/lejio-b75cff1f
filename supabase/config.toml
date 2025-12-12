@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.send-fee-payment-confirmation]
 verify_jwt = false
+
+[functions.send-demo-contract]
+verify_jwt = false
