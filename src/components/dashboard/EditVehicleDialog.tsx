@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin } from 'lucide-react';
+import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VEHICLE_FEATURES = [
@@ -67,6 +67,7 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     location_city: vehicle.location_city || '',
     latitude: vehicle.latitude || undefined as number | undefined,
     longitude: vehicle.longitude || undefined as number | undefined,
+    vehicle_value: vehicle.vehicle_value || undefined as number | undefined,
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -94,6 +95,7 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         location_city: vehicle.location_city || '',
         latitude: vehicle.latitude || undefined,
         longitude: vehicle.longitude || undefined,
+        vehicle_value: vehicle.vehicle_value || undefined,
       });
     }
   };
@@ -295,6 +297,32 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
                   }))}
                   placeholder="9.900"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Vehicle Value for Vanvidskørsel */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Bilens værdi (vanvidskørsel)</Label>
+            <div className="space-y-2">
+              <Input
+                type="number"
+                value={formData.vehicle_value || ''}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  vehicle_value: parseFloat(e.target.value) || undefined 
+                }))}
+                placeholder="F.eks. 150.000"
+              />
+              <div className="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-medium text-yellow-600 mb-1">Vigtig information</p>
+                    <p>Denne værdi bruges ved vanvidskørsel-ansvar i lejekontrakten. Værdien må <strong>aldrig</strong> være højere end den faktiske købspris.</p>
+                    <p className="mt-1">LEJIO kan foretage stikprøvekontrol og kræve dokumentation (slutseddel eller bankoverførsel).</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

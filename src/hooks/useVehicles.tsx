@@ -37,6 +37,7 @@ export interface Vehicle {
   location_city: string | null;
   latitude: number | null;
   longitude: number | null;
+  vehicle_value: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -70,6 +71,7 @@ export interface VehicleInsert {
   location_city?: string;
   latitude?: number;
   longitude?: number;
+  vehicle_value?: number;
 }
 
 export const useVehicles = () => {
