@@ -15,7 +15,7 @@ import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock } from 'lucide-react';
+import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SubscriptionLimits {
@@ -28,7 +28,8 @@ interface SubscriptionLimits {
 const AddVehicleDialog = () => {
   const [open, setOpen] = useState(false);
   const [registration, setRegistration] = useState('');
-  const [step, setStep] = useState<'lookup' | 'details'>('lookup');
+  const [step, setStep] = useState<'lookup' | 'details' | 'manual'>('lookup');
+  const [manualMode, setManualMode] = useState(false);
   const [vehicleDetails, setVehicleDetails] = useState<Partial<VehicleInsert>>({});
   const [subscriptionLimits, setSubscriptionLimits] = useState<SubscriptionLimits | null>(null);
   const [checkingLimits, setCheckingLimits] = useState(false);
@@ -141,8 +142,39 @@ const AddVehicleDialog = () => {
   const resetForm = () => {
     setRegistration('');
     setStep('lookup');
+    setManualMode(false);
     setVehicleDetails({});
     reset();
+  };
+
+  const startManualEntry = () => {
+    setManualMode(true);
+    setVehicleDetails({
+      registration: registration || '',
+      make: '',
+      model: '',
+      variant: '',
+      year: undefined,
+      fuel_type: '',
+      color: '',
+      vin: '',
+      daily_price: 499,
+      weekly_price: 2800,
+      monthly_price: 9900,
+      included_km: 100,
+      extra_km_price: 2.50,
+      deposit_required: false,
+      deposit_amount: 0,
+      prepaid_rent_enabled: false,
+      prepaid_rent_months: 1,
+      payment_schedule: 'upfront' as const,
+      use_custom_location: false,
+      location_address: '',
+      location_postal_code: '',
+      location_city: '',
+      vehicle_value: undefined,
+    });
+    setStep('manual');
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -161,7 +193,7 @@ const AddVehicleDialog = () => {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">
-            {step === 'lookup' ? 'Find din bil' : 'Bekræft biloplysninger'}
+            {step === 'lookup' ? 'Find din bil' : step === 'manual' ? 'Indtast biloplysninger manuelt' : 'Bekræft biloplysninger'}
           </DialogTitle>
         </DialogHeader>
 
@@ -199,7 +231,15 @@ const AddVehicleDialog = () => {
                   {lookupLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 </Button>
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && (
+                <div className="space-y-2">
+                  <p className="text-sm text-destructive">{error}</p>
+                  <Button variant="outline" size="sm" onClick={startManualEntry} className="gap-2">
+                    <Edit className="w-4 h-4" />
+                    Indtast manuelt i stedet
+                  </Button>
+                </div>
+              )}
             </div>
 
             {vehicle && (
@@ -221,6 +261,195 @@ const AddVehicleDialog = () => {
                 </div>
               </div>
             )}
+
+            {/* Manual entry button */}
+            <div className="pt-2 border-t border-border">
+              <Button variant="ghost" onClick={startManualEntry} className="w-full gap-2 text-muted-foreground hover:text-foreground">
+                <Edit className="w-4 h-4" />
+                Eller indtast biloplysninger manuelt
+              </Button>
+            </div>
+          </div>
+        ) : step === 'manual' ? (
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            {/* Manual vehicle info entry */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Biloplysninger</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Nummerplade *</Label>
+                  <Input
+                    value={vehicleDetails.registration || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, registration: e.target.value.toUpperCase() }))}
+                    placeholder="AB 12 345"
+                    className="uppercase"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Årgang</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.year || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, year: parseInt(e.target.value) || undefined }))}
+                    placeholder="2020"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Mærke *</Label>
+                  <Input
+                    value={vehicleDetails.make || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, make: e.target.value }))}
+                    placeholder="F.eks. Toyota"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Model *</Label>
+                  <Input
+                    value={vehicleDetails.model || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, model: e.target.value }))}
+                    placeholder="F.eks. Corolla"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Variant</Label>
+                  <Input
+                    value={vehicleDetails.variant || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, variant: e.target.value }))}
+                    placeholder="F.eks. 1.8 Hybrid"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Brændstof</Label>
+                  <Input
+                    value={vehicleDetails.fuel_type || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, fuel_type: e.target.value }))}
+                    placeholder="F.eks. Benzin"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Farve</Label>
+                  <Input
+                    value={vehicleDetails.color || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, color: e.target.value }))}
+                    placeholder="F.eks. Sort"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Stelnummer (VIN)</Label>
+                  <Input
+                    value={vehicleDetails.vin || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, vin: e.target.value.toUpperCase() }))}
+                    placeholder="Valgfrit"
+                    className="uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Prices */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Priser</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Pr. dag (kr)</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.daily_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, daily_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="499"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Pr. uge (kr)</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.weekly_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, weekly_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="2.800"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Pr. måned (kr)</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.monthly_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, monthly_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="9.900"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Vehicle Value */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Bilens værdi (vanvidskørsel)</Label>
+              <Input
+                type="number"
+                value={vehicleDetails.vehicle_value || ''}
+                onChange={(e) => setVehicleDetails(prev => ({ ...prev, vehicle_value: parseFloat(e.target.value) || undefined }))}
+                placeholder="F.eks. 150.000"
+              />
+            </div>
+
+            {/* KM Settings */}
+            <div 
+              className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
+              onClick={() => setVehicleDetails(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
+            >
+              <Checkbox
+                id="manual_unlimited_km"
+                checked={vehicleDetails.unlimited_km || false}
+                onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, unlimited_km: !!checked }))}
+              />
+              <label htmlFor="manual_unlimited_km" className="text-sm font-medium cursor-pointer select-none">
+                Fri km (ingen km-begrænsning)
+              </label>
+            </div>
+
+            {!vehicleDetails.unlimited_km && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Inkl. km/dag</Label>
+                  <Input
+                    type="number"
+                    value={vehicleDetails.included_km || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
+                    placeholder="100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Ekstra km pris (kr)</Label>
+                  <Input
+                    type="number"
+                    step="0.50"
+                    value={vehicleDetails.extra_km_price || ''}
+                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
+                    placeholder="2,50"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" onClick={() => { setStep('lookup'); setManualMode(false); }} className="flex-1">
+                Tilbage
+              </Button>
+              <Button 
+                onClick={handleAddVehicle} 
+                disabled={addingVehicle || !vehicleDetails.registration || !vehicleDetails.make || !vehicleDetails.model || !canAddVehicle}
+                className="flex-1"
+              >
+                {addingVehicle ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Tilføj bil
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4 py-4">
