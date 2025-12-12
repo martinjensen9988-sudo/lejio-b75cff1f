@@ -8,44 +8,81 @@ export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const checkAdminStatus = async (userId: string) => {
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'super_admin'
-      });
-      
-      if (error) {
-        console.error('Error checking admin status:', error);
+      try {
+        const { data, error } = await supabase.rpc('has_role', {
+          _user_id: userId,
+          _role: 'super_admin'
+        });
+        
+        if (error) {
+          console.error('Error checking admin status:', error);
+          return false;
+        }
+        return data === true;
+      } catch (err) {
+        console.error('Error in checkAdminStatus:', err);
         return false;
       }
-      return data === true;
     };
 
+    // Initial session check
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        if (session?.user) {
+          setUser(session.user);
+          const isAdmin = await checkAdminStatus(session.user.id);
+          if (mounted) {
+            setIsSuperAdmin(isAdmin);
+          }
+        } else {
+          setUser(null);
+          setIsSuperAdmin(false);
+        }
+      } catch (err) {
+        console.error('Error initializing auth:', err);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         setUser(session?.user ?? null);
         
         if (session?.user) {
           const isAdmin = await checkAdminStatus(session.user.id);
-          setIsSuperAdmin(isAdmin);
+          if (mounted) {
+            setIsSuperAdmin(isAdmin);
+          }
         } else {
           setIsSuperAdmin(false);
         }
-        setIsLoading(false);
+        
+        // Only set loading false here if we're responding to a real auth change event
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          setIsLoading(false);
+        }
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const isAdmin = await checkAdminStatus(session.user.id);
-        setIsSuperAdmin(isAdmin);
-      }
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
