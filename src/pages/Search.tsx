@@ -64,7 +64,7 @@ const Search = () => {
   const [filteredVehicles, setFilteredVehicles] = useState<SearchVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
-  const [showMap, setShowMap] = useState(true);
+  const [showMap, setShowMap] = useState(false);
   const [filters, setFilters] = useState<SearchFiltersState>({
     priceMin: 0,
     priceMax: 5000,
@@ -234,22 +234,23 @@ const Search = () => {
             </div>
           ) : (
             <div className="flex flex-col md:flex-row gap-6">
-              {/* Map - Hidden on mobile when showing list */}
-              <div className={`${showMap ? 'block' : 'hidden'} md:block md:w-1/2 lg:w-3/5`}>
-                <div className="sticky top-24 h-[500px] md:h-[calc(100vh-200px)] rounded-2xl overflow-hidden border border-border shadow-soft">
-                  <SearchMap
-                    vehicles={filteredVehicles}
-                    selectedVehicle={selectedVehicle}
-                    onVehicleSelect={setSelectedVehicle}
-                  />
+              {/* Vehicle List - Shows by default */}
+              <div className={`${!showMap ? 'block' : 'hidden'} md:block ${showMap ? 'md:w-1/2 lg:w-2/5' : 'md:w-full'}`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="font-semibold text-lg">{filteredVehicles.length} biler</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowMap(!showMap)}
+                    className="hidden md:flex"
+                  >
+                    <MapPin className="w-4 h-4 mr-2" />
+                    {showMap ? 'Skjul kort' : 'Vis kort'}
+                  </Button>
                 </div>
-              </div>
-
-              {/* Vehicle List - Hidden on mobile when showing map */}
-              <div className={`${!showMap ? 'block' : 'hidden'} md:block md:w-1/2 lg:w-2/5`}>
-                <div className="space-y-4">
+                <div className={`grid gap-4 ${!showMap ? 'md:grid-cols-2 lg:grid-cols-3' : ''}`}>
                   {filteredVehicles.length === 0 ? (
-                    <div className="text-center py-12 bg-card rounded-2xl border border-border">
+                    <div className="text-center py-12 bg-card rounded-2xl border border-border col-span-full">
                       <Car className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                       <h3 className="text-lg font-semibold mb-2">Ingen biler fundet</h3>
                       <p className="text-muted-foreground">
@@ -269,6 +270,19 @@ const Search = () => {
                   )}
                 </div>
               </div>
+
+              {/* Map - Hidden by default, shown when toggled */}
+              {showMap && (
+                <div className={`${showMap ? 'block' : 'hidden'} md:block md:w-1/2 lg:w-3/5`}>
+                  <div className="sticky top-24 h-[500px] md:h-[calc(100vh-200px)] rounded-2xl overflow-hidden border border-border shadow-soft">
+                    <SearchMap
+                      vehicles={filteredVehicles}
+                      selectedVehicle={selectedVehicle}
+                      onVehicleSelect={setSelectedVehicle}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { Calendar, Fuel, DollarSign, Clock } from "lucide-react";
+import { Calendar, Fuel, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -157,7 +157,7 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Min pris/dag</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kr</span>
                 <Input
                   type="number"
                   value={filters.priceMin}
@@ -167,7 +167,7 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
                       priceMin: Number(e.target.value) || 0,
                     }))
                   }
-                  className="w-24 pl-9"
+                  className="w-28 pl-9"
                   placeholder="0"
                 />
               </div>
@@ -176,7 +176,7 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Max pris/dag</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kr</span>
                 <Input
                   type="number"
                   value={filters.priceMax}
@@ -186,7 +186,7 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
                       priceMax: Number(e.target.value) || 10000,
                     }))
                   }
-                  className="w-24 pl-9"
+                  className="w-28 pl-9"
                   placeholder="5000"
                 />
               </div>
