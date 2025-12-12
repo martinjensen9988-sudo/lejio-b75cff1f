@@ -907,6 +907,11 @@ export type Database = {
           image_url: string | null
           included_km: number | null
           is_available: boolean | null
+          latitude: number | null
+          location_address: string | null
+          location_city: string | null
+          location_postal_code: string | null
+          longitude: number | null
           make: string
           model: string
           monthly_price: number | null
@@ -919,6 +924,7 @@ export type Database = {
           registration: string
           unlimited_km: boolean
           updated_at: string
+          use_custom_location: boolean
           variant: string | null
           vin: string | null
           weekly_price: number | null
@@ -938,6 +944,11 @@ export type Database = {
           image_url?: string | null
           included_km?: number | null
           is_available?: boolean | null
+          latitude?: number | null
+          location_address?: string | null
+          location_city?: string | null
+          location_postal_code?: string | null
+          longitude?: number | null
           make: string
           model: string
           monthly_price?: number | null
@@ -950,6 +961,7 @@ export type Database = {
           registration: string
           unlimited_km?: boolean
           updated_at?: string
+          use_custom_location?: boolean
           variant?: string | null
           vin?: string | null
           weekly_price?: number | null
@@ -969,6 +981,11 @@ export type Database = {
           image_url?: string | null
           included_km?: number | null
           is_available?: boolean | null
+          latitude?: number | null
+          location_address?: string | null
+          location_city?: string | null
+          location_postal_code?: string | null
+          longitude?: number | null
           make?: string
           model?: string
           monthly_price?: number | null
@@ -981,6 +998,7 @@ export type Database = {
           registration?: string
           unlimited_km?: boolean
           updated_at?: string
+          use_custom_location?: boolean
           variant?: string | null
           vin?: string | null
           weekly_price?: number | null
