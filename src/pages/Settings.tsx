@@ -26,7 +26,10 @@ import {
   Wallet,
   Upload,
   Image,
+  Truck,
 } from 'lucide-react';
+import { FleetDashboard } from '@/components/fleet/FleetDashboard';
+import { LessorRatingsCard } from '@/components/ratings/LessorRatingsCard';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface ProfileData {
@@ -287,7 +290,7 @@ const Settings = () => {
 
       <main className="container mx-auto px-6 py-8 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Profil</span>
@@ -300,6 +303,12 @@ const Settings = () => {
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">Kontrakt</span>
             </TabsTrigger>
+            {isProfessional && (
+              <TabsTrigger value="fleet" className="gap-2">
+                <Truck className="w-4 h-4" />
+                <span className="hidden sm:inline">Fleet</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Profile Tab */}
@@ -837,6 +846,16 @@ const Settings = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Fleet Tab */}
+          {isProfessional && (
+            <TabsContent value="fleet" className="space-y-6">
+              <FleetDashboard />
+              
+              {/* Lessor Rating Card */}
+              {user && <LessorRatingsCard lessorId={user.id} />}
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Save Button */}
