@@ -1,0 +1,310 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Loader2, CheckCircle, CreditCard, Car, Crown, Sparkles, Settings
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { da } from 'date-fns/locale';
+
+interface SubscriptionStatus {
+  subscribed: boolean;
+  tier: string | null;
+  tier_name: string | null;
+  max_vehicles: number;
+  price?: number;
+  subscription_end: string | null;
+  stripe_customer_id: string | null;
+}
+
+const TIERS = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    subtitle: '1-5 biler',
+    price: 299,
+    maxVehicles: 5,
+    features: [
+      'Op til 5 køretøjer',
+      'Ubegrænsede bookinger',
+      'Digitale kontrakter',
+      'Dashboard & statistik',
+    ],
+  },
+  {
+    id: 'standard',
+    name: 'Standard',
+    subtitle: '6-15 biler',
+    price: 499,
+    maxVehicles: 15,
+    popular: true,
+    features: [
+      'Op til 15 køretøjer',
+      'Ubegrænsede bookinger',
+      'Digitale kontrakter',
+      'Dashboard & statistik',
+      'Prioriteret support',
+    ],
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    subtitle: '16+ biler',
+    price: 799,
+    maxVehicles: 999,
+    features: [
+      'Ubegrænsede køretøjer',
+      'Ubegrænsede bookinger',
+      'Digitale kontrakter',
+      'Dashboard & statistik',
+      'Dedikeret support',
+      'API adgang',
+    ],
+  },
+];
+
+interface ProSubscriptionCardProps {
+  vehicleCount?: number;
+}
+
+const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => {
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-pro-subscription');
+      if (error) throw error;
+      setSubscription(data);
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkSubscription();
+
+    // Check for success/cancelled URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('subscription') === 'success') {
+      toast.success('Abonnement aktiveret!', {
+        description: 'Dit Pro-abonnement er nu aktivt.',
+      });
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+      // Refresh subscription status
+      setTimeout(checkSubscription, 2000);
+    } else if (params.get('subscription') === 'cancelled') {
+      toast.info('Abonnement afbrudt', {
+        description: 'Du kan altid vende tilbage og aktivere dit abonnement.',
+      });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  const handleCheckout = async (tier: string) => {
+    setCheckoutLoading(tier);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-pro-checkout', {
+        body: { tier },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      toast.error('Kunne ikke starte checkout', {
+        description: error.message || 'Prøv igen senere',
+      });
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pro-customer-portal');
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error('Portal error:', error);
+      toast.error('Kunne ikke åbne kundeportal', {
+        description: error.message || 'Prøv igen senere',
+      });
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
+  const getRecommendedTier = () => {
+    if (vehicleCount <= 5) return 'starter';
+    if (vehicleCount <= 15) return 'standard';
+    return 'enterprise';
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // If user has active subscription, show management view
+  if (subscription?.subscribed) {
+    const currentTier = TIERS.find(t => t.id === subscription.tier) || TIERS[0];
+    
+    return (
+      <Card className="border-primary">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-primary" />
+                Dit Pro-abonnement
+              </CardTitle>
+              <CardDescription>
+                Administrer dit månedlige abonnement
+              </CardDescription>
+            </div>
+            <Badge className="bg-primary">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Aktiv
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="bg-muted p-4 rounded-lg space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Nuværende plan</span>
+              <span className="font-semibold">{subscription.tier_name}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Månedlig pris</span>
+              <span className="font-semibold">{currentTier.price} kr/md</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Maks. køretøjer</span>
+              <span className="font-semibold">{subscription.max_vehicles === 999 ? 'Ubegrænset' : subscription.max_vehicles}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Dine køretøjer</span>
+              <span className="font-semibold">{vehicleCount}</span>
+            </div>
+            {subscription.subscription_end && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Næste betaling</span>
+                <span className="font-semibold">
+                  {format(new Date(subscription.subscription_end), 'd. MMMM yyyy', { locale: da })}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <Button 
+            onClick={handleManageSubscription} 
+            variant="outline" 
+            className="w-full"
+            disabled={portalLoading}
+          >
+            {portalLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <Settings className="w-4 h-4 mr-2" />
+            )}
+            Administrer abonnement
+          </Button>
+          <p className="text-xs text-center text-muted-foreground">
+            Her kan du ændre betalingsmetode, opgradere/nedgradere eller annullere dit abonnement
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show subscription options
+  const recommendedTier = getRecommendedTier();
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5" />
+            LEJIO Pro Abonnement
+          </CardTitle>
+          <CardDescription>
+            Vælg det abonnement der passer til din flåde. Ingen bindingsperiode - annuller når som helst.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {TIERS.map((tier) => (
+          <Card 
+            key={tier.id}
+            className={`relative ${tier.id === recommendedTier ? 'border-primary shadow-lg' : ''}`}
+          >
+            {tier.id === recommendedTier && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-primary">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Anbefalet
+                </Badge>
+              </div>
+            )}
+            <CardHeader className="text-center pb-2">
+              <CardTitle className="text-lg">{tier.name}</CardTitle>
+              <CardDescription>{tier.subtitle}</CardDescription>
+              <div className="pt-2">
+                <span className="text-3xl font-bold">{tier.price}</span>
+                <span className="text-muted-foreground"> kr/md</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-2">
+                {tier.features.map((feature, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                onClick={() => handleCheckout(tier.id)}
+                disabled={checkoutLoading !== null}
+                className="w-full"
+                variant={tier.id === recommendedTier ? 'default' : 'outline'}
+              >
+                {checkoutLoading === tier.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                Vælg {tier.name}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <p className="text-xs text-center text-muted-foreground">
+        * Alle priser er ekskl. moms. Betalingen sker via Stripe. Du kan til enhver tid ændre eller annullere dit abonnement.
+      </p>
+    </div>
+  );
+};
+
+export default ProSubscriptionCard;
