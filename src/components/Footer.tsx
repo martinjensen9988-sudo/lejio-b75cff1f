@@ -48,17 +48,24 @@ const Footer = () => {
               <a href="mailto:hej@lejio.dk" className="hover:text-secondary transition-colors">hej@lejio.dk</a>
             </div>
             
-            {/* Social icons in happy colors */}
+            {/* Social icons */}
             <div className="flex gap-3 mt-6">
-              {['📘', '📸', '🐦'].map((emoji, i) => (
-                <a 
-                  key={i}
-                  href="#" 
-                  className="w-10 h-10 rounded-xl bg-primary-foreground/10 hover:bg-secondary flex items-center justify-center text-lg transition-colors"
-                >
-                  {emoji}
-                </a>
-              ))}
+              <a 
+                href="https://www.facebook.com/profile.php?id=61584959161176" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-xl bg-primary-foreground/10 hover:bg-secondary flex items-center justify-center text-lg transition-colors"
+                aria-label="Facebook"
+              >
+                📘
+              </a>
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-xl bg-primary-foreground/10 hover:bg-secondary flex items-center justify-center text-lg transition-colors"
+                aria-label="Instagram"
+              >
+                📸
+              </a>
             </div>
           </div>
         </div>
