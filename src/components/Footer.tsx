@@ -26,9 +26,9 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-bold text-primary-foreground mb-4">For lejere</h4>
             <ul className="space-y-3 text-sm text-primary-foreground/80">
-              <li><a href="#" className="hover:text-secondary transition-colors">Søg biler</a></li>
+              <li><a href="/search" className="hover:text-secondary transition-colors">Søg biler</a></li>
               <li><a href="#how-it-works" className="hover:text-secondary transition-colors">Hvordan det virker</a></li>
-              <li><a href="#" className="hover:text-secondary transition-colors">FAQ</a></li>
+              <li><a href="/faq" className="hover:text-secondary transition-colors">FAQ</a></li>
             </ul>
           </div>
 

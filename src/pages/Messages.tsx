@@ -1,0 +1,281 @@
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useMessages } from "@/hooks/useMessages";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { 
+  MessageCircle, 
+  Send, 
+  ArrowLeft, 
+  Headphones,
+  User,
+  Building2
+} from "lucide-react";
+import { format } from "date-fns";
+import { da } from "date-fns/locale";
+
+const Messages = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const {
+    conversations,
+    messages,
+    loading,
+    activeConversation,
+    setActiveConversation,
+    sendMessage,
+    startConversation,
+  } = useMessages();
+
+  const [newMessage, setNewMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!activeConversation || !newMessage.trim() || sending) return;
+
+    setSending(true);
+    await sendMessage(activeConversation, newMessage);
+    setNewMessage("");
+    setSending(false);
+  };
+
+  const handleStartCustomerServiceChat = async () => {
+    await startConversation(null, true);
+  };
+
+  const activeConv = conversations.find((c) => c.id === activeConversation);
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-6 py-24 flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Indlæser...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+
+      <main className="container mx-auto px-6 py-24">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              Beskeder
+            </h1>
+            <Button
+              onClick={handleStartCustomerServiceChat}
+              variant="outline"
+              className="gap-2"
+            >
+              <Headphones className="w-4 h-4" />
+              Kontakt kundeservice
+            </Button>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border overflow-hidden h-[600px] flex">
+            {/* Conversations list */}
+            <div className={`w-full md:w-80 border-r border-border flex flex-col ${activeConversation ? 'hidden md:flex' : 'flex'}`}>
+              <div className="p-4 border-b border-border">
+                <h2 className="font-medium text-foreground">Samtaler</h2>
+              </div>
+              <ScrollArea className="flex-1">
+                {conversations.length === 0 ? (
+                  <div className="p-6 text-center text-muted-foreground">
+                    <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Ingen samtaler endnu</p>
+                    <p className="text-sm mt-1">Start en samtale med kundeservice</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {conversations.map((conv) => (
+                      <button
+                        key={conv.id}
+                        onClick={() => setActiveConversation(conv.id)}
+                        className={`w-full p-4 text-left hover:bg-muted/50 transition-colors ${
+                          activeConversation === conv.id ? "bg-muted/50" : ""
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <Avatar className="w-10 h-10">
+                            <AvatarFallback className={conv.is_customer_service ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"}>
+                              {conv.is_customer_service ? (
+                                <Headphones className="w-5 h-5" />
+                              ) : conv.other_participant?.company_name ? (
+                                <Building2 className="w-5 h-5" />
+                              ) : (
+                                <User className="w-5 h-5" />
+                              )}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium text-foreground truncate">
+                                {conv.is_customer_service
+                                  ? "LEJIO Kundeservice"
+                                  : conv.other_participant?.company_name ||
+                                    conv.other_participant?.full_name ||
+                                    conv.other_participant?.email ||
+                                    "Ukendt bruger"}
+                              </p>
+                              {(conv.unread_count ?? 0) > 0 && (
+                                <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                                  {conv.unread_count}
+                                </span>
+                              )}
+                            </div>
+                            {conv.last_message && (
+                              <p className="text-sm text-muted-foreground truncate mt-0.5">
+                                {conv.last_message.content}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(conv.updated_at), "d. MMM HH:mm", { locale: da })}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+
+            {/* Messages area */}
+            <div className={`flex-1 flex flex-col ${!activeConversation ? 'hidden md:flex' : 'flex'}`}>
+              {activeConversation && activeConv ? (
+                <>
+                  {/* Chat header */}
+                  <div className="p-4 border-b border-border flex items-center gap-3">
+                    <button
+                      onClick={() => setActiveConversation(null)}
+                      className="md:hidden p-2 hover:bg-muted rounded-lg"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <Avatar className="w-10 h-10">
+                      <AvatarFallback className={activeConv.is_customer_service ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"}>
+                        {activeConv.is_customer_service ? (
+                          <Headphones className="w-5 h-5" />
+                        ) : activeConv.other_participant?.company_name ? (
+                          <Building2 className="w-5 h-5" />
+                        ) : (
+                          <User className="w-5 h-5" />
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {activeConv.is_customer_service
+                          ? "LEJIO Kundeservice"
+                          : activeConv.other_participant?.company_name ||
+                            activeConv.other_participant?.full_name ||
+                            activeConv.other_participant?.email}
+                      </p>
+                      {activeConv.is_customer_service && (
+                        <p className="text-xs text-muted-foreground">
+                          Vi svarer hurtigst muligt
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-4">
+                      {messages.length === 0 ? (
+                        <div className="text-center text-muted-foreground py-8">
+                          <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                          <p>Ingen beskeder endnu</p>
+                          <p className="text-sm">Skriv en besked for at starte samtalen</p>
+                        </div>
+                      ) : (
+                        messages.map((message) => {
+                          const isOwn = message.sender_id === user?.id;
+                          return (
+                            <div
+                              key={message.id}
+                              className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                                  isOwn
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-foreground"
+                                }`}
+                              >
+                                <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                <p
+                                  className={`text-xs mt-1 ${
+                                    isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {format(new Date(message.created_at), "HH:mm", { locale: da })}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
+
+                  {/* Message input */}
+                  <div className="p-4 border-t border-border">
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }}
+                      className="flex gap-2"
+                    >
+                      <Input
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Skriv en besked..."
+                        className="flex-1"
+                        disabled={sending}
+                      />
+                      <Button type="submit" disabled={!newMessage.trim() || sending}>
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </form>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium">Vælg en samtale</p>
+                    <p className="text-sm">Eller start en ny samtale med kundeservice</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Messages;

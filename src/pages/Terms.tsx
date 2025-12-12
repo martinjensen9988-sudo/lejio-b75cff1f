@@ -13,7 +13,7 @@ const Terms = () => {
           <div className="prose prose-lg max-w-none space-y-8 text-muted-foreground">
             <p className="text-lg">
               Disse handelsbetingelser ("Betingelser") gælder for brugen af LEJIO's platform lejio.dk 
-              og udgør en bindende aftale mellem dig og LEJIO ApS.
+              og udgør en bindende aftale mellem dig og LEJIO.
             </p>
             
             <p className="text-sm text-muted-foreground">
@@ -27,7 +27,7 @@ const Terms = () => {
                 af køretøjer. LEJIO fungerer som formidler og er ikke part i lejeaftalen mellem lejer og udlejer.
               </p>
               <ul className="list-disc pl-6 space-y-2 mt-4">
-                <li>LEJIO ApS</li>
+                <li>LEJIO</li>
                 <li>E-mail: hej@lejio.dk</li>
                 <li>Web: lejio.dk</li>
               </ul>

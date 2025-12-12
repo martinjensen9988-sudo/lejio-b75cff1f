@@ -35,8 +35,12 @@ const Navigation = () => {
             <a href="#features" className="text-muted-foreground hover:text-primary font-medium transition-colors">Funktioner</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary font-medium transition-colors">Sådan virker det</a>
             <a href="#pricing" className="text-muted-foreground hover:text-primary font-medium transition-colors">Priser</a>
+            <a href="/faq" onClick={(e) => { e.preventDefault(); navigate("/faq"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">FAQ</a>
             {user && (
-              <a href="/my-rentals" onClick={(e) => { e.preventDefault(); navigate("/my-rentals"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">Mine lejeaftaler</a>
+              <>
+                <a href="/my-rentals" onClick={(e) => { e.preventDefault(); navigate("/my-rentals"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">Mine lejeaftaler</a>
+                <a href="/beskeder" onClick={(e) => { e.preventDefault(); navigate("/beskeder"); }} className="text-muted-foreground hover:text-primary font-medium transition-colors">Beskeder</a>
+              </>
             )}
           </div>
 
@@ -81,8 +85,12 @@ const Navigation = () => {
             <a href="#features" className="text-muted-foreground hover:text-primary font-medium py-2">Funktioner</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary font-medium py-2">Sådan virker det</a>
             <a href="#pricing" className="text-muted-foreground hover:text-primary font-medium py-2">Priser</a>
+            <a href="/faq" onClick={(e) => { e.preventDefault(); navigate("/faq"); setIsOpen(false); }} className="text-muted-foreground hover:text-primary font-medium py-2">FAQ</a>
             {user && (
-              <a href="/my-rentals" onClick={(e) => { e.preventDefault(); navigate("/my-rentals"); setIsOpen(false); }} className="text-muted-foreground hover:text-primary font-medium py-2">Mine lejeaftaler</a>
+              <>
+                <a href="/my-rentals" onClick={(e) => { e.preventDefault(); navigate("/my-rentals"); setIsOpen(false); }} className="text-muted-foreground hover:text-primary font-medium py-2">Mine lejeaftaler</a>
+                <a href="/beskeder" onClick={(e) => { e.preventDefault(); navigate("/beskeder"); setIsOpen(false); }} className="text-muted-foreground hover:text-primary font-medium py-2">Beskeder</a>
+              </>
             )}
             <div className="flex flex-col gap-2 pt-2 border-t border-border">
               {user ? (
