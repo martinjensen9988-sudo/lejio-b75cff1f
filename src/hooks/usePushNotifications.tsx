@@ -67,7 +67,7 @@ export const usePushNotifications = () => {
     init();
   }, [user]);
 
-  // Check subscription status
+  // Check subscription status and update permission
   useEffect(() => {
     const checkSubscription = async () => {
       if (!state.isSupported || !user) {
@@ -76,12 +76,16 @@ export const usePushNotifications = () => {
       }
 
       try {
+        // Re-check permission status (it may have changed)
+        const currentPermission = 'Notification' in window ? Notification.permission : 'default';
+        
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
         
         setState(prev => ({
           ...prev,
           isSubscribed: !!subscription,
+          permission: currentPermission,
           isLoading: false,
         }));
       } catch (error) {
@@ -91,6 +95,20 @@ export const usePushNotifications = () => {
     };
 
     checkSubscription();
+
+    // Listen for permission changes (if browser supports it)
+    if ('permissions' in navigator) {
+      navigator.permissions.query({ name: 'notifications' as PermissionName }).then(permissionStatus => {
+        permissionStatus.onchange = () => {
+          setState(prev => ({ 
+            ...prev, 
+            permission: Notification.permission 
+          }));
+        };
+      }).catch(() => {
+        // Some browsers don't support querying notification permission
+      });
+    }
   }, [state.isSupported, user]);
 
   const subscribe = useCallback(async () => {
