@@ -680,6 +680,68 @@ export type Database = {
           },
         ]
       }
+      lessor_reports: {
+        Row: {
+          admin_notes: string | null
+          booking_id: string | null
+          created_at: string
+          description: string
+          id: string
+          lessor_id: string
+          reason: string
+          reporter_email: string
+          reporter_name: string | null
+          reporter_phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          severity: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          booking_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          lessor_id: string
+          reason: string
+          reporter_email: string
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          booking_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          lessor_id?: string
+          reason?: string
+          reporter_email?: string
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessor_reports_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           card_brand: string | null
@@ -844,6 +906,11 @@ export type Database = {
       profiles: {
         Row: {
           accepted_payment_methods: string[] | null
+          account_banned_at: string | null
+          account_banned_reason: string | null
+          account_paused_at: string | null
+          account_paused_reason: string | null
+          account_status: string
           address: string | null
           avatar_url: string | null
           average_rating: number | null
@@ -888,6 +955,11 @@ export type Database = {
         }
         Insert: {
           accepted_payment_methods?: string[] | null
+          account_banned_at?: string | null
+          account_banned_reason?: string | null
+          account_paused_at?: string | null
+          account_paused_reason?: string | null
+          account_status?: string
           address?: string | null
           avatar_url?: string | null
           average_rating?: number | null
@@ -932,6 +1004,11 @@ export type Database = {
         }
         Update: {
           accepted_payment_methods?: string[] | null
+          account_banned_at?: string | null
+          account_banned_reason?: string | null
+          account_paused_at?: string | null
+          account_paused_reason?: string | null
+          account_status?: string
           address?: string | null
           avatar_url?: string | null
           average_rating?: number | null
