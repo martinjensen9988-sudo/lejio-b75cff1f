@@ -94,24 +94,12 @@ const GpsTracking = () => {
           <TabsContent value="tracking" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                {devices.length > 0 ? (
-                  <GpsTrackingMap
-                    devices={devices}
-                    selectedDevice={selectedDevice}
-                    onSelectDevice={setSelectedDevice}
-                    geofences={geofences}
-                  />
-                ) : (
-                  <Card className="h-[400px] flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <NavIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="font-semibold mb-2">Ingen GPS-enheder endnu</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Tilføj en GPS-tracker for at se dine køretøjer på kortet
-                      </p>
-                    </div>
-                  </Card>
-                )}
+                <GpsTrackingMap
+                  devices={devices}
+                  selectedDevice={selectedDevice}
+                  onSelectDevice={setSelectedDevice}
+                  geofences={geofences}
+                />
               </div>
               <div className="space-y-4">
                 <GpsDeviceList
