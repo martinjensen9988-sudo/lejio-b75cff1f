@@ -6,9 +6,8 @@ interface PaymentResult {
   success: boolean;
   paymentUrl?: string;
   transactionId?: string;
-  subscriptionId?: string;
-  paymentType?: 'one_time' | 'subscription';
-  mode?: 'gateway' | 'p2p';
+  mode?: 'p2p_commission' | 'pro_fee';
+  commissionAmount?: number;
   message?: string;
   error?: string;
 }
@@ -39,29 +38,15 @@ export const usePayments = () => {
         throw new Error(data.error);
       }
 
-      if (data.mode === 'p2p') {
-        // P2P mode - LEJIO handles payment
-        toast.success('Betaling håndteres af LEJIO');
-        return {
-          success: true,
-          mode: 'p2p',
-          message: data.message,
-        };
-      }
-
-      // Gateway mode - redirect to payment page
-      if (data.paymentUrl) {
-        return {
-          success: true,
-          mode: 'gateway',
-          paymentUrl: data.paymentUrl,
-          transactionId: data.transactionId,
-          subscriptionId: data.subscriptionId,
-          paymentType: data.paymentType,
-        };
-      }
-
-      return { success: true };
+      // Return commission payment details
+      return {
+        success: true,
+        mode: data.mode,
+        paymentUrl: data.paymentUrl,
+        transactionId: data.transactionId,
+        commissionAmount: data.commissionAmount,
+        message: data.message,
+      };
     } catch (err) {
       console.error('Payment error:', err);
       const message = err instanceof Error ? err.message : 'Ukendt fejl';

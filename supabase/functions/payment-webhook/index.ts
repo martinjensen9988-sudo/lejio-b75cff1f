@@ -3,17 +3,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature, x-quickpay-checksum-sha256",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
-type PaymentGateway = 'stripe' | 'quickpay' | 'pensopay' | 'reepay' | 'onpay';
-
 interface WebhookEvent {
-  gateway: PaymentGateway;
-  eventType: string;
+  eventType: 'payment.completed' | 'payment.failed' | 'payment.cancelled';
   transactionId: string;
-  status: 'completed' | 'failed' | 'cancelled' | 'refunded';
-  subscriptionId?: string;
+  bookingId?: string;
+  amount?: number;
   metadata?: Record<string, string>;
 }
 
@@ -47,170 +44,35 @@ async function verifyStripeSignature(payload: string, signature: string, secret:
   }
 }
 
-// Verify Quickpay checksum using Web Crypto API
-async function verifyQuickpayChecksum(payload: string, checksum: string, apiKey: string): Promise<boolean> {
-  try {
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(apiKey),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"]
-    );
-    const signatureBuffer = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
-    const expectedChecksum = Array.from(new Uint8Array(signatureBuffer))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-    
-    return expectedChecksum === checksum;
-  } catch (e) {
-    console.error('Quickpay checksum verification failed:', e);
-    return false;
-  }
-}
-
-// Parse Stripe webhook
+// Parse Stripe webhook for LEJIO commission payments
 function parseStripeWebhook(body: any): WebhookEvent | null {
   const eventType = body.type;
-  const data = body.data?.object;
+  const session = body.data?.object;
   
-  if (!data) return null;
+  if (!session) return null;
   
-  let status: WebhookEvent['status'] = 'completed';
-  let parsedEventType = eventType;
+  let parsedEventType: WebhookEvent['eventType'];
   
   switch (eventType) {
     case 'checkout.session.completed':
-      status = 'completed';
+      parsedEventType = 'payment.completed';
       break;
     case 'checkout.session.expired':
-      status = 'cancelled';
+      parsedEventType = 'payment.cancelled';
       break;
     case 'payment_intent.payment_failed':
-      status = 'failed';
-      break;
-    case 'charge.refunded':
-      status = 'refunded';
-      break;
-    case 'invoice.payment_succeeded':
-      parsedEventType = 'subscription_payment';
-      status = 'completed';
-      break;
-    case 'customer.subscription.deleted':
-      parsedEventType = 'subscription_cancelled';
-      status = 'cancelled';
+      parsedEventType = 'payment.failed';
       break;
     default:
       return null;
   }
   
   return {
-    gateway: 'stripe',
     eventType: parsedEventType,
-    transactionId: data.id,
-    status,
-    subscriptionId: data.subscription,
-    metadata: data.metadata,
-  };
-}
-
-// Parse Quickpay webhook
-function parseQuickpayWebhook(body: any): WebhookEvent | null {
-  const accepted = body.accepted;
-  const state = body.state;
-  
-  let status: WebhookEvent['status'] = 'completed';
-  if (!accepted) status = 'failed';
-  if (state === 'cancelled') status = 'cancelled';
-  if (state === 'refunded') status = 'refunded';
-  
-  return {
-    gateway: 'quickpay',
-    eventType: body.type || 'payment',
-    transactionId: body.id?.toString(),
-    status,
-    metadata: { order_id: body.order_id },
-  };
-}
-
-// Parse PensoPay webhook (similar to Quickpay)
-function parsePensopayWebhook(body: any): WebhookEvent | null {
-  return {
-    gateway: 'pensopay',
-    eventType: body.type || 'payment',
-    transactionId: body.id?.toString(),
-    status: body.accepted ? 'completed' : 'failed',
-    metadata: { order_id: body.order_id },
-  };
-}
-
-// Parse Reepay webhook
-function parseReepayWebhook(body: any): WebhookEvent | null {
-  const eventType = body.event_type;
-  let status: WebhookEvent['status'] = 'completed';
-  
-  switch (eventType) {
-    case 'invoice_settled':
-    case 'invoice_authorized':
-      status = 'completed';
-      break;
-    case 'invoice_failed':
-      status = 'failed';
-      break;
-    case 'invoice_cancelled':
-      status = 'cancelled';
-      break;
-    case 'invoice_refunded':
-      status = 'refunded';
-      break;
-    case 'subscription_cancelled':
-      status = 'cancelled';
-      break;
-    default:
-      break;
-  }
-  
-  return {
-    gateway: 'reepay',
-    eventType,
-    transactionId: body.invoice || body.id,
-    status,
-    subscriptionId: body.subscription,
-    metadata: { customer: body.customer },
-  };
-}
-
-// Parse OnPay webhook
-function parseOnpayWebhook(body: any): WebhookEvent | null {
-  const status = body.data?.status;
-  let mappedStatus: WebhookEvent['status'] = 'completed';
-  
-  switch (status) {
-    case 'active':
-    case 'captured':
-      mappedStatus = 'completed';
-      break;
-    case 'declined':
-    case 'failed':
-      mappedStatus = 'failed';
-      break;
-    case 'cancelled':
-      mappedStatus = 'cancelled';
-      break;
-    case 'refunded':
-      mappedStatus = 'refunded';
-      break;
-    default:
-      break;
-  }
-  
-  return {
-    gateway: 'onpay',
-    eventType: body.type || 'payment',
-    transactionId: body.data?.uuid || body.data?.transaction_number,
-    status: mappedStatus,
-    metadata: { order_id: body.data?.order_id },
+    transactionId: session.id || session.payment_intent,
+    bookingId: session.metadata?.booking_id,
+    amount: session.amount_total ? session.amount_total / 100 : undefined,
+    metadata: session.metadata,
   };
 }
 
@@ -222,53 +84,34 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const url = new URL(req.url);
-    const gateway = url.searchParams.get('gateway') as PaymentGateway;
+    const stripeWebhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     
-    if (!gateway) {
-      console.error('No gateway specified');
-      return new Response(JSON.stringify({ error: 'Gateway parameter required' }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const rawBody = await req.text();
     const body = JSON.parse(rawBody);
     
-    console.log(`Received ${gateway} webhook:`, JSON.stringify(body).slice(0, 500));
+    console.log('Received Stripe webhook:', body.type);
 
-    // Parse webhook based on gateway
-    let event: WebhookEvent | null = null;
-    
-    switch (gateway) {
-      case 'stripe':
-        event = parseStripeWebhook(body);
-        break;
-      case 'quickpay':
-        event = parseQuickpayWebhook(body);
-        break;
-      case 'pensopay':
-        event = parsePensopayWebhook(body);
-        break;
-      case 'reepay':
-        event = parseReepayWebhook(body);
-        break;
-      case 'onpay':
-        event = parseOnpayWebhook(body);
-        break;
-      default:
-        return new Response(JSON.stringify({ error: 'Unknown gateway' }), {
-          status: 400,
+    // Verify Stripe signature if secret is configured
+    const stripeSignature = req.headers.get('stripe-signature');
+    if (stripeWebhookSecret && stripeSignature) {
+      const isValid = await verifyStripeSignature(rawBody, stripeSignature, stripeWebhookSecret);
+      if (!isValid) {
+        console.error('Invalid Stripe signature');
+        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+          status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
     }
 
+    // Parse the webhook event
+    const event = parseStripeWebhook(body);
+    
     if (!event) {
-      console.log('Event not relevant, skipping');
-      return new Response(JSON.stringify({ received: true }), {
+      console.log('Unhandled event type:', body.type);
+      return new Response(JSON.stringify({ received: true, message: 'Event type not handled' }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -279,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Find the transaction by gateway_transaction_id
     const { data: transaction, error: txError } = await supabase
       .from('payment_transactions')
-      .select('*, booking:bookings(*)')
+      .select('*')
       .eq('gateway_transaction_id', event.transactionId)
       .maybeSingle();
 
@@ -287,101 +130,58 @@ const handler = async (req: Request): Promise<Response> => {
       console.error('Error finding transaction:', txError);
     }
 
-    // Map event status to transaction status
-    const txStatus = event.status === 'completed' ? 'completed' 
-      : event.status === 'failed' ? 'failed'
-      : event.status === 'cancelled' ? 'cancelled'
-      : event.status === 'refunded' ? 'refunded'
-      : 'pending';
-
-    if (transaction) {
-      // Update transaction status
-      await supabase
-        .from('payment_transactions')
-        .update({ 
-          status: txStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', transaction.id);
-
-      console.log(`Updated transaction ${transaction.id} to status: ${txStatus}`);
-
-      // Update booking status if payment completed
-      if (event.status === 'completed' && transaction.booking_id) {
-        await supabase
-          .from('bookings')
-          .update({ 
-            status: 'confirmed',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', transaction.booking_id);
-
-        console.log(`Updated booking ${transaction.booking_id} to confirmed`);
-      }
-
-      // Handle refund - update booking status
-      if (event.status === 'refunded' && transaction.booking_id) {
-        await supabase
-          .from('bookings')
-          .update({ 
-            status: 'cancelled',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', transaction.booking_id);
-
-        console.log(`Updated booking ${transaction.booking_id} to cancelled (refunded)`);
-      }
+    if (!transaction) {
+      console.log('Transaction not found for:', event.transactionId);
+      return new Response(JSON.stringify({ received: true, message: 'Transaction not found' }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Handle subscription events
-    if (event.subscriptionId) {
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('gateway_subscription_id', event.subscriptionId)
-        .maybeSingle();
-
-      if (subscription) {
-        let subscriptionStatus = subscription.status;
-        
-        if (event.eventType === 'subscription_cancelled') {
-          subscriptionStatus = 'cancelled';
-        } else if (event.status === 'completed') {
-          subscriptionStatus = 'active';
-        }
-
-        await supabase
-          .from('subscriptions')
-          .update({ 
-            status: subscriptionStatus,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', subscription.id);
-
-        console.log(`Updated subscription ${subscription.id} to status: ${subscriptionStatus}`);
-
-        // Log subscription payment as transaction
-        if (event.eventType === 'subscription_payment' && event.status === 'completed') {
-          await supabase.from('payment_transactions').insert({
-            booking_id: subscription.booking_id,
-            lessor_id: subscription.lessor_id,
-            renter_id: subscription.renter_id,
-            gateway: event.gateway,
-            gateway_transaction_id: event.transactionId,
-            subscription_id: subscription.id,
-            amount: subscription.amount,
-            currency: subscription.currency,
-            status: 'completed',
-            type: 'subscription_payment',
-            description: `Månedlig betaling for abonnement`,
-          });
-
-          console.log('Logged subscription payment transaction');
-        }
-      }
+    // Update transaction status
+    let newStatus: string;
+    switch (event.eventType) {
+      case 'payment.completed':
+        newStatus = 'completed';
+        break;
+      case 'payment.failed':
+        newStatus = 'failed';
+        break;
+      case 'payment.cancelled':
+        newStatus = 'cancelled';
+        break;
+      default:
+        newStatus = 'unknown';
     }
 
-    return new Response(JSON.stringify({ received: true, processed: true }), {
+    const { error: updateTxError } = await supabase
+      .from('payment_transactions')
+      .update({ 
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', transaction.id);
+
+    if (updateTxError) {
+      console.error('Failed to update transaction:', updateTxError);
+    }
+
+    console.log(`Transaction ${transaction.id} updated to status: ${newStatus}`);
+
+    // If commission payment completed, the lessor can now confirm the booking
+    // We don't auto-confirm - the lessor still needs to manually confirm
+    if (event.eventType === 'payment.completed' && transaction.booking_id) {
+      console.log(`Commission paid for booking ${transaction.booking_id} - lessor can now confirm`);
+      
+      // Optionally send notification to lessor that they can now confirm
+      // For now, just log it - the frontend will check transaction status
+    }
+
+    return new Response(JSON.stringify({ 
+      received: true, 
+      transactionId: transaction.id,
+      status: newStatus 
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
