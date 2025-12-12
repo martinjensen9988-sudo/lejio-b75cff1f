@@ -158,6 +158,7 @@ export type Database = {
           lessor_phone: string | null
           lessor_signature: string | null
           lessor_signed_at: string | null
+          logo_url: string | null
           pdf_url: string | null
           renter_address: string | null
           renter_email: string
@@ -209,6 +210,7 @@ export type Database = {
           lessor_phone?: string | null
           lessor_signature?: string | null
           lessor_signed_at?: string | null
+          logo_url?: string | null
           pdf_url?: string | null
           renter_address?: string | null
           renter_email: string
@@ -260,6 +262,7 @@ export type Database = {
           lessor_phone?: string | null
           lessor_signature?: string | null
           lessor_signed_at?: string | null
+          logo_url?: string | null
           pdf_url?: string | null
           renter_address?: string | null
           renter_email?: string
@@ -706,6 +709,7 @@ export type Database = {
           bank_account_number: string | null
           bank_reg_number: string | null
           city: string | null
+          company_logo_url: string | null
           company_name: string | null
           created_at: string
           cvr_number: string | null
@@ -743,6 +747,7 @@ export type Database = {
           bank_account_number?: string | null
           bank_reg_number?: string | null
           city?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
           created_at?: string
           cvr_number?: string | null
@@ -780,6 +785,7 @@ export type Database = {
           bank_account_number?: string | null
           bank_reg_number?: string | null
           city?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
           created_at?: string
           cvr_number?: string | null

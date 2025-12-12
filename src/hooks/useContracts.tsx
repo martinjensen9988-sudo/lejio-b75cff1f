@@ -55,6 +55,8 @@ export interface Contract {
   fuel_policy_enabled: boolean;
   fuel_missing_fee: number | null;
   fuel_price_per_liter: number | null;
+  // Logo
+  logo_url: string | null;
 }
 
 export const useContracts = () => {
