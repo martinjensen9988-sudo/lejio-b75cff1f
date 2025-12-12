@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Booking } from '@/hooks/useBookings';
 import { Contract, useContracts } from '@/hooks/useContracts';
+import { useDamageReports } from '@/hooks/useDamageReports';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -14,9 +15,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import ContractSigningModal from '@/components/contracts/ContractSigningModal';
+import DamageReportModal from '@/components/damage/DamageReportModal';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Check, X, Car, Calendar, FileText, Loader2, FileCheck } from 'lucide-react';
+import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BookingsTableProps {
@@ -39,6 +41,11 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [signingModalOpen, setSigningModalOpen] = useState(false);
   const [confirmingBooking, setConfirmingBooking] = useState<string | null>(null);
+  
+  // Damage report state
+  const [damageReportOpen, setDamageReportOpen] = useState(false);
+  const [selectedBookingForDamage, setSelectedBookingForDamage] = useState<Booking | null>(null);
+  const [damageReportType, setDamageReportType] = useState<'pickup' | 'return'>('pickup');
 
   const handleConfirmBooking = async (booking: Booking) => {
     setConfirmingBooking(booking.id);
@@ -256,22 +263,50 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                       </div>
                     )}
                     {booking.status === 'confirmed' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onUpdateStatus(booking.id, 'active')}
-                      >
-                        Start
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedBookingForDamage(booking);
+                            setDamageReportType('pickup');
+                            setDamageReportOpen(true);
+                          }}
+                          title="Udleveringsrapport"
+                        >
+                          <Camera className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onUpdateStatus(booking.id, 'active')}
+                        >
+                          Start
+                        </Button>
+                      </div>
                     )}
                     {booking.status === 'active' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onUpdateStatus(booking.id, 'completed')}
-                      >
-                        Afslut
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedBookingForDamage(booking);
+                            setDamageReportType('return');
+                            setDamageReportOpen(true);
+                          }}
+                          title="Indleveringsrapport"
+                        >
+                          <ClipboardCheck className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onUpdateStatus(booking.id, 'completed')}
+                        >
+                          Afslut
+                        </Button>
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>
@@ -288,6 +323,18 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
           open={signingModalOpen}
           onOpenChange={setSigningModalOpen}
           onSign={signContract}
+        />
+      )}
+
+      {/* Damage Report Modal */}
+      {selectedBookingForDamage && (
+        <DamageReportModal
+          open={damageReportOpen}
+          onOpenChange={setDamageReportOpen}
+          bookingId={selectedBookingForDamage.id}
+          vehicleId={selectedBookingForDamage.vehicle_id}
+          contractId={getContractForBooking(selectedBookingForDamage.id)?.id}
+          reportType={damageReportType}
         />
       )}
     </>

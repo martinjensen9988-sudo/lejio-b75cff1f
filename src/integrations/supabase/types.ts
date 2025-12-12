@@ -291,6 +291,124 @@ export type Database = {
           },
         ]
       }
+      damage_items: {
+        Row: {
+          created_at: string
+          damage_report_id: string
+          damage_type: string
+          description: string | null
+          id: string
+          photo_url: string | null
+          position: string
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          damage_report_id: string
+          damage_type: string
+          description?: string | null
+          id?: string
+          photo_url?: string | null
+          position: string
+          severity: string
+        }
+        Update: {
+          created_at?: string
+          damage_report_id?: string
+          damage_type?: string
+          description?: string | null
+          id?: string
+          photo_url?: string | null
+          position?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damage_items_damage_report_id_fkey"
+            columns: ["damage_report_id"]
+            isOneToOne: false
+            referencedRelation: "damage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      damage_reports: {
+        Row: {
+          booking_id: string
+          contract_id: string | null
+          created_at: string
+          exterior_clean: boolean | null
+          fuel_level: string | null
+          id: string
+          interior_clean: boolean | null
+          notes: string | null
+          odometer_reading: number | null
+          report_type: string
+          reported_by: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          booking_id: string
+          contract_id?: string | null
+          created_at?: string
+          exterior_clean?: boolean | null
+          fuel_level?: string | null
+          id?: string
+          interior_clean?: boolean | null
+          notes?: string | null
+          odometer_reading?: number | null
+          report_type: string
+          reported_by: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          booking_id?: string
+          contract_id?: string | null
+          created_at?: string
+          exterior_clean?: boolean | null
+          fuel_level?: string | null
+          id?: string
+          interior_clean?: boolean | null
+          notes?: string | null
+          odometer_reading?: number | null
+          report_type?: string
+          reported_by?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damage_reports_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_reports_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_reports_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_reports_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discount_code_redemptions: {
         Row: {
           discount_code_id: string
