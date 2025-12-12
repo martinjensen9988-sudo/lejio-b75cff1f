@@ -65,6 +65,8 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     location_address: vehicle.location_address || '',
     location_postal_code: vehicle.location_postal_code || '',
     location_city: vehicle.location_city || '',
+    latitude: vehicle.latitude || undefined as number | undefined,
+    longitude: vehicle.longitude || undefined as number | undefined,
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -90,6 +92,8 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         location_address: vehicle.location_address || '',
         location_postal_code: vehicle.location_postal_code || '',
         location_city: vehicle.location_city || '',
+        latitude: vehicle.latitude || undefined,
+        longitude: vehicle.longitude || undefined,
       });
     }
   };
@@ -144,7 +148,41 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
 
   const handleSave = async () => {
     setIsLoading(true);
-    const success = await onUpdate(vehicle.id, formData);
+    
+    let finalData = { ...formData };
+    
+    // Geocode the address if custom location is enabled
+    if (formData.use_custom_location && formData.location_address) {
+      try {
+        const { data, error } = await supabase.functions.invoke('geocode-address', {
+          body: {
+            address: formData.location_address,
+            postalCode: formData.location_postal_code,
+            city: formData.location_city,
+          },
+        });
+        
+        if (!error && data?.latitude && data?.longitude) {
+          finalData = {
+            ...finalData,
+            latitude: data.latitude,
+            longitude: data.longitude,
+          };
+        }
+      } catch (err) {
+        console.error('Geocoding failed:', err);
+        // Continue without coordinates
+      }
+    } else if (!formData.use_custom_location) {
+      // Clear coordinates if custom location is disabled
+      finalData = {
+        ...finalData,
+        latitude: undefined,
+        longitude: undefined,
+      };
+    }
+    
+    const success = await onUpdate(vehicle.id, finalData);
     setIsLoading(false);
     if (success) {
       setOpen(false);

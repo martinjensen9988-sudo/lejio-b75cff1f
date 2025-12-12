@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
+import { supabase } from '@/integrations/supabase/client';
 import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin } from 'lucide-react';
 
 const AddVehicleDialog = () => {
@@ -58,7 +59,30 @@ const AddVehicleDialog = () => {
   const handleAddVehicle = async () => {
     if (!vehicleDetails.registration || !vehicleDetails.make || !vehicleDetails.model) return;
     
-    const result = await addVehicle(vehicleDetails as VehicleInsert);
+    let finalDetails = { ...vehicleDetails };
+    
+    // Geocode the address if custom location is enabled
+    if (vehicleDetails.use_custom_location && vehicleDetails.location_address) {
+      try {
+        const { data, error } = await supabase.functions.invoke('geocode-address', {
+          body: {
+            address: vehicleDetails.location_address,
+            postalCode: vehicleDetails.location_postal_code,
+            city: vehicleDetails.location_city,
+          },
+        });
+        
+        if (!error && data?.latitude && data?.longitude) {
+          finalDetails.latitude = data.latitude;
+          finalDetails.longitude = data.longitude;
+        }
+      } catch (err) {
+        console.error('Geocoding failed:', err);
+        // Continue without coordinates
+      }
+    }
+    
+    const result = await addVehicle(finalDetails as VehicleInsert);
     if (result) {
       setOpen(false);
       resetForm();
