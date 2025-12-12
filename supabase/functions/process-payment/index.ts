@@ -6,321 +6,52 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type PaymentGateway = 'stripe' | 'quickpay' | 'pensopay' | 'reepay' | 'onpay' | 'none';
+// LEJIO commission rates
+const PRIVATE_COMMISSION_RATE = 0.15; // 15% for private lessors
+const PRO_BOOKING_FEE = 19; // 19 kr per booking for pro users
 
-interface PaymentRequest {
-  bookingId: string;
-  amount: number;
-  currency?: string;
-  type: 'one_time' | 'subscription';
-  returnUrl?: string;
-}
-
-interface GatewayConfig {
-  gateway: PaymentGateway;
-  apiKey: string;
-  merchantId: string;
-}
-
-interface PaymentResult {
-  paymentUrl: string;
-  transactionId: string;
-  subscriptionId?: string;
-}
-
-// Gateway-specific payment creation
-async function createStripePayment(config: GatewayConfig, request: PaymentRequest, customerEmail: string) {
+// Create Stripe checkout session for LEJIO commission payment
+async function createStripeCommissionPayment(
+  amount: number,
+  currency: string,
+  bookingId: string,
+  lessorEmail: string,
+  returnUrl: string,
+  stripeSecretKey: string,
+  description: string
+): Promise<{ paymentUrl: string; sessionId: string }> {
   const stripe = await import("https://esm.sh/stripe@14.21.0");
-  const stripeClient = new stripe.default(config.apiKey, {
+  const stripeClient = new stripe.default(stripeSecretKey, {
     apiVersion: '2023-10-16',
   });
 
-  if (request.type === 'subscription') {
-    // Create a checkout session for subscription
-    const session = await stripeClient.checkout.sessions.create({
-      mode: 'subscription',
-      payment_method_types: ['card'],
-      customer_email: customerEmail,
-      line_items: [{
-        price_data: {
-          currency: request.currency?.toLowerCase() || 'dkk',
-          product_data: {
-            name: `Månedlig leje - Booking ${request.bookingId.slice(0, 8)}`,
-          },
-          unit_amount: Math.round(request.amount * 100),
-          recurring: {
-            interval: 'month',
-          },
+  const session = await stripeClient.checkout.sessions.create({
+    mode: 'payment',
+    payment_method_types: ['card'],
+    customer_email: lessorEmail,
+    line_items: [{
+      price_data: {
+        currency: currency.toLowerCase(),
+        product_data: {
+          name: 'LEJIO Kommission',
+          description: description,
         },
-        quantity: 1,
-      }],
-      success_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=success',
-      cancel_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=cancelled',
-      metadata: {
-        booking_id: request.bookingId,
+        unit_amount: Math.round(amount * 100),
       },
-    });
-
-    return {
-      paymentUrl: session.url,
-      transactionId: session.id,
-      subscriptionId: session.subscription,
-    };
-  } else {
-    // One-time payment
-    const session = await stripeClient.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      customer_email: customerEmail,
-      line_items: [{
-        price_data: {
-          currency: request.currency?.toLowerCase() || 'dkk',
-          product_data: {
-            name: `Leje - Booking ${request.bookingId.slice(0, 8)}`,
-          },
-          unit_amount: Math.round(request.amount * 100),
-        },
-        quantity: 1,
-      }],
-      success_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=success',
-      cancel_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=cancelled',
-      metadata: {
-        booking_id: request.bookingId,
-      },
-    });
-
-    return {
-      paymentUrl: session.url,
-      transactionId: session.id,
-    };
-  }
-}
-
-async function createQuickpayPayment(config: GatewayConfig, request: PaymentRequest, customerEmail: string) {
-  // Quickpay API integration
-  const authHeader = `Basic ${btoa(`:${config.apiKey}`)}`;
-  
-  // Create payment
-  const paymentResponse = await fetch('https://api.quickpay.net/payments', {
-    method: 'POST',
-    headers: {
-      'Accept-Version': 'v10',
-      'Authorization': authHeader,
-      'Content-Type': 'application/json',
+      quantity: 1,
+    }],
+    success_url: `${returnUrl}?payment=success&booking=${bookingId}`,
+    cancel_url: `${returnUrl}?payment=cancelled&booking=${bookingId}`,
+    metadata: {
+      booking_id: bookingId,
+      type: 'lejio_commission',
     },
-    body: JSON.stringify({
-      order_id: request.bookingId.replace(/-/g, '').slice(0, 20),
-      currency: request.currency || 'DKK',
-    }),
   });
-
-  if (!paymentResponse.ok) {
-    const error = await paymentResponse.text();
-    console.error('Quickpay create payment error:', error);
-    throw new Error(`Quickpay error: ${error}`);
-  }
-
-  const payment = await paymentResponse.json();
-
-  // Create payment link
-  const linkResponse = await fetch(`https://api.quickpay.net/payments/${payment.id}/link`, {
-    method: 'PUT',
-    headers: {
-      'Accept-Version': 'v10',
-      'Authorization': authHeader,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      amount: Math.round(request.amount * 100),
-      continue_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=success',
-      cancel_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=cancelled',
-      customer_email: customerEmail,
-    }),
-  });
-
-  if (!linkResponse.ok) {
-    const error = await linkResponse.text();
-    console.error('Quickpay create link error:', error);
-    throw new Error(`Quickpay link error: ${error}`);
-  }
-
-  const link = await linkResponse.json();
 
   return {
-    paymentUrl: link.url,
-    transactionId: payment.id.toString(),
+    paymentUrl: session.url,
+    sessionId: session.id,
   };
-}
-
-async function createPensopayPayment(config: GatewayConfig, request: PaymentRequest, customerEmail: string) {
-  // PensoPay uses same API as Quickpay (they are related)
-  const authHeader = `Basic ${btoa(`:${config.apiKey}`)}`;
-  
-  const paymentResponse = await fetch('https://api.pensopay.com/v1/payments', {
-    method: 'POST',
-    headers: {
-      'Authorization': authHeader,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      order_id: request.bookingId.replace(/-/g, '').slice(0, 20),
-      currency: request.currency || 'DKK',
-      amount: Math.round(request.amount * 100),
-    }),
-  });
-
-  if (!paymentResponse.ok) {
-    const error = await paymentResponse.text();
-    console.error('PensoPay error:', error);
-    throw new Error(`PensoPay error: ${error}`);
-  }
-
-  const payment = await paymentResponse.json();
-
-  return {
-    paymentUrl: payment.link?.url || payment.payment_link,
-    transactionId: payment.id?.toString(),
-  };
-}
-
-async function createReepayPayment(config: GatewayConfig, request: PaymentRequest, customerEmail: string) {
-  // Reepay API
-  const authHeader = `Basic ${btoa(`${config.apiKey}:`)}`;
-  
-  if (request.type === 'subscription') {
-    // Create subscription session
-    const response = await fetch('https://checkout-api.reepay.com/v1/session/subscription', {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        configuration: {
-          accept_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=success',
-          cancel_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=cancelled',
-        },
-        subscription: {
-          plan: 'monthly_rental',
-          customer: {
-            email: customerEmail,
-            handle: request.bookingId,
-          },
-        },
-        order: {
-          handle: request.bookingId,
-          amount: Math.round(request.amount * 100),
-          currency: request.currency || 'DKK',
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('Reepay error:', error);
-      throw new Error(`Reepay error: ${error}`);
-    }
-
-    const session = await response.json();
-    return {
-      paymentUrl: session.url,
-      transactionId: session.id,
-      subscriptionId: session.subscription,
-    };
-  } else {
-    // One-time charge session
-    const response = await fetch('https://checkout-api.reepay.com/v1/session/charge', {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        configuration: {
-          accept_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=success',
-          cancel_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=cancelled',
-        },
-        order: {
-          handle: request.bookingId,
-          amount: Math.round(request.amount * 100),
-          currency: request.currency || 'DKK',
-          customer: {
-            email: customerEmail,
-            handle: `customer_${request.bookingId}`,
-          },
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('Reepay error:', error);
-      throw new Error(`Reepay error: ${error}`);
-    }
-
-    const session = await response.json();
-    return {
-      paymentUrl: session.url,
-      transactionId: session.id,
-    };
-  }
-}
-
-async function createOnpayPayment(config: GatewayConfig, request: PaymentRequest, customerEmail: string) {
-  // OnPay API
-  const response = await fetch('https://api.onpay.io/v1/transaction', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      amount: Math.round(request.amount * 100),
-      currency: request.currency || 'DKK',
-      order_id: request.bookingId.slice(0, 36),
-      accept_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=success',
-      decline_url: request.returnUrl || 'https://lejio.dk/my-rentals?payment=cancelled',
-      type: 'payment',
-      "3dsecure": true,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('OnPay error:', error);
-    throw new Error(`OnPay error: ${error}`);
-  }
-
-  const transaction = await response.json();
-  return {
-    paymentUrl: transaction.data?.payment_window_url || transaction.payment_url,
-    transactionId: transaction.data?.uuid || transaction.id,
-  };
-}
-
-// Gateway switch
-async function processPayment(
-  gateway: PaymentGateway,
-  config: GatewayConfig,
-  request: PaymentRequest,
-  customerEmail: string
-): Promise<PaymentResult> {
-  console.log(`Processing ${request.type} payment via ${gateway} for ${request.amount} ${request.currency || 'DKK'}`);
-
-  switch (gateway) {
-    case 'stripe':
-      return createStripePayment(config, request, customerEmail);
-    case 'quickpay':
-      return createQuickpayPayment(config, request, customerEmail);
-    case 'pensopay':
-      return createPensopayPayment(config, request, customerEmail);
-    case 'reepay':
-      return createReepayPayment(config, request, customerEmail);
-    case 'onpay':
-      return createOnpayPayment(config, request, customerEmail);
-    default:
-      throw new Error(`Unsupported gateway: ${gateway}`);
-  }
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -331,16 +62,25 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const lejioStripeKey = Deno.env.get('LEJIO_STRIPE_SECRET_KEY');
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { bookingId, returnUrl }: { bookingId: string; returnUrl?: string } = await req.json();
 
-    console.log(`Processing payment for booking: ${bookingId}`);
+    if (!bookingId) {
+      return new Response(JSON.stringify({ error: 'Booking ID is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // Fetch booking with vehicle
+    console.log(`Processing LEJIO commission for booking: ${bookingId}`);
+
+    // Fetch booking
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
-      .select(`*, vehicle:vehicles(*)`)
+      .select('*')
       .eq('id', bookingId)
       .single();
 
@@ -352,22 +92,12 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Fetch lessor profile separately
+    // Fetch lessor profile
     const { data: lessor, error: lessorError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', booking.lessor_id)
       .single();
-
-    if (bookingError || !booking) {
-      console.error('Booking not found:', bookingError);
-      return new Response(JSON.stringify({ error: 'Booking not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const vehicle = booking.vehicle;
 
     if (lessorError || !lessor) {
       console.error('Lessor profile not found:', lessorError);
@@ -377,91 +107,84 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Check if lessor has payment gateway configured
-    const gateway = lessor.payment_gateway as PaymentGateway;
-    if (!gateway || gateway === 'none') {
-      // P2P mode - LEJIO handles payment
-      console.log('No gateway configured, using P2P mode');
+    // Determine user type and commission
+    const isPrivateUser = lessor.user_type === 'privat' || !lessor.cvr_number;
+    
+    let commissionAmount: number;
+    let paymentMode: 'p2p_commission' | 'pro_fee';
+    let description: string;
+
+    if (isPrivateUser) {
+      // Private users pay 15% commission to LEJIO
+      commissionAmount = booking.total_price * PRIVATE_COMMISSION_RATE;
+      paymentMode = 'p2p_commission';
+      description = `15% kommission for booking af ${booking.total_price} kr`;
+      console.log(`Private user - charging 15% commission: ${commissionAmount.toFixed(2)} DKK`);
+    } else {
+      // Pro users pay fixed 19 kr per booking
+      commissionAmount = PRO_BOOKING_FEE;
+      paymentMode = 'pro_fee';
+      description = `Booking gebyr`;
+      console.log(`Pro user - charging fixed fee: ${commissionAmount} DKK`);
+    }
+
+    // Check if LEJIO Stripe key is configured
+    if (!lejioStripeKey) {
+      console.error('LEJIO_STRIPE_SECRET_KEY not configured');
       return new Response(JSON.stringify({ 
-        success: true, 
-        mode: 'p2p',
-        message: 'Betaling håndteres af LEJIO' 
+        error: 'Payment system not configured',
+        message: 'LEJIO betalingssystem er ikke konfigureret'
       }), {
-        status: 200,
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (!lessor.gateway_api_key) {
-      return new Response(JSON.stringify({ error: 'Gateway API key not configured' }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const config: GatewayConfig = {
-      gateway,
-      apiKey: lessor.gateway_api_key,
-      merchantId: lessor.gateway_merchant_id || '',
-    };
-
-    // Determine payment type based on vehicle settings
-    const paymentType = vehicle.payment_schedule === 'monthly' ? 'subscription' : 'one_time';
-
-    const paymentRequest: PaymentRequest = {
+    // Create Stripe checkout for LEJIO commission
+    const baseReturnUrl = returnUrl || `${req.headers.get('origin') || 'https://lejio.dk'}/dashboard`;
+    
+    const { paymentUrl, sessionId } = await createStripeCommissionPayment(
+      commissionAmount,
+      'DKK',
       bookingId,
-      amount: booking.total_price,
-      currency: 'DKK',
-      type: paymentType,
-      returnUrl,
-    };
-
-    // Process payment
-    const result = await processPayment(
-      gateway,
-      config,
-      paymentRequest,
-      booking.renter_email
+      lessor.email,
+      baseReturnUrl,
+      lejioStripeKey,
+      description
     );
 
-    console.log('Payment created:', result);
-
-    // Log transaction
-    await supabase.from('payment_transactions').insert({
-      booking_id: bookingId,
-      lessor_id: booking.lessor_id,
-      renter_id: booking.renter_id,
-      gateway,
-      gateway_transaction_id: result.transactionId,
-      amount: booking.total_price,
-      currency: 'DKK',
-      status: 'pending',
-      type: paymentType === 'subscription' ? 'subscription_start' : 'payment',
-      description: `Betaling for booking ${bookingId.slice(0, 8)}`,
-    });
-
-    // If subscription, create subscription record
-    if (paymentType === 'subscription' && result.subscriptionId) {
-      await supabase.from('subscriptions').insert({
+    // Log the commission transaction
+    const { error: transactionError } = await supabase
+      .from('payment_transactions')
+      .insert({
         booking_id: bookingId,
-        vehicle_id: vehicle.id,
         lessor_id: booking.lessor_id,
-        renter_id: booking.renter_id,
-        gateway,
-        gateway_subscription_id: result.subscriptionId,
-        amount: vehicle.monthly_price || booking.total_price,
+        gateway: 'stripe',
+        gateway_transaction_id: sessionId,
+        amount: commissionAmount,
         currency: 'DKK',
-        interval: 'month',
         status: 'pending',
+        type: paymentMode === 'p2p_commission' ? 'commission' : 'platform_fee',
+        description: paymentMode === 'p2p_commission' 
+          ? `LEJIO kommission (15%) for booking ${bookingId.slice(0, 8)}`
+          : `LEJIO booking gebyr for booking ${bookingId.slice(0, 8)}`,
       });
+
+    if (transactionError) {
+      console.error('Transaction logging error:', transactionError);
     }
+
+    console.log(`Commission payment created - session: ${sessionId}`);
 
     return new Response(JSON.stringify({
       success: true,
-      paymentUrl: result.paymentUrl,
-      transactionId: result.transactionId,
-      subscriptionId: result.subscriptionId,
-      paymentType,
+      mode: paymentMode,
+      paymentUrl,
+      transactionId: sessionId,
+      commissionAmount,
+      message: paymentMode === 'p2p_commission'
+        ? `Betal 15% kommission (${commissionAmount.toFixed(2)} kr) for at godkende bookingen`
+        : `Betal booking gebyr (${commissionAmount} kr) for at godkende bookingen`,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
