@@ -669,6 +669,7 @@ const Settings = () => {
                             onChange={(e) => setPaymentFormData(p => ({ ...p, gateway_api_key: e.target.value }))}
                             placeholder="Din API-nøgle fra gateway"
                             className="pr-10"
+                            autoComplete="off"
                           />
                           <Button
                             type="button"
