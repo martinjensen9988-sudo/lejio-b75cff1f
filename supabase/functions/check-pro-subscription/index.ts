@@ -53,6 +53,21 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Get profile to check trial status
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('user_type, trial_ends_at, subscription_status')
+      .eq('id', user.id)
+      .single();
+
+    // Check if user is in active trial period
+    const isInTrial = profile?.trial_ends_at && new Date(profile.trial_ends_at) > new Date();
+    const trialDaysLeft = isInTrial 
+      ? Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    logStep("Trial status", { isInTrial, trialDaysLeft, trialEndsAt: profile?.trial_ends_at });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
@@ -62,9 +77,12 @@ serve(async (req) => {
         subscribed: false,
         tier: null,
         tier_name: null,
-        max_vehicles: 5,
+        max_vehicles: isInTrial ? 5 : 1, // Trial users get starter limits
         subscription_end: null,
         stripe_customer_id: null,
+        is_trial: isInTrial,
+        trial_days_left: trialDaysLeft,
+        trial_ends_at: profile?.trial_ends_at || null,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -87,7 +105,7 @@ serve(async (req) => {
       await supabaseClient
         .from('profiles')
         .update({
-          subscription_status: 'inactive',
+          subscription_status: isInTrial ? 'trial' : 'inactive',
           stripe_customer_id: customerId,
           stripe_subscription_id: null,
         })
@@ -97,9 +115,12 @@ serve(async (req) => {
         subscribed: false,
         tier: null,
         tier_name: null,
-        max_vehicles: 5,
+        max_vehicles: isInTrial ? 5 : 1, // Trial users get starter limits
         subscription_end: null,
         stripe_customer_id: customerId,
+        is_trial: isInTrial,
+        trial_days_left: trialDaysLeft,
+        trial_ends_at: profile?.trial_ends_at || null,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -143,6 +164,9 @@ serve(async (req) => {
       subscription_end: subscriptionEnd,
       stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
+      is_trial: false,
+      trial_days_left: 0,
+      trial_ends_at: null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
