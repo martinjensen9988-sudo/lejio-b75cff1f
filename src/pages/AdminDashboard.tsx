@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,7 @@ import AdminLessorReports from '@/components/admin/AdminLessorReports';
 import AdminMessages from '@/components/admin/AdminMessages';
 import { AdminLiveChat } from '@/components/admin/AdminLiveChat';
 import AdminVehicleValueVerification from '@/components/admin/AdminVehicleValueVerification';
+import AdminGpsDevices from '@/components/admin/AdminGpsDevices';
 
 interface Customer {
   id: string;
@@ -309,6 +310,10 @@ const AdminDashboard = () => {
               <ShieldCheck className="w-4 h-4 mr-2" />
               Bilværdier
             </TabsTrigger>
+            <TabsTrigger value="gps">
+              <MapPin className="w-4 h-4 mr-2" />
+              GPS-enheder
+            </TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
@@ -409,6 +414,11 @@ const AdminDashboard = () => {
           {/* Vehicle Value Verification Tab */}
           <TabsContent value="vehicle-values">
             <AdminVehicleValueVerification />
+          </TabsContent>
+
+          {/* GPS Devices Tab */}
+          <TabsContent value="gps">
+            <AdminGpsDevices />
           </TabsContent>
         </Tabs>
 

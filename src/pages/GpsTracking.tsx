@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useGpsDevices, GpsDeviceWithLatest } from '@/hooks/useGpsDevices';
 import { useGeofences, useGeofenceAlerts } from '@/hooks/useGeofences';
+import { useMessages } from '@/hooks/useMessages';
 import Navigation from '@/components/Navigation';
 import { GpsDeviceList } from '@/components/gps/GpsDeviceList';
 import { GpsTrackingMap } from '@/components/gps/GpsTrackingMap';
@@ -11,8 +12,9 @@ import { GeofenceAlertsList } from '@/components/gps/GeofenceAlertsList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, MapPin, Shield, Bell, Navigation as NavIcon, Smartphone, HelpCircle, Mail } from 'lucide-react';
+import { ArrowLeft, MapPin, Shield, Bell, Navigation as NavIcon, Smartphone, HelpCircle, MessageCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const GpsTracking = () => {
   const { user, loading } = useAuth();
@@ -20,7 +22,24 @@ const GpsTracking = () => {
   const { devices, isLoading } = useGpsDevices();
   const { geofences } = useGeofences();
   const { unreadCount } = useGeofenceAlerts();
+  const { startConversation } = useMessages();
   const [selectedDevice, setSelectedDevice] = useState<GpsDeviceWithLatest | null>(null);
+  const [startingChat, setStartingChat] = useState(false);
+
+  const handleContactSupport = async () => {
+    setStartingChat(true);
+    try {
+      const conversationId = await startConversation(user!.id, true);
+      if (conversationId) {
+        toast.success('Chat startet med support');
+        navigate('/messages');
+      }
+    } catch (error) {
+      toast.error('Kunne ikke starte chat');
+    } finally {
+      setStartingChat(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -80,7 +99,7 @@ const GpsTracking = () => {
                   
                   <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
                     <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-5 h-5 text-primary" />
+                      <MessageCircle className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">2. Kontakt LEJIO support</h3>
@@ -104,8 +123,12 @@ const GpsTracking = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                  <Button className="flex-1" onClick={() => window.location.href = 'mailto:support@lejio.dk?subject=GPS-sporing%20opsætning'}>
-                    <Mail className="w-4 h-4 mr-2" />
+                  <Button className="flex-1" onClick={handleContactSupport} disabled={startingChat}>
+                    {startingChat ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                    )}
                     Kontakt support
                   </Button>
                   <Button variant="outline" className="flex-1" onClick={() => navigate('/faq')}>
