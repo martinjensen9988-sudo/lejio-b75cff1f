@@ -1760,6 +1760,42 @@ export type Database = {
           total_ratings: number
         }[]
       }
+      get_visitor_chat_messages: {
+        Args: { session_id_param: string }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          sender_type: string
+          session_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "visitor_chat_messages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_visitor_chat_session: {
+        Args: { session_id_param: string }
+        Returns: {
+          assigned_admin_id: string | null
+          created_at: string
+          id: string
+          needs_human_support: boolean
+          session_status: string
+          updated_at: string
+          visitor_email: string | null
+          visitor_name: string | null
+          visitor_phone: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "visitor_chat_sessions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
