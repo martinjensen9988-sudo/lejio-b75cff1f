@@ -4,18 +4,21 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { GpsDeviceWithLatest } from '@/hooks/useGpsDevices';
+import { Geofence } from '@/hooks/useGeofences';
 import { MapPin } from 'lucide-react';
 
 interface GpsTrackingMapProps {
   devices: GpsDeviceWithLatest[];
   selectedDevice?: GpsDeviceWithLatest | null;
   onSelectDevice?: (device: GpsDeviceWithLatest) => void;
+  geofences?: Geofence[];
 }
 
-export const GpsTrackingMap = ({ devices, selectedDevice, onSelectDevice }: GpsTrackingMapProps) => {
+export const GpsTrackingMap = ({ devices, selectedDevice, onSelectDevice, geofences = [] }: GpsTrackingMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const geofenceLayersRef = useRef<string[]>([]);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +145,93 @@ export const GpsTrackingMap = ({ devices, selectedDevice, onSelectDevice }: GpsT
       duration: 1000,
     });
   }, [selectedDevice]);
+
+  // Draw geofences as circles
+  useEffect(() => {
+    if (!map.current) return;
+
+    const currentMap = map.current;
+
+    const addGeofenceLayers = () => {
+      // Remove existing geofence layers
+      geofenceLayersRef.current.forEach((layerId) => {
+        if (currentMap.getLayer(layerId)) {
+          currentMap.removeLayer(layerId);
+        }
+        if (currentMap.getSource(layerId)) {
+          currentMap.removeSource(layerId);
+        }
+      });
+      geofenceLayersRef.current = [];
+
+      // Add geofence circles
+      geofences.forEach((geofence) => {
+        const sourceId = `geofence-${geofence.id}`;
+        const fillLayerId = `geofence-fill-${geofence.id}`;
+        const lineLayerId = `geofence-line-${geofence.id}`;
+
+        // Create a circle polygon from center and radius
+        const center = [geofence.center_longitude, geofence.center_latitude];
+        const radiusKm = geofence.radius_meters / 1000;
+        const points = 64;
+        const coords: [number, number][] = [];
+
+        for (let i = 0; i < points; i++) {
+          const angle = (i / points) * 2 * Math.PI;
+          const dx = radiusKm * Math.cos(angle);
+          const dy = radiusKm * Math.sin(angle);
+          const lat = center[1] + (dy / 111.32);
+          const lng = center[0] + (dx / (111.32 * Math.cos(center[1] * Math.PI / 180)));
+          coords.push([lng, lat]);
+        }
+        coords.push(coords[0]); // Close the polygon
+
+        currentMap.addSource(sourceId, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: { name: geofence.name, isActive: geofence.is_active },
+            geometry: {
+              type: 'Polygon',
+              coordinates: [coords],
+            },
+          },
+        });
+
+        // Fill layer
+        currentMap.addLayer({
+          id: fillLayerId,
+          type: 'fill',
+          source: sourceId,
+          paint: {
+            'fill-color': geofence.is_active ? '#22c55e' : '#6b7280',
+            'fill-opacity': 0.15,
+          },
+        });
+
+        // Line layer
+        currentMap.addLayer({
+          id: lineLayerId,
+          type: 'line',
+          source: sourceId,
+          paint: {
+            'line-color': geofence.is_active ? '#22c55e' : '#6b7280',
+            'line-width': 2,
+            'line-dasharray': geofence.is_active ? [1] : [2, 2],
+          },
+        });
+
+        geofenceLayersRef.current.push(sourceId, fillLayerId, lineLayerId);
+      });
+    };
+
+    // Wait for map style to load
+    if (currentMap.isStyleLoaded()) {
+      addGeofenceLayers();
+    } else {
+      currentMap.once('style.load', addGeofenceLayers);
+    }
+  }, [geofences]);
 
   if (loading) {
     return (

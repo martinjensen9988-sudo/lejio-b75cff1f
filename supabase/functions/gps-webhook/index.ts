@@ -145,6 +145,76 @@ const parseGeneric = (data: Record<string, unknown>): GpsDataPoint => {
   };
 };
 
+interface VehicleData {
+  owner_id: string;
+  make: string;
+  model: string;
+  registration: string;
+}
+
+// Send push notification for geofence alerts
+const sendGeofenceNotification = async (
+  vehicleId: string,
+  geofenceName: string,
+  alertType: 'exit' | 'enter'
+) => {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get vehicle owner
+    const { data: vehicleData } = await supabaseClient
+      .from('vehicles')
+      .select('owner_id, make, model, registration')
+      .eq('id', vehicleId)
+      .single();
+
+    const vehicle = vehicleData as VehicleData | null;
+    if (!vehicle) return;
+
+    const title = alertType === 'exit' 
+      ? `⚠️ Køretøj forlod zone` 
+      : `📍 Køretøj ankom til zone`;
+    
+    const body = alertType === 'exit'
+      ? `${vehicle.make} ${vehicle.model} (${vehicle.registration}) forlod "${geofenceName}"`
+      : `${vehicle.make} ${vehicle.model} (${vehicle.registration}) ankom til "${geofenceName}"`;
+
+    // Get user's push subscriptions
+    const { data: subscriptions } = await supabaseClient
+      .from('push_subscriptions')
+      .select('*')
+      .eq('user_id', vehicle.owner_id);
+
+    if (!subscriptions || subscriptions.length === 0) {
+      console.log('No push subscriptions for vehicle owner');
+      return;
+    }
+
+    // Call send-push-notification function
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        userId: vehicle.owner_id,
+        title,
+        body,
+        url: '/gps',
+        tag: `geofence-${alertType}`,
+      }),
+    });
+
+    const result = await response.json();
+    console.log('Push notification sent:', result);
+  } catch (error) {
+    console.error('Error sending geofence push notification:', error);
+  }
+};
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -273,6 +343,9 @@ serve(async (req) => {
               latitude: parsed.latitude,
               longitude: parsed.longitude,
             });
+
+            // Send push notification to vehicle owner
+            await sendGeofenceNotification(device.vehicle_id, geofence.name, 'exit');
           }
 
           // Check for enter
@@ -285,6 +358,9 @@ serve(async (req) => {
               latitude: parsed.latitude,
               longitude: parsed.longitude,
             });
+
+            // Send push notification to vehicle owner
+            await sendGeofenceNotification(device.vehicle_id, geofence.name, 'enter');
           }
         }
       }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useGpsDevices, GpsDeviceWithLatest } from '@/hooks/useGpsDevices';
-import { useGeofenceAlerts } from '@/hooks/useGeofences';
+import { useGeofences, useGeofenceAlerts } from '@/hooks/useGeofences';
 import Navigation from '@/components/Navigation';
 import { GpsDeviceList } from '@/components/gps/GpsDeviceList';
 import { GpsTrackingMap } from '@/components/gps/GpsTrackingMap';
@@ -18,6 +18,7 @@ const GpsTracking = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { devices, isLoading } = useGpsDevices();
+  const { geofences } = useGeofences();
   const { unreadCount } = useGeofenceAlerts();
   const [selectedDevice, setSelectedDevice] = useState<GpsDeviceWithLatest | null>(null);
 
@@ -80,6 +81,7 @@ const GpsTracking = () => {
                   devices={devices}
                   selectedDevice={selectedDevice}
                   onSelectDevice={setSelectedDevice}
+                  geofences={geofences}
                 />
               </div>
               <div>
