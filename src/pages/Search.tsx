@@ -37,6 +37,11 @@ export interface SearchVehicle {
   display_address: string | null;
   display_postal_code: string | null;
   display_city: string | null;
+  // Fleet/owner info for badges
+  owner_fleet_plan: 'fleet_basic' | 'fleet_premium' | null;
+  owner_lessor_status: 'bronze' | 'silver' | 'gold' | 'platinum' | null;
+  owner_average_rating: number | null;
+  owner_company_name: string | null;
   // For map compatibility
   lat?: number;
   lng?: number;

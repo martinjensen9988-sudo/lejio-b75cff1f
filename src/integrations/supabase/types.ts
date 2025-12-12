@@ -1158,7 +1158,6 @@ export type Database = {
           daily_price: number | null
           deposit_amount: number | null
           deposit_required: boolean | null
-          description: string | null
           display_address: string | null
           display_city: string | null
           display_postal_code: string | null
@@ -1177,6 +1176,14 @@ export type Database = {
           make: string | null
           model: string | null
           monthly_price: number | null
+          owner_average_rating: number | null
+          owner_company_name: string | null
+          owner_fleet_plan:
+            | Database["public"]["Enums"]["fleet_plan_type"]
+            | null
+          owner_lessor_status:
+            | Database["public"]["Enums"]["lessor_status"]
+            | null
           unlimited_km: boolean | null
           use_custom_location: boolean | null
           variant: string | null
