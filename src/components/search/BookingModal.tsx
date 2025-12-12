@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { differenceInDays, format } from "date-fns";
 import { da } from "date-fns/locale";
-import { Calendar, Car, Check, User, Mail, Phone, Loader2 } from "lucide-react";
+import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { SearchVehicle, SearchFiltersState } from "@/pages/Search";
 import { supabase } from "@/integrations/supabase/client";
+import VehicleLocationMap from "./VehicleLocationMap";
 
 interface BookingModalProps {
   open: boolean;
@@ -222,6 +223,22 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
                 Udfyld dine oplysninger for at sende en bookingforespørgsel
               </DialogDescription>
             </DialogHeader>
+
+            {/* Vehicle Location Map */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                Afhentningssted
+              </Label>
+              <VehicleLocationMap
+                latitude={vehicle.latitude}
+                longitude={vehicle.longitude}
+                address={vehicle.display_address}
+                postalCode={vehicle.display_postal_code}
+                city={vehicle.display_city}
+                className="h-32"
+              />
+            </div>
 
             {/* Booking Summary */}
             <div className="bg-muted/50 rounded-xl p-4 space-y-2">
