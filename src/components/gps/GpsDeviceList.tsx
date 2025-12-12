@@ -12,9 +12,10 @@ import { da } from 'date-fns/locale';
 interface GpsDeviceListProps {
   onSelectDevice?: (device: GpsDeviceWithLatest) => void;
   selectedDeviceId?: string;
+  showAddButton?: boolean;
 }
 
-export const GpsDeviceList = ({ onSelectDevice, selectedDeviceId }: GpsDeviceListProps) => {
+export const GpsDeviceList = ({ onSelectDevice, selectedDeviceId, showAddButton = true }: GpsDeviceListProps) => {
   const { devices, isLoading, updateDevice, deleteDevice } = useGpsDevices();
   const [showAddDialog, setShowAddDialog] = useState(false);
 
@@ -48,10 +49,12 @@ export const GpsDeviceList = ({ onSelectDevice, selectedDeviceId }: GpsDeviceLis
             <Navigation className="w-5 h-5" />
             GPS-enheder
           </CardTitle>
-          <Button onClick={() => setShowAddDialog(true)} size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Tilføj enhed
-          </Button>
+          {showAddButton && (
+            <Button onClick={() => setShowAddDialog(true)} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Tilføj enhed
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           {devices.length === 0 ? (
