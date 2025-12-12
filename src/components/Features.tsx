@@ -103,7 +103,7 @@ const Features = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {[
-              { icon: "💳", title: "Bring Your Own Gateway", desc: "Quickpay, PensoPay, Stripe" },
+              { icon: "💳", title: "Brug din egen betalingsløsning", desc: "Quickpay, PensoPay, Stripe" },
               { icon: "📋", title: "B2B Kontrakter", desc: "Med dit CVR og vilkår" },
               { icon: "🛡️", title: "Din forsikring", desc: "Automatisk i kontrakten" },
               { icon: "📊", title: "Dashboard", desc: "Komplet overblik" },
