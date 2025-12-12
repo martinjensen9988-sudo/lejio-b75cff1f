@@ -14,6 +14,8 @@ export interface CVRData {
   phone?: string;
   email?: string;
   industry?: string;
+  vatRegistered: boolean;
+  vatNumber?: string;
 }
 
 interface UseCVRLookupReturn {
