@@ -10,17 +10,38 @@ const corsHeaders = {
 // Pro subscription tiers with price IDs
 const PRO_TIERS = {
   starter: {
-    price_id: "price_1SdNcKHoHnimcmNgf138iD4F", // 299 kr/month (1-5 vehicles)
+    monthly: {
+      price_id: "price_1SdNcKHoHnimcmNgf138iD4F", // 299 kr/month (1-5 vehicles)
+      price: 299,
+    },
+    yearly: {
+      price_id: "price_1SdO9wHoHnimcmNgzTqzKWO9", // 3051 kr/year (15% discount)
+      price: 3051,
+    },
     name: "LEJIO Pro - Starter",
     max_vehicles: 5,
   },
   standard: {
-    price_id: "price_1SdNcPHoHnimcmNgLizHnZML", // 499 kr/month (6-15 vehicles)
+    monthly: {
+      price_id: "price_1SdNcPHoHnimcmNgLizHnZML", // 499 kr/month (6-15 vehicles)
+      price: 499,
+    },
+    yearly: {
+      price_id: "price_1SdO9yHoHnimcmNguBqAQQeO", // 5089.80 kr/year (15% discount)
+      price: 5090,
+    },
     name: "LEJIO Pro - Standard",
     max_vehicles: 15,
   },
   enterprise: {
-    price_id: "price_1SdNcRHoHnimcmNgDGcli7JG", // 799 kr/month (16+ vehicles)
+    monthly: {
+      price_id: "price_1SdNcRHoHnimcmNgDGcli7JG", // 799 kr/month (16+ vehicles)
+      price: 799,
+    },
+    yearly: {
+      price_id: "price_1SdOA0HoHnimcmNgo4dRzJIJ", // 8149.80 kr/year (15% discount)
+      price: 8150,
+    },
     name: "LEJIO Pro - Enterprise",
     max_vehicles: 999,
   },
@@ -44,13 +65,17 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { tier } = await req.json();
+    const { tier, interval = 'monthly' } = await req.json();
     if (!tier || !PRO_TIERS[tier as keyof typeof PRO_TIERS]) {
       throw new Error("Invalid subscription tier");
     }
+    if (interval !== 'monthly' && interval !== 'yearly') {
+      throw new Error("Invalid billing interval");
+    }
 
     const selectedTier = PRO_TIERS[tier as keyof typeof PRO_TIERS];
-    logStep("Selected tier", { tier, priceId: selectedTier.price_id });
+    const priceConfig = selectedTier[interval as 'monthly' | 'yearly'];
+    logStep("Selected tier", { tier, interval, priceId: priceConfig.price_id });
 
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
@@ -106,7 +131,7 @@ serve(async (req) => {
       client_reference_id: user.id,
       line_items: [
         {
-          price: selectedTier.price_id,
+          price: priceConfig.price_id,
           quantity: 1,
         },
       ],
@@ -116,11 +141,13 @@ serve(async (req) => {
       metadata: {
         user_id: user.id,
         tier: tier,
+        interval: interval,
       },
       subscription_data: {
         metadata: {
           user_id: user.id,
           tier: tier,
+          interval: interval,
         },
       },
     });
