@@ -66,17 +66,20 @@ const Dashboard = () => {
               <h1 className="hidden sm:block font-display font-bold text-foreground">Dashboard</h1>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/search')}>
-                <Search className="w-4 h-4" />
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={() => navigate('/search')}>
+                <Search className="w-4 h-4 mr-2" />
+                Find bil
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/my-rentals')}>
-                <FileText className="w-4 h-4" />
+              <Button variant="outline" size="sm" onClick={() => navigate('/my-rentals')}>
+                <FileText className="w-4 h-4 mr-2" />
+                Mine lejeaftaler
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/beskeder')} className="relative">
-                <MessageCircle className="w-4 h-4" />
+              <Button variant="outline" size="sm" onClick={() => navigate('/beskeder')} className="relative">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Beskeder
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full px-1">
+                  <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-destructive text-destructive-foreground rounded-full px-1">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
