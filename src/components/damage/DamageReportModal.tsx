@@ -8,11 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle, Save } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle, Save, MapPin } from 'lucide-react';
 import { useDamageReports, DamageReport, DamageItem, CreateDamageItemInput } from '@/hooks/useDamageReports';
 import { useContracts, Contract } from '@/hooks/useContracts';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import VehicleDamageSelector from './VehicleDamageSelector';
 
 interface DamageReportModalProps {
   open: boolean;
@@ -447,47 +449,84 @@ export const DamageReportModal = ({
               <div className="space-y-4">
                 <h3 className="font-semibold flex items-center gap-2">
                   <Plus className="w-4 h-4" />
-                  Tilfoej ny skade
+                  Tilføj ny skade
                 </h3>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Position paa koeretøj</Label>
-                    <Select 
-                      value={newDamage.position} 
-                      onValueChange={(v) => setNewDamage({ ...newDamage, position: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Vaelg position" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {VEHICLE_POSITIONS.map((pos) => (
-                          <SelectItem key={pos.value} value={pos.value}>
-                            {pos.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <Tabs defaultValue="visual" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="visual" className="gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Visuel markering
+                    </TabsTrigger>
+                    <TabsTrigger value="manual" className="gap-2">
+                      <Car className="w-4 h-4" />
+                      Manuel valg
+                    </TabsTrigger>
+                  </TabsList>
                   
-                  <div className="space-y-2">
-                    <Label>Type skade</Label>
-                    <Select 
-                      value={newDamage.damage_type} 
-                      onValueChange={(v) => setNewDamage({ ...newDamage, damage_type: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Vaelg type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DAMAGE_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <TabsContent value="visual" className="mt-4">
+                    <VehicleDamageSelector
+                      selectedPosition={newDamage.position || ''}
+                      onSelectPosition={(pos) => setNewDamage({ ...newDamage, position: pos })}
+                      existingDamages={report.damage_items?.map(item => ({
+                        id: item.id,
+                        position: item.position,
+                        severity: item.severity,
+                        damage_type: item.damage_type,
+                      })) || []}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="manual" className="mt-4">
+                    <div className="space-y-2">
+                      <Label>Position på køretøj</Label>
+                      <Select 
+                        value={newDamage.position} 
+                        onValueChange={(v) => setNewDamage({ ...newDamage, position: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Vælg position" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {VEHICLE_POSITIONS.map((pos) => (
+                            <SelectItem key={pos.value} value={pos.value}>
+                              {pos.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                {newDamage.position && (
+                  <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">Valgt position:</span>{' '}
+                      <span className="font-medium text-primary">
+                        {VEHICLE_POSITIONS.find(p => p.value === newDamage.position)?.label}
+                      </span>
+                    </p>
                   </div>
+                )}
+                
+                <div className="space-y-2">
+                  <Label>Type skade</Label>
+                  <Select 
+                    value={newDamage.damage_type} 
+                    onValueChange={(v) => setNewDamage({ ...newDamage, damage_type: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Vælg type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DAMAGE_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
