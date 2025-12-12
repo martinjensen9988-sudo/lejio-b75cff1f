@@ -61,10 +61,40 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const lejioStripeKey = Deno.env.get('LEJIO_STRIPE_SECRET_KEY');
     
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Validate authorization header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.error('No authorization header provided');
+      return new Response(JSON.stringify({ error: 'Authorization required' }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Create client with user's JWT to verify authentication
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    
+    // Verify the user's JWT
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Authentication failed:', authError);
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`Authenticated user: ${user.id}`);
+
+    // Create service role client for database operations
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { bookingId, returnUrl }: { bookingId: string; returnUrl?: string } = await req.json();
 
@@ -91,6 +121,17 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Authorization check: Only the lessor can initiate payment for their booking
+    if (booking.lessor_id !== user.id) {
+      console.error(`Authorization failed: User ${user.id} is not the lessor of booking ${bookingId}`);
+      return new Response(JSON.stringify({ error: 'Du har ikke tilladelse til at betale for denne booking' }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`Authorization passed: User ${user.id} is the lessor`);
 
     // Fetch lessor profile
     const { data: lessor, error: lessorError } = await supabase
