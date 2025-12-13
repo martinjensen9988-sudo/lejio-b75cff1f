@@ -1,4 +1,4 @@
-import { Calendar, Fuel, Clock, Car, Truck, Tent } from "lucide-react";
+import { Calendar, Fuel, Clock, Car, Truck, Tent, Weight, Users, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,16 @@ interface SearchFiltersProps {
   filters: SearchFiltersState;
   setFilters: React.Dispatch<React.SetStateAction<SearchFiltersState>>;
 }
+
+const TRAILER_TYPES = [
+  { value: 'all', label: 'Alle typer' },
+  { value: 'open', label: 'Åben trailer' },
+  { value: 'closed', label: 'Lukket kassetrailer' },
+  { value: 'horse', label: 'Hestetrailer' },
+  { value: 'boat', label: 'Bådtrailer' },
+  { value: 'auto', label: 'Auto-trailer' },
+  { value: 'tipper', label: 'Tiptrailer' },
+];
 
 const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
   const handlePeriodChange = (type: RentalPeriodType, count: number) => {
@@ -73,20 +83,36 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
     });
   };
 
+  const resetFilters = () => {
+    setFilters({
+      priceMin: 0,
+      priceMax: 5000,
+      fuelType: "all",
+      startDate: undefined,
+      endDate: undefined,
+      periodType: 'daily',
+      periodCount: 1,
+      vehicleType: 'all',
+      trailerType: 'all',
+      maxWeight: undefined,
+      minSleepingCapacity: undefined,
+    });
+  };
+
   return (
     <div className="bg-card border-b border-border py-4 px-4 md:px-6">
       <div className="container mx-auto">
         <div className="flex flex-wrap gap-4 items-end">
-          {/* Vehicle Type */}
+          {/* Vehicle Type - Primary Filter */}
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Køretøjstype</Label>
             <Select
               value={filters.vehicleType}
               onValueChange={(value: VehicleTypeFilter) => 
-                setFilters((prev) => ({ ...prev, vehicleType: value }))
+                setFilters((prev) => ({ ...prev, vehicleType: value, trailerType: 'all' }))
               }
             >
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[160px]">
                 {filters.vehicleType === 'bil' && <Car className="mr-2 h-4 w-4" />}
                 {filters.vehicleType === 'trailer' && <Truck className="mr-2 h-4 w-4" />}
                 {filters.vehicleType === 'campingvogn' && <Tent className="mr-2 h-4 w-4" />}
@@ -121,6 +147,77 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Trailer-specific: Type filter */}
+          {filters.vehicleType === 'trailer' && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Trailer-type</Label>
+              <Select
+                value={filters.trailerType || 'all'}
+                onValueChange={(value) => 
+                  setFilters((prev) => ({ ...prev, trailerType: value }))
+                }
+              >
+                <SelectTrigger className="w-[160px]">
+                  <Ruler className="mr-2 h-4 w-4" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TRAILER_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Trailer/Campingvogn: Max Weight filter */}
+          {(filters.vehicleType === 'trailer' || filters.vehicleType === 'campingvogn') && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Max totalvægt (kg)</Label>
+              <div className="relative">
+                <Weight className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  value={filters.maxWeight || ''}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      maxWeight: Number(e.target.value) || undefined,
+                    }))
+                  }
+                  className="w-28 pl-9"
+                  placeholder="750"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Campingvogn: Sleeping capacity filter */}
+          {filters.vehicleType === 'campingvogn' && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Min. sovepladser</Label>
+              <div className="relative">
+                <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={filters.minSleepingCapacity || ''}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      minSleepingCapacity: Number(e.target.value) || undefined,
+                    }))
+                  }
+                  className="w-24 pl-9"
+                  placeholder="2"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Rental Period Type */}
           <div className="space-y-1.5">
@@ -238,45 +335,36 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
             </div>
           </div>
 
-          {/* Fuel Type */}
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Brændstof</Label>
-            <Select
-              value={filters.fuelType}
-              onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, fuelType: value }))
-              }
-            >
-              <SelectTrigger className="w-[140px]">
-                <Fuel className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Alle typer" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle typer</SelectItem>
-                <SelectItem value="Benzin">Benzin</SelectItem>
-                <SelectItem value="Diesel">Diesel</SelectItem>
-                <SelectItem value="El">El</SelectItem>
-                <SelectItem value="Hybrid">Hybrid</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Fuel Type - Only for Cars */}
+          {filters.vehicleType === 'bil' && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Brændstof</Label>
+              <Select
+                value={filters.fuelType}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, fuelType: value }))
+                }
+              >
+                <SelectTrigger className="w-[140px]">
+                  <Fuel className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Alle typer" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle typer</SelectItem>
+                  <SelectItem value="Benzin">Benzin</SelectItem>
+                  <SelectItem value="Diesel">Diesel</SelectItem>
+                  <SelectItem value="El">El</SelectItem>
+                  <SelectItem value="Hybrid">Hybrid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Reset Filters */}
           <Button
             variant="ghost"
             size="sm"
-            onClick={() =>
-              setFilters({
-                priceMin: 0,
-                priceMax: 5000,
-                fuelType: "all",
-                startDate: undefined,
-                endDate: undefined,
-                periodType: 'daily',
-                periodCount: 1,
-                vehicleType: 'all',
-              })
-            }
+            onClick={resetFilters}
             className="text-muted-foreground"
           >
             Nulstil filtre

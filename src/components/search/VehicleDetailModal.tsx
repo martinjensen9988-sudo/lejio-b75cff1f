@@ -16,9 +16,21 @@ import {
   Umbrella,
   Weight,
   MapPin,
-  X,
   CreditCard,
   Clock,
+  Thermometer,
+  Tv,
+  Bike,
+  Dog,
+  Cigarette,
+  Music,
+  Plug,
+  Ruler,
+  Timer,
+  Package,
+  Flame,
+  Snowflake,
+  Droplets,
 } from "lucide-react";
 import {
   Dialog,
@@ -38,6 +50,22 @@ interface VehicleDetailModalProps {
   onOpenChange: (open: boolean) => void;
   filters: SearchFiltersState;
 }
+
+const TRAILER_TYPE_LABELS: Record<string, string> = {
+  open: 'Åben trailer',
+  closed: 'Lukket kassetrailer',
+  horse: 'Hestetrailer',
+  boat: 'Bådtrailer',
+  auto: 'Auto-trailer',
+  tipper: 'Tiptrailer',
+};
+
+const LAYOUT_TYPE_LABELS: Record<string, string> = {
+  double_bed: 'Dobbeltseng',
+  single_beds: 'Enkeltsenge',
+  french_bed: 'Fransk seng',
+  round_seating: 'Rundsiddegruppe',
+};
 
 export const VehicleDetailModal = ({
   vehicle,
@@ -111,6 +139,17 @@ export const VehicleDetailModal = ({
     };
   }, [filters, vehicle]);
 
+  // Calculate load capacity for trailers
+  const loadCapacity = useMemo(() => {
+    if (!vehicle || vehicle.vehicle_type !== 'trailer') return null;
+    // Estimate: egenvægt is typically ~30% of totalvægt for trailers
+    if (vehicle.total_weight) {
+      const estimatedEmptyWeight = Math.round(vehicle.total_weight * 0.3);
+      return vehicle.total_weight - estimatedEmptyWeight;
+    }
+    return null;
+  }, [vehicle]);
+
   if (!vehicle) return null;
 
   return (
@@ -136,10 +175,21 @@ export const VehicleDetailModal = ({
               <VehicleIcon className="w-3 h-3 mr-1" />
               {vehicleTypeLabel}
             </Badge>
+            {vehicle.vehicle_type === 'trailer' && vehicle.trailer_type && (
+              <Badge variant="outline" className="bg-background/80">
+                {TRAILER_TYPE_LABELS[vehicle.trailer_type] || vehicle.trailer_type}
+              </Badge>
+            )}
             {vehicle.unlimited_km && vehicle.vehicle_type === "bil" && (
               <Badge className="bg-accent text-accent-foreground">
                 <Check className="w-3 h-3 mr-1" />
                 Fri km
+              </Badge>
+            )}
+            {vehicle.tempo_approved && (
+              <Badge className="bg-mint text-mint-foreground">
+                <Timer className="w-3 h-3 mr-1" />
+                Tempo 100
               </Badge>
             )}
           </div>
@@ -227,40 +277,85 @@ export const VehicleDetailModal = ({
               </div>
             )}
 
-            {/* Trailer-specific */}
-            {vehicle.vehicle_type === "trailer" && vehicle.total_weight && (
-              <div className="flex items-center gap-2 text-sm">
-                <Weight className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Totalvægt:</span>
-                <span className="font-medium">{vehicle.total_weight} kg</span>
-              </div>
-            )}
-
+            {/* TRAILER-SPECIFIC DETAILS */}
             {vehicle.vehicle_type === "trailer" && (
-              <div className="flex items-center gap-2 text-sm">
-                <CreditCard className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Kørekort:</span>
-                <span className="font-medium">
-                  {vehicle.requires_b_license ? "B-kørekort krævet" : "Intet B-kørekort krævet"}
-                </span>
-              </div>
+              <>
+                {vehicle.total_weight && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Weight className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Totalvægt:</span>
+                    <span className="font-medium">{vehicle.total_weight} kg</span>
+                  </div>
+                )}
+
+                {loadCapacity && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Package className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Lasteevne:</span>
+                    <span className="font-medium">~{loadCapacity} kg</span>
+                  </div>
+                )}
+
+                {/* Internal dimensions */}
+                {(vehicle.internal_length_cm || vehicle.internal_width_cm) && (
+                  <div className="flex items-center gap-2 text-sm col-span-2">
+                    <Ruler className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Ladmål (LxBxH):</span>
+                    <span className="font-medium">
+                      {vehicle.internal_length_cm || '?'} x {vehicle.internal_width_cm || '?'} x {vehicle.internal_height_cm || '?'} cm
+                    </span>
+                  </div>
+                )}
+
+                {vehicle.plug_type && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Plug className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Stik:</span>
+                    <span className="font-medium">{vehicle.plug_type === '7-pin' ? '7-polet' : '13-polet'}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 text-sm">
+                  <CreditCard className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Kørekort:</span>
+                  <span className="font-medium">
+                    {vehicle.requires_b_license ? "B-kørekort OK" : "Kræver BE-kort"}
+                  </span>
+                </div>
+              </>
             )}
 
-            {/* Campingvogn-specific */}
-            {vehicle.vehicle_type === "campingvogn" && vehicle.sleeping_capacity && (
-              <div className="flex items-center gap-2 text-sm">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Sovepladser:</span>
-                <span className="font-medium">{vehicle.sleeping_capacity}</span>
-              </div>
-            )}
+            {/* CAMPINGVOGN-SPECIFIC DETAILS */}
+            {vehicle.vehicle_type === "campingvogn" && (
+              <>
+                {(vehicle.adult_sleeping_capacity || vehicle.sleeping_capacity) && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Sovepladser:</span>
+                    <span className="font-medium">
+                      {vehicle.adult_sleeping_capacity 
+                        ? `${vehicle.adult_sleeping_capacity} voksne${vehicle.child_sleeping_capacity ? ` + ${vehicle.child_sleeping_capacity} børn` : ''}`
+                        : vehicle.sleeping_capacity}
+                    </span>
+                  </div>
+                )}
 
-            {vehicle.vehicle_type === "campingvogn" && vehicle.total_weight && (
-              <div className="flex items-center gap-2 text-sm">
-                <Weight className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Totalvægt:</span>
-                <span className="font-medium">{vehicle.total_weight} kg</span>
-              </div>
+                {vehicle.layout_type && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Ruler className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Indretning:</span>
+                    <span className="font-medium">{LAYOUT_TYPE_LABELS[vehicle.layout_type] || vehicle.layout_type}</span>
+                  </div>
+                )}
+
+                {vehicle.total_weight && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Weight className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Totalvægt:</span>
+                    <span className="font-medium">{vehicle.total_weight} kg</span>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Location */}
@@ -276,37 +371,146 @@ export const VehicleDetailModal = ({
             )}
           </div>
 
-          {/* Campingvogn Amenities */}
-          {vehicle.vehicle_type === "campingvogn" && (
+          {/* Trailer Accessories */}
+          {vehicle.vehicle_type === "trailer" && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium mb-2">Faciliteter</h4>
+              <h4 className="text-sm font-medium mb-2">Tilbehør</h4>
               <div className="flex flex-wrap gap-2">
-                {vehicle.has_kitchen && (
-                  <Badge variant="secondary">
-                    <ChefHat className="w-3 h-3 mr-1" />
-                    Køkken
-                  </Badge>
-                )}
-                {vehicle.has_bathroom && (
-                  <Badge variant="secondary">
-                    <Bath className="w-3 h-3 mr-1" />
-                    Bad/Toilet
-                  </Badge>
-                )}
-                {vehicle.has_awning && (
-                  <Badge variant="secondary">
-                    <Umbrella className="w-3 h-3 mr-1" />
-                    Markise
-                  </Badge>
+                {vehicle.has_ramps && <Badge variant="secondary">Ramper</Badge>}
+                {vehicle.has_winch && <Badge variant="secondary">Spil</Badge>}
+                {vehicle.has_tarpaulin && <Badge variant="secondary">Presenning</Badge>}
+                {vehicle.has_net && <Badge variant="secondary">Net</Badge>}
+                {vehicle.has_jockey_wheel && <Badge variant="secondary">Næsehjul</Badge>}
+                {vehicle.has_lock_included && <Badge variant="secondary">Lås inkl.</Badge>}
+                {vehicle.has_adapter && <Badge variant="secondary">Adapter</Badge>}
+                {!vehicle.has_ramps && !vehicle.has_winch && !vehicle.has_tarpaulin && 
+                 !vehicle.has_net && !vehicle.has_jockey_wheel && !vehicle.has_lock_included && 
+                 !vehicle.has_adapter && (
+                  <span className="text-sm text-muted-foreground">Intet ekstra tilbehør</span>
                 )}
               </div>
             </div>
           )}
 
+          {/* Campingvogn Facilities */}
+          {vehicle.vehicle_type === "campingvogn" && (
+            <>
+              {/* Kitchen & Bath */}
+              <div className="mb-4">
+                <h4 className="text-sm font-medium mb-2">Køkken & Bad</h4>
+                <div className="flex flex-wrap gap-2">
+                  {vehicle.has_fridge && (
+                    <Badge variant="secondary">
+                      <Snowflake className="w-3 h-3 mr-1" />
+                      Køleskab
+                    </Badge>
+                  )}
+                  {vehicle.has_freezer && <Badge variant="secondary">Fryser</Badge>}
+                  {vehicle.has_gas_burner && (
+                    <Badge variant="secondary">
+                      <Flame className="w-3 h-3 mr-1" />
+                      Gasblus
+                    </Badge>
+                  )}
+                  {vehicle.has_toilet && (
+                    <Badge variant="secondary">
+                      <Bath className="w-3 h-3 mr-1" />
+                      Toilet
+                    </Badge>
+                  )}
+                  {vehicle.has_shower && (
+                    <Badge variant="secondary">
+                      <Droplets className="w-3 h-3 mr-1" />
+                      Brusebad
+                    </Badge>
+                  )}
+                  {vehicle.has_hot_water && <Badge variant="secondary">Varmt vand</Badge>}
+                  {vehicle.has_kitchen && !vehicle.has_fridge && !vehicle.has_gas_burner && (
+                    <Badge variant="secondary">
+                      <ChefHat className="w-3 h-3 mr-1" />
+                      Køkken
+                    </Badge>
+                  )}
+                  {vehicle.has_bathroom && !vehicle.has_toilet && !vehicle.has_shower && (
+                    <Badge variant="secondary">
+                      <Bath className="w-3 h-3 mr-1" />
+                      Bad/WC
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Equipment */}
+              <div className="mb-4">
+                <h4 className="text-sm font-medium mb-2">Udstyr</h4>
+                <div className="flex flex-wrap gap-2">
+                  {vehicle.has_awning_tent && <Badge variant="secondary">Fortelt</Badge>}
+                  {vehicle.has_awning && (
+                    <Badge variant="secondary">
+                      <Umbrella className="w-3 h-3 mr-1" />
+                      Markise
+                    </Badge>
+                  )}
+                  {vehicle.has_mover && <Badge variant="secondary">Mover</Badge>}
+                  {vehicle.has_bike_rack && (
+                    <Badge variant="secondary">
+                      <Bike className="w-3 h-3 mr-1" />
+                      Cykelstativ
+                    </Badge>
+                  )}
+                  {vehicle.has_ac && (
+                    <Badge variant="secondary">
+                      <Thermometer className="w-3 h-3 mr-1" />
+                      Aircondition
+                    </Badge>
+                  )}
+                  {vehicle.has_floor_heating && <Badge variant="secondary">Gulvvarme</Badge>}
+                  {vehicle.has_tv && (
+                    <Badge variant="secondary">
+                      <Tv className="w-3 h-3 mr-1" />
+                      TV
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Included Items */}
+              {(vehicle.service_included || vehicle.camping_furniture_included || vehicle.gas_bottle_included) && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium mb-2">Medfølger</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {vehicle.service_included && <Badge className="bg-mint/20 text-mint-foreground border-mint/30">Service/bestik inkl.</Badge>}
+                    {vehicle.camping_furniture_included && <Badge className="bg-mint/20 text-mint-foreground border-mint/30">Campingmøbler inkl.</Badge>}
+                    {vehicle.gas_bottle_included && <Badge className="bg-mint/20 text-mint-foreground border-mint/30">Gasflaske inkl.</Badge>}
+                  </div>
+                </div>
+              )}
+
+              {/* Rules */}
+              <div className="mb-4">
+                <h4 className="text-sm font-medium mb-2">Regler</h4>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant={vehicle.pets_allowed ? "secondary" : "outline"} className={!vehicle.pets_allowed ? "opacity-50" : ""}>
+                    <Dog className="w-3 h-3 mr-1" />
+                    {vehicle.pets_allowed ? "Husdyr tilladt" : "Ingen husdyr"}
+                  </Badge>
+                  <Badge variant={vehicle.smoking_allowed ? "secondary" : "outline"} className={!vehicle.smoking_allowed ? "opacity-50" : ""}>
+                    <Cigarette className="w-3 h-3 mr-1" />
+                    {vehicle.smoking_allowed ? "Rygning tilladt" : "Ikke-ryger"}
+                  </Badge>
+                  <Badge variant={vehicle.festival_use_allowed ? "secondary" : "outline"} className={!vehicle.festival_use_allowed ? "opacity-50" : ""}>
+                    <Music className="w-3 h-3 mr-1" />
+                    {vehicle.festival_use_allowed ? "Festival OK" : "Ingen festival"}
+                  </Badge>
+                </div>
+              </div>
+            </>
+          )}
+
           {/* Features */}
           {vehicle.features && vehicle.features.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium mb-2">Udstyr</h4>
+              <h4 className="text-sm font-medium mb-2">Ekstra udstyr</h4>
               <div className="flex flex-wrap gap-2">
                 {vehicle.features.map((feature, i) => (
                   <Badge key={i} variant="outline">
@@ -326,7 +530,7 @@ export const VehicleDetailModal = ({
                 <span className="text-muted-foreground">Depositum:</span>
                 <span className="font-medium">{vehicle.deposit_amount.toLocaleString("da-DK")} kr</span>
               </div>
-              {!vehicle.unlimited_km && vehicle.extra_km_price && (
+              {!vehicle.unlimited_km && vehicle.extra_km_price && vehicle.vehicle_type === 'bil' && (
                 <div className="flex items-center gap-2 text-sm mt-1">
                   <Gauge className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Ekstra km:</span>

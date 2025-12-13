@@ -1777,6 +1777,9 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          adult_sleeping_capacity: number | null
+          camping_furniture_included: boolean | null
+          child_sleeping_capacity: number | null
           color: string | null
           created_at: string
           daily_price: number | null
@@ -1785,15 +1788,40 @@ export type Database = {
           description: string | null
           extra_km_price: number | null
           features: string[] | null
+          festival_use_allowed: boolean | null
           fuel_type: string | null
+          gas_bottle_included: boolean | null
+          has_ac: boolean | null
+          has_adapter: boolean | null
           has_awning: boolean | null
+          has_awning_tent: boolean | null
           has_bathroom: boolean | null
+          has_bike_rack: boolean | null
+          has_floor_heating: boolean | null
+          has_freezer: boolean | null
+          has_fridge: boolean | null
+          has_gas_burner: boolean | null
+          has_hot_water: boolean | null
+          has_jockey_wheel: boolean | null
           has_kitchen: boolean | null
+          has_lock_included: boolean | null
+          has_mover: boolean | null
+          has_net: boolean | null
+          has_ramps: boolean | null
+          has_shower: boolean | null
+          has_tarpaulin: boolean | null
+          has_toilet: boolean | null
+          has_tv: boolean | null
+          has_winch: boolean | null
           id: string
           image_url: string | null
           included_km: number | null
+          internal_height_cm: number | null
+          internal_length_cm: number | null
+          internal_width_cm: number | null
           is_available: boolean | null
           latitude: number | null
+          layout_type: string | null
           location_address: string | null
           location_city: string | null
           location_postal_code: string | null
@@ -1805,12 +1833,18 @@ export type Database = {
           payment_schedule:
             | Database["public"]["Enums"]["payment_schedule_type"]
             | null
+          pets_allowed: boolean | null
+          plug_type: string | null
           prepaid_rent_enabled: boolean
           prepaid_rent_months: number | null
           registration: string
           requires_b_license: boolean | null
+          service_included: boolean | null
           sleeping_capacity: number | null
+          smoking_allowed: boolean | null
+          tempo_approved: boolean | null
           total_weight: number | null
+          trailer_type: string | null
           unlimited_km: boolean
           updated_at: string
           use_custom_location: boolean
@@ -1828,6 +1862,9 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          adult_sleeping_capacity?: number | null
+          camping_furniture_included?: boolean | null
+          child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
           daily_price?: number | null
@@ -1836,15 +1873,40 @@ export type Database = {
           description?: string | null
           extra_km_price?: number | null
           features?: string[] | null
+          festival_use_allowed?: boolean | null
           fuel_type?: string | null
+          gas_bottle_included?: boolean | null
+          has_ac?: boolean | null
+          has_adapter?: boolean | null
           has_awning?: boolean | null
+          has_awning_tent?: boolean | null
           has_bathroom?: boolean | null
+          has_bike_rack?: boolean | null
+          has_floor_heating?: boolean | null
+          has_freezer?: boolean | null
+          has_fridge?: boolean | null
+          has_gas_burner?: boolean | null
+          has_hot_water?: boolean | null
+          has_jockey_wheel?: boolean | null
           has_kitchen?: boolean | null
+          has_lock_included?: boolean | null
+          has_mover?: boolean | null
+          has_net?: boolean | null
+          has_ramps?: boolean | null
+          has_shower?: boolean | null
+          has_tarpaulin?: boolean | null
+          has_toilet?: boolean | null
+          has_tv?: boolean | null
+          has_winch?: boolean | null
           id?: string
           image_url?: string | null
           included_km?: number | null
+          internal_height_cm?: number | null
+          internal_length_cm?: number | null
+          internal_width_cm?: number | null
           is_available?: boolean | null
           latitude?: number | null
+          layout_type?: string | null
           location_address?: string | null
           location_city?: string | null
           location_postal_code?: string | null
@@ -1856,12 +1918,18 @@ export type Database = {
           payment_schedule?:
             | Database["public"]["Enums"]["payment_schedule_type"]
             | null
+          pets_allowed?: boolean | null
+          plug_type?: string | null
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
           registration: string
           requires_b_license?: boolean | null
+          service_included?: boolean | null
           sleeping_capacity?: number | null
+          smoking_allowed?: boolean | null
+          tempo_approved?: boolean | null
           total_weight?: number | null
+          trailer_type?: string | null
           unlimited_km?: boolean
           updated_at?: string
           use_custom_location?: boolean
@@ -1879,6 +1947,9 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          adult_sleeping_capacity?: number | null
+          camping_furniture_included?: boolean | null
+          child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
           daily_price?: number | null
@@ -1887,15 +1958,40 @@ export type Database = {
           description?: string | null
           extra_km_price?: number | null
           features?: string[] | null
+          festival_use_allowed?: boolean | null
           fuel_type?: string | null
+          gas_bottle_included?: boolean | null
+          has_ac?: boolean | null
+          has_adapter?: boolean | null
           has_awning?: boolean | null
+          has_awning_tent?: boolean | null
           has_bathroom?: boolean | null
+          has_bike_rack?: boolean | null
+          has_floor_heating?: boolean | null
+          has_freezer?: boolean | null
+          has_fridge?: boolean | null
+          has_gas_burner?: boolean | null
+          has_hot_water?: boolean | null
+          has_jockey_wheel?: boolean | null
           has_kitchen?: boolean | null
+          has_lock_included?: boolean | null
+          has_mover?: boolean | null
+          has_net?: boolean | null
+          has_ramps?: boolean | null
+          has_shower?: boolean | null
+          has_tarpaulin?: boolean | null
+          has_toilet?: boolean | null
+          has_tv?: boolean | null
+          has_winch?: boolean | null
           id?: string
           image_url?: string | null
           included_km?: number | null
+          internal_height_cm?: number | null
+          internal_length_cm?: number | null
+          internal_width_cm?: number | null
           is_available?: boolean | null
           latitude?: number | null
+          layout_type?: string | null
           location_address?: string | null
           location_city?: string | null
           location_postal_code?: string | null
@@ -1907,12 +2003,18 @@ export type Database = {
           payment_schedule?:
             | Database["public"]["Enums"]["payment_schedule_type"]
             | null
+          pets_allowed?: boolean | null
+          plug_type?: string | null
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
           registration?: string
           requires_b_license?: boolean | null
+          service_included?: boolean | null
           sleeping_capacity?: number | null
+          smoking_allowed?: boolean | null
+          tempo_approved?: boolean | null
           total_weight?: number | null
+          trailer_type?: string | null
           unlimited_km?: boolean
           updated_at?: string
           use_custom_location?: boolean
@@ -2056,6 +2158,9 @@ export type Database = {
     Views: {
       vehicles_public: {
         Row: {
+          adult_sleeping_capacity: number | null
+          camping_furniture_included: boolean | null
+          child_sleeping_capacity: number | null
           color: string | null
           daily_price: number | null
           deposit_amount: number | null
@@ -2063,15 +2168,40 @@ export type Database = {
           description: string | null
           extra_km_price: number | null
           features: string[] | null
+          festival_use_allowed: boolean | null
           fuel_type: string | null
+          gas_bottle_included: boolean | null
+          has_ac: boolean | null
+          has_adapter: boolean | null
           has_awning: boolean | null
+          has_awning_tent: boolean | null
           has_bathroom: boolean | null
+          has_bike_rack: boolean | null
+          has_floor_heating: boolean | null
+          has_freezer: boolean | null
+          has_fridge: boolean | null
+          has_gas_burner: boolean | null
+          has_hot_water: boolean | null
+          has_jockey_wheel: boolean | null
           has_kitchen: boolean | null
+          has_lock_included: boolean | null
+          has_mover: boolean | null
+          has_net: boolean | null
+          has_ramps: boolean | null
+          has_shower: boolean | null
+          has_tarpaulin: boolean | null
+          has_toilet: boolean | null
+          has_tv: boolean | null
+          has_winch: boolean | null
           id: string | null
           image_url: string | null
           included_km: number | null
+          internal_height_cm: number | null
+          internal_length_cm: number | null
+          internal_width_cm: number | null
           is_available: boolean | null
           latitude: number | null
+          layout_type: string | null
           location_address: string | null
           location_city: string | null
           location_postal_code: string | null
@@ -2083,11 +2213,18 @@ export type Database = {
           payment_schedule:
             | Database["public"]["Enums"]["payment_schedule_type"]
             | null
+          pets_allowed: boolean | null
+          plug_type: string | null
           prepaid_rent_enabled: boolean | null
           prepaid_rent_months: number | null
+          registration: string | null
           requires_b_license: boolean | null
+          service_included: boolean | null
           sleeping_capacity: number | null
+          smoking_allowed: boolean | null
+          tempo_approved: boolean | null
           total_weight: number | null
+          trailer_type: string | null
           unlimited_km: boolean | null
           use_custom_location: boolean | null
           variant: string | null
@@ -2096,6 +2233,9 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          adult_sleeping_capacity?: number | null
+          camping_furniture_included?: boolean | null
+          child_sleeping_capacity?: number | null
           color?: string | null
           daily_price?: number | null
           deposit_amount?: number | null
@@ -2103,15 +2243,40 @@ export type Database = {
           description?: string | null
           extra_km_price?: number | null
           features?: string[] | null
+          festival_use_allowed?: boolean | null
           fuel_type?: string | null
+          gas_bottle_included?: boolean | null
+          has_ac?: boolean | null
+          has_adapter?: boolean | null
           has_awning?: boolean | null
+          has_awning_tent?: boolean | null
           has_bathroom?: boolean | null
+          has_bike_rack?: boolean | null
+          has_floor_heating?: boolean | null
+          has_freezer?: boolean | null
+          has_fridge?: boolean | null
+          has_gas_burner?: boolean | null
+          has_hot_water?: boolean | null
+          has_jockey_wheel?: boolean | null
           has_kitchen?: boolean | null
+          has_lock_included?: boolean | null
+          has_mover?: boolean | null
+          has_net?: boolean | null
+          has_ramps?: boolean | null
+          has_shower?: boolean | null
+          has_tarpaulin?: boolean | null
+          has_toilet?: boolean | null
+          has_tv?: boolean | null
+          has_winch?: boolean | null
           id?: string | null
           image_url?: string | null
           included_km?: number | null
+          internal_height_cm?: number | null
+          internal_length_cm?: number | null
+          internal_width_cm?: number | null
           is_available?: boolean | null
           latitude?: number | null
+          layout_type?: string | null
           location_address?: string | null
           location_city?: string | null
           location_postal_code?: string | null
@@ -2123,11 +2288,18 @@ export type Database = {
           payment_schedule?:
             | Database["public"]["Enums"]["payment_schedule_type"]
             | null
+          pets_allowed?: boolean | null
+          plug_type?: string | null
           prepaid_rent_enabled?: boolean | null
           prepaid_rent_months?: number | null
+          registration?: string | null
           requires_b_license?: boolean | null
+          service_included?: boolean | null
           sleeping_capacity?: number | null
+          smoking_allowed?: boolean | null
+          tempo_approved?: boolean | null
           total_weight?: number | null
+          trailer_type?: string | null
           unlimited_km?: boolean | null
           use_custom_location?: boolean | null
           variant?: string | null
@@ -2136,6 +2308,9 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          adult_sleeping_capacity?: number | null
+          camping_furniture_included?: boolean | null
+          child_sleeping_capacity?: number | null
           color?: string | null
           daily_price?: number | null
           deposit_amount?: number | null
@@ -2143,15 +2318,40 @@ export type Database = {
           description?: string | null
           extra_km_price?: number | null
           features?: string[] | null
+          festival_use_allowed?: boolean | null
           fuel_type?: string | null
+          gas_bottle_included?: boolean | null
+          has_ac?: boolean | null
+          has_adapter?: boolean | null
           has_awning?: boolean | null
+          has_awning_tent?: boolean | null
           has_bathroom?: boolean | null
+          has_bike_rack?: boolean | null
+          has_floor_heating?: boolean | null
+          has_freezer?: boolean | null
+          has_fridge?: boolean | null
+          has_gas_burner?: boolean | null
+          has_hot_water?: boolean | null
+          has_jockey_wheel?: boolean | null
           has_kitchen?: boolean | null
+          has_lock_included?: boolean | null
+          has_mover?: boolean | null
+          has_net?: boolean | null
+          has_ramps?: boolean | null
+          has_shower?: boolean | null
+          has_tarpaulin?: boolean | null
+          has_toilet?: boolean | null
+          has_tv?: boolean | null
+          has_winch?: boolean | null
           id?: string | null
           image_url?: string | null
           included_km?: number | null
+          internal_height_cm?: number | null
+          internal_length_cm?: number | null
+          internal_width_cm?: number | null
           is_available?: boolean | null
           latitude?: number | null
+          layout_type?: string | null
           location_address?: string | null
           location_city?: string | null
           location_postal_code?: string | null
@@ -2163,11 +2363,18 @@ export type Database = {
           payment_schedule?:
             | Database["public"]["Enums"]["payment_schedule_type"]
             | null
+          pets_allowed?: boolean | null
+          plug_type?: string | null
           prepaid_rent_enabled?: boolean | null
           prepaid_rent_months?: number | null
+          registration?: string | null
           requires_b_license?: boolean | null
+          service_included?: boolean | null
           sleeping_capacity?: number | null
+          smoking_allowed?: boolean | null
+          tempo_approved?: boolean | null
           total_weight?: number | null
+          trailer_type?: string | null
           unlimited_km?: boolean | null
           use_custom_location?: boolean | null
           variant?: string | null

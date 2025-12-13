@@ -40,14 +40,12 @@ export interface SearchVehicle {
   features: string[] | null;
   deposit_required: boolean;
   deposit_amount: number | null;
-  // Location fields from database
   use_custom_location: boolean;
   location_address: string | null;
   location_postal_code: string | null;
   location_city: string | null;
   latitude: number | null;
   longitude: number | null;
-  // Vehicle type fields
   vehicle_type: 'bil' | 'trailer' | 'campingvogn';
   total_weight: number | null;
   requires_b_license: boolean;
@@ -55,18 +53,52 @@ export interface SearchVehicle {
   has_kitchen: boolean;
   has_bathroom: boolean;
   has_awning: boolean;
-  // Display fields (aliased from location fields)
+  // New trailer fields
+  trailer_type: string | null;
+  internal_length_cm: number | null;
+  internal_width_cm: number | null;
+  internal_height_cm: number | null;
+  plug_type: string | null;
+  has_ramps: boolean;
+  has_winch: boolean;
+  has_tarpaulin: boolean;
+  has_net: boolean;
+  has_jockey_wheel: boolean;
+  has_lock_included: boolean;
+  has_adapter: boolean;
+  tempo_approved: boolean;
+  // New caravan fields
+  adult_sleeping_capacity: number | null;
+  child_sleeping_capacity: number | null;
+  layout_type: string | null;
+  has_fridge: boolean;
+  has_freezer: boolean;
+  has_gas_burner: boolean;
+  has_toilet: boolean;
+  has_shower: boolean;
+  has_hot_water: boolean;
+  has_mover: boolean;
+  has_bike_rack: boolean;
+  has_ac: boolean;
+  has_floor_heating: boolean;
+  has_tv: boolean;
+  has_awning_tent: boolean;
+  service_included: boolean;
+  camping_furniture_included: boolean;
+  gas_bottle_included: boolean;
+  pets_allowed: boolean;
+  smoking_allowed: boolean;
+  festival_use_allowed: boolean;
+  // Display/owner fields
   display_address?: string | null;
   display_postal_code?: string | null;
   display_city?: string | null;
-  // Owner/fleet info
   owner_id?: string;
   owner_fleet_plan?: 'fleet_basic' | 'fleet_premium' | null;
   owner_lessor_status?: 'bronze' | 'silver' | 'gold' | 'platinum' | null;
   owner_average_rating?: number | null;
   owner_company_name?: string | null;
   created_at?: string | null;
-  // For map compatibility
   lat?: number;
   lng?: number;
 }
@@ -82,6 +114,9 @@ export interface SearchFiltersState {
   periodType: RentalPeriodType;
   periodCount: number;
   vehicleType: VehicleTypeFilter;
+  trailerType?: string;
+  maxWeight?: number;
+  minSleepingCapacity?: number;
 }
 
 const Search = () => {
@@ -232,9 +267,23 @@ const Search = () => {
       return price >= filters.priceMin && price <= filters.priceMax;
     });
 
-    // Fuel type filter (only for cars)
-    if (filters.fuelType !== "all" && filters.vehicleType !== 'trailer' && filters.vehicleType !== 'campingvogn') {
-      result = result.filter((v) => v.fuel_type === filters.fuelType);
+    // Weight filter for trailers/campingvogne
+    if (filters.maxWeight && (filters.vehicleType === 'trailer' || filters.vehicleType === 'campingvogn')) {
+      result = result.filter((v) => !v.total_weight || v.total_weight <= filters.maxWeight!);
+    }
+
+    // Sleeping capacity filter for campingvogne
+    if (filters.minSleepingCapacity && filters.vehicleType === 'campingvogn') {
+      const minCapacity = filters.minSleepingCapacity;
+      result = result.filter((v) => {
+        const totalCapacity = (v.adult_sleeping_capacity || 0) + (v.child_sleeping_capacity || 0) || v.sleeping_capacity || 0;
+        return totalCapacity >= minCapacity;
+      });
+    }
+
+    // Trailer type filter
+    if (filters.trailerType && filters.trailerType !== 'all' && filters.vehicleType === 'trailer') {
+      result = result.filter((v) => v.trailer_type === filters.trailerType);
     }
 
     setFilteredVehicles(result);
