@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import SearchFilters from "@/components/search/SearchFilters";
 import VehicleSearchCard from "@/components/search/VehicleSearchCard";
 import SearchMap from "@/components/search/SearchMap";
+import { VehicleDetailModal } from "@/components/search/VehicleDetailModal";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,7 @@ const Search = () => {
   const [filteredVehicles, setFilteredVehicles] = useState<SearchVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
+  const [detailVehicle, setDetailVehicle] = useState<SearchVehicle | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('date_desc');
   const [searchQuery, setSearchQuery] = useState('');
@@ -368,7 +370,10 @@ const Search = () => {
                         key={vehicle.id}
                         vehicle={vehicle}
                         isSelected={selectedVehicle === vehicle.id}
-                        onSelect={() => setSelectedVehicle(vehicle.id)}
+                        onSelect={() => {
+                          setSelectedVehicle(vehicle.id);
+                          setDetailVehicle(vehicle);
+                        }}
                         filters={filters}
                       />
                     ))
@@ -391,6 +396,16 @@ const Search = () => {
             </div>
           )}
         </div>
+
+        {/* Vehicle Detail Modal */}
+        <VehicleDetailModal
+          vehicle={detailVehicle}
+          open={detailVehicle !== null}
+          onOpenChange={(open) => {
+            if (!open) setDetailVehicle(null);
+          }}
+          filters={filters}
+        />
       </main>
 
       <Footer />
