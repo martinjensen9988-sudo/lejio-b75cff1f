@@ -1786,6 +1786,9 @@ export type Database = {
           extra_km_price: number | null
           features: string[] | null
           fuel_type: string | null
+          has_awning: boolean | null
+          has_bathroom: boolean | null
+          has_kitchen: boolean | null
           id: string
           image_url: string | null
           included_km: number | null
@@ -1805,6 +1808,9 @@ export type Database = {
           prepaid_rent_enabled: boolean
           prepaid_rent_months: number | null
           registration: string
+          requires_b_license: boolean | null
+          sleeping_capacity: number | null
+          total_weight: number | null
           unlimited_km: boolean
           updated_at: string
           use_custom_location: boolean
@@ -1815,6 +1821,7 @@ export type Database = {
           value_verified_at: string | null
           value_verified_by: string | null
           variant: string | null
+          vehicle_type: string
           vehicle_value: number | null
           vin: string | null
           weekly_price: number | null
@@ -1830,6 +1837,9 @@ export type Database = {
           extra_km_price?: number | null
           features?: string[] | null
           fuel_type?: string | null
+          has_awning?: boolean | null
+          has_bathroom?: boolean | null
+          has_kitchen?: boolean | null
           id?: string
           image_url?: string | null
           included_km?: number | null
@@ -1849,6 +1859,9 @@ export type Database = {
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
           registration: string
+          requires_b_license?: boolean | null
+          sleeping_capacity?: number | null
+          total_weight?: number | null
           unlimited_km?: boolean
           updated_at?: string
           use_custom_location?: boolean
@@ -1859,6 +1872,7 @@ export type Database = {
           value_verified_at?: string | null
           value_verified_by?: string | null
           variant?: string | null
+          vehicle_type?: string
           vehicle_value?: number | null
           vin?: string | null
           weekly_price?: number | null
@@ -1874,6 +1888,9 @@ export type Database = {
           extra_km_price?: number | null
           features?: string[] | null
           fuel_type?: string | null
+          has_awning?: boolean | null
+          has_bathroom?: boolean | null
+          has_kitchen?: boolean | null
           id?: string
           image_url?: string | null
           included_km?: number | null
@@ -1893,6 +1910,9 @@ export type Database = {
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
           registration?: string
+          requires_b_license?: boolean | null
+          sleeping_capacity?: number | null
+          total_weight?: number | null
           unlimited_km?: boolean
           updated_at?: string
           use_custom_location?: boolean
@@ -1903,6 +1923,7 @@ export type Database = {
           value_verified_at?: string | null
           value_verified_by?: string | null
           variant?: string | null
+          vehicle_type?: string
           vehicle_value?: number | null
           vin?: string | null
           weekly_price?: number | null
@@ -2036,16 +2057,16 @@ export type Database = {
       vehicles_public: {
         Row: {
           color: string | null
-          created_at: string | null
           daily_price: number | null
           deposit_amount: number | null
           deposit_required: boolean | null
-          display_address: string | null
-          display_city: string | null
-          display_postal_code: string | null
+          description: string | null
           extra_km_price: number | null
           features: string[] | null
           fuel_type: string | null
+          has_awning: boolean | null
+          has_bathroom: boolean | null
+          has_kitchen: boolean | null
           id: string | null
           image_url: string | null
           included_km: number | null
@@ -2058,19 +2079,101 @@ export type Database = {
           make: string | null
           model: string | null
           monthly_price: number | null
-          owner_average_rating: number | null
-          owner_company_name: string | null
-          owner_fleet_plan:
-            | Database["public"]["Enums"]["fleet_plan_type"]
+          owner_id: string | null
+          payment_schedule:
+            | Database["public"]["Enums"]["payment_schedule_type"]
             | null
-          owner_lessor_status:
-            | Database["public"]["Enums"]["lessor_status"]
-            | null
+          prepaid_rent_enabled: boolean | null
+          prepaid_rent_months: number | null
+          requires_b_license: boolean | null
+          sleeping_capacity: number | null
+          total_weight: number | null
           unlimited_km: boolean | null
           use_custom_location: boolean | null
           variant: string | null
+          vehicle_type: string | null
           weekly_price: number | null
           year: number | null
+        }
+        Insert: {
+          color?: string | null
+          daily_price?: number | null
+          deposit_amount?: number | null
+          deposit_required?: boolean | null
+          description?: string | null
+          extra_km_price?: number | null
+          features?: string[] | null
+          fuel_type?: string | null
+          has_awning?: boolean | null
+          has_bathroom?: boolean | null
+          has_kitchen?: boolean | null
+          id?: string | null
+          image_url?: string | null
+          included_km?: number | null
+          is_available?: boolean | null
+          latitude?: number | null
+          location_address?: string | null
+          location_city?: string | null
+          location_postal_code?: string | null
+          longitude?: number | null
+          make?: string | null
+          model?: string | null
+          monthly_price?: number | null
+          owner_id?: string | null
+          payment_schedule?:
+            | Database["public"]["Enums"]["payment_schedule_type"]
+            | null
+          prepaid_rent_enabled?: boolean | null
+          prepaid_rent_months?: number | null
+          requires_b_license?: boolean | null
+          sleeping_capacity?: number | null
+          total_weight?: number | null
+          unlimited_km?: boolean | null
+          use_custom_location?: boolean | null
+          variant?: string | null
+          vehicle_type?: string | null
+          weekly_price?: number | null
+          year?: number | null
+        }
+        Update: {
+          color?: string | null
+          daily_price?: number | null
+          deposit_amount?: number | null
+          deposit_required?: boolean | null
+          description?: string | null
+          extra_km_price?: number | null
+          features?: string[] | null
+          fuel_type?: string | null
+          has_awning?: boolean | null
+          has_bathroom?: boolean | null
+          has_kitchen?: boolean | null
+          id?: string | null
+          image_url?: string | null
+          included_km?: number | null
+          is_available?: boolean | null
+          latitude?: number | null
+          location_address?: string | null
+          location_city?: string | null
+          location_postal_code?: string | null
+          longitude?: number | null
+          make?: string | null
+          model?: string | null
+          monthly_price?: number | null
+          owner_id?: string | null
+          payment_schedule?:
+            | Database["public"]["Enums"]["payment_schedule_type"]
+            | null
+          prepaid_rent_enabled?: boolean | null
+          prepaid_rent_months?: number | null
+          requires_b_license?: boolean | null
+          sleeping_capacity?: number | null
+          total_weight?: number | null
+          unlimited_km?: boolean | null
+          use_custom_location?: boolean | null
+          variant?: string | null
+          vehicle_type?: string | null
+          weekly_price?: number | null
+          year?: number | null
         }
         Relationships: []
       }

@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
 export type PaymentScheduleType = 'upfront' | 'monthly';
+export type VehicleType = 'bil' | 'trailer' | 'campingvogn';
 
 export interface Vehicle {
   id: string;
@@ -38,6 +39,13 @@ export interface Vehicle {
   latitude: number | null;
   longitude: number | null;
   vehicle_value: number | null;
+  vehicle_type: VehicleType;
+  total_weight: number | null;
+  requires_b_license: boolean;
+  sleeping_capacity: number | null;
+  has_kitchen: boolean;
+  has_bathroom: boolean;
+  has_awning: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -72,6 +80,13 @@ export interface VehicleInsert {
   latitude?: number;
   longitude?: number;
   vehicle_value?: number;
+  vehicle_type?: VehicleType;
+  total_weight?: number;
+  requires_b_license?: boolean;
+  sleeping_capacity?: number;
+  has_kitchen?: boolean;
+  has_bathroom?: boolean;
+  has_awning?: boolean;
 }
 
 export const useVehicles = () => {
@@ -96,7 +111,12 @@ export const useVehicles = () => {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      setVehicles(data || []);
+      // Cast vehicle_type to VehicleType
+      const typedData = (data || []).map(v => ({
+        ...v,
+        vehicle_type: (v.vehicle_type || 'bil') as VehicleType,
+      }));
+      setVehicles(typedData);
     } catch (err) {
       console.error('Error fetching vehicles:', err);
       setError('Kunne ikke hente køretøjer');
@@ -123,16 +143,17 @@ export const useVehicles = () => {
 
       if (insertError) {
         if (insertError.code === '23505') {
-          toast.error('Denne bil er allerede registreret');
+          toast.error('Dette køretøj er allerede registreret');
         } else {
           toast.error('Kunne ikke tilføje køretøj');
         }
         throw insertError;
       }
 
-      setVehicles(prev => [data, ...prev]);
+      const typedData = { ...data, vehicle_type: (data.vehicle_type || 'bil') as VehicleType };
+      setVehicles(prev => [typedData, ...prev]);
       toast.success('Køretøj tilføjet!');
-      return data;
+      return typedData;
     } catch (err) {
       console.error('Error adding vehicle:', err);
       return null;

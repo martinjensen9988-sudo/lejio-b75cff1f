@@ -5,7 +5,7 @@ import SearchFilters from "@/components/search/SearchFilters";
 import VehicleSearchCard from "@/components/search/VehicleSearchCard";
 import SearchMap from "@/components/search/SearchMap";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Car, MapPin, ArrowUpDown, Search as SearchIcon, X } from "lucide-react";
+import { Loader2, Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 
 type SortOption = 'price_asc' | 'price_desc' | 'date_desc' | 'date_asc' | 'rating_desc';
+
+export type VehicleTypeFilter = 'all' | 'bil' | 'trailer' | 'campingvogn';
 
 // Public vehicle data - no sensitive fields like owner_id, vin, registration
 export interface SearchVehicle {
@@ -44,15 +46,25 @@ export interface SearchVehicle {
   location_city: string | null;
   latitude: number | null;
   longitude: number | null;
-  display_address: string | null;
-  display_postal_code: string | null;
-  display_city: string | null;
-  // Fleet/owner info for badges
-  owner_fleet_plan: 'fleet_basic' | 'fleet_premium' | null;
-  owner_lessor_status: 'bronze' | 'silver' | 'gold' | 'platinum' | null;
-  owner_average_rating: number | null;
-  owner_company_name: string | null;
-  created_at: string | null;
+  // Vehicle type fields
+  vehicle_type: 'bil' | 'trailer' | 'campingvogn';
+  total_weight: number | null;
+  requires_b_license: boolean;
+  sleeping_capacity: number | null;
+  has_kitchen: boolean;
+  has_bathroom: boolean;
+  has_awning: boolean;
+  // Display fields (aliased from location fields)
+  display_address?: string | null;
+  display_postal_code?: string | null;
+  display_city?: string | null;
+  // Owner/fleet info
+  owner_id?: string;
+  owner_fleet_plan?: 'fleet_basic' | 'fleet_premium' | null;
+  owner_lessor_status?: 'bronze' | 'silver' | 'gold' | 'platinum' | null;
+  owner_average_rating?: number | null;
+  owner_company_name?: string | null;
+  created_at?: string | null;
   // For map compatibility
   lat?: number;
   lng?: number;
@@ -68,6 +80,7 @@ export interface SearchFiltersState {
   endDate: Date | undefined;
   periodType: RentalPeriodType;
   periodCount: number;
+  vehicleType: VehicleTypeFilter;
 }
 
 const Search = () => {
@@ -86,6 +99,7 @@ const Search = () => {
     endDate: undefined,
     periodType: 'daily',
     periodCount: 1,
+    vehicleType: 'all',
   });
 
   // Sort vehicles based on selected option
@@ -127,69 +141,59 @@ const Search = () => {
       }
 
       // Map database coordinates to lat/lng for map, with fallback for vehicles without coordinates
-      const vehiclesWithLocations = (data || []).map((vehicle, index) => {
-        // Use real coordinates if available
-        if (vehicle.latitude && vehicle.longitude) {
-          return {
-            ...vehicle,
-            lat: vehicle.latitude,
-            lng: vehicle.longitude,
-          };
-        }
+      const vehiclesWithLocations = (data || []).map((vehicle) => {
+        // Default location values
+        let lat = vehicle.latitude || 55.6761;
+        let lng = vehicle.longitude || 12.5683;
         
-        // Fallback: generate location based on postal code or random
-        // In production, all vehicles should have geocoded coordinates
-        const postalCode = vehicle.display_postal_code;
-        let lat = 55.6761; // Default Copenhagen
-        let lng = 12.5683;
-        
-        if (postalCode) {
-          // Rough estimation based on Danish postal codes
-          const code = parseInt(postalCode);
-          if (code >= 1000 && code <= 2999) {
-            // Copenhagen area
-            lat = 55.676 + (Math.random() - 0.5) * 0.1;
-            lng = 12.568 + (Math.random() - 0.5) * 0.15;
-          } else if (code >= 3000 && code <= 3699) {
-            // North Zealand
-            lat = 55.85 + (Math.random() - 0.5) * 0.2;
-            lng = 12.35 + (Math.random() - 0.5) * 0.3;
-          } else if (code >= 4000 && code <= 4999) {
-            // South/West Zealand
-            lat = 55.4 + (Math.random() - 0.5) * 0.3;
-            lng = 11.8 + (Math.random() - 0.5) * 0.4;
-          } else if (code >= 5000 && code <= 5999) {
-            // Funen
-            lat = 55.4 + (Math.random() - 0.5) * 0.15;
-            lng = 10.4 + (Math.random() - 0.5) * 0.2;
-          } else if (code >= 6000 && code <= 6999) {
-            // South Jutland
-            lat = 55.3 + (Math.random() - 0.5) * 0.3;
-            lng = 9.5 + (Math.random() - 0.5) * 0.4;
-          } else if (code >= 7000 && code <= 7999) {
-            // Central Jutland
-            lat = 56.1 + (Math.random() - 0.5) * 0.3;
-            lng = 9.5 + (Math.random() - 0.5) * 0.4;
-          } else if (code >= 8000 && code <= 8999) {
-            // East Jutland / Aarhus
-            lat = 56.15 + (Math.random() - 0.5) * 0.2;
-            lng = 10.2 + (Math.random() - 0.5) * 0.3;
-          } else if (code >= 9000 && code <= 9999) {
-            // North Jutland
-            lat = 57.0 + (Math.random() - 0.5) * 0.3;
-            lng = 10.0 + (Math.random() - 0.5) * 0.5;
+        // Fallback: generate location based on postal code if no coordinates
+        if (!vehicle.latitude || !vehicle.longitude) {
+          const postalCode = vehicle.location_postal_code;
+          if (postalCode) {
+            const code = parseInt(postalCode);
+            if (code >= 1000 && code <= 2999) {
+              lat = 55.676 + (Math.random() - 0.5) * 0.1;
+              lng = 12.568 + (Math.random() - 0.5) * 0.15;
+            } else if (code >= 3000 && code <= 3699) {
+              lat = 55.85 + (Math.random() - 0.5) * 0.2;
+              lng = 12.35 + (Math.random() - 0.5) * 0.3;
+            } else if (code >= 4000 && code <= 4999) {
+              lat = 55.4 + (Math.random() - 0.5) * 0.3;
+              lng = 11.8 + (Math.random() - 0.5) * 0.4;
+            } else if (code >= 5000 && code <= 5999) {
+              lat = 55.4 + (Math.random() - 0.5) * 0.15;
+              lng = 10.4 + (Math.random() - 0.5) * 0.2;
+            } else if (code >= 6000 && code <= 6999) {
+              lat = 55.3 + (Math.random() - 0.5) * 0.3;
+              lng = 9.5 + (Math.random() - 0.5) * 0.4;
+            } else if (code >= 7000 && code <= 7999) {
+              lat = 56.1 + (Math.random() - 0.5) * 0.3;
+              lng = 9.5 + (Math.random() - 0.5) * 0.4;
+            } else if (code >= 8000 && code <= 8999) {
+              lat = 56.15 + (Math.random() - 0.5) * 0.2;
+              lng = 10.2 + (Math.random() - 0.5) * 0.3;
+            } else if (code >= 9000 && code <= 9999) {
+              lat = 57.0 + (Math.random() - 0.5) * 0.3;
+              lng = 10.0 + (Math.random() - 0.5) * 0.5;
+            }
+          } else {
+            lat = 55.6 + (Math.random() - 0.5) * 1.5;
+            lng = 10.5 + (Math.random() - 0.5) * 3;
           }
-        } else {
-          // Random fallback across Denmark
-          lat = 55.6 + (Math.random() - 0.5) * 1.5;
-          lng = 10.5 + (Math.random() - 0.5) * 3;
         }
         
         return {
           ...vehicle,
+          vehicle_type: vehicle.vehicle_type || 'bil',
+          total_weight: vehicle.total_weight || null,
+          requires_b_license: vehicle.requires_b_license ?? true,
+          sleeping_capacity: vehicle.sleeping_capacity || null,
+          has_kitchen: vehicle.has_kitchen || false,
+          has_bathroom: vehicle.has_bathroom || false,
+          has_awning: vehicle.has_awning || false,
           lat,
           lng,
-        };
+        } as SearchVehicle;
       });
 
       setVehicles(vehiclesWithLocations);
@@ -203,6 +207,11 @@ const Search = () => {
   // Apply filters
   useEffect(() => {
     let result = [...vehicles];
+
+    // Vehicle type filter
+    if (filters.vehicleType !== "all") {
+      result = result.filter((v) => v.vehicle_type === filters.vehicleType);
+    }
 
     // Search query filter (make/model)
     if (searchQuery.trim()) {
@@ -221,13 +230,23 @@ const Search = () => {
       return price >= filters.priceMin && price <= filters.priceMax;
     });
 
-    // Fuel type filter
-    if (filters.fuelType !== "all") {
+    // Fuel type filter (only for cars)
+    if (filters.fuelType !== "all" && filters.vehicleType !== 'trailer' && filters.vehicleType !== 'campingvogn') {
       result = result.filter((v) => v.fuel_type === filters.fuelType);
     }
 
     setFilteredVehicles(result);
   }, [filters, vehicles, searchQuery]);
+
+  // Get vehicle type label and count
+  const getVehicleTypeLabel = () => {
+    switch (filters.vehicleType) {
+      case 'bil': return 'biler';
+      case 'trailer': return 'trailere';
+      case 'campingvogn': return 'campingvogne';
+      default: return 'køretøjer';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -238,10 +257,10 @@ const Search = () => {
         <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 py-8 px-6">
           <div className="container mx-auto">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Find din næste lejebil
+              Find dit næste køretøj
             </h1>
             <p className="text-muted-foreground">
-              {filteredVehicles.length} biler tilgængelige i Danmark
+              {filteredVehicles.length} {getVehicleTypeLabel()} tilgængelige i Danmark
             </p>
           </div>
         </div>
@@ -306,7 +325,7 @@ const Search = () => {
                   
                   {/* Sort and Map Toggle */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <h2 className="font-semibold text-lg">{filteredVehicles.length} biler</h2>
+                    <h2 className="font-semibold text-lg">{filteredVehicles.length} {getVehicleTypeLabel()}</h2>
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                       <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
                         <SelectTrigger className="w-full sm:w-[180px]">

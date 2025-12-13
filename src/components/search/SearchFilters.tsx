@@ -1,4 +1,4 @@
-import { Calendar, Fuel, Clock } from "lucide-react";
+import { Calendar, Fuel, Clock, Car, Truck, Tent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, addDays, addWeeks, addMonths } from "date-fns";
 import { da } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { SearchFiltersState, RentalPeriodType } from "@/pages/Search";
+import { SearchFiltersState, RentalPeriodType, VehicleTypeFilter } from "@/pages/Search";
 
 interface SearchFiltersProps {
   filters: SearchFiltersState;
@@ -77,6 +77,51 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
     <div className="bg-card border-b border-border py-4 px-4 md:px-6">
       <div className="container mx-auto">
         <div className="flex flex-wrap gap-4 items-end">
+          {/* Vehicle Type */}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Køretøjstype</Label>
+            <Select
+              value={filters.vehicleType}
+              onValueChange={(value: VehicleTypeFilter) => 
+                setFilters((prev) => ({ ...prev, vehicleType: value }))
+              }
+            >
+              <SelectTrigger className="w-[150px]">
+                {filters.vehicleType === 'bil' && <Car className="mr-2 h-4 w-4" />}
+                {filters.vehicleType === 'trailer' && <Truck className="mr-2 h-4 w-4" />}
+                {filters.vehicleType === 'campingvogn' && <Tent className="mr-2 h-4 w-4" />}
+                {filters.vehicleType === 'all' && <Car className="mr-2 h-4 w-4" />}
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex items-center gap-2">
+                    <Car className="h-4 w-4" />
+                    Alle typer
+                  </div>
+                </SelectItem>
+                <SelectItem value="bil">
+                  <div className="flex items-center gap-2">
+                    <Car className="h-4 w-4" />
+                    Biler
+                  </div>
+                </SelectItem>
+                <SelectItem value="trailer">
+                  <div className="flex items-center gap-2">
+                    <Truck className="h-4 w-4" />
+                    Trailere
+                  </div>
+                </SelectItem>
+                <SelectItem value="campingvogn">
+                  <div className="flex items-center gap-2">
+                    <Tent className="h-4 w-4" />
+                    Campingvogne
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Rental Period Type */}
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Lejetype</Label>
@@ -229,6 +274,7 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
                 endDate: undefined,
                 periodType: 'daily',
                 periodCount: 1,
+                vehicleType: 'all',
               })
             }
             className="text-muted-foreground"

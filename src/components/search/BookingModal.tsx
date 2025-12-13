@@ -233,9 +233,9 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
               <VehicleLocationMap
                 latitude={vehicle.latitude}
                 longitude={vehicle.longitude}
-                address={vehicle.display_address}
-                postalCode={vehicle.display_postal_code}
-                city={vehicle.display_city}
+                address={vehicle.location_address || vehicle.display_address}
+                postalCode={vehicle.location_postal_code || vehicle.display_postal_code}
+                city={vehicle.location_city || vehicle.display_city}
                 className="h-32"
               />
             </div>

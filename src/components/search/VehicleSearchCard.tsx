@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Car, Fuel, Calendar, Gauge, Check, Shield, Star } from "lucide-react";
+import { Car, Fuel, Calendar, Gauge, Check, Shield, Star, Truck, Tent, Users, ChefHat, Bath, Umbrella, Weight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,24 @@ const VehicleSearchCard = ({
   filters,
 }: VehicleSearchCardProps) => {
   const navigate = useNavigate();
+
+  // Get vehicle type icon
+  const VehicleIcon = useMemo(() => {
+    switch (vehicle.vehicle_type) {
+      case 'trailer': return Truck;
+      case 'campingvogn': return Tent;
+      default: return Car;
+    }
+  }, [vehicle.vehicle_type]);
+
+  // Get vehicle type label
+  const vehicleTypeLabel = useMemo(() => {
+    switch (vehicle.vehicle_type) {
+      case 'trailer': return 'Trailer';
+      case 'campingvogn': return 'Campingvogn';
+      default: return 'Bil';
+    }
+  }, [vehicle.vehicle_type]);
 
   // Calculate pricing based on period type
   const pricing = useMemo(() => {
@@ -78,10 +96,17 @@ const VehicleSearchCard = ({
               />
             ) : (
               <div className="w-full h-full bg-muted flex items-center justify-center">
-                <Car className="w-12 h-12 text-muted-foreground" />
+                <VehicleIcon className="w-12 h-12 text-muted-foreground" />
               </div>
             )}
-            {vehicle.unlimited_km && (
+            {/* Vehicle type badge */}
+            {vehicle.vehicle_type !== 'bil' && (
+              <Badge className="absolute top-2 left-2 bg-secondary text-secondary-foreground">
+                <VehicleIcon className="w-3 h-3 mr-1" />
+                {vehicleTypeLabel}
+              </Badge>
+            )}
+            {vehicle.unlimited_km && vehicle.vehicle_type === 'bil' && (
               <Badge className="absolute top-2 left-2 bg-accent text-accent-foreground">
                 <Check className="w-3 h-3 mr-1" />
                 Fri km
@@ -127,7 +152,7 @@ const VehicleSearchCard = ({
               </div>
             )}
 
-            {/* Features */}
+            {/* Features - vary by vehicle type */}
             <div className="flex flex-wrap gap-3 mb-3 text-sm text-muted-foreground">
               {vehicle.year && (
                 <span className="flex items-center gap-1">
@@ -135,16 +160,42 @@ const VehicleSearchCard = ({
                   {vehicle.year}
                 </span>
               )}
-              {vehicle.fuel_type && (
+              {/* Car-specific features */}
+              {vehicle.vehicle_type === 'bil' && vehicle.fuel_type && (
                 <span className="flex items-center gap-1">
                   <Fuel className="w-4 h-4" />
                   {vehicle.fuel_type}
                 </span>
               )}
-              {!vehicle.unlimited_km && vehicle.included_km && (
+              {vehicle.vehicle_type === 'bil' && !vehicle.unlimited_km && vehicle.included_km && (
                 <span className="flex items-center gap-1">
                   <Gauge className="w-4 h-4" />
                   {vehicle.included_km} km/dag inkl.
+                </span>
+              )}
+              {/* Trailer-specific features */}
+              {vehicle.vehicle_type === 'trailer' && vehicle.total_weight && (
+                <span className="flex items-center gap-1">
+                  <Weight className="w-4 h-4" />
+                  {vehicle.total_weight} kg
+                </span>
+              )}
+              {vehicle.vehicle_type === 'trailer' && !vehicle.requires_b_license && (
+                <Badge variant="outline" className="text-xs bg-mint/10 border-mint/30 text-mint">
+                  Intet B-kørekort krævet
+                </Badge>
+              )}
+              {/* Campingvogn-specific features */}
+              {vehicle.vehicle_type === 'campingvogn' && vehicle.sleeping_capacity && (
+                <span className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  {vehicle.sleeping_capacity} sovepladser
+                </span>
+              )}
+              {vehicle.vehicle_type === 'campingvogn' && vehicle.total_weight && (
+                <span className="flex items-center gap-1">
+                  <Weight className="w-4 h-4" />
+                  {vehicle.total_weight} kg
                 </span>
               )}
             </div>
@@ -155,6 +206,29 @@ const VehicleSearchCard = ({
                 <Badge variant="outline" className="text-xs">
                   {vehicle.color}
                 </Badge>
+              )}
+              {/* Campingvogn amenities */}
+              {vehicle.vehicle_type === 'campingvogn' && (
+                <>
+                  {vehicle.has_kitchen && (
+                    <Badge variant="secondary" className="text-xs">
+                      <ChefHat className="w-3 h-3 mr-1" />
+                      Køkken
+                    </Badge>
+                  )}
+                  {vehicle.has_bathroom && (
+                    <Badge variant="secondary" className="text-xs">
+                      <Bath className="w-3 h-3 mr-1" />
+                      Bad/Toilet
+                    </Badge>
+                  )}
+                  {vehicle.has_awning && (
+                    <Badge variant="secondary" className="text-xs">
+                      <Umbrella className="w-3 h-3 mr-1" />
+                      Markise
+                    </Badge>
+                  )}
+                </>
               )}
               {vehicle.features?.slice(0, 3).map((feature, i) => (
                 <Badge key={i} variant="secondary" className="text-xs">
@@ -187,7 +261,7 @@ const VehicleSearchCard = ({
                   navigate(`/booking/${vehicle.id}`);
                 }}
               >
-                Book nu
+                Lej nu
               </Button>
             </div>
           </div>
