@@ -58,15 +58,16 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <LejioLogo size="sm" />
               <div className="hidden sm:block h-6 w-px bg-border" />
               <h1 className="hidden sm:block font-display font-bold text-foreground">Dashboard</h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-3">
               <Button variant="outline" size="sm" onClick={() => navigate('/search')}>
                 <Search className="w-4 h-4 mr-2" />
                 Find bil
@@ -84,7 +85,7 @@ const Dashboard = () => {
                   </span>
                 )}
               </Button>
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 border border-border">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 border border-border">
                 <div className={`w-2 h-2 rounded-full ${profile?.user_type === 'professionel' ? 'bg-primary' : 'bg-accent'}`} />
                 <span className="text-sm font-medium text-foreground">
                   {profile?.full_name || user.email?.split('@')[0]}
@@ -103,11 +104,47 @@ const Dashboard = () => {
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* Mobile Navigation */}
+            <div className="flex md:hidden items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={() => navigate('/beskeder')} className="relative">
+                <MessageCircle className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full px-0.5">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
+                <Settings className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
+      {/* Mobile Quick Navigation */}
+      <div className="md:hidden bg-card border-b border-border overflow-x-auto">
+        <div className="flex gap-2 px-4 py-2">
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/search')}>
+            <Search className="w-4 h-4 mr-1" />
+            Find bil
+          </Button>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/my-rentals')}>
+            <FileText className="w-4 h-4 mr-1" />
+            Mine lejeaftaler
+          </Button>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/gps')}>
+            <MapPin className="w-4 h-4 mr-1" />
+            GPS
+          </Button>
+        </div>
+      </div>
+
+      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Trial Status for Professional Users */}
         <div className="mb-6">
           <TrialStatusCard />
@@ -119,7 +156,7 @@ const Dashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8">
           <StatCard
             icon={Car}
             label="Dine biler"
@@ -135,54 +172,53 @@ const Dashboard = () => {
           />
           <StatCard
             icon={Calendar}
-            label="Aktive udlejninger"
+            label="Aktive"
             value={activeBookings}
             loading={bookingsLoading}
           />
           <StatCard
             icon={Calendar}
-            label="Total bookinger"
+            label="Total"
             value={bookings.length}
             loading={bookingsLoading}
           />
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="vehicles" className="space-y-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <TabsList className="flex-wrap">
-              <TabsTrigger value="vehicles" className="gap-2">
-                <Car className="w-4 h-4" />
-                <span className="hidden sm:inline">Mine biler</span>
-              </TabsTrigger>
-              <TabsTrigger value="calendar" className="gap-2">
-                <CalendarDays className="w-4 h-4" />
-                <span className="hidden sm:inline">Kalender</span>
-              </TabsTrigger>
-              <TabsTrigger value="bookings" className="gap-2">
-                <Calendar className="w-4 h-4" />
-                <span className="hidden sm:inline">Bookinger</span>
-                {pendingBookings > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-accent text-accent-foreground">
-                    {pendingBookings}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="recurring" className="gap-2">
-                <Repeat className="w-4 h-4" />
-                <span className="hidden sm:inline">Abonnementer</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2">
-                <BarChart3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="gps" className="gap-2" onClick={() => navigate('/gps')}>
-                <MapPin className="w-4 h-4" />
-                <span className="hidden sm:inline">GPS</span>
-              </TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="vehicles" className="space-y-4 sm:space-y-6">
+          {/* Mobile: Scrollable tabs */}
+          <div className="flex flex-col gap-3">
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <TabsList className="w-max sm:w-auto inline-flex">
+                <TabsTrigger value="vehicles" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Car className="w-4 h-4" />
+                  <span>Biler</span>
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <CalendarDays className="w-4 h-4" />
+                  <span className="hidden xs:inline">Kalender</span>
+                </TabsTrigger>
+                <TabsTrigger value="bookings" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Calendar className="w-4 h-4" />
+                  <span>Bookinger</span>
+                  {pendingBookings > 0 && (
+                    <span className="ml-0.5 px-1 py-0.5 text-[10px] rounded-full bg-accent text-accent-foreground">
+                      {pendingBookings}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="recurring" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Repeat className="w-4 h-4" />
+                  <span className="hidden sm:inline">Abonnementer</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <BarChart3 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Analytics</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <CreateBookingDialog vehicles={vehicles} onBookingCreated={refetchBookings} />
               <AddVehicleDialog />
             </div>
@@ -259,18 +295,18 @@ interface StatCardProps {
 }
 
 const StatCard = ({ icon: Icon, label, value, loading, highlight }: StatCardProps) => (
-  <div className={`bg-card rounded-2xl p-5 border ${highlight ? 'border-accent shadow-glow-peach' : 'border-border'}`}>
-    <div className="flex items-center gap-3 mb-2">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${highlight ? 'bg-accent/20' : 'bg-muted'}`}>
-        <Icon className={`w-5 h-5 ${highlight ? 'text-accent' : 'text-muted-foreground'}`} />
+  <div className={`bg-card rounded-xl sm:rounded-2xl p-3 sm:p-5 border ${highlight ? 'border-accent shadow-glow-peach' : 'border-border'}`}>
+    <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center ${highlight ? 'bg-accent/20' : 'bg-muted'}`}>
+        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${highlight ? 'text-accent' : 'text-muted-foreground'}`} />
       </div>
     </div>
     {loading ? (
-      <Skeleton className="h-8 w-12" />
+      <Skeleton className="h-6 sm:h-8 w-10 sm:w-12" />
     ) : (
-      <p className="font-display text-3xl font-black text-foreground">{value}</p>
+      <p className="font-display text-2xl sm:text-3xl font-black text-foreground">{value}</p>
     )}
-    <p className="text-sm text-muted-foreground">{label}</p>
+    <p className="text-xs sm:text-sm text-muted-foreground truncate">{label}</p>
   </div>
 );
 
