@@ -87,6 +87,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         fetchProfile(session.user.id);
       }
       setLoading(false);
+    }).catch((error) => {
+      console.error('Error getting session:', error);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

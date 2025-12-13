@@ -33,8 +33,9 @@ export const LiveChatWidget = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    checkLiveChatStatus();
-    loadOrCreateSession();
+    // Run independently to prevent blocking
+    checkLiveChatStatus().catch(console.error);
+    loadOrCreateSession().catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -71,46 +72,68 @@ export const LiveChatWidget = () => {
   }, [session?.id]);
 
   const checkLiveChatStatus = async () => {
-    const { data } = await supabase
-      .from('live_chat_settings')
-      .select('is_live_chat_active')
-      .single();
-    setIsLiveChatActive(data?.is_live_chat_active ?? false);
+    try {
+      const { data } = await supabase
+        .from('live_chat_settings')
+        .select('is_live_chat_active')
+        .single();
+      setIsLiveChatActive(data?.is_live_chat_active ?? false);
+    } catch (error) {
+      console.error('Error checking live chat status:', error);
+      setIsLiveChatActive(false);
+    }
   };
 
   const loadOrCreateSession = async () => {
-    const storedSessionId = localStorage.getItem('lejio_chat_session');
-    
-    if (storedSessionId) {
-      // Use RPC function for secure session access
-      const { data: existingSession } = await supabase
-        .rpc('get_visitor_chat_session', { session_id_param: storedSessionId });
+    try {
+      const storedSessionId = localStorage.getItem('lejio_chat_session');
       
-      if (existingSession && existingSession.length > 0) {
-        setSession(existingSession[0] as ChatSession);
-        loadMessages(existingSession[0].id);
+      // Validate UUID format before making RPC call
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      
+      if (storedSessionId && uuidRegex.test(storedSessionId)) {
+        // Use RPC function for secure session access
+        const { data: existingSession, error: sessionError } = await supabase
+          .rpc('get_visitor_chat_session', { session_id_param: storedSessionId });
+        
+        if (!sessionError && existingSession && existingSession.length > 0) {
+          setSession(existingSession[0] as ChatSession);
+          loadMessages(existingSession[0].id);
+          return;
+        }
+      }
+      
+      // If session not found, invalid, or error, clear old session ID
+      if (storedSessionId) {
+        localStorage.removeItem('lejio_chat_session');
+      }
+
+      const { data: newSession, error: insertError } = await supabase
+        .from('visitor_chat_sessions')
+        .insert({})
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Failed to create chat session:', insertError);
         return;
       }
-    }
 
-    const { data: newSession } = await supabase
-      .from('visitor_chat_sessions')
-      .insert({})
-      .select()
-      .single();
-
-    if (newSession) {
-      localStorage.setItem('lejio_chat_session', newSession.id);
-      setSession(newSession as ChatSession);
-      
-      // Add welcome message
-      const welcomeMsg: Message = {
-        id: 'welcome',
-        sender_type: 'ai',
-        content: 'Hej! 👋 Jeg er LEJIOs AI-assistent. Hvordan kan jeg hjælpe dig i dag? Du kan spørge mig om priser, hvordan platformen fungerer, eller noget helt andet.',
-        created_at: new Date().toISOString(),
-      };
-      setMessages([welcomeMsg]);
+      if (newSession) {
+        localStorage.setItem('lejio_chat_session', newSession.id);
+        setSession(newSession as ChatSession);
+        
+        // Add welcome message
+        const welcomeMsg: Message = {
+          id: 'welcome',
+          sender_type: 'ai',
+          content: 'Hej! 👋 Jeg er LEJIOs AI-assistent. Hvordan kan jeg hjælpe dig i dag? Du kan spørge mig om priser, hvordan platformen fungerer, eller noget helt andet.',
+          created_at: new Date().toISOString(),
+        };
+        setMessages([welcomeMsg]);
+      }
+    } catch (error) {
+      console.error('Chat session error:', error);
     }
   };
 
