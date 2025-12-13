@@ -58,6 +58,8 @@ export const LiveChatWidget = () => {
           const newMessage = payload.new as Message;
           if (newMessage.sender_type === 'admin') {
             setMessages((prev) => [...prev, newMessage]);
+            // When admin sends a message, update session status to in_progress
+            setSession((prev) => prev ? { ...prev, session_status: 'in_progress' } : prev);
           }
         }
       )
@@ -233,6 +235,13 @@ export const LiveChatWidget = () => {
       content: userMessage,
     });
 
+    // If session is already handled by human agent (in_progress or waiting_for_agent), 
+    // don't call AI - just save the message
+    if (session.session_status === 'in_progress' || session.session_status === 'waiting_for_agent') {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const aiResponse = await streamChat(userMessage);
 
@@ -246,7 +255,7 @@ export const LiveChatWidget = () => {
           .update({ needs_human_support: true, session_status: 'waiting_for_agent' })
           .eq('id', session.id);
 
-        setSession((prev) => prev ? { ...prev, needs_human_support: true } : prev);
+        setSession((prev) => prev ? { ...prev, needs_human_support: true, session_status: 'waiting_for_agent' } : prev);
 
         if (!isLiveChatActive) {
           setShowContactForm(true);
