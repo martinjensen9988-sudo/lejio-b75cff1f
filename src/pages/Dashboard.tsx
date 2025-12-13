@@ -76,7 +76,7 @@ const Dashboard = () => {
                 <FileText className="w-4 h-4 mr-2" />
                 Mine lejeaftaler
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/beskeder')} className="relative">
+              <Button variant="outline" size="sm" onClick={() => navigate('/messages')} className="relative">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Beskeder
                 {unreadCount > 0 && (
@@ -107,7 +107,7 @@ const Dashboard = () => {
 
             {/* Mobile Navigation */}
             <div className="flex md:hidden items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/beskeder')} className="relative">
+              <Button variant="ghost" size="icon" onClick={() => navigate('/messages')} className="relative">
                 <MessageCircle className="w-5 h-5" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full px-0.5">
