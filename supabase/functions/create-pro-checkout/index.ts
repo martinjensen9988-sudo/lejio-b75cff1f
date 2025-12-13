@@ -11,36 +11,36 @@ const corsHeaders = {
 const PRO_TIERS = {
   starter: {
     monthly: {
-      price_id: "price_1SdNcKHoHnimcmNgf138iD4F", // 299 kr/month (1-5 vehicles)
-      price: 299,
+      price_id: "price_1SdzLOHoHnimcmNgz56nhs2t", // 349 kr/month (1-5 vehicles)
+      price: 349,
     },
     yearly: {
-      price_id: "price_1SdO9wHoHnimcmNgzTqzKWO9", // 3051 kr/year (15% discount)
-      price: 3051,
+      price_id: "price_1SdzLQHoHnimcmNgi3q91qmL", // 3560 kr/year (15% discount)
+      price: 3560,
     },
     name: "LEJIO Pro - Starter",
     max_vehicles: 5,
   },
   standard: {
     monthly: {
-      price_id: "price_1SdNcPHoHnimcmNgLizHnZML", // 499 kr/month (6-15 vehicles)
-      price: 499,
+      price_id: "price_1SdzLSHoHnimcmNgQPEMuLaR", // 599 kr/month (6-15 vehicles)
+      price: 599,
     },
     yearly: {
-      price_id: "price_1SdO9yHoHnimcmNguBqAQQeO", // 5089.80 kr/year (15% discount)
-      price: 5090,
+      price_id: "price_1SdzLTHoHnimcmNgTQ4W3lvA", // 6110 kr/year (15% discount)
+      price: 6110,
     },
     name: "LEJIO Pro - Standard",
     max_vehicles: 15,
   },
   enterprise: {
     monthly: {
-      price_id: "price_1SdNcRHoHnimcmNgDGcli7JG", // 799 kr/month (16+ vehicles)
-      price: 799,
+      price_id: "price_1SdzLVHoHnimcmNgws6xteXg", // 899 kr/month (16+ vehicles)
+      price: 899,
     },
     yearly: {
-      price_id: "price_1SdOA0HoHnimcmNgo4dRzJIJ", // 8149.80 kr/year (15% discount)
-      price: 8150,
+      price_id: "price_1SdzLXHoHnimcmNgXWg8YYBC", // 9170 kr/year (15% discount)
+      price: 9170,
     },
     name: "LEJIO Pro - Enterprise",
     max_vehicles: 999,

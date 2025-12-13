@@ -30,8 +30,8 @@ const TIERS = [
     id: 'starter',
     name: 'Starter',
     subtitle: '1-5 biler',
-    monthlyPrice: 299,
-    yearlyPrice: 3051, // 299 * 12 * 0.85 = 3051
+    monthlyPrice: 349,
+    yearlyPrice: 3560, // 349 * 12 * 0.85 = 3559.80
     maxVehicles: 5,
     features: [
       'Op til 5 køretøjer',
@@ -44,8 +44,8 @@ const TIERS = [
     id: 'standard',
     name: 'Standard',
     subtitle: '6-15 biler',
-    monthlyPrice: 499,
-    yearlyPrice: 5090, // 499 * 12 * 0.85 = 5089.80
+    monthlyPrice: 599,
+    yearlyPrice: 6110, // 599 * 12 * 0.85 = 6109.80
     maxVehicles: 15,
     popular: true,
     features: [
@@ -60,8 +60,8 @@ const TIERS = [
     id: 'enterprise',
     name: 'Enterprise',
     subtitle: '16+ biler',
-    monthlyPrice: 799,
-    yearlyPrice: 8150, // 799 * 12 * 0.85 = 8149.80
+    monthlyPrice: 899,
+    yearlyPrice: 9170, // 899 * 12 * 0.85 = 9169.80
     maxVehicles: 999,
     features: [
       'Ubegrænsede køretøjer',
