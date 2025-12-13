@@ -15,7 +15,7 @@ import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit } from 'lucide-react';
+import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit, Truck, Tent } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SubscriptionLimits {
@@ -25,10 +25,19 @@ interface SubscriptionLimits {
   tier: string | null;
 }
 
+type VehicleType = 'bil' | 'trailer' | 'campingvogn';
+
+const VEHICLE_TYPES = [
+  { value: 'bil' as VehicleType, label: 'Bil', icon: Car, description: 'Personbiler og varevogne' },
+  { value: 'trailer' as VehicleType, label: 'Trailer', icon: Truck, description: 'Alle typer trailere' },
+  { value: 'campingvogn' as VehicleType, label: 'Campingvogn', icon: Tent, description: 'Campingvogne og autocampere' },
+];
+
 const AddVehicleDialog = () => {
   const [open, setOpen] = useState(false);
   const [registration, setRegistration] = useState('');
-  const [step, setStep] = useState<'lookup' | 'details' | 'manual'>('lookup');
+  const [step, setStep] = useState<'type' | 'lookup' | 'details' | 'manual'>('type');
+  const [selectedType, setSelectedType] = useState<VehicleType>('bil');
   const [manualMode, setManualMode] = useState(false);
   const [vehicleDetails, setVehicleDetails] = useState<Partial<VehicleInsert>>({});
   const [subscriptionLimits, setSubscriptionLimits] = useState<SubscriptionLimits | null>(null);
@@ -66,6 +75,11 @@ const AddVehicleDialog = () => {
   const isAtVehicleLimit = isProfessional && subscriptionLimits && vehicles.length >= subscriptionLimits.max_vehicles;
   const canAddVehicle = !isProfessional || !isAtVehicleLimit;
 
+  const handleSelectType = (type: VehicleType) => {
+    setSelectedType(type);
+    setStep('lookup');
+  };
+
   const handleLookup = async () => {
     const result = await lookupVehicle(registration);
     if (result) {
@@ -78,11 +92,11 @@ const AddVehicleDialog = () => {
         fuel_type: result.fuel_type,
         color: result.color,
         vin: result.vin,
-        daily_price: 499,
-        weekly_price: 2800,
-        monthly_price: 9900,
-        included_km: 100,
-        extra_km_price: 2.50,
+        daily_price: selectedType === 'bil' ? 499 : selectedType === 'trailer' ? 199 : 799,
+        weekly_price: selectedType === 'bil' ? 2800 : selectedType === 'trailer' ? 999 : 4500,
+        monthly_price: selectedType === 'bil' ? 9900 : selectedType === 'trailer' ? 2900 : 14900,
+        included_km: selectedType === 'bil' ? 100 : undefined,
+        extra_km_price: selectedType === 'bil' ? 2.50 : undefined,
         deposit_required: false,
         deposit_amount: 0,
         prepaid_rent_enabled: false,
@@ -93,6 +107,14 @@ const AddVehicleDialog = () => {
         location_postal_code: '',
         location_city: '',
         vehicle_value: undefined,
+        vehicle_type: selectedType,
+        // Trailer/campingvogn specific
+        total_weight: undefined,
+        requires_b_license: selectedType === 'trailer' ? true : undefined,
+        sleeping_capacity: selectedType === 'campingvogn' ? 4 : undefined,
+        has_kitchen: selectedType === 'campingvogn' ? false : undefined,
+        has_bathroom: selectedType === 'campingvogn' ? false : undefined,
+        has_awning: selectedType === 'campingvogn' ? false : undefined,
       });
       setStep('details');
     }
@@ -141,7 +163,8 @@ const AddVehicleDialog = () => {
 
   const resetForm = () => {
     setRegistration('');
-    setStep('lookup');
+    setStep('type');
+    setSelectedType('bil');
     setManualMode(false);
     setVehicleDetails({});
     reset();
@@ -155,14 +178,14 @@ const AddVehicleDialog = () => {
       model: '',
       variant: '',
       year: undefined,
-      fuel_type: '',
+      fuel_type: selectedType === 'bil' ? '' : undefined,
       color: '',
       vin: '',
-      daily_price: 499,
-      weekly_price: 2800,
-      monthly_price: 9900,
-      included_km: 100,
-      extra_km_price: 2.50,
+      daily_price: selectedType === 'bil' ? 499 : selectedType === 'trailer' ? 199 : 799,
+      weekly_price: selectedType === 'bil' ? 2800 : selectedType === 'trailer' ? 999 : 4500,
+      monthly_price: selectedType === 'bil' ? 9900 : selectedType === 'trailer' ? 2900 : 14900,
+      included_km: selectedType === 'bil' ? 100 : undefined,
+      extra_km_price: selectedType === 'bil' ? 2.50 : undefined,
       deposit_required: false,
       deposit_amount: 0,
       prepaid_rent_enabled: false,
@@ -173,6 +196,14 @@ const AddVehicleDialog = () => {
       location_postal_code: '',
       location_city: '',
       vehicle_value: undefined,
+      vehicle_type: selectedType,
+      // Trailer/campingvogn specific
+      total_weight: undefined,
+      requires_b_license: selectedType === 'trailer' ? true : undefined,
+      sleeping_capacity: selectedType === 'campingvogn' ? 4 : undefined,
+      has_kitchen: selectedType === 'campingvogn' ? false : undefined,
+      has_bathroom: selectedType === 'campingvogn' ? false : undefined,
+      has_awning: selectedType === 'campingvogn' ? false : undefined,
     });
     setStep('manual');
   };
@@ -182,28 +213,38 @@ const AddVehicleDialog = () => {
     if (!newOpen) resetForm();
   };
 
+  const getVehicleTypeLabel = () => {
+    const type = VEHICLE_TYPES.find(t => t.value === selectedType);
+    return type?.label.toLowerCase() || 'køretøj';
+  };
+
+  const VehicleIcon = VEHICLE_TYPES.find(t => t.value === selectedType)?.icon || Car;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="warm" className="gap-2" disabled={isAtVehicleLimit}>
           {isAtVehicleLimit ? <Lock className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {isAtVehicleLimit ? 'Opgrader for flere biler' : 'Tilføj bil'}
+          {isAtVehicleLimit ? 'Opgrader' : 'Tilføj køretøj'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">
-            {step === 'lookup' ? 'Find din bil' : step === 'manual' ? 'Indtast biloplysninger manuelt' : 'Bekræft biloplysninger'}
+            {step === 'type' ? 'Vælg køretøjstype' : 
+             step === 'lookup' ? `Find din ${getVehicleTypeLabel()}` : 
+             step === 'manual' ? `Indtast ${getVehicleTypeLabel()}oplysninger` : 
+             `Bekræft ${getVehicleTypeLabel()}oplysninger`}
           </DialogTitle>
         </DialogHeader>
 
         {/* Vehicle limit warning for professional users */}
-        {isProfessional && subscriptionLimits && (
+        {isProfessional && subscriptionLimits && step !== 'type' && (
           <div className={`p-3 rounded-xl border ${isAtVehicleLimit ? 'bg-destructive/10 border-destructive/20' : 'bg-muted/50 border-border'}`}>
             <div className="flex items-center gap-2 text-sm">
-              <Car className="w-4 h-4" />
+              <VehicleIcon className="w-4 h-4" />
               <span>
-                {vehicles.length} af {subscriptionLimits.max_vehicles === 999 ? '∞' : subscriptionLimits.max_vehicles} biler brugt
+                {vehicles.length} af {subscriptionLimits.max_vehicles === 999 ? '∞' : subscriptionLimits.max_vehicles} køretøjer brugt
               </span>
               {subscriptionLimits.is_trial && (
                 <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary">
@@ -214,7 +255,26 @@ const AddVehicleDialog = () => {
           </div>
         )}
 
-        {step === 'lookup' ? (
+        {/* Step 1: Choose vehicle type */}
+        {step === 'type' ? (
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-3">
+              {VEHICLE_TYPES.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => handleSelectType(type.value)}
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-center group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                    <type.icon className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <span className="font-semibold text-sm">{type.label}</span>
+                  <span className="text-xs text-muted-foreground">{type.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : step === 'lookup' ? (
           <div className="space-y-6 py-4">
             <div className="space-y-2">
               <Label>Nummerplade</Label>
@@ -246,7 +306,7 @@ const AddVehicleDialog = () => {
               <div className="p-4 rounded-xl bg-mint/10 border border-mint/20 animate-scale-in">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-mint/20 flex items-center justify-center">
-                    <Car className="w-6 h-6 text-mint" />
+                    <VehicleIcon className="w-6 h-6 text-mint" />
                   </div>
                   <div>
                     <h4 className="font-display font-bold text-foreground">
@@ -263,10 +323,13 @@ const AddVehicleDialog = () => {
             )}
 
             {/* Manual entry button */}
-            <div className="pt-2 border-t border-border">
+            <div className="pt-2 border-t border-border space-y-2">
               <Button variant="ghost" onClick={startManualEntry} className="w-full gap-2 text-muted-foreground hover:text-foreground">
                 <Edit className="w-4 h-4" />
-                Eller indtast biloplysninger manuelt
+                Eller indtast {getVehicleTypeLabel()}oplysninger manuelt
+              </Button>
+              <Button variant="outline" onClick={() => setStep('type')} className="w-full">
+                Tilbage til valg af køretøjstype
               </Button>
             </div>
           </div>
@@ -274,7 +337,7 @@ const AddVehicleDialog = () => {
           <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
             {/* Manual vehicle info entry */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Biloplysninger</Label>
+              <Label className="text-base font-semibold">{selectedType === 'bil' ? 'Biloplysninger' : selectedType === 'trailer' ? 'Traileroplysninger' : 'Campingvognoplysninger'}</Label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">Nummerplade *</Label>
@@ -301,7 +364,7 @@ const AddVehicleDialog = () => {
                   <Input
                     value={vehicleDetails.make || ''}
                     onChange={(e) => setVehicleDetails(prev => ({ ...prev, make: e.target.value }))}
-                    placeholder="F.eks. Toyota"
+                    placeholder={selectedType === 'bil' ? 'F.eks. Toyota' : selectedType === 'trailer' ? 'F.eks. Brenderup' : 'F.eks. Hobby'}
                   />
                 </div>
                 <div className="space-y-2">
@@ -309,7 +372,7 @@ const AddVehicleDialog = () => {
                   <Input
                     value={vehicleDetails.model || ''}
                     onChange={(e) => setVehicleDetails(prev => ({ ...prev, model: e.target.value }))}
-                    placeholder="F.eks. Corolla"
+                    placeholder={selectedType === 'bil' ? 'F.eks. Corolla' : selectedType === 'trailer' ? 'F.eks. 2500' : 'F.eks. De Luxe 495'}
                   />
                 </div>
               </div>
@@ -319,17 +382,30 @@ const AddVehicleDialog = () => {
                   <Input
                     value={vehicleDetails.variant || ''}
                     onChange={(e) => setVehicleDetails(prev => ({ ...prev, variant: e.target.value }))}
-                    placeholder="F.eks. 1.8 Hybrid"
+                    placeholder="Valgfrit"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Brændstof</Label>
-                  <Input
-                    value={vehicleDetails.fuel_type || ''}
-                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, fuel_type: e.target.value }))}
-                    placeholder="F.eks. Benzin"
-                  />
-                </div>
+                {selectedType === 'bil' && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Brændstof</Label>
+                    <Input
+                      value={vehicleDetails.fuel_type || ''}
+                      onChange={(e) => setVehicleDetails(prev => ({ ...prev, fuel_type: e.target.value }))}
+                      placeholder="F.eks. Benzin"
+                    />
+                  </div>
+                )}
+                {(selectedType === 'trailer' || selectedType === 'campingvogn') && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Totalvægt (kg)</Label>
+                    <Input
+                      type="number"
+                      value={vehicleDetails.total_weight || ''}
+                      onChange={(e) => setVehicleDetails(prev => ({ ...prev, total_weight: parseInt(e.target.value) || undefined }))}
+                      placeholder="F.eks. 750"
+                    />
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -337,7 +413,7 @@ const AddVehicleDialog = () => {
                   <Input
                     value={vehicleDetails.color || ''}
                     onChange={(e) => setVehicleDetails(prev => ({ ...prev, color: e.target.value }))}
-                    placeholder="F.eks. Sort"
+                    placeholder="F.eks. Hvid"
                   />
                 </div>
                 <div className="space-y-2">
@@ -350,6 +426,73 @@ const AddVehicleDialog = () => {
                   />
                 </div>
               </div>
+              
+              {/* Trailer specific */}
+              {selectedType === 'trailer' && (
+                <div 
+                  className="flex items-center space-x-3 p-3 rounded-xl bg-lavender/10 border border-lavender/20 cursor-pointer"
+                  onClick={() => setVehicleDetails(prev => ({ ...prev, requires_b_license: !prev.requires_b_license }))}
+                >
+                  <Checkbox
+                    id="requires_b_license"
+                    checked={vehicleDetails.requires_b_license ?? true}
+                    onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, requires_b_license: !!checked }))}
+                  />
+                  <label htmlFor="requires_b_license" className="text-sm font-medium cursor-pointer select-none">
+                    Kræver kun B-kørekort (under 750 kg)
+                  </label>
+                </div>
+              )}
+
+              {/* Campingvogn specific */}
+              {selectedType === 'campingvogn' && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Antal sovepladser</Label>
+                    <Input
+                      type="number"
+                      value={vehicleDetails.sleeping_capacity || ''}
+                      onChange={(e) => setVehicleDetails(prev => ({ ...prev, sleeping_capacity: parseInt(e.target.value) || undefined }))}
+                      placeholder="F.eks. 4"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div 
+                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
+                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_kitchen: !prev.has_kitchen }))}
+                    >
+                      <Checkbox
+                        id="has_kitchen"
+                        checked={vehicleDetails.has_kitchen || false}
+                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_kitchen: !!checked }))}
+                      />
+                      <label htmlFor="has_kitchen" className="text-xs cursor-pointer select-none">Køkken</label>
+                    </div>
+                    <div 
+                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
+                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_bathroom: !prev.has_bathroom }))}
+                    >
+                      <Checkbox
+                        id="has_bathroom"
+                        checked={vehicleDetails.has_bathroom || false}
+                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_bathroom: !!checked }))}
+                      />
+                      <label htmlFor="has_bathroom" className="text-xs cursor-pointer select-none">Bad/WC</label>
+                    </div>
+                    <div 
+                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
+                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_awning: !prev.has_awning }))}
+                    >
+                      <Checkbox
+                        id="has_awning"
+                        checked={vehicleDetails.has_awning || false}
+                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_awning: !!checked }))}
+                      />
+                      <label htmlFor="has_awning" className="text-xs cursor-pointer select-none">Markise</label>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Prices */}
@@ -388,7 +531,7 @@ const AddVehicleDialog = () => {
 
             {/* Vehicle Value */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Bilens værdi (vanvidskørsel)</Label>
+              <Label className="text-base font-semibold">Køretøjets værdi (ansvar)</Label>
               <Input
                 type="number"
                 value={vehicleDetails.vehicle_value || ''}
@@ -397,43 +540,47 @@ const AddVehicleDialog = () => {
               />
             </div>
 
-            {/* KM Settings */}
-            <div 
-              className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
-              onClick={() => setVehicleDetails(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
-            >
-              <Checkbox
-                id="manual_unlimited_km"
-                checked={vehicleDetails.unlimited_km || false}
-                onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, unlimited_km: !!checked }))}
-              />
-              <label htmlFor="manual_unlimited_km" className="text-sm font-medium cursor-pointer select-none">
-                Fri km (ingen km-begrænsning)
-              </label>
-            </div>
+            {/* KM Settings - Only for cars */}
+            {selectedType === 'bil' && (
+              <>
+                <div 
+                  className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
+                  onClick={() => setVehicleDetails(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
+                >
+                  <Checkbox
+                    id="manual_unlimited_km"
+                    checked={vehicleDetails.unlimited_km || false}
+                    onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, unlimited_km: !!checked }))}
+                  />
+                  <label htmlFor="manual_unlimited_km" className="text-sm font-medium cursor-pointer select-none">
+                    Fri km (ingen km-begrænsning)
+                  </label>
+                </div>
 
-            {!vehicleDetails.unlimited_km && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Inkl. km/dag</Label>
-                  <Input
-                    type="number"
-                    value={vehicleDetails.included_km || ''}
-                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
-                    placeholder="100"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Ekstra km pris (kr)</Label>
-                  <Input
-                    type="number"
-                    step="0.50"
-                    value={vehicleDetails.extra_km_price || ''}
-                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
-                    placeholder="2,50"
-                  />
-                </div>
-              </div>
+                {!vehicleDetails.unlimited_km && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Inkl. km/dag</Label>
+                      <Input
+                        type="number"
+                        value={vehicleDetails.included_km || ''}
+                        onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
+                        placeholder="100"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Ekstra km pris (kr)</Label>
+                      <Input
+                        type="number"
+                        step="0.50"
+                        value={vehicleDetails.extra_km_price || ''}
+                        onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
+                        placeholder="2,50"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Buttons */}
@@ -447,15 +594,15 @@ const AddVehicleDialog = () => {
                 className="flex-1"
               >
                 {addingVehicle ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Tilføj bil
+                Tilføj {getVehicleTypeLabel()}
               </Button>
             </div>
           </div>
         ) : (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
             <div className="p-4 rounded-xl bg-muted/50 border border-border">
               <div className="flex items-center gap-3 mb-4">
-                <Car className="w-5 h-5 text-primary" />
+                <VehicleIcon className="w-5 h-5 text-primary" />
                 <span className="font-display font-bold">
                   {vehicleDetails.make} {vehicleDetails.model}
                 </span>
@@ -470,7 +617,7 @@ const AddVehicleDialog = () => {
                     <span className="ml-1 font-medium">{vehicleDetails.year}</span>
                   </div>
                 )}
-                {vehicleDetails.fuel_type && (
+                {vehicleDetails.fuel_type && selectedType === 'bil' && (
                   <div>
                     <span className="text-muted-foreground">Brændstof:</span>
                     <span className="ml-1 font-medium capitalize">{vehicleDetails.fuel_type}</span>
@@ -485,6 +632,91 @@ const AddVehicleDialog = () => {
               </div>
             </div>
 
+            {/* Trailer/campingvogn specific fields */}
+            {(selectedType === 'trailer' || selectedType === 'campingvogn') && (
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">
+                  {selectedType === 'trailer' ? 'Trailer-oplysninger' : 'Campingvogn-oplysninger'}
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Totalvægt (kg)</Label>
+                    <Input
+                      type="number"
+                      value={vehicleDetails.total_weight || ''}
+                      onChange={(e) => setVehicleDetails(prev => ({ ...prev, total_weight: parseInt(e.target.value) || undefined }))}
+                      placeholder="F.eks. 750"
+                    />
+                  </div>
+                  {selectedType === 'campingvogn' && (
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Antal sovepladser</Label>
+                      <Input
+                        type="number"
+                        value={vehicleDetails.sleeping_capacity || ''}
+                        onChange={(e) => setVehicleDetails(prev => ({ ...prev, sleeping_capacity: parseInt(e.target.value) || undefined }))}
+                        placeholder="F.eks. 4"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                {selectedType === 'trailer' && (
+                  <div 
+                    className="flex items-center space-x-3 p-3 rounded-xl bg-lavender/10 border border-lavender/20 cursor-pointer"
+                    onClick={() => setVehicleDetails(prev => ({ ...prev, requires_b_license: !prev.requires_b_license }))}
+                  >
+                    <Checkbox
+                      id="detail_requires_b_license"
+                      checked={vehicleDetails.requires_b_license ?? true}
+                      onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, requires_b_license: !!checked }))}
+                    />
+                    <label htmlFor="detail_requires_b_license" className="text-sm font-medium cursor-pointer select-none">
+                      Kræver kun B-kørekort (under 750 kg)
+                    </label>
+                  </div>
+                )}
+
+                {selectedType === 'campingvogn' && (
+                  <div className="grid grid-cols-3 gap-2">
+                    <div 
+                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
+                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_kitchen: !prev.has_kitchen }))}
+                    >
+                      <Checkbox
+                        id="detail_has_kitchen"
+                        checked={vehicleDetails.has_kitchen || false}
+                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_kitchen: !!checked }))}
+                      />
+                      <label htmlFor="detail_has_kitchen" className="text-xs cursor-pointer select-none">Køkken</label>
+                    </div>
+                    <div 
+                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
+                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_bathroom: !prev.has_bathroom }))}
+                    >
+                      <Checkbox
+                        id="detail_has_bathroom"
+                        checked={vehicleDetails.has_bathroom || false}
+                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_bathroom: !!checked }))}
+                      />
+                      <label htmlFor="detail_has_bathroom" className="text-xs cursor-pointer select-none">Bad/WC</label>
+                    </div>
+                    <div 
+                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
+                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_awning: !prev.has_awning }))}
+                    >
+                      <Checkbox
+                        id="detail_has_awning"
+                        checked={vehicleDetails.has_awning || false}
+                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_awning: !!checked }))}
+                      />
+                      <label htmlFor="detail_has_awning" className="text-xs cursor-pointer select-none">Markise</label>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="space-y-3">
               <Label className="text-base font-semibold">Priser</Label>
               <div className="grid grid-cols-3 gap-3">
@@ -494,7 +726,7 @@ const AddVehicleDialog = () => {
                     type="number"
                     value={vehicleDetails.daily_price || ''}
                     onChange={(e) => setVehicleDetails(prev => ({ ...prev, daily_price: parseFloat(e.target.value) || undefined }))}
-                    placeholder="499"
+                    placeholder={selectedType === 'bil' ? '499' : selectedType === 'trailer' ? '199' : '799'}
                   />
                 </div>
                 <div className="space-y-2">
@@ -503,7 +735,7 @@ const AddVehicleDialog = () => {
                     type="number"
                     value={vehicleDetails.weekly_price || ''}
                     onChange={(e) => setVehicleDetails(prev => ({ ...prev, weekly_price: parseFloat(e.target.value) || undefined }))}
-                    placeholder="2.800"
+                    placeholder={selectedType === 'bil' ? '2.800' : selectedType === 'trailer' ? '999' : '4.500'}
                   />
                 </div>
                 <div className="space-y-2">
@@ -512,15 +744,15 @@ const AddVehicleDialog = () => {
                     type="number"
                     value={vehicleDetails.monthly_price || ''}
                     onChange={(e) => setVehicleDetails(prev => ({ ...prev, monthly_price: parseFloat(e.target.value) || undefined }))}
-                    placeholder="9.900"
+                    placeholder={selectedType === 'bil' ? '9.900' : selectedType === 'trailer' ? '2.900' : '14.900'}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Vehicle Value for Vanvidskørsel */}
+            {/* Vehicle Value */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Bilens værdi (vanvidskørsel)</Label>
+              <Label className="text-base font-semibold">Køretøjets værdi (ansvar)</Label>
               <div className="space-y-2">
                 <Input
                   type="number"
@@ -533,51 +765,54 @@ const AddVehicleDialog = () => {
                     <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
                     <div className="text-xs text-muted-foreground">
                       <p className="font-medium text-yellow-600 mb-1">Vigtig information</p>
-                      <p>Denne værdi bruges ved vanvidskørsel-ansvar i lejekontrakten. Værdien må <strong>aldrig</strong> være højere end den faktiske købspris.</p>
-                      <p className="mt-1">LEJIO kan foretage stikprøvekontrol og kræve dokumentation (slutseddel eller bankoverførsel).</p>
+                      <p>Denne værdi bruges i lejekontrakten. Værdien må <strong>aldrig</strong> være højere end den faktiske købspris.</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Unlimited KM checkbox */}
-            <div 
-              className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
-              onClick={() => setVehicleDetails(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
-            >
-              <Checkbox
-                id="unlimited_km"
-                checked={vehicleDetails.unlimited_km || false}
-                onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, unlimited_km: !!checked }))}
-              />
-              <label htmlFor="unlimited_km" className="text-sm font-medium cursor-pointer select-none">
-                Fri km (ingen km-begrænsning)
-              </label>
-            </div>
+            {/* Unlimited KM checkbox - Only for cars */}
+            {selectedType === 'bil' && (
+              <>
+                <div 
+                  className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
+                  onClick={() => setVehicleDetails(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
+                >
+                  <Checkbox
+                    id="unlimited_km"
+                    checked={vehicleDetails.unlimited_km || false}
+                    onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, unlimited_km: !!checked }))}
+                  />
+                  <label htmlFor="unlimited_km" className="text-sm font-medium cursor-pointer select-none">
+                    Fri km (ingen km-begrænsning)
+                  </label>
+                </div>
 
-            {!vehicleDetails.unlimited_km && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Inkl. km/dag</Label>
-                  <Input
-                    type="number"
-                    value={vehicleDetails.included_km || ''}
-                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
-                    placeholder="100"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Ekstra km pris (kr)</Label>
-                  <Input
-                    type="number"
-                    step="0.50"
-                    value={vehicleDetails.extra_km_price || ''}
-                    onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
-                    placeholder="2,50"
-                  />
-                </div>
-              </div>
+                {!vehicleDetails.unlimited_km && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Inkl. km/dag</Label>
+                      <Input
+                        type="number"
+                        value={vehicleDetails.included_km || ''}
+                        onChange={(e) => setVehicleDetails(prev => ({ ...prev, included_km: parseInt(e.target.value) || undefined }))}
+                        placeholder="100"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Ekstra km pris (kr)</Label>
+                      <Input
+                        type="number"
+                        step="0.50"
+                        value={vehicleDetails.extra_km_price || ''}
+                        onChange={(e) => setVehicleDetails(prev => ({ ...prev, extra_km_price: parseFloat(e.target.value) || undefined }))}
+                        placeholder="2,50"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Deposit Section */}
@@ -758,7 +993,8 @@ const AddVehicleDialog = () => {
                 Tilbage
               </Button>
               <Button variant="warm" className="flex-1" onClick={handleAddVehicle} disabled={addingVehicle}>
-                {addingVehicle ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Tilføj bil'}
+                {addingVehicle ? <Loader2 className="w-4 h-4 animate-spin" /> : `Tilføj ${getVehicleTypeLabel()}`}
+              </Button>
               </Button>
             </div>
           </div>
