@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +36,7 @@ import AdminMessages from '@/components/admin/AdminMessages';
 import { AdminLiveChat } from '@/components/admin/AdminLiveChat';
 import AdminVehicleValueVerification from '@/components/admin/AdminVehicleValueVerification';
 import AdminGpsDevices from '@/components/admin/AdminGpsDevices';
+import AdminBookingStats from '@/components/admin/AdminBookingStats';
 
 interface Customer {
   id: string;
@@ -314,6 +315,10 @@ const AdminDashboard = () => {
               <MapPin className="w-4 h-4 mr-2" />
               GPS-enheder
             </TabsTrigger>
+            <TabsTrigger value="stats">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Booking-statistik
+            </TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
@@ -419,6 +424,11 @@ const AdminDashboard = () => {
           {/* GPS Devices Tab */}
           <TabsContent value="gps">
             <AdminGpsDevices />
+          </TabsContent>
+
+          {/* Booking Stats Tab */}
+          <TabsContent value="stats">
+            <AdminBookingStats />
           </TabsContent>
         </Tabs>
 
