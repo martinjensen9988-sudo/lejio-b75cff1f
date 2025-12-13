@@ -104,3 +104,12 @@ verify_jwt = false
 
 [functions.gps-webhook]
 verify_jwt = false
+
+[functions.check-booking-milestones]
+verify_jwt = false
+
+[functions.get-payment-settings]
+verify_jwt = true
+
+[functions.save-payment-settings]
+verify_jwt = true
