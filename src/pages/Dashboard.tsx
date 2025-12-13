@@ -97,11 +97,9 @@ const Dashboard = () => {
               <Button variant="ghost" size="sm" onClick={() => navigate('/settings')}>
                 <Settings className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-                <Home className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4" />
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                <LogOut className="w-4 h-4 mr-2" />
+                Log ud
               </Button>
             </div>
 
