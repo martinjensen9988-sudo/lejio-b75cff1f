@@ -39,7 +39,7 @@ const Pricing = () => {
               <div className="flex items-baseline gap-2 mb-1">
                 <span className="font-display text-4xl font-black text-foreground">Gratis</span>
               </div>
-              <p className="text-accent font-bold text-sm">49 kr per booking</p>
+              <p className="text-accent font-bold text-sm">59 kr per booking</p>
               <p className="text-xs text-muted-foreground mt-1">Du betaler kun når du tjener</p>
             </div>
 
@@ -81,10 +81,10 @@ const Pricing = () => {
             <div className="mb-4">
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-muted-foreground text-sm">Fra</span>
-                <span className="font-display text-4xl font-black text-foreground">299</span>
+                <span className="font-display text-4xl font-black text-foreground">349</span>
                 <span className="text-muted-foreground text-sm">kr/md</span>
               </div>
-              <p className="text-primary font-bold text-sm">+ 19 kr per booking</p>
+              <p className="text-primary font-bold text-sm">+ 25 kr per booking</p>
               <p className="text-xs text-muted-foreground mt-1">Du beholder 100% af betalingen</p>
             </div>
 
