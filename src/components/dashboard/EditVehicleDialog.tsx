@@ -13,8 +13,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin, AlertTriangle } from 'lucide-react';
+import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin, AlertTriangle, Truck, Tent } from 'lucide-react';
 import { toast } from 'sonner';
+import { TrailerFields } from './TrailerFields';
+import { CaravanFields } from './CaravanFields';
 
 const VEHICLE_FEATURES = [
   { id: 'aircon', label: 'Aircondition' },
@@ -68,6 +70,47 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     latitude: vehicle.latitude || undefined as number | undefined,
     longitude: vehicle.longitude || undefined as number | undefined,
     vehicle_value: vehicle.vehicle_value || undefined as number | undefined,
+    // Trailer fields
+    trailer_type: vehicle.trailer_type || '',
+    internal_length_cm: vehicle.internal_length_cm || undefined as number | undefined,
+    internal_width_cm: vehicle.internal_width_cm || undefined as number | undefined,
+    internal_height_cm: vehicle.internal_height_cm || undefined as number | undefined,
+    plug_type: vehicle.plug_type || '',
+    tempo_approved: vehicle.tempo_approved || false,
+    requires_b_license: vehicle.requires_b_license ?? true,
+    has_ramps: vehicle.has_ramps || false,
+    has_winch: vehicle.has_winch || false,
+    has_tarpaulin: vehicle.has_tarpaulin || false,
+    has_net: vehicle.has_net || false,
+    has_jockey_wheel: vehicle.has_jockey_wheel || false,
+    has_lock_included: vehicle.has_lock_included || false,
+    has_adapter: vehicle.has_adapter || false,
+    // Caravan fields
+    adult_sleeping_capacity: vehicle.adult_sleeping_capacity || undefined as number | undefined,
+    child_sleeping_capacity: vehicle.child_sleeping_capacity || undefined as number | undefined,
+    layout_type: vehicle.layout_type || '',
+    has_fridge: vehicle.has_fridge || false,
+    has_freezer: vehicle.has_freezer || false,
+    has_gas_burner: vehicle.has_gas_burner || false,
+    has_toilet: vehicle.has_toilet || false,
+    has_shower: vehicle.has_shower || false,
+    has_hot_water: vehicle.has_hot_water || false,
+    has_awning_tent: vehicle.has_awning_tent || false,
+    has_mover: vehicle.has_mover || false,
+    has_bike_rack: vehicle.has_bike_rack || false,
+    has_ac: vehicle.has_ac || false,
+    has_floor_heating: vehicle.has_floor_heating || false,
+    has_tv: vehicle.has_tv || false,
+    service_included: vehicle.service_included || false,
+    camping_furniture_included: vehicle.camping_furniture_included || false,
+    gas_bottle_included: vehicle.gas_bottle_included || false,
+    pets_allowed: vehicle.pets_allowed || false,
+    smoking_allowed: vehicle.smoking_allowed || false,
+    festival_use_allowed: vehicle.festival_use_allowed || false,
+    total_weight: vehicle.total_weight || undefined as number | undefined,
+    has_kitchen: vehicle.has_kitchen || false,
+    has_bathroom: vehicle.has_bathroom || false,
+    has_awning: vehicle.has_awning || false,
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -96,6 +139,47 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         latitude: vehicle.latitude || undefined,
         longitude: vehicle.longitude || undefined,
         vehicle_value: vehicle.vehicle_value || undefined,
+        // Trailer fields
+        trailer_type: vehicle.trailer_type || '',
+        internal_length_cm: vehicle.internal_length_cm || undefined,
+        internal_width_cm: vehicle.internal_width_cm || undefined,
+        internal_height_cm: vehicle.internal_height_cm || undefined,
+        plug_type: vehicle.plug_type || '',
+        tempo_approved: vehicle.tempo_approved || false,
+        requires_b_license: vehicle.requires_b_license ?? true,
+        has_ramps: vehicle.has_ramps || false,
+        has_winch: vehicle.has_winch || false,
+        has_tarpaulin: vehicle.has_tarpaulin || false,
+        has_net: vehicle.has_net || false,
+        has_jockey_wheel: vehicle.has_jockey_wheel || false,
+        has_lock_included: vehicle.has_lock_included || false,
+        has_adapter: vehicle.has_adapter || false,
+        // Caravan fields
+        adult_sleeping_capacity: vehicle.adult_sleeping_capacity || undefined,
+        child_sleeping_capacity: vehicle.child_sleeping_capacity || undefined,
+        layout_type: vehicle.layout_type || '',
+        has_fridge: vehicle.has_fridge || false,
+        has_freezer: vehicle.has_freezer || false,
+        has_gas_burner: vehicle.has_gas_burner || false,
+        has_toilet: vehicle.has_toilet || false,
+        has_shower: vehicle.has_shower || false,
+        has_hot_water: vehicle.has_hot_water || false,
+        has_awning_tent: vehicle.has_awning_tent || false,
+        has_mover: vehicle.has_mover || false,
+        has_bike_rack: vehicle.has_bike_rack || false,
+        has_ac: vehicle.has_ac || false,
+        has_floor_heating: vehicle.has_floor_heating || false,
+        has_tv: vehicle.has_tv || false,
+        service_included: vehicle.service_included || false,
+        camping_furniture_included: vehicle.camping_furniture_included || false,
+        gas_bottle_included: vehicle.gas_bottle_included || false,
+        pets_allowed: vehicle.pets_allowed || false,
+        smoking_allowed: vehicle.smoking_allowed || false,
+        festival_use_allowed: vehicle.festival_use_allowed || false,
+        total_weight: vehicle.total_weight || undefined,
+        has_kitchen: vehicle.has_kitchen || false,
+        has_bathroom: vehicle.has_bathroom || false,
+        has_awning: vehicle.has_awning || false,
       });
     }
   };
@@ -557,31 +641,49 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
             )}
           </div>
 
-          {/* Features */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Udstyr & Features</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {VEHICLE_FEATURES.map(feature => (
-                <div
-                  key={feature.id}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
-                  onClick={() => handleFeatureToggle(feature.id)}
-                >
-                  <Checkbox
-                    id={feature.id}
-                    checked={formData.features.includes(feature.id)}
-                    onCheckedChange={() => handleFeatureToggle(feature.id)}
-                  />
-                  <label 
-                    htmlFor={feature.id} 
-                    className="text-sm cursor-pointer select-none"
+          {/* Trailer specific fields */}
+          {vehicle.vehicle_type === 'trailer' && (
+            <TrailerFields 
+              vehicleDetails={formData as unknown as Record<string, unknown>}
+              setVehicleDetails={(fn) => setFormData(prev => fn(prev as unknown as Record<string, unknown>) as typeof prev)}
+            />
+          )}
+
+          {/* Caravan specific fields */}
+          {vehicle.vehicle_type === 'campingvogn' && (
+            <CaravanFields 
+              vehicleDetails={formData as unknown as Record<string, unknown>}
+              setVehicleDetails={(fn) => setFormData(prev => fn(prev as unknown as Record<string, unknown>) as typeof prev)}
+            />
+          )}
+
+          {/* Features - only for cars */}
+          {vehicle.vehicle_type === 'bil' && (
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Udstyr & Features</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {VEHICLE_FEATURES.map(feature => (
+                  <div
+                    key={feature.id}
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => handleFeatureToggle(feature.id)}
                   >
-                    {feature.label}
-                  </label>
-                </div>
-              ))}
+                    <Checkbox
+                      id={feature.id}
+                      checked={formData.features.includes(feature.id)}
+                      onCheckedChange={() => handleFeatureToggle(feature.id)}
+                    />
+                    <label 
+                      htmlFor={feature.id} 
+                      className="text-sm cursor-pointer select-none"
+                    >
+                      {feature.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">

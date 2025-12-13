@@ -17,6 +17,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit, Truck, Tent } from 'lucide-react';
 import { toast } from 'sonner';
+import { TrailerFields } from './TrailerFields';
+import { CaravanFields } from './CaravanFields';
 
 interface SubscriptionLimits {
   max_vehicles: number;
@@ -427,71 +429,20 @@ const AddVehicleDialog = () => {
                 </div>
               </div>
               
-              {/* Trailer specific */}
+              {/* Trailer specific fields */}
               {selectedType === 'trailer' && (
-                <div 
-                  className="flex items-center space-x-3 p-3 rounded-xl bg-lavender/10 border border-lavender/20 cursor-pointer"
-                  onClick={() => setVehicleDetails(prev => ({ ...prev, requires_b_license: !prev.requires_b_license }))}
-                >
-                  <Checkbox
-                    id="requires_b_license"
-                    checked={vehicleDetails.requires_b_license ?? true}
-                    onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, requires_b_license: !!checked }))}
-                  />
-                  <label htmlFor="requires_b_license" className="text-sm font-medium cursor-pointer select-none">
-                    Kræver kun B-kørekort (under 750 kg)
-                  </label>
-                </div>
+                <TrailerFields 
+                  vehicleDetails={vehicleDetails as Record<string, unknown>}
+                  setVehicleDetails={setVehicleDetails as (fn: (prev: Record<string, unknown>) => Record<string, unknown>) => void}
+                />
               )}
 
-              {/* Campingvogn specific */}
+              {/* Campingvogn specific fields */}
               {selectedType === 'campingvogn' && (
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Antal sovepladser</Label>
-                    <Input
-                      type="number"
-                      value={vehicleDetails.sleeping_capacity || ''}
-                      onChange={(e) => setVehicleDetails(prev => ({ ...prev, sleeping_capacity: parseInt(e.target.value) || undefined }))}
-                      placeholder="F.eks. 4"
-                    />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div 
-                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
-                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_kitchen: !prev.has_kitchen }))}
-                    >
-                      <Checkbox
-                        id="has_kitchen"
-                        checked={vehicleDetails.has_kitchen || false}
-                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_kitchen: !!checked }))}
-                      />
-                      <label htmlFor="has_kitchen" className="text-xs cursor-pointer select-none">Køkken</label>
-                    </div>
-                    <div 
-                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
-                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_bathroom: !prev.has_bathroom }))}
-                    >
-                      <Checkbox
-                        id="has_bathroom"
-                        checked={vehicleDetails.has_bathroom || false}
-                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_bathroom: !!checked }))}
-                      />
-                      <label htmlFor="has_bathroom" className="text-xs cursor-pointer select-none">Bad/WC</label>
-                    </div>
-                    <div 
-                      className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 border border-border cursor-pointer"
-                      onClick={() => setVehicleDetails(prev => ({ ...prev, has_awning: !prev.has_awning }))}
-                    >
-                      <Checkbox
-                        id="has_awning"
-                        checked={vehicleDetails.has_awning || false}
-                        onCheckedChange={(checked) => setVehicleDetails(prev => ({ ...prev, has_awning: !!checked }))}
-                      />
-                      <label htmlFor="has_awning" className="text-xs cursor-pointer select-none">Markise</label>
-                    </div>
-                  </div>
-                </div>
+                <CaravanFields 
+                  vehicleDetails={vehicleDetails as Record<string, unknown>}
+                  setVehicleDetails={setVehicleDetails as (fn: (prev: Record<string, unknown>) => Record<string, unknown>) => void}
+                />
               )}
             </div>
 

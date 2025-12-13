@@ -46,6 +46,42 @@ export interface Vehicle {
   has_kitchen: boolean;
   has_bathroom: boolean;
   has_awning: boolean;
+  // Trailer specific
+  trailer_type: string | null;
+  internal_length_cm: number | null;
+  internal_width_cm: number | null;
+  internal_height_cm: number | null;
+  plug_type: string | null;
+  tempo_approved: boolean;
+  has_ramps: boolean;
+  has_winch: boolean;
+  has_tarpaulin: boolean;
+  has_net: boolean;
+  has_jockey_wheel: boolean;
+  has_lock_included: boolean;
+  has_adapter: boolean;
+  // Caravan specific
+  adult_sleeping_capacity: number | null;
+  child_sleeping_capacity: number | null;
+  layout_type: string | null;
+  has_fridge: boolean;
+  has_freezer: boolean;
+  has_gas_burner: boolean;
+  has_toilet: boolean;
+  has_shower: boolean;
+  has_hot_water: boolean;
+  has_awning_tent: boolean;
+  has_mover: boolean;
+  has_bike_rack: boolean;
+  has_ac: boolean;
+  has_floor_heating: boolean;
+  has_tv: boolean;
+  service_included: boolean;
+  camping_furniture_included: boolean;
+  gas_bottle_included: boolean;
+  pets_allowed: boolean;
+  smoking_allowed: boolean;
+  festival_use_allowed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -87,6 +123,42 @@ export interface VehicleInsert {
   has_kitchen?: boolean;
   has_bathroom?: boolean;
   has_awning?: boolean;
+  // Trailer specific
+  trailer_type?: string;
+  internal_length_cm?: number;
+  internal_width_cm?: number;
+  internal_height_cm?: number;
+  plug_type?: string;
+  tempo_approved?: boolean;
+  has_ramps?: boolean;
+  has_winch?: boolean;
+  has_tarpaulin?: boolean;
+  has_net?: boolean;
+  has_jockey_wheel?: boolean;
+  has_lock_included?: boolean;
+  has_adapter?: boolean;
+  // Caravan specific
+  adult_sleeping_capacity?: number;
+  child_sleeping_capacity?: number;
+  layout_type?: string;
+  has_fridge?: boolean;
+  has_freezer?: boolean;
+  has_gas_burner?: boolean;
+  has_toilet?: boolean;
+  has_shower?: boolean;
+  has_hot_water?: boolean;
+  has_awning_tent?: boolean;
+  has_mover?: boolean;
+  has_bike_rack?: boolean;
+  has_ac?: boolean;
+  has_floor_heating?: boolean;
+  has_tv?: boolean;
+  service_included?: boolean;
+  camping_furniture_included?: boolean;
+  gas_bottle_included?: boolean;
+  pets_allowed?: boolean;
+  smoking_allowed?: boolean;
+  festival_use_allowed?: boolean;
 }
 
 export const useVehicles = () => {
