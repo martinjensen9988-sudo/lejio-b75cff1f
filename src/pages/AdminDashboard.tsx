@@ -154,8 +154,14 @@ const AdminDashboard = () => {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/admin');
+    try {
+      await signOut();
+      navigate('/admin');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Force navigate even if signOut fails
+      navigate('/admin');
+    }
   };
 
   const filteredCustomers = customers.filter(c => 
