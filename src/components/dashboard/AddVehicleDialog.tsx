@@ -995,7 +995,6 @@ const AddVehicleDialog = () => {
               <Button variant="warm" className="flex-1" onClick={handleAddVehicle} disabled={addingVehicle}>
                 {addingVehicle ? <Loader2 className="w-4 h-4 animate-spin" /> : `Tilføj ${getVehicleTypeLabel()}`}
               </Button>
-              </Button>
             </div>
           </div>
         )}
