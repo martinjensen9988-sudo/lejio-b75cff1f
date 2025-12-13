@@ -110,23 +110,24 @@ const Messages = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="container mx-auto px-6 py-24">
+      <main className="container mx-auto px-4 sm:px-6 py-20 sm:py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="font-display text-2xl font-bold text-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground">
               Beskeder
             </h1>
             <Button
               onClick={handleStartCustomerServiceChat}
               variant="outline"
-              className="gap-2"
+              size="sm"
+              className="gap-2 w-full sm:w-auto"
             >
               <Headphones className="w-4 h-4" />
               Kontakt kundeservice
             </Button>
           </div>
 
-          <div className="bg-card rounded-2xl border border-border overflow-hidden h-[600px] flex">
+          <div className="bg-card rounded-xl sm:rounded-2xl border border-border overflow-hidden h-[calc(100vh-180px)] sm:h-[600px] flex">
             {/* Conversations list */}
             <div className={`w-full md:w-80 border-r border-border flex flex-col ${activeConversation ? 'hidden md:flex' : 'flex'}`}>
               <div className="p-4 border-b border-border">

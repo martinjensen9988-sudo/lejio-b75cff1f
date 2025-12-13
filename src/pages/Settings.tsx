@@ -281,57 +281,60 @@ const Settings = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Tilbage
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="shrink-0">
+                <ArrowLeft className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Tilbage</span>
               </Button>
-              <div className="h-6 w-px bg-border" />
-              <LejioLogo size="sm" />
+              <div className="hidden sm:block h-6 w-px bg-border" />
+              <div className="hidden sm:block"><LejioLogo size="sm" /></div>
             </div>
-            <h1 className="font-display font-bold text-foreground">Indstillinger</h1>
+            <h1 className="font-display font-bold text-foreground text-sm sm:text-base truncate">Indstillinger</h1>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8 max-w-4xl">
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className={cn("grid w-full", isProfessional ? "grid-cols-7" : "grid-cols-5")}>
-            <TabsTrigger value="profile" className="gap-2">
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Profil</span>
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2">
-              <Bell className="w-4 h-4" />
-              <span className="hidden sm:inline">Notifikationer</span>
-            </TabsTrigger>
-            {isProfessional && (
-              <TabsTrigger value="subscription" className="gap-2">
-                <Crown className="w-4 h-4" />
-                <span className="hidden sm:inline">Abonnement</span>
+      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-4xl">
+        <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
+          {/* Mobile-friendly scrollable tabs */}
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className={cn("w-max sm:w-full inline-flex sm:grid", isProfessional ? "sm:grid-cols-7" : "sm:grid-cols-5")}>
+              <TabsTrigger value="profile" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                <User className="w-4 h-4" />
+                <span className="hidden xs:inline sm:inline">Profil</span>
               </TabsTrigger>
-            )}
-            <TabsTrigger value="payment" className="gap-2">
-              <CreditCard className="w-4 h-4" />
-              <span className="hidden sm:inline">Betaling</span>
-            </TabsTrigger>
-            <TabsTrigger value="insurance" className="gap-2">
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Kontrakt</span>
-            </TabsTrigger>
-            <TabsTrigger value="damages" className="gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              <span className="hidden sm:inline">Skader</span>
-            </TabsTrigger>
-            {isProfessional && (
-              <TabsTrigger value="fleet" className="gap-2">
-                <Truck className="w-4 h-4" />
-                <span className="hidden sm:inline">Fleet</span>
+              <TabsTrigger value="notifications" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                <Bell className="w-4 h-4" />
+                <span className="hidden sm:inline">Notifikationer</span>
               </TabsTrigger>
-            )}
-          </TabsList>
+              {isProfessional && (
+                <TabsTrigger value="subscription" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Crown className="w-4 h-4" />
+                  <span className="hidden sm:inline">Abonnement</span>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="payment" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                <CreditCard className="w-4 h-4" />
+                <span className="hidden sm:inline">Betaling</span>
+              </TabsTrigger>
+              <TabsTrigger value="insurance" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                <Shield className="w-4 h-4" />
+                <span className="hidden sm:inline">Kontrakt</span>
+              </TabsTrigger>
+              <TabsTrigger value="damages" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="hidden sm:inline">Skader</span>
+              </TabsTrigger>
+              {isProfessional && (
+                <TabsTrigger value="fleet" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Truck className="w-4 h-4" />
+                  <span className="hidden sm:inline">Fleet</span>
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
