@@ -1662,6 +1662,87 @@ export type Database = {
           },
         ]
       }
+      subscription_rentals: {
+        Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          lessor_id: string
+          monthly_price: number
+          next_payment_date: string | null
+          renter_email: string
+          renter_id: string | null
+          renter_name: string | null
+          renter_phone: string | null
+          start_date: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          lessor_id: string
+          monthly_price: number
+          next_payment_date?: string | null
+          renter_email: string
+          renter_id?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          start_date: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          lessor_id?: string
+          monthly_price?: number
+          next_payment_date?: string | null
+          renter_email?: string
+          renter_id?: string | null
+          renter_name?: string | null
+          renter_phone?: string | null
+          start_date?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_rentals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_rentals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number
@@ -1775,6 +1856,144 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_service_logs: {
+        Row: {
+          cost: number | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          notes: string | null
+          odometer_reading: number | null
+          performed_by: string | null
+          service_date: string
+          service_type: string
+          vehicle_id: string
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          odometer_reading?: number | null
+          performed_by?: string | null
+          service_date?: string
+          service_type: string
+          vehicle_id: string
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          odometer_reading?: number | null
+          performed_by?: string | null
+          service_date?: string
+          service_type?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_service_logs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_service_logs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_swaps: {
+        Row: {
+          accepted_at: string | null
+          booking_id: string
+          contract_addendum_url: string | null
+          created_at: string
+          created_by: string
+          id: string
+          new_vehicle_id: string
+          notes: string | null
+          original_odometer: number | null
+          original_vehicle_id: string
+          swap_date: string
+          swap_reason: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          booking_id: string
+          contract_addendum_url?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          new_vehicle_id: string
+          notes?: string | null
+          original_odometer?: number | null
+          original_vehicle_id: string
+          swap_date?: string
+          swap_reason: string
+        }
+        Update: {
+          accepted_at?: string | null
+          booking_id?: string
+          contract_addendum_url?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          new_vehicle_id?: string
+          notes?: string | null
+          original_odometer?: number | null
+          original_vehicle_id?: string
+          swap_date?: string
+          swap_reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_swaps_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_swaps_new_vehicle_id_fkey"
+            columns: ["new_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_swaps_new_vehicle_id_fkey"
+            columns: ["new_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_swaps_original_vehicle_id_fkey"
+            columns: ["original_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_swaps_original_vehicle_id_fkey"
+            columns: ["original_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           adult_sleeping_capacity: number | null
@@ -1782,6 +2001,7 @@ export type Database = {
           child_sleeping_capacity: number | null
           color: string | null
           created_at: string
+          current_odometer: number | null
           daily_price: number | null
           deposit_amount: number | null
           deposit_required: boolean
@@ -1820,6 +2040,8 @@ export type Database = {
           internal_length_cm: number | null
           internal_width_cm: number | null
           is_available: boolean | null
+          last_service_date: string | null
+          last_service_odometer: number | null
           latitude: number | null
           layout_type: string | null
           location_address: string | null
@@ -1829,6 +2051,7 @@ export type Database = {
           make: string
           model: string
           monthly_price: number | null
+          next_inspection_date: string | null
           owner_id: string
           payment_schedule:
             | Database["public"]["Enums"]["payment_schedule_type"]
@@ -1840,9 +2063,18 @@ export type Database = {
           registration: string
           requires_b_license: boolean | null
           service_included: boolean | null
+          service_interval_km: number | null
+          service_interval_months: number | null
+          service_status: string | null
           sleeping_capacity: number | null
           smoking_allowed: boolean | null
+          subscription_available: boolean | null
+          subscription_monthly_price: number | null
           tempo_approved: boolean | null
+          tire_change_reminder_sent: boolean | null
+          tire_hotel_location: string | null
+          tire_size: string | null
+          tire_type: string | null
           total_weight: number | null
           trailer_type: string | null
           unlimited_km: boolean
@@ -1867,6 +2099,7 @@ export type Database = {
           child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
+          current_odometer?: number | null
           daily_price?: number | null
           deposit_amount?: number | null
           deposit_required?: boolean
@@ -1905,6 +2138,8 @@ export type Database = {
           internal_length_cm?: number | null
           internal_width_cm?: number | null
           is_available?: boolean | null
+          last_service_date?: string | null
+          last_service_odometer?: number | null
           latitude?: number | null
           layout_type?: string | null
           location_address?: string | null
@@ -1914,6 +2149,7 @@ export type Database = {
           make: string
           model: string
           monthly_price?: number | null
+          next_inspection_date?: string | null
           owner_id: string
           payment_schedule?:
             | Database["public"]["Enums"]["payment_schedule_type"]
@@ -1925,9 +2161,18 @@ export type Database = {
           registration: string
           requires_b_license?: boolean | null
           service_included?: boolean | null
+          service_interval_km?: number | null
+          service_interval_months?: number | null
+          service_status?: string | null
           sleeping_capacity?: number | null
           smoking_allowed?: boolean | null
+          subscription_available?: boolean | null
+          subscription_monthly_price?: number | null
           tempo_approved?: boolean | null
+          tire_change_reminder_sent?: boolean | null
+          tire_hotel_location?: string | null
+          tire_size?: string | null
+          tire_type?: string | null
           total_weight?: number | null
           trailer_type?: string | null
           unlimited_km?: boolean
@@ -1952,6 +2197,7 @@ export type Database = {
           child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
+          current_odometer?: number | null
           daily_price?: number | null
           deposit_amount?: number | null
           deposit_required?: boolean
@@ -1990,6 +2236,8 @@ export type Database = {
           internal_length_cm?: number | null
           internal_width_cm?: number | null
           is_available?: boolean | null
+          last_service_date?: string | null
+          last_service_odometer?: number | null
           latitude?: number | null
           layout_type?: string | null
           location_address?: string | null
@@ -1999,6 +2247,7 @@ export type Database = {
           make?: string
           model?: string
           monthly_price?: number | null
+          next_inspection_date?: string | null
           owner_id?: string
           payment_schedule?:
             | Database["public"]["Enums"]["payment_schedule_type"]
@@ -2010,9 +2259,18 @@ export type Database = {
           registration?: string
           requires_b_license?: boolean | null
           service_included?: boolean | null
+          service_interval_km?: number | null
+          service_interval_months?: number | null
+          service_status?: string | null
           sleeping_capacity?: number | null
           smoking_allowed?: boolean | null
+          subscription_available?: boolean | null
+          subscription_monthly_price?: number | null
           tempo_approved?: boolean | null
+          tire_change_reminder_sent?: boolean | null
+          tire_hotel_location?: string | null
+          tire_size?: string | null
+          tire_type?: string | null
           total_weight?: number | null
           trailer_type?: string | null
           unlimited_km?: boolean

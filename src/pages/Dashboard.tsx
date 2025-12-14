@@ -17,7 +17,8 @@ import PendingFeesCard from '@/components/dashboard/PendingFeesCard';
 import TrialStatusCard from '@/components/dashboard/TrialStatusCard';
 import AnalyticsDashboard from '@/components/dashboard/AnalyticsDashboard';
 import RecurringRentalsTable from '@/components/dashboard/RecurringRentalsTable';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin } from 'lucide-react';
+import ServiceTab from '@/components/dashboard/ServiceTab';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -209,6 +210,10 @@ const Dashboard = () => {
                   <Repeat className="w-4 h-4" />
                   <span className="hidden sm:inline">Abonnementer</span>
                 </TabsTrigger>
+                <TabsTrigger value="service" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Wrench className="w-4 h-4" />
+                  <span className="hidden sm:inline">Værksted</span>
+                </TabsTrigger>
                 <TabsTrigger value="analytics" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
                   <BarChart3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Analytics</span>
@@ -273,6 +278,10 @@ const Dashboard = () => {
 
           <TabsContent value="recurring" className="mt-6">
             <RecurringRentalsTable />
+          </TabsContent>
+
+          <TabsContent value="service" className="mt-6">
+            <ServiceTab vehicles={vehicles} onUpdate={updateVehicle} />
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-6">
