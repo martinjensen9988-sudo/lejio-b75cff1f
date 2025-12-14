@@ -82,6 +82,21 @@ export interface Vehicle {
   pets_allowed: boolean;
   smoking_allowed: boolean;
   festival_use_allowed: boolean;
+  // Subscription fields
+  subscription_available: boolean;
+  subscription_monthly_price: number | null;
+  // Service/maintenance fields
+  service_interval_km: number | null;
+  service_interval_months: number | null;
+  next_inspection_date: string | null;
+  current_odometer: number | null;
+  last_service_date: string | null;
+  last_service_odometer: number | null;
+  service_status: 'ok' | 'service_soon' | 'service_required' | 'blocked';
+  tire_type: 'summer' | 'winter' | 'all_season';
+  tire_size: string | null;
+  tire_hotel_location: string | null;
+  tire_change_reminder_sent: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -183,12 +198,14 @@ export const useVehicles = () => {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      // Cast vehicle_type to VehicleType
+      // Cast vehicle_type, tire_type, and service_status to proper types
       const typedData = (data || []).map(v => ({
         ...v,
         vehicle_type: (v.vehicle_type || 'bil') as VehicleType,
+        tire_type: (v.tire_type || 'summer') as 'summer' | 'winter' | 'all_season',
+        service_status: (v.service_status || 'ok') as 'ok' | 'service_soon' | 'service_required' | 'blocked',
       }));
-      setVehicles(typedData);
+      setVehicles(typedData as Vehicle[]);
     } catch (err) {
       console.error('Error fetching vehicles:', err);
       setError('Kunne ikke hente køretøjer');
@@ -222,7 +239,12 @@ export const useVehicles = () => {
         throw insertError;
       }
 
-      const typedData = { ...data, vehicle_type: (data.vehicle_type || 'bil') as VehicleType };
+      const typedData = { 
+        ...data, 
+        vehicle_type: (data.vehicle_type || 'bil') as VehicleType,
+        tire_type: (data.tire_type || 'summer') as 'summer' | 'winter' | 'all_season',
+        service_status: (data.service_status || 'ok') as 'ok' | 'service_soon' | 'service_required' | 'blocked',
+      } as Vehicle;
       setVehicles(prev => [typedData, ...prev]);
       toast.success('Køretøj tilføjet!');
       return typedData;
