@@ -35,8 +35,9 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-bold text-primary-foreground mb-4">For udlejere</h4>
             <ul className="space-y-3 text-sm text-primary-foreground/80">
-              <li><a href="#" className="hover:text-secondary transition-colors">Bliv privat udlejer</a></li>
-              <li><a href="#" className="hover:text-secondary transition-colors">Pro-partner program</a></li>
+              <li><a href="/funktioner" className="hover:text-secondary transition-colors">Alle funktioner</a></li>
+              <li><a href="/auth" className="hover:text-secondary transition-colors">Bliv privat udlejer</a></li>
+              <li><a href="/auth" className="hover:text-secondary transition-colors">Pro-partner program</a></li>
               <li><a href="#pricing" className="hover:text-secondary transition-colors">Priser</a></li>
             </ul>
           </div>
