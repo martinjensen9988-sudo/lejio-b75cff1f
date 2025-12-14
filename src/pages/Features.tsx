@@ -1,0 +1,352 @@
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { 
+  Calendar, 
+  FileText, 
+  CreditCard, 
+  MapPin, 
+  Bell, 
+  Shield, 
+  Users, 
+  BarChart3, 
+  MessageSquare, 
+  Car, 
+  Settings, 
+  Clock,
+  Repeat,
+  Wrench,
+  Gauge,
+  CircleDot,
+  FileCheck,
+  Smartphone,
+  Truck,
+  Star
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+
+const Features = () => {
+  const navigate = useNavigate();
+
+  const featureCategories = [
+    {
+      title: "Booking & Kalender",
+      icon: Calendar,
+      color: "bg-primary/10 text-primary",
+      features: [
+        {
+          title: "Smart Booking-kalender",
+          description: "Visuel oversigt over alle dine bookinger med drag-and-drop funktionalitet.",
+          icon: Calendar,
+        },
+        {
+          title: "Automatisk tilgængelighed",
+          description: "Systemet blokerer automatisk datoer ved nye bookinger.",
+          icon: Clock,
+        },
+        {
+          title: "Abonnementsudlejning",
+          description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.",
+          icon: Repeat,
+          badge: "Ny",
+        },
+      ],
+    },
+    {
+      title: "Kontrakter & Dokumentation",
+      icon: FileText,
+      color: "bg-accent/10 text-accent",
+      features: [
+        {
+          title: "Automatisk kontraktgenerering",
+          description: "Juridisk korrekte lejekontrakter genereres automatisk med alle detaljer.",
+          icon: FileText,
+        },
+        {
+          title: "Digital underskrift",
+          description: "Både udlejer og lejer underskriver digitalt direkte i systemet.",
+          icon: FileCheck,
+        },
+        {
+          title: "PDF-download & Email",
+          description: "Kontrakter sendes automatisk til begge parter som PDF.",
+          icon: Smartphone,
+        },
+        {
+          title: "Skaderapporter",
+          description: "Dokumentér bilens stand ved udlevering og aflevering med fotos.",
+          icon: Shield,
+        },
+      ],
+    },
+    {
+      title: "Betaling & Økonomi",
+      icon: CreditCard,
+      color: "bg-secondary/10 text-secondary-foreground",
+      features: [
+        {
+          title: "Flere betalingsmetoder",
+          description: "Modtag betaling via kort, MobilePay, bankoverførsel eller kontant.",
+          icon: CreditCard,
+        },
+        {
+          title: "Automatisk abonnementsbetaling",
+          description: "Ved månedlig leje trækkes beløbet automatisk fra lejerens kort.",
+          icon: Repeat,
+          badge: "Ny",
+        },
+        {
+          title: "Depositumhåndtering",
+          description: "Administrer depositum og frigivelse sikkert gennem systemet.",
+          icon: Shield,
+        },
+        {
+          title: "Brændstofpolitik",
+          description: "Automatisk beregning af brændstofgebyr ved manglende tank.",
+          icon: Gauge,
+        },
+      ],
+    },
+    {
+      title: "GPS & Flådestyring",
+      icon: MapPin,
+      color: "bg-green-500/10 text-green-600",
+      features: [
+        {
+          title: "Real-time GPS-sporing",
+          description: "Se hvor dine biler befinder sig i realtid på kortet.",
+          icon: MapPin,
+        },
+        {
+          title: "Geofencing-alarmer",
+          description: "Få besked når en bil forlader et defineret område.",
+          icon: CircleDot,
+        },
+        {
+          title: "Kilometerregistrering",
+          description: "Automatisk opdatering af kilometertal via GPS-tracker.",
+          icon: Gauge,
+        },
+      ],
+    },
+    {
+      title: "Værksted & Service",
+      icon: Wrench,
+      color: "bg-orange-500/10 text-orange-600",
+      features: [
+        {
+          title: "Serviceintervaller",
+          description: "Hold styr på hvornår hver bil skal til service baseret på km eller tid.",
+          icon: Wrench,
+          badge: "Kommer snart",
+        },
+        {
+          title: "Synsdato-påmindelser",
+          description: "Automatisk påmindelse når syn nærmer sig.",
+          icon: Bell,
+          badge: "Kommer snart",
+        },
+        {
+          title: "Dækstyring",
+          description: "Administrer sommer/vinterdæk og dækhotel-lokationer.",
+          icon: CircleDot,
+          badge: "Kommer snart",
+        },
+        {
+          title: "Byttebil-funktion",
+          description: "Udskift køretøj midt i lejeperiode ved service eller nedbrud.",
+          icon: Truck,
+          badge: "Kommer snart",
+        },
+      ],
+    },
+    {
+      title: "Kommunikation",
+      icon: MessageSquare,
+      color: "bg-purple-500/10 text-purple-600",
+      features: [
+        {
+          title: "Indbygget beskedsystem",
+          description: "Kommuniker direkte med lejere gennem platformen.",
+          icon: MessageSquare,
+        },
+        {
+          title: "Push-notifikationer",
+          description: "Få besked på telefonen ved nye bookinger og beskeder.",
+          icon: Bell,
+        },
+        {
+          title: "Automatiske emails",
+          description: "Bookingbekræftelser og påmindelser sendes automatisk.",
+          icon: Smartphone,
+        },
+      ],
+    },
+    {
+      title: "Lejer-administration",
+      icon: Users,
+      color: "bg-blue-500/10 text-blue-600",
+      features: [
+        {
+          title: "Lejerhistorik",
+          description: "Se alle tidligere bookinger og interaktioner med hver lejer.",
+          icon: Users,
+        },
+        {
+          title: "Lejer-rating",
+          description: "Bedøm lejere og se deres gennemsnitlige rating.",
+          icon: Star,
+        },
+        {
+          title: "Advarselsregister",
+          description: "Se advarsler på problematiske lejere på tværs af platformen.",
+          icon: Shield,
+        },
+      ],
+    },
+    {
+      title: "Statistik & Rapporter",
+      icon: BarChart3,
+      color: "bg-indigo-500/10 text-indigo-600",
+      features: [
+        {
+          title: "Indtjeningsoversigt",
+          description: "Se din samlede indtjening fordelt på biler og perioder.",
+          icon: BarChart3,
+        },
+        {
+          title: "Udnyttelsesgrad",
+          description: "Analysér hvor ofte dine biler er udlejet.",
+          icon: Gauge,
+        },
+        {
+          title: "Månedlige opgørelser",
+          description: "Detaljerede rapporter til regnskab og SKAT.",
+          icon: FileText,
+        },
+      ],
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="container mx-auto px-6 relative">
+          <div className="text-center max-w-3xl mx-auto">
+            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+              Alt hvad du har brug for
+            </Badge>
+            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
+              Alle funktioner i LEJIO
+            </h1>
+            <p className="text-lg text-muted-foreground mb-8">
+              Fra booking til kontrakter, betaling til GPS-sporing – vi har samlet alt du behøver for at drive en professionel udlejningsforretning.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => navigate('/auth')}
+              >
+                Kom i gang gratis
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => navigate('/#pricing')}
+              >
+                Se priser
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-20">
+        <div className="container mx-auto px-6">
+          <div className="space-y-16">
+            {featureCategories.map((category, categoryIndex) => (
+              <div key={categoryIndex}>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className={`p-3 rounded-xl ${category.color}`}>
+                    <category.icon className="w-6 h-6" />
+                  </div>
+                  <h2 className="font-display text-2xl font-bold text-foreground">
+                    {category.title}
+                  </h2>
+                </div>
+                
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {category.features.map((feature, featureIndex) => (
+                    <Card key={featureIndex} className="border-border/50 hover:border-primary/30 transition-colors">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className={`p-2 rounded-lg ${category.color} w-fit`}>
+                            <feature.icon className="w-4 h-4" />
+                          </div>
+                          {feature.badge && (
+                            <Badge 
+                              variant={feature.badge === "Ny" ? "default" : "secondary"}
+                              className={feature.badge === "Ny" ? "bg-accent text-accent-foreground" : ""}
+                            >
+                              {feature.badge}
+                            </Badge>
+                          )}
+                        </div>
+                        <CardTitle className="text-lg mt-3">{feature.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription className="text-muted-foreground">
+                          {feature.description}
+                        </CardDescription>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-primary/5">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="font-display text-3xl font-bold text-foreground mb-4">
+            Klar til at komme i gang?
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+            Opret din gratis konto i dag og begynd at udleje dine køretøjer på den smarte måde.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-primary/90"
+              onClick={() => navigate('/auth')}
+            >
+              Opret gratis konto
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={() => navigate('/search')}
+            >
+              Se biler til leje
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Features;
