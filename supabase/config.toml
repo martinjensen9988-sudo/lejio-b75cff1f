@@ -113,3 +113,6 @@ verify_jwt = true
 
 [functions.save-payment-settings]
 verify_jwt = true
+
+[functions.analyze-dashboard]
+verify_jwt = true

@@ -185,6 +185,154 @@ export type Database = {
           },
         ]
       }
+      check_in_out_records: {
+        Row: {
+          ai_detected_fuel_percent: number | null
+          ai_detected_odometer: number | null
+          booking_id: string
+          captured_at: string
+          confirmed_fuel_percent: number | null
+          confirmed_odometer: number | null
+          created_at: string
+          dashboard_image_url: string | null
+          expected_latitude: number | null
+          expected_longitude: number | null
+          expected_plate: string
+          fuel_end_percent: number | null
+          fuel_fee: number | null
+          fuel_missing_liters: number | null
+          fuel_start_percent: number | null
+          id: string
+          km_driven: number | null
+          km_included: number | null
+          km_overage: number | null
+          km_overage_fee: number | null
+          km_overage_rate: number | null
+          latitude: number | null
+          lessor_id: string
+          location_distance_km: number | null
+          location_verified: boolean | null
+          longitude: number | null
+          manual_correction_reason: string | null
+          plate_scan_image_url: string | null
+          plate_verified: boolean | null
+          record_type: string
+          renter_id: string | null
+          requires_review: boolean | null
+          scanned_plate: string | null
+          server_timestamp: string
+          settlement_status: string | null
+          total_extra_charges: number | null
+          updated_at: string
+          vehicle_id: string
+          was_manually_corrected: boolean | null
+        }
+        Insert: {
+          ai_detected_fuel_percent?: number | null
+          ai_detected_odometer?: number | null
+          booking_id: string
+          captured_at?: string
+          confirmed_fuel_percent?: number | null
+          confirmed_odometer?: number | null
+          created_at?: string
+          dashboard_image_url?: string | null
+          expected_latitude?: number | null
+          expected_longitude?: number | null
+          expected_plate: string
+          fuel_end_percent?: number | null
+          fuel_fee?: number | null
+          fuel_missing_liters?: number | null
+          fuel_start_percent?: number | null
+          id?: string
+          km_driven?: number | null
+          km_included?: number | null
+          km_overage?: number | null
+          km_overage_fee?: number | null
+          km_overage_rate?: number | null
+          latitude?: number | null
+          lessor_id: string
+          location_distance_km?: number | null
+          location_verified?: boolean | null
+          longitude?: number | null
+          manual_correction_reason?: string | null
+          plate_scan_image_url?: string | null
+          plate_verified?: boolean | null
+          record_type: string
+          renter_id?: string | null
+          requires_review?: boolean | null
+          scanned_plate?: string | null
+          server_timestamp?: string
+          settlement_status?: string | null
+          total_extra_charges?: number | null
+          updated_at?: string
+          vehicle_id: string
+          was_manually_corrected?: boolean | null
+        }
+        Update: {
+          ai_detected_fuel_percent?: number | null
+          ai_detected_odometer?: number | null
+          booking_id?: string
+          captured_at?: string
+          confirmed_fuel_percent?: number | null
+          confirmed_odometer?: number | null
+          created_at?: string
+          dashboard_image_url?: string | null
+          expected_latitude?: number | null
+          expected_longitude?: number | null
+          expected_plate?: string
+          fuel_end_percent?: number | null
+          fuel_fee?: number | null
+          fuel_missing_liters?: number | null
+          fuel_start_percent?: number | null
+          id?: string
+          km_driven?: number | null
+          km_included?: number | null
+          km_overage?: number | null
+          km_overage_fee?: number | null
+          km_overage_rate?: number | null
+          latitude?: number | null
+          lessor_id?: string
+          location_distance_km?: number | null
+          location_verified?: boolean | null
+          longitude?: number | null
+          manual_correction_reason?: string | null
+          plate_scan_image_url?: string | null
+          plate_verified?: boolean | null
+          record_type?: string
+          renter_id?: string | null
+          requires_review?: boolean | null
+          scanned_plate?: string | null
+          server_timestamp?: string
+          settlement_status?: string | null
+          total_extra_charges?: number | null
+          updated_at?: string
+          vehicle_id?: string
+          was_manually_corrected?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_in_out_records_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "check_in_out_records_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "check_in_out_records_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           admin_notes: string | null
@@ -1273,6 +1421,7 @@ export type Database = {
           average_rating: number | null
           bank_account_number: string | null
           bank_reg_number: string | null
+          check_in_out_enabled: boolean | null
           city: string | null
           company_logo_url: string | null
           company_name: string | null
@@ -1322,6 +1471,7 @@ export type Database = {
           average_rating?: number | null
           bank_account_number?: string | null
           bank_reg_number?: string | null
+          check_in_out_enabled?: boolean | null
           city?: string | null
           company_logo_url?: string | null
           company_name?: string | null
@@ -1371,6 +1521,7 @@ export type Database = {
           average_rating?: number | null
           bank_account_number?: string | null
           bank_reg_number?: string | null
+          check_in_out_enabled?: boolean | null
           city?: string | null
           company_logo_url?: string | null
           company_name?: string | null

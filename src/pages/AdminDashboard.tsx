@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu, Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,7 @@ import { AdminLiveChat } from '@/components/admin/AdminLiveChat';
 import AdminVehicleValueVerification from '@/components/admin/AdminVehicleValueVerification';
 import AdminGpsDevices from '@/components/admin/AdminGpsDevices';
 import AdminBookingStats from '@/components/admin/AdminBookingStats';
+import { AdminCheckInOutSettings } from '@/components/admin/AdminCheckInOutSettings';
 
 interface Customer {
   id: string;
@@ -213,6 +214,7 @@ const AdminDashboard = () => {
     { value: 'live-chat', icon: Headphones, label: 'Live Chat' },
     { value: 'vehicle-values', icon: ShieldCheck, label: 'Bilværdier' },
     { value: 'gps', icon: MapPin, label: 'GPS' },
+    { value: 'checkinout', icon: Camera, label: 'Check-in/out' },
     { value: 'stats', icon: BarChart3, label: 'Statistik' },
   ];
 
@@ -454,6 +456,11 @@ const AdminDashboard = () => {
           {/* GPS Devices Tab */}
           <TabsContent value="gps">
             <AdminGpsDevices />
+          </TabsContent>
+
+          {/* Check-in/out Settings Tab */}
+          <TabsContent value="checkinout">
+            <AdminCheckInOutSettings />
           </TabsContent>
 
           {/* Booking Stats Tab */}
