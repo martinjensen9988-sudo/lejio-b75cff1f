@@ -594,6 +594,51 @@ export type Database = {
           },
         ]
       }
+      customer_segments: {
+        Row: {
+          created_at: string
+          first_booking_at: string | null
+          id: string
+          last_booking_at: string | null
+          lessor_id: string
+          notes: string | null
+          renter_email: string
+          renter_name: string | null
+          segment: string
+          total_bookings: number
+          total_revenue: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          first_booking_at?: string | null
+          id?: string
+          last_booking_at?: string | null
+          lessor_id: string
+          notes?: string | null
+          renter_email: string
+          renter_name?: string | null
+          segment?: string
+          total_bookings?: number
+          total_revenue?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          first_booking_at?: string | null
+          id?: string
+          last_booking_at?: string | null
+          lessor_id?: string
+          notes?: string | null
+          renter_email?: string
+          renter_name?: string | null
+          segment?: string
+          total_bookings?: number
+          total_revenue?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       damage_items: {
         Row: {
           created_at: string
@@ -712,6 +757,47 @@ export type Database = {
           },
         ]
       }
+      deposit_transactions: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          description: string | null
+          id: string
+          lessor_id: string
+          reference_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lessor_id: string
+          reference_id?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lessor_id?: string
+          reference_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discount_code_redemptions: {
         Row: {
           discount_code_id: string
@@ -786,6 +872,60 @@ export type Database = {
           updated_at?: string
           valid_from?: string | null
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      driver_licenses: {
+        Row: {
+          ai_verification_result: Json | null
+          back_image_url: string | null
+          created_at: string
+          expiry_date: string | null
+          front_image_url: string | null
+          id: string
+          issue_date: string | null
+          license_country: string
+          license_number: string
+          rejection_reason: string | null
+          updated_at: string
+          user_id: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          ai_verification_result?: Json | null
+          back_image_url?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          front_image_url?: string | null
+          id?: string
+          issue_date?: string | null
+          license_country?: string
+          license_number: string
+          rejection_reason?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          ai_verification_result?: Json | null
+          back_image_url?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          front_image_url?: string | null
+          id?: string
+          issue_date?: string | null
+          license_country?: string
+          license_number?: string
+          rejection_reason?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -1048,6 +1188,83 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          currency: string
+          due_date: string | null
+          id: string
+          invoice_number: string
+          issued_at: string | null
+          lessor_id: string
+          line_items: Json
+          paid_at: string | null
+          pdf_url: string | null
+          renter_address: string | null
+          renter_cvr: string | null
+          renter_email: string
+          renter_name: string | null
+          status: string
+          subtotal: number
+          total_amount: number
+          updated_at: string
+          vat_amount: number
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          issued_at?: string | null
+          lessor_id: string
+          line_items?: Json
+          paid_at?: string | null
+          pdf_url?: string | null
+          renter_address?: string | null
+          renter_cvr?: string | null
+          renter_email: string
+          renter_name?: string | null
+          status?: string
+          subtotal: number
+          total_amount: number
+          updated_at?: string
+          vat_amount?: number
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          issued_at?: string | null
+          lessor_id?: string
+          line_items?: Json
+          paid_at?: string | null
+          pdf_url?: string | null
+          renter_address?: string | null
+          renter_cvr?: string | null
+          renter_email?: string
+          renter_name?: string | null
+          status?: string
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -1813,6 +2030,117 @@ export type Database = {
           },
         ]
       }
+      seasonal_pricing: {
+        Row: {
+          created_at: string
+          end_date: string
+          fixed_price: number | null
+          id: string
+          is_active: boolean
+          name: string
+          price_multiplier: number
+          start_date: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          fixed_price?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_multiplier?: number
+          start_date: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          fixed_price?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_multiplier?: number
+          start_date?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_pricing_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seasonal_pricing_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_reminders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_km: number | null
+          due_date: string | null
+          due_km: number | null
+          id: string
+          is_completed: boolean
+          notes: string | null
+          service_type: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_km?: number | null
+          due_date?: string | null
+          due_km?: number | null
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+          service_type: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_km?: number | null
+          due_date?: string | null
+          due_km?: number | null
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+          service_type?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_reminders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_reminders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_rentals: {
         Row: {
           cancellation_reason: string | null
@@ -2006,6 +2334,42 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vehicle_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_favorites_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_favorites_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_service_logs: {
         Row: {
@@ -2800,6 +3164,7 @@ export type Database = {
         Returns: boolean
       }
       generate_contract_number: { Args: never; Returns: string }
+      generate_invoice_number: { Args: never; Returns: string }
       get_renter_rating_stats: {
         Args: { renter_email_input: string }
         Returns: {
