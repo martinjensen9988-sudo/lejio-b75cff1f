@@ -18,7 +18,11 @@ import TrialStatusCard from '@/components/dashboard/TrialStatusCard';
 import AnalyticsDashboard from '@/components/dashboard/AnalyticsDashboard';
 import RecurringRentalsTable from '@/components/dashboard/RecurringRentalsTable';
 import ServiceTab from '@/components/dashboard/ServiceTab';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench } from 'lucide-react';
+import InvoicesTab from '@/components/dashboard/InvoicesTab';
+import CustomerSegmentsTab from '@/components/dashboard/CustomerSegmentsTab';
+import FavoritesTab from '@/components/dashboard/FavoritesTab';
+import ServiceRemindersCard from '@/components/dashboard/ServiceRemindersCard';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -206,6 +210,18 @@ const Dashboard = () => {
                     </span>
                   )}
                 </TabsTrigger>
+                <TabsTrigger value="invoices" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Receipt className="w-4 h-4" />
+                  <span className="hidden sm:inline">Fakturaer</span>
+                </TabsTrigger>
+                <TabsTrigger value="customers" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Users className="w-4 h-4" />
+                  <span className="hidden sm:inline">Kunder</span>
+                </TabsTrigger>
+                <TabsTrigger value="favorites" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Heart className="w-4 h-4" />
+                  <span className="hidden sm:inline">Favoritter</span>
+                </TabsTrigger>
                 <TabsTrigger value="recurring" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
                   <Repeat className="w-4 h-4" />
                   <span className="hidden sm:inline">Abonnementer</span>
@@ -276,12 +292,32 @@ const Dashboard = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="invoices" className="mt-6">
+            <InvoicesTab />
+          </TabsContent>
+
+          <TabsContent value="customers" className="mt-6">
+            <CustomerSegmentsTab />
+          </TabsContent>
+
+          <TabsContent value="favorites" className="mt-6">
+            <FavoritesTab />
+          </TabsContent>
+
           <TabsContent value="recurring" className="mt-6">
             <RecurringRentalsTable />
           </TabsContent>
 
           <TabsContent value="service" className="mt-6">
-            <ServiceTab vehicles={vehicles} onUpdate={updateVehicle} />
+            <div className="grid lg:grid-cols-2 gap-6">
+              <ServiceTab vehicles={vehicles} onUpdate={updateVehicle} />
+              <ServiceRemindersCard vehicles={vehicles.map(v => ({
+                id: v.id,
+                make: v.make,
+                model: v.model,
+                registration: v.registration
+              }))} />
+            </div>
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-6">
