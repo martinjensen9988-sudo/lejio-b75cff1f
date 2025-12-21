@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SearchVehicle, SearchFiltersState } from "@/pages/Search";
 import { LessorStatusBadge } from "@/components/ratings/LessorStatusBadge";
-
+import FavoriteButton from "@/components/search/FavoriteButton";
 interface VehicleSearchCardProps {
   vehicle: SearchVehicle;
   isSelected: boolean;
@@ -99,6 +99,11 @@ const VehicleSearchCard = ({
                 <VehicleIcon className="w-12 h-12 text-muted-foreground" />
               </div>
             )}
+            {/* Favorite button */}
+            <FavoriteButton 
+              vehicleId={vehicle.id} 
+              className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm hover:bg-background"
+            />
             {/* Vehicle type badge */}
             {vehicle.vehicle_type !== 'bil' && (
               <Badge className="absolute top-2 left-2 bg-secondary text-secondary-foreground">
@@ -113,7 +118,7 @@ const VehicleSearchCard = ({
               </Badge>
             )}
             {vehicle.owner_fleet_plan && (
-              <Badge className="absolute top-2 right-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md">
+              <Badge className="absolute bottom-2 right-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md">
                 <Shield className="w-3 h-3 mr-1" />
                 LEJIO Varetager
               </Badge>
