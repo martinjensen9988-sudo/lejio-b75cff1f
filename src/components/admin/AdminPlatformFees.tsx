@@ -119,16 +119,31 @@ const AdminPlatformFees = () => {
   const handleSendReminders = async () => {
     setSendingReminders(true);
     try {
+      // Get current session for JWT authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Du skal være logget ind for at sende påmindelser');
+        return;
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-payment-reminder`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
           body: JSON.stringify({ sendToAll: true }),
         }
       );
       
       const data = await response.json();
+      
+      if (response.status === 401 || response.status === 403) {
+        toast.error('Du har ikke tilladelse til at sende påmindelser');
+        return;
+      }
       
       if (data.success) {
         toast.success(`Påmindelser sendt til ${data.emailsSent} udlejere`);

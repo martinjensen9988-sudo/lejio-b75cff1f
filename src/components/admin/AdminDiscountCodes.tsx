@@ -150,10 +150,11 @@ const AdminDiscountCodes = () => {
 
   const generateRandomCode = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    const array = new Uint8Array(8);
+    crypto.getRandomValues(array);
+    const code = Array.from(array, byte => 
+      chars.charAt(byte % chars.length)
+    ).join('');
     setFormData(prev => ({ ...prev, code }));
   };
 

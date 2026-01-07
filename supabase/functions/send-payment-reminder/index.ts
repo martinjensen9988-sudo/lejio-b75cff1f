@@ -37,7 +37,11 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Validate CRON_SECRET for authorization
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Validate authorization - supports both CRON_SECRET and JWT with super_admin role
     const authHeader = req.headers.get("Authorization");
     const cronSecret = Deno.env.get("CRON_SECRET");
     
@@ -49,17 +53,43 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
     
-    if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
-      console.error("Unauthorized: Invalid or missing CRON_SECRET");
+    let isAuthorized = false;
+    
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      
+      // Check if it's the CRON_SECRET (for scheduled jobs)
+      if (token === cronSecret) {
+        isAuthorized = true;
+        console.log("Authorized via CRON_SECRET");
+      } else {
+        // Validate JWT and check for super_admin role
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+        
+        if (!userError && userData.user) {
+          // Check if user has super_admin role
+          const { data: hasRole } = await supabaseClient.rpc('has_role', {
+            _user_id: userData.user.id,
+            _role: 'super_admin'
+          });
+          
+          if (hasRole) {
+            isAuthorized = true;
+            console.log(`Authorized via JWT - super_admin user: ${userData.user.email}`);
+          }
+        }
+      }
+    }
+    
+    if (!isAuthorized) {
+      console.error("Unauthorized: Invalid credentials or insufficient permissions");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = supabaseClient;
 
     const { lessorId, sendToAll }: PaymentReminderRequest = await req.json();
 

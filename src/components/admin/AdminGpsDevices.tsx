@@ -146,11 +146,12 @@ const AdminGpsDevices = () => {
   };
 
   const generateWebhookSecret = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let secret = '';
-    for (let i = 0; i < 32; i++) {
-      secret += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    // Use cryptographically secure random generation
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const secret = Array.from(array, byte => 
+      byte.toString(16).padStart(2, '0')
+    ).join('');
     setFormData(prev => ({ ...prev, webhook_secret: secret }));
   };
 
