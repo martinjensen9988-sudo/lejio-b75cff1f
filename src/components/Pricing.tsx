@@ -13,6 +13,15 @@ const Pricing = () => {
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16 animate-slide-up">
+          {/* Free Trial Banner */}
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-mint/30 to-accent/30 border-2 border-mint/50 shadow-lg shadow-mint/20 mb-6">
+            <span className="text-2xl">🎁</span>
+            <div className="text-left">
+              <p className="font-bold text-foreground">6 måneders gratis adgang</p>
+              <p className="text-sm text-muted-foreground">Fuld adgang til alt – intet kreditkort krævet</p>
+            </div>
+          </div>
+          
           <span className="text-4xl mb-4 block">💎</span>
           <h2 className="font-display text-4xl sm:text-5xl font-black mb-4">
             Priser der giver <span className="text-gradient-warm">mening</span>
