@@ -87,63 +87,69 @@ export const LiveChatWidget = () => {
   const loadOrCreateSession = async () => {
     try {
       const storedSessionId = localStorage.getItem('lejio_chat_session');
+      const storedSessionToken = localStorage.getItem('lejio_chat_token');
       
-      // Validate UUID format before making RPC call
+      // Validate UUID format
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       
-      if (storedSessionId && uuidRegex.test(storedSessionId)) {
-        // Use RPC function for secure session access
-        const { data: existingSession, error: sessionError } = await supabase
-          .rpc('get_visitor_chat_session', { session_id_param: storedSessionId });
+      if (storedSessionId && storedSessionToken && uuidRegex.test(storedSessionId)) {
+        // Use secure Edge Function for session access
+        const { data, error } = await supabase.functions.invoke('chat-session', {
+          body: { action: 'get', sessionId: storedSessionId, sessionToken: storedSessionToken }
+        });
         
-        if (!sessionError && existingSession && existingSession.length > 0) {
-          setSession(existingSession[0] as ChatSession);
-          loadMessages(existingSession[0].id);
+        if (!error && data?.session) {
+          setSession(data.session as ChatSession);
+          loadMessages(storedSessionId, storedSessionToken);
           return;
         }
       }
       
-      // If session not found, invalid, or error, clear old session ID
+      // If session not found, invalid, or error, clear old session data
       if (storedSessionId) {
         localStorage.removeItem('lejio_chat_session');
+        localStorage.removeItem('lejio_chat_token');
       }
 
-      const { data: newSession, error: insertError } = await supabase
-        .from('visitor_chat_sessions')
-        .insert({})
-        .select()
-        .single();
+      // Create new session via secure Edge Function
+      const { data, error } = await supabase.functions.invoke('chat-session', {
+        body: { action: 'create' }
+      });
 
-      if (insertError) {
-        console.error('Failed to create chat session:', insertError);
+      if (error || !data?.session) {
+        console.error('Failed to create chat session:', error);
         return;
       }
 
-      if (newSession) {
-        localStorage.setItem('lejio_chat_session', newSession.id);
-        setSession(newSession as ChatSession);
-        
-        // Add welcome message
-        const welcomeMsg: Message = {
-          id: 'welcome',
-          sender_type: 'ai',
-          content: 'Hej! 👋 Jeg er LEJIOs AI-assistent. Hvordan kan jeg hjælpe dig i dag? Du kan spørge mig om priser, hvordan platformen fungerer, eller noget helt andet.',
-          created_at: new Date().toISOString(),
-        };
-        setMessages([welcomeMsg]);
-      }
+      // Store session ID and token securely
+      localStorage.setItem('lejio_chat_session', data.session.id);
+      localStorage.setItem('lejio_chat_token', data.token);
+      setSession(data.session as ChatSession);
+      
+      // Add welcome message
+      const welcomeMsg: Message = {
+        id: 'welcome',
+        sender_type: 'ai',
+        content: 'Hej! 👋 Jeg er LEJIOs AI-assistent. Hvordan kan jeg hjælpe dig i dag? Du kan spørge mig om priser, hvordan platformen fungerer, eller noget helt andet.',
+        created_at: new Date().toISOString(),
+      };
+      setMessages([welcomeMsg]);
     } catch (error) {
       console.error('Chat session error:', error);
     }
   };
 
-  const loadMessages = async (sessionId: string) => {
-    // Use RPC function for secure message access
-    const { data } = await supabase
-      .rpc('get_visitor_chat_messages', { session_id_param: sessionId });
+  const loadMessages = async (sessionId: string, sessionToken?: string) => {
+    const token = sessionToken || localStorage.getItem('lejio_chat_token');
+    if (!token) return;
 
-    if (data && data.length > 0) {
-      setMessages(data as Message[]);
+    // Use secure Edge Function for message access
+    const { data, error } = await supabase.functions.invoke('chat-session', {
+      body: { action: 'messages', sessionId, sessionToken: token }
+    });
+
+    if (!error && data?.messages && data.messages.length > 0) {
+      setMessages(data.messages as Message[]);
     } else {
       const welcomeMsg: Message = {
         id: 'welcome',
