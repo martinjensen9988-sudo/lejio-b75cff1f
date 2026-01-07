@@ -77,30 +77,52 @@ export const GpsTrackingMap = ({ devices, selectedDevice, onSelectDevice, geofen
 
       const isSelected = selectedDevice?.id === device.id;
       
-      // Create custom marker element
+      // Create custom marker element using safe DOM methods
       const el = document.createElement('div');
       el.className = 'gps-marker';
-      el.innerHTML = `
-        <div style="
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background: ${isSelected ? 'hsl(var(--primary))' : 'hsl(var(--secondary))'};
-          border: 3px solid ${isSelected ? 'hsl(var(--primary))' : 'hsl(var(--border))'};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-          transition: all 0.2s;
-        ">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${isSelected ? 'white' : 'currentColor'}" stroke-width="2">
-            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
-            <circle cx="7" cy="17" r="2"></circle>
-            <circle cx="17" cy="17" r="2"></circle>
-          </svg>
-        </div>
+      
+      const markerDiv = document.createElement('div');
+      markerDiv.style.cssText = `
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: ${isSelected ? 'hsl(var(--primary))' : 'hsl(var(--secondary))'};
+        border: 3px solid ${isSelected ? 'hsl(var(--primary))' : 'hsl(var(--border))'};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: all 0.2s;
       `;
+      
+      // Create SVG element safely using createElementNS
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '18');
+      svg.setAttribute('height', '18');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', isSelected ? 'white' : 'currentColor');
+      svg.setAttribute('stroke-width', '2');
+      
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2');
+      svg.appendChild(path);
+      
+      const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle1.setAttribute('cx', '7');
+      circle1.setAttribute('cy', '17');
+      circle1.setAttribute('r', '2');
+      svg.appendChild(circle1);
+      
+      const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle2.setAttribute('cx', '17');
+      circle2.setAttribute('cy', '17');
+      circle2.setAttribute('r', '2');
+      svg.appendChild(circle2);
+      
+      markerDiv.appendChild(svg);
+      el.appendChild(markerDiv);
 
       el.addEventListener('click', () => {
         onSelectDevice?.(device);
