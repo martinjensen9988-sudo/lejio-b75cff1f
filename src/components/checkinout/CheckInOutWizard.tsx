@@ -16,9 +16,11 @@ import {
   Gauge,
   AlertTriangle,
   Edit2,
-  Car
+  Car,
+  ScanLine
 } from 'lucide-react';
 import { useCheckInOut } from '@/hooks/useCheckInOut';
+import { ARDamageScanner } from '@/components/damage/ARDamageScanner';
 import { toast } from 'sonner';
 
 interface CheckInOutWizardProps {
@@ -52,7 +54,7 @@ interface CheckInOutWizardProps {
   onComplete: () => void;
 }
 
-type Step = 'plate' | 'dashboard' | 'confirm' | 'settlement';
+type Step = 'plate' | 'damage-scan' | 'dashboard' | 'confirm' | 'settlement';
 
 export const CheckInOutWizard = ({
   open,
@@ -75,6 +77,8 @@ export const CheckInOutWizard = ({
   const [manualReason, setManualReason] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showDamageScanner, setShowDamageScanner] = useState(false);
+  const [damageResults, setDamageResults] = useState<any[]>([]);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -149,10 +153,21 @@ export const CheckInOutWizard = ({
     setPlateVerified(isValid);
     if (isValid) {
       stopCamera();
-      setStep('dashboard');
+      setStep('damage-scan');
     } else {
       toast.error('Nummerpladen matcher ikke den bookede bil');
     }
+  };
+
+  const handleDamageScanComplete = (results: any[]) => {
+    setDamageResults(results);
+    setShowDamageScanner(false);
+    setStep('dashboard');
+    toast.success('Skadesscanning afsluttet');
+  };
+
+  const handleSkipDamageScan = () => {
+    setStep('dashboard');
   };
 
   const handleDashboardCapture = async () => {
@@ -346,7 +361,64 @@ export const CheckInOutWizard = ({
           </div>
         )}
 
-        {/* Step 2: Dashboard Capture */}
+        {/* Step 2: AR Damage Scan */}
+        {step === 'damage-scan' && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-green-600 mb-4">
+              <CheckCircle className="h-5 w-5" />
+              <span>Nummerplade verificeret</span>
+            </div>
+
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
+                <ScanLine className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">AR Skadesscanner</h3>
+                <p className="text-muted-foreground text-sm">
+                  Scan bilen med kameraet for automatisk at dokumentere skader
+                </p>
+              </div>
+            </div>
+
+            {damageResults.length > 0 && (
+              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span>
+                    {damageResults.length} områder scannet, 
+                    {damageResults.reduce((acc, r) => acc + (r.damages?.length || 0), 0)} skader fundet
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleSkipDamageScan} className="flex-1">
+                Spring over
+              </Button>
+              <Button onClick={() => setShowDamageScanner(true)} className="flex-1">
+                <ScanLine className="mr-2 h-4 w-4" />
+                Start scanning
+              </Button>
+            </div>
+
+            <ARDamageScanner
+              open={showDamageScanner}
+              onOpenChange={setShowDamageScanner}
+              vehicleInfo={{
+                id: booking.vehicle_id,
+                make: booking.vehicle?.make || '',
+                model: booking.vehicle?.model || '',
+                registration: expectedPlate,
+              }}
+              mode={mode}
+              onComplete={handleDamageScanComplete}
+            />
+          </div>
+        )}
+
+        {/* Step 3: Dashboard Capture */}
         {step === 'dashboard' && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-green-600 mb-4">
