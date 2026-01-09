@@ -22,7 +22,8 @@ import InvoicesTab from '@/components/dashboard/InvoicesTab';
 import CustomerSegmentsTab from '@/components/dashboard/CustomerSegmentsTab';
 import FavoritesTab from '@/components/dashboard/FavoritesTab';
 import ServiceRemindersCard from '@/components/dashboard/ServiceRemindersCard';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart } from 'lucide-react';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles } from 'lucide-react';
+import { AIPriceSuggestions } from '@/components/dashboard/AIPriceSuggestions';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -234,6 +235,10 @@ const Dashboard = () => {
                   <BarChart3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Analytics</span>
                 </TabsTrigger>
+                <TabsTrigger value="ai-pricing" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="hidden sm:inline">AI Priser</span>
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -322,6 +327,10 @@ const Dashboard = () => {
 
           <TabsContent value="analytics" className="mt-6">
             <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="ai-pricing" className="mt-6">
+            <AIPriceSuggestions vehicles={vehicles} onApplyPrice={async (id, updates) => updateVehicle(id, updates)} />
           </TabsContent>
         </Tabs>
       </main>
