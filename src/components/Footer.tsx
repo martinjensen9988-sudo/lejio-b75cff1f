@@ -15,7 +15,7 @@ const Footer = () => {
               <span className="font-display font-black text-2xl text-primary-foreground">LEJIO</span>
             </div>
             <p className="text-sm text-primary-foreground/80 max-w-xs">
-              Den nemmeste vej til din næste bil. Private og professionelle udlejere – alt samlet ét sted.
+              Den nemmeste vej til dit næste køretøj. Private udlejere og forhandlere – alt samlet ét sted.
             </p>
             <div className="flex items-center gap-2 mt-4 text-sm text-primary-foreground/70">
               <MapPin className="w-4 h-4" />
@@ -37,7 +37,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-primary-foreground/80">
               <li><a href="/funktioner" className="hover:text-secondary transition-colors">Alle funktioner</a></li>
               <li><a href="/auth" className="hover:text-secondary transition-colors">Bliv privat udlejer</a></li>
-              <li><a href="/auth" className="hover:text-secondary transition-colors">Pro-partner program</a></li>
+              <li><a href="/auth" className="hover:text-secondary transition-colors">Forhandler program</a></li>
               <li><a href="#pricing" className="hover:text-secondary transition-colors">Priser</a></li>
             </ul>
           </div>

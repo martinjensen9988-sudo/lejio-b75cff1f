@@ -38,7 +38,7 @@ const PrivacyPolicy = () => {
               <ul className="list-disc pl-6 space-y-2">
                 <li>Kontaktoplysninger: Navn, e-mailadresse, telefonnummer, adresse</li>
                 <li>Identifikationsoplysninger: Kørekortnummer, fødselsdato</li>
-                <li>Virksomhedsoplysninger: CVR-nummer, firmanavn (for professionelle udlejere)</li>
+                <li>Virksomhedsoplysninger: CVR-nummer, firmanavn (for forhandlere)</li>
                 <li>Betalingsoplysninger: Bankkontonummer, MobilePay-nummer</li>
                 <li>Køretøjsoplysninger: Registreringsnummer, mærke, model</li>
               </ul>

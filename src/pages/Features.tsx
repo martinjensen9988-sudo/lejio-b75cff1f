@@ -246,7 +246,7 @@ const Features = () => {
               Alle funktioner i LEJIO
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Fra booking til kontrakter, betaling til GPS-sporing – vi har samlet alt du behøver for at drive en professionel udlejningsforretning.
+              Fra booking til kontrakter, betaling til GPS-sporing – vi har samlet alt du behøver for at drive din udlejningsforretning.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 

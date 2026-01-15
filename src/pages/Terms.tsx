@@ -23,7 +23,7 @@ const Terms = () => {
             <section>
               <h2 className="font-display text-2xl font-semibold text-foreground mt-8 mb-4">1. Om LEJIO</h2>
               <p>
-                LEJIO er en online platform, der forbinder lejere med private og professionelle udlejere 
+                LEJIO er en online platform, der forbinder lejere med private udlejere og forhandlere 
                 af køretøjer. LEJIO fungerer som formidler og er ikke part i lejeaftalen mellem lejer og udlejer.
               </p>
               <ul className="list-disc pl-6 space-y-2 mt-4">
@@ -58,7 +58,7 @@ const Terms = () => {
                 <li>Skal være fyldt 18 år</li>
                 <li>Skal have gyldigt kørekort</li>
                 <li>Skal have gyldig ansvarsforsikring på køretøjet</li>
-                <li>Professionelle udlejere skal have gyldigt CVR-nummer</li>
+                <li>Forhandlere skal have gyldigt CVR-nummer</li>
               </ul>
 
               <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">3.3 Krav til lejere</h3>
@@ -134,7 +134,7 @@ const Terms = () => {
                 <li>49 kr pr. gennemført booking</li>
               </ul>
 
-              <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">8.2 Pro Partner (CVR)</h3>
+              <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">8.2 Forhandler (CVR)</h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li>299 kr/måned for 1-5 køretøjer</li>
                 <li>499 kr/måned for 6-15 køretøjer</li>

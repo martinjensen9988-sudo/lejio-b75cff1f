@@ -345,7 +345,7 @@ const Auth = () => {
                           <Building2 className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-lg text-foreground">Professionel udlejer</h3>
+                          <h3 className="font-bold text-lg text-foreground">Forhandler</h3>
                           <p className="text-sm text-muted-foreground mt-1">
                             Jeg har et CVR-nummer og driver en udlejningsforretning.
                           </p>
@@ -384,7 +384,7 @@ const Auth = () => {
                     </button>
                     <div>
                       <h2 className="text-xl font-display font-bold text-foreground">
-                        {userType === "privat" ? "Privat udlejer" : "Professionel udlejer"}
+                        {userType === "privat" ? "Privat udlejer" : "Forhandler"}
                       </h2>
                       <p className="text-sm text-muted-foreground">Trin 1 af 2 - Login oplysninger</p>
                     </div>

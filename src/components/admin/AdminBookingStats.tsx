@@ -477,7 +477,7 @@ const AdminBookingStats = () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {stat.user_type === 'professionel' ? 'Pro' : 'Privat'}
+                      {stat.user_type === 'professionel' ? 'Forhandler' : 'Privat'}
                     </Badge>
                   </TableCell>
                   <TableCell>
