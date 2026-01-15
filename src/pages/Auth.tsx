@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCVRLookup } from "@/hooks/useCVRLookup";
+import { useReferral } from "@/hooks/useReferral";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +40,20 @@ const Auth = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [referralCodeFromUrl, setReferralCodeFromUrl] = useState<string | null>(null);
   const { data: cvrData, lookupCVR, isLoading: cvrLoading, error: cvrError, isCompanyActive } = useCVRLookup();
+  const { applyReferralCode } = useReferral();
+  const [searchParams] = useSearchParams();
+
+  // Check for referral code in URL
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferralCodeFromUrl(refCode.toUpperCase());
+      // Switch to signup mode if coming from referral link
+      setMode('signup');
+    }
+  }, [searchParams]);
 
   // Auto-lookup CVR when 8 digits are entered
   useEffect(() => {
@@ -174,6 +188,16 @@ const Auth = () => {
         toast.error(error.message);
       }
     } else {
+      // Apply referral code if present
+      if (referralCodeFromUrl) {
+        // Small delay to ensure user is fully registered
+        setTimeout(async () => {
+          const result = await applyReferralCode(referralCodeFromUrl);
+          if (result.success) {
+            toast.success("Henvisningskode anvendt! Du får 500 kr. rabat på din første månedsleasing");
+          }
+        }, 1000);
+      }
       toast.success("Konto oprettet! Velkommen til LEJIO 🎉");
       navigate("/");
     }
@@ -220,6 +244,23 @@ const Auth = () => {
             {mode === "login" ? "Log ind på din konto" : "Opret din konto"}
           </p>
         </div>
+
+        {/* Referral Code Banner */}
+        {referralCodeFromUrl && mode === 'signup' && (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+              <Check className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-green-700 dark:text-green-400">
+                Henvisningskode aktiveret!
+              </p>
+              <p className="text-sm text-green-600 dark:text-green-500">
+                Du får 500 kr. rabat på din første månedsleasing
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Auth Card */}
         <div className="bg-card rounded-3xl p-8 shadow-lg border-2 border-border">

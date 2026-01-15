@@ -137,7 +137,27 @@ export const useFines = () => {
       const fine = fines.find(f => f.id === fineId);
       if (!fine) throw new Error('Bøde ikke fundet');
 
-      // Send email notification (would integrate with send-fine-notification edge function)
+      // Get lessor name
+      const lessorName = (profile as any)?.full_name || (profile as any)?.company_name || 'Udlejer';
+
+      // Send email notification
+      await supabase.functions.invoke('send-fine-notification', {
+        body: {
+          renterEmail: fine.renter_email,
+          renterName: fine.renter_name || 'Lejer',
+          lessorName,
+          fineType: fine.fine_type,
+          fineDate: fine.fine_date,
+          fineAmount: fine.fine_amount,
+          adminFee: fine.admin_fee,
+          totalAmount: fine.total_amount,
+          description: fine.description,
+          fileUrl: fine.file_url,
+          vehicleInfo: fine.vehicle ? `${fine.vehicle.registration} (${fine.vehicle.make} ${fine.vehicle.model})` : undefined,
+        },
+      });
+
+      // Update status
       const { error } = await supabase
         .from('fines')
         .update({
