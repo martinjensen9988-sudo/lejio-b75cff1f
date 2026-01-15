@@ -38,8 +38,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <JanuaryPromoBanner />
       <Navigation />
+      <JanuaryPromoBanner />
       <main>
         <Hero />
         <Features />
