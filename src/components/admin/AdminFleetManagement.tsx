@@ -56,7 +56,7 @@ interface FleetCustomer {
   email: string;
   full_name: string | null;
   company_name: string | null;
-  fleet_plan: 'fleet_basic' | 'fleet_premium' | null;
+  fleet_plan: 'fleet_private' | 'fleet_basic' | 'fleet_premium' | null;
   fleet_commission_rate: number | null;
   average_rating: number;
   total_rating_count: number;
@@ -91,8 +91,9 @@ interface FleetVehicle {
 }
 
 const FLEET_PLAN_LABELS: Record<string, string> = {
-  fleet_basic: 'LEJIO Varetager',
-  fleet_premium: 'LEJIO Varetager Pro',
+  fleet_private: 'Privat Fleet (30%)',
+  fleet_basic: 'LEJIO Varetager (20%)',
+  fleet_premium: 'LEJIO Varetager Pro (35%)',
 };
 
 const AdminFleetManagement = () => {
@@ -117,8 +118,20 @@ const AdminFleetManagement = () => {
     email: '',
     company_name: '',
     full_name: '',
-    fleet_plan: 'fleet_basic' as 'fleet_basic' | 'fleet_premium',
-    fleet_commission_rate: 15,
+    fleet_plan: 'fleet_private' as 'fleet_private' | 'fleet_basic' | 'fleet_premium',
+    fleet_commission_rate: 30,
+  });
+  
+  // Fleet booking state
+  const [showFleetBooking, setShowFleetBooking] = useState(false);
+  const [selectedVehicleForBooking, setSelectedVehicleForBooking] = useState<FleetVehicle | null>(null);
+  const [bookingForm, setBookingForm] = useState({
+    start_date: '',
+    end_date: '',
+    renter_name: '',
+    renter_email: '',
+    renter_phone: '',
+    total_price: '',
   });
   
   // New vehicle form
@@ -209,9 +222,9 @@ const AdminFleetManagement = () => {
         .update({
           company_name: newCustomerForm.company_name,
           full_name: newCustomerForm.full_name || null,
-          fleet_plan: newCustomerForm.fleet_plan,
+          fleet_plan: newCustomerForm.fleet_plan as any,
           fleet_commission_rate: newCustomerForm.fleet_commission_rate,
-          user_type: 'professionel',
+          user_type: newCustomerForm.fleet_plan === 'fleet_private' ? 'privat' : 'professionel',
         })
         .eq('id', existingProfile.id);
 
@@ -224,8 +237,8 @@ const AdminFleetManagement = () => {
           email: '',
           company_name: '',
           full_name: '',
-          fleet_plan: 'fleet_basic',
-          fleet_commission_rate: 15,
+          fleet_plan: 'fleet_private',
+          fleet_commission_rate: 30,
         });
         fetchData();
       }
@@ -345,8 +358,56 @@ const AdminFleetManagement = () => {
 
   const getCustomerById = (id: string) => customers.find(c => c.id === id);
 
+  // Handle fleet booking creation
+  const handleCreateFleetBooking = async () => {
+    if (!selectedVehicleForBooking || !bookingForm.start_date || !bookingForm.end_date || !bookingForm.renter_name) {
+      toast.error('Udfyld alle påkrævede felter');
+      return;
+    }
+
+    setIsCreating(true);
+
+    const { error } = await supabase.from('bookings').insert({
+      vehicle_id: selectedVehicleForBooking.id,
+      lessor_id: selectedVehicleForBooking.owner_id,
+      start_date: bookingForm.start_date,
+      end_date: bookingForm.end_date,
+      renter_name: bookingForm.renter_name,
+      renter_email: bookingForm.renter_email || null,
+      renter_phone: bookingForm.renter_phone || null,
+      total_price: parseFloat(bookingForm.total_price) || 0,
+      status: 'confirmed', // Fleet bookings are auto-confirmed
+    });
+
+    if (error) {
+      console.error('Error creating fleet booking:', error);
+      toast.error('Kunne ikke oprette fleet booking');
+    } else {
+      toast.success('Fleet booking oprettet!');
+      setShowFleetBooking(false);
+      setSelectedVehicleForBooking(null);
+      setBookingForm({
+        start_date: '',
+        end_date: '',
+        renter_name: '',
+        renter_email: '',
+        renter_phone: '',
+        total_price: '',
+      });
+      fetchData();
+    }
+
+    setIsCreating(false);
+  };
+
+  const openFleetBookingDialog = (vehicle: FleetVehicle) => {
+    setSelectedVehicleForBooking(vehicle);
+    setShowFleetBooking(true);
+  };
+
   const stats = {
     totalFleetCustomers: customers.length,
+    privateCustomers: customers.filter(c => c.fleet_plan === 'fleet_private').length,
     basicCustomers: customers.filter(c => c.fleet_plan === 'fleet_basic').length,
     premiumCustomers: customers.filter(c => c.fleet_plan === 'fleet_premium').length,
     pendingSettlements: settlements.filter(s => s.status === 'pending').length,
@@ -393,8 +454,8 @@ const AdminFleetManagement = () => {
                 <Building2 className="w-5 h-5 text-blue-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.basicCustomers} / {stats.premiumCustomers}</p>
-                <p className="text-xs text-muted-foreground">Basic / Premium</p>
+                <p className="text-2xl font-bold">{stats.privateCustomers} / {stats.basicCustomers} / {stats.premiumCustomers}</p>
+                <p className="text-xs text-muted-foreground">Privat / Basic / Premium</p>
               </div>
             </div>
           </CardContent>
@@ -585,9 +646,11 @@ const AdminFleetManagement = () => {
                   <TableHead>Køretøj</TableHead>
                   <TableHead>Registrering</TableHead>
                   <TableHead>Ejer</TableHead>
+                  <TableHead>Plan</TableHead>
                   <TableHead>Dagspris</TableHead>
                   <TableHead>Ugepris</TableHead>
                   <TableHead>Månedspris</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -605,9 +668,24 @@ const AdminFleetManagement = () => {
                       <TableCell>
                         {owner?.company_name || owner?.full_name || 'Ukendt'}
                       </TableCell>
+                      <TableCell>
+                        <Badge variant={owner?.fleet_plan === 'fleet_premium' ? 'default' : owner?.fleet_plan === 'fleet_private' ? 'secondary' : 'outline'} className="text-xs">
+                          {owner?.fleet_plan ? FLEET_PLAN_LABELS[owner.fleet_plan] : '-'}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{vehicle.daily_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
                       <TableCell>{vehicle.weekly_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
                       <TableCell>{vehicle.monthly_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
+                      <TableCell>
+                        <Button 
+                          size="sm" 
+                          onClick={() => openFleetBookingDialog(vehicle)}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          <Calendar className="w-4 h-4 mr-1" />
+                          Book
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -997,6 +1075,107 @@ const AdminFleetManagement = () => {
             >
               {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Opret køretøj
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Fleet Booking Dialog */}
+      <Dialog open={showFleetBooking} onOpenChange={setShowFleetBooking}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
+              Book Fleet Køretøj
+            </DialogTitle>
+            <DialogDescription>
+              {selectedVehicleForBooking && (
+                <>Opret booking for {selectedVehicleForBooking.make} {selectedVehicleForBooking.model} ({selectedVehicleForBooking.registration})</>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {selectedVehicleForBooking && (
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{selectedVehicleForBooking.make} {selectedVehicleForBooking.model}</p>
+                <p className="text-sm text-muted-foreground">{selectedVehicleForBooking.registration} • {selectedVehicleForBooking.daily_price?.toLocaleString('da-DK') || '0'} kr/dag</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Startdato *</Label>
+                <Input
+                  type="date"
+                  value={bookingForm.start_date}
+                  onChange={(e) => setBookingForm(prev => ({ ...prev, start_date: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Slutdato *</Label>
+                <Input
+                  type="date"
+                  value={bookingForm.end_date}
+                  onChange={(e) => setBookingForm(prev => ({ ...prev, end_date: e.target.value }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Kundens navn *</Label>
+              <Input
+                value={bookingForm.renter_name}
+                onChange={(e) => setBookingForm(prev => ({ ...prev, renter_name: e.target.value }))}
+                placeholder="Fulde navn"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={bookingForm.renter_email}
+                  onChange={(e) => setBookingForm(prev => ({ ...prev, renter_email: e.target.value }))}
+                  placeholder="email@eksempel.dk"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Telefon</Label>
+                <Input
+                  type="tel"
+                  value={bookingForm.renter_phone}
+                  onChange={(e) => setBookingForm(prev => ({ ...prev, renter_phone: e.target.value }))}
+                  placeholder="+45 12 34 56 78"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Total pris (DKK) *</Label>
+              <Input
+                type="number"
+                min="0"
+                value={bookingForm.total_price}
+                onChange={(e) => setBookingForm(prev => ({ ...prev, total_price: e.target.value }))}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFleetBooking(false)}>
+              Annuller
+            </Button>
+            <Button 
+              onClick={handleCreateFleetBooking}
+              disabled={isCreating || !bookingForm.start_date || !bookingForm.end_date || !bookingForm.renter_name}
+            >
+              {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Opret booking
             </Button>
           </DialogFooter>
         </DialogContent>
