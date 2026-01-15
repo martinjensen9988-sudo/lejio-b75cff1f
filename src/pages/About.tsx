@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Car, Caravan, Truck, Scan, FileCheck, Shield, Wrench, RefreshCw, Leaf } from 'lucide-react';
+import { ArrowLeft, Car, Caravan, Truck, Scan, FileCheck, Shield, Wrench, RefreshCw, Leaf, Star, CreditCard, User } from 'lucide-react';
 
 const About = () => {
   const navigate = useNavigate();
@@ -53,6 +53,33 @@ const About = () => {
               </p>
             </div>
 
+            {/* Leadership Section */}
+            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl p-8 sm:p-12 border border-primary/20">
+              <h2 className="font-display text-3xl font-bold mb-8 text-center">
+                Ledelsen bag platformen
+              </h2>
+              <p className="text-muted-foreground text-center mb-10">
+                Bag Lejio.dk står et dedikeret team med en passion for teknologi og mobilitet.
+              </p>
+
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-card rounded-2xl p-8 border border-border shadow-lg">
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
+                      <User className="w-12 h-12 text-white" />
+                    </div>
+                    <div className="text-center sm:text-left">
+                      <h3 className="font-display text-2xl font-bold mb-1">Rasmus Damsgaard</h3>
+                      <p className="text-primary font-medium mb-4">Daglig Leder</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        Som daglig leder er det Rasmus, der har fingeren på pulsen i alle dele af forretningen. Han er garant for, at teknologien bag Lejio altid fungerer fejlfrit, så både udlejere og lejere får en problemfri oplevelse. Rasmus brænder for god kundeservice og står altid klar til at hjælpe vores brugere, hvis der opstår spørgsmål eller behov for support. Hos Lejio er hjælpen aldrig mere end et opkald eller en besked væk.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Unique Concept */}
             <div>
               <h2 className="font-display text-3xl font-bold mb-8">
@@ -68,7 +95,7 @@ const About = () => {
                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                     <Car className="w-7 h-7 text-primary" />
                   </div>
-                  <h3 className="font-display text-xl font-bold mb-3">Personbiler & Minileasing</h3>
+                  <h3 className="font-display text-xl font-bold mb-3">🚗 Personbiler & Minileasing</h3>
                   <p className="text-muted-foreground text-sm">
                     Vi har specialiseret os i lejeperioder på 30+ dage. Det er den perfekte løsning til dig, der står mellem to biler, har fået nyt job, eller som ønsker at teste elbil-livet af uden at binde dig økonomisk i årevis. 0 kr. i udbetaling, ingen lang binding – bare en bil, når du har brug for den.
                   </p>
@@ -79,7 +106,7 @@ const About = () => {
                   <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
                     <Caravan className="w-7 h-7 text-accent" />
                   </div>
-                  <h3 className="font-display text-xl font-bold mb-3">Campingvogne – Frihed på landevejen</h3>
+                  <h3 className="font-display text-xl font-bold mb-3">🚐 Campingvogne – Frihed på landevejen</h3>
                   <p className="text-muted-foreground text-sm">
                     Vi gør drømmen om den frie ferie tilgængelig. Gennem Lejio kan ejere af campingvogne få dækket deres årlige omkostninger ved at udleje vognen i de uger, de ikke selv bruger den, mens lejerne får adgang til kvalitetsvogne uden de store investeringsomkostninger.
                   </p>
@@ -90,7 +117,7 @@ const About = () => {
                   <div className="w-14 h-14 rounded-xl bg-mint/10 flex items-center justify-center mb-4">
                     <Truck className="w-7 h-7 text-mint" />
                   </div>
-                  <h3 className="font-display text-xl font-bold mb-3">Trailere til ethvert behov</h3>
+                  <h3 className="font-display text-xl font-bold mb-3">🛒 Trailere til ethvert behov</h3>
                   <p className="text-muted-foreground text-sm">
                     Fra den lille havetrailer til den store flyttetrailer eller den specialiserede hestetrailer. Vi gør det muligt at finde en trailer i nabolaget med få klik, fremfor at skulle køre langt til en tankstation.
                   </p>
@@ -101,7 +128,7 @@ const About = () => {
             {/* Technology Section */}
             <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl p-8 sm:p-12 border border-primary/20">
               <h2 className="font-display text-3xl font-bold mb-4">
-                Teknologien bag: Lejio Vision
+                Teknologien bag: Lejio Vision (AI-drevet tryghed)
               </h2>
               <p className="text-muted-foreground mb-8">
                 Vi ved, at den største bekymring ved udlejning er spørgsmålet om tillid og dokumentation. Derfor har vi udviklet <strong className="text-foreground">Lejio Vision</strong>, en teknologisk løsning, der fjerner det manuelle besvær og de juridiske gråzoner.
@@ -124,7 +151,7 @@ const About = () => {
                   </div>
                   <h4 className="font-bold">AI Dashboard-analyse</h4>
                   <p className="text-sm text-muted-foreground">
-                    Ved at tage et enkelt billede af instrumentbrættet kan vores kunstige intelligens øjeblikkeligt aflæse kilometerstand og brændstofniveau. Dataene overføres direkte til lejekontrakten.
+                    Dette er hjertet i vores check-in/out proces. Ved at tage et enkelt billede af instrumentbrættet kan vores kunstige intelligens øjeblikkeligt aflæse kilometerstand og brændstofniveau (eller batteristatus). Dataene overføres direkte til lejekontrakten, hvilket eliminerer menneskelige fejl, tastefejl og diskussioner ved aflevering.
                   </p>
                 </div>
 
@@ -157,7 +184,7 @@ const About = () => {
                   <div>
                     <h4 className="font-bold mb-1">Automatiseret Jura</h4>
                     <p className="text-sm text-muted-foreground">
-                      Vi genererer dynamiske, juridisk validerede lejekontrakter, der underskrives digitalt med MitID/NemID-validering af parterne.
+                      Vi genererer dynamiske, juridisk validerede lejekontrakter, der underskrives digitalt med MitID-validering af parterne.
                     </p>
                   </div>
                 </div>
@@ -169,7 +196,7 @@ const About = () => {
                   <div>
                     <h4 className="font-bold mb-1">Service- & Vedligeholdelsesmodul</h4>
                     <p className="text-sm text-muted-foreground">
-                      Systemet holder automatisk styr på køretøjernes sundhed inkl. påmindelser om syn, serviceintervaller og dækskift.
+                      Systemet holder automatisk styr på køretøjernes sundhed. Det inkluderer påmindelser om syn, serviceintervaller og den logistiske styring af sommer- og vinterdæk.
                     </p>
                   </div>
                 </div>
@@ -181,7 +208,43 @@ const About = () => {
                   <div>
                     <h4 className="font-bold mb-1">Smart Byttebil-funktion</h4>
                     <p className="text-sm text-muted-foreground">
-                      Med ét klik kan du overføre alle lejerens data, depositum og kontraktdetaljer til et nyt køretøj ved service eller nedbrud.
+                      Hvis et køretøj skal til service eller får et nedbrud, kan forhandleren med ét klik overføre alle lejerens data, depositum og kontraktdetaljer til et nyt køretøj. Det minimerer nedetid og maksimerer kundetilfredshed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Section */}
+            <div className="bg-card rounded-3xl p-8 sm:p-12 border border-border">
+              <h2 className="font-display text-3xl font-bold mb-4 text-center">
+                Sikkerhed og Tillid i Højsædet
+              </h2>
+              <p className="text-muted-foreground text-center mb-8">
+                På Lejio.dk er sikkerhed ikke et tilvalg, men en integreret del af platformen. Vi benytter avanceret brugerverificering for at sikre, at alle parter kan føle sig trygge.
+              </p>
+
+              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <div className="flex gap-4 items-start">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Star className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1">Bruger-rating</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Gennemsigtighed gennem ratings sikrer, at kun de bedste lejere og udlejere benytter platformen.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                    <CreditCard className="w-6 h-6 text-accent" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1">Sikker Betaling</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Alle transaktioner håndteres gennem krypterede betalingsveje, og vi tilbyder integreret depositumshåndtering, der beskytter udlejeren mod uforudsete udgifter.
                     </p>
                   </div>
                 </div>
