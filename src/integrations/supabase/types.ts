@@ -1224,6 +1224,53 @@ export type Database = {
           },
         ]
       }
+      deductible_insurance: {
+        Row: {
+          booking_id: string
+          created_at: string
+          daily_rate: number
+          days_covered: number
+          id: string
+          new_deductible: number
+          original_deductible: number
+          renter_id: string | null
+          status: string
+          total_amount: number
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          daily_rate?: number
+          days_covered: number
+          id?: string
+          new_deductible?: number
+          original_deductible?: number
+          renter_id?: string | null
+          status?: string
+          total_amount: number
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          daily_rate?: number
+          days_covered?: number
+          id?: string
+          new_deductible?: number
+          original_deductible?: number
+          renter_id?: string | null
+          status?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deductible_insurance_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposit_transactions: {
         Row: {
           amount: number
@@ -1440,6 +1487,91 @@ export type Database = {
           },
           {
             foreignKeyName: "facebook_posts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fines: {
+        Row: {
+          admin_fee: number
+          booking_id: string | null
+          created_at: string
+          description: string | null
+          file_url: string | null
+          fine_amount: number
+          fine_date: string
+          fine_type: string
+          id: string
+          lessor_id: string
+          paid_at: string | null
+          renter_email: string
+          renter_name: string | null
+          sent_to_renter_at: string | null
+          status: string
+          total_amount: number | null
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          admin_fee?: number
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          fine_amount: number
+          fine_date: string
+          fine_type?: string
+          id?: string
+          lessor_id: string
+          paid_at?: string | null
+          renter_email: string
+          renter_name?: string | null
+          sent_to_renter_at?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          admin_fee?: number
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          fine_amount?: number
+          fine_date?: string
+          fine_type?: string
+          id?: string
+          lessor_id?: string
+          paid_at?: string | null
+          renter_email?: string
+          renter_name?: string | null
+          sent_to_renter_at?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fines_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fines_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fines_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
@@ -2226,6 +2358,7 @@ export type Database = {
           created_at: string
           cvr_number: string | null
           email: string
+          fine_admin_fee: number | null
           fleet_commission_rate: number | null
           fleet_plan: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee: number | null
@@ -2276,6 +2409,7 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email: string
+          fine_admin_fee?: number | null
           fleet_commission_rate?: number | null
           fleet_plan?: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee?: number | null
@@ -2326,6 +2460,7 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email?: string
+          fine_admin_fee?: number | null
           fleet_commission_rate?: number | null
           fleet_plan?: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee?: number | null
@@ -2499,6 +2634,90 @@ export type Database = {
           },
         ]
       }
+      referral_codes: {
+        Row: {
+          available_credit: number
+          code: string
+          created_at: string
+          id: string
+          total_credit_earned: number
+          total_referrals: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_credit?: number
+          code: string
+          created_at?: string
+          id?: string
+          total_credit_earned?: number
+          total_referrals?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_credit?: number
+          code?: string
+          created_at?: string
+          id?: string
+          total_credit_earned?: number
+          total_referrals?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_redemptions: {
+        Row: {
+          booking_id: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          referral_code_id: string
+          referred_discount: number
+          referred_user_id: string
+          referrer_credit: number
+          status: string
+        }
+        Insert: {
+          booking_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code_id: string
+          referred_discount?: number
+          referred_user_id: string
+          referrer_credit?: number
+          status?: string
+        }
+        Update: {
+          booking_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code_id?: string
+          referred_discount?: number
+          referred_user_id?: string
+          referrer_credit?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_redemptions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_redemptions_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       renter_ratings: {
         Row: {
           booking_id: string
@@ -2658,6 +2877,79 @@ export type Database = {
           },
           {
             foreignKeyName: "seasonal_pricing_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_bookings: {
+        Row: {
+          actual_cost: number | null
+          completed_at: string | null
+          created_at: string
+          estimated_cost: number | null
+          id: string
+          lessor_id: string
+          preferred_date: string
+          preferred_time_slot: string | null
+          service_reminder_id: string | null
+          service_type: string
+          status: string
+          updated_at: string
+          vehicle_id: string
+          workshop_notes: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          completed_at?: string | null
+          created_at?: string
+          estimated_cost?: number | null
+          id?: string
+          lessor_id: string
+          preferred_date: string
+          preferred_time_slot?: string | null
+          service_reminder_id?: string | null
+          service_type: string
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+          workshop_notes?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          completed_at?: string | null
+          created_at?: string
+          estimated_cost?: number | null
+          id?: string
+          lessor_id?: string
+          preferred_date?: string
+          preferred_time_slot?: string | null
+          service_reminder_id?: string | null
+          service_type?: string
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+          workshop_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_bookings_service_reminder_id_fkey"
+            columns: ["service_reminder_id"]
+            isOneToOne: false
+            referencedRelation: "service_reminders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
@@ -3985,6 +4277,7 @@ export type Database = {
       generate_contract_number: { Args: never; Returns: string }
       generate_corporate_invoice_number: { Args: never; Returns: string }
       generate_invoice_number: { Args: never; Returns: string }
+      generate_referral_code: { Args: never; Returns: string }
       get_renter_rating_stats: {
         Args: { renter_email_input: string }
         Returns: {
