@@ -75,9 +75,9 @@ const About = () => {
                     </div>
                     <div className="text-center sm:text-left">
                       <h3 className="font-display text-2xl font-bold mb-1">Rasmus Damsgaard</h3>
-                      <p className="text-primary font-medium mb-4">Daglig Leder</p>
+                      <p className="text-primary font-medium mb-4">Co-founder & Daglig Leder</p>
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        Som daglig leder er det Rasmus, der har fingeren på pulsen i alle dele af forretningen. Han er garant for, at teknologien bag Lejio altid fungerer fejlfrit, så både udlejere og lejere får en problemfri oplevelse. Rasmus brænder for god kundeservice og står altid klar til at hjælpe vores brugere, hvis der opstår spørgsmål eller behov for support. Hos Lejio er hjælpen aldrig mere end et opkald eller en besked væk.
+                        Rasmus er medstifter af Lejio og står i spidsen for den daglige drift. Med en passion for teknologi og mobilitet har han været drivkraften bag platformens udvikling fra idé til virkelighed. Han er garant for, at teknologien altid fungerer fejlfrit, og brænder for at levere fremragende kundeservice. Rasmus tror på, at deleøkonomi er fremtiden – og arbejder hver dag på at gøre det nemt og trygt for danskerne at udleje og leje køretøjer. Hos Lejio er hjælpen aldrig mere end et opkald væk.
                       </p>
                     </div>
                   </div>

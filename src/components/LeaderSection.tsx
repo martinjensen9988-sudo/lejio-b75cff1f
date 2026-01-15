@@ -24,9 +24,9 @@ const LeaderSection = () => {
                 />
               </div>
               <h3 className="font-display text-2xl font-bold mb-1">Rasmus Damsgaard</h3>
-              <p className="text-primary font-medium mb-4">Daglig Leder</p>
+              <p className="text-primary font-medium mb-4">Co-founder & Daglig Leder</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Rasmus har fingeren på pulsen i alle dele af forretningen. Han sikrer, at teknologien bag Lejio altid fungerer fejlfrit, og brænder for god kundeservice. Hos Lejio er hjælpen aldrig mere end et opkald eller en besked væk.
+                Som medstifter og daglig leder er Rasmus hjertet bag Lejio. Han har været med fra dag ét og brænder for at skabe Danmarks mest brugervenlige udlejningsplatform. Med fokus på teknologi og kundeservice sikrer han, at både udlejere og lejere får en problemfri oplevelse. Hos Lejio er hjælpen aldrig mere end et opkald væk.
               </p>
             </div>
           </div>
