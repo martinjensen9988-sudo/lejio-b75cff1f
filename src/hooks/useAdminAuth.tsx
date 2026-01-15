@@ -72,8 +72,8 @@ export const useAdminAuth = () => {
           setIsSuperAdmin(false);
         }
         
-        // Only set loading false here if we're responding to a real auth change event
-        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        // Always set loading to false after processing any auth state change
+        if (mounted) {
           setIsLoading(false);
         }
       }
