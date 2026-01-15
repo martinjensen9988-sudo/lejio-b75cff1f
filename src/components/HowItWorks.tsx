@@ -35,7 +35,7 @@ const HowItWorks = () => {
                 step: 1, 
                 icon: Search, 
                 title: "Søg", 
-                desc: "Find biler i dit område. Filtrer på type, pris og dato.",
+                desc: "Find køretøjer i dit område. Filtrer på type, pris og dato.",
                 color: "bg-mint/20 text-mint",
                 borderColor: "border-mint/30"
               },
@@ -43,7 +43,7 @@ const HowItWorks = () => {
                 step: 2, 
                 icon: CreditCard, 
                 title: "Book & betal", 
-                desc: "Vælg bil, bekræft booking og betal sikkert online.",
+                desc: "Vælg køretøj, bekræft booking og betal sikkert online.",
                 color: "bg-secondary/20 text-secondary-foreground",
                 borderColor: "border-secondary/30"
               },
@@ -51,7 +51,7 @@ const HowItWorks = () => {
                 step: 3, 
                 icon: Sparkles, 
                 title: "Kør afsted!", 
-                desc: "Hent bilen, modtag kontrakten – og nyd turen!",
+                desc: "Hent køretøjet, modtag kontrakten – og nyd turen!",
                 color: "bg-lavender/30 text-lavender-foreground",
                 borderColor: "border-lavender/30"
               },
@@ -90,8 +90,8 @@ const HowItWorks = () => {
               { 
                 step: 1, 
                 emoji: "🚗",
-                title: "Opret din bil", 
-                desc: "Indtast nummerplade – vi henter data automatisk.",
+                title: "Opret dit køretøj", 
+                desc: "Indtast nummerplade – vi henter data automatisk. Biler, campingvogne, trailere.",
               },
               { 
                 step: 2, 

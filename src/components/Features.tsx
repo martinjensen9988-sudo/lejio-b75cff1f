@@ -16,7 +16,7 @@ const Features = () => {
             Vælg din <span className="text-gradient">vej</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Uanset om du søger en bil eller vil leje din ud – LEJIO gør det nemt og trygt.
+            Uanset om du søger et køretøj eller vil leje dit ud – LEJIO gør det nemt og trygt.
           </p>
         </div>
 
@@ -29,17 +29,17 @@ const Features = () => {
             </div>
             
             <h3 className="font-display text-2xl font-bold text-foreground mb-2">
-              Skal du på tur? 🚗
+              Skal du på tur? 🚗🏕️
             </h3>
             <p className="text-muted-foreground mb-6">
-              Find den perfekte bil i dit nabolag. Fra små bybiler til store flyttevogne – alt samlet ét sted.
+              Find det perfekte køretøj i dit nabolag. Fra små bybiler til campingvogne og trailere – alt samlet ét sted.
             </p>
 
             <div className="space-y-3 mb-8">
               {[
-                "Søg blandt hundredvis af biler",
-                "Private og professionelle udlejere",
-                "Instant booking på de fleste biler",
+                "Søg blandt hundredvis af køretøjer",
+                "Biler, campingvogne og trailere",
+                "Instant booking på de fleste køretøjer",
                 "Automatisk juridisk kontrakt",
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
@@ -50,7 +50,7 @@ const Features = () => {
             </div>
 
             <Button variant="default" size="lg" className="w-full group/btn">
-              Find en bil
+              Find køretøj
               <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
             </Button>
           </div>
@@ -62,18 +62,18 @@ const Features = () => {
             </div>
             
             <h3 className="font-display text-2xl font-bold text-foreground mb-2">
-              Har du en bil i indkørslen? 💰
+              Har du køretøjer der står stille? 💰
             </h3>
             <p className="text-muted-foreground mb-6">
-              Lad den tjene penge, når du ikke bruger den. Det er nemt, trygt – og du bestemmer selv prisen.
+              Lad din bil, campingvogn eller trailer tjene penge. Det er nemt, trygt – og du bestemmer selv prisen.
             </p>
 
             <div className="space-y-3 mb-8">
               {[
-                "Opret din bil på 2 minutter",
+                "Opret dit køretøj på 2 minutter",
                 "Du bestemmer pris og tilgængelighed",
                 "Vi håndterer betaling og kontrakt",
-                "Tjen op til 5.000 kr/md ekstra",
+                "Tjen op til 5.000+ kr/md ekstra",
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <span className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs">✓</span>

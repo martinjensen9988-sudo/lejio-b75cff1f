@@ -52,7 +52,7 @@ const Hero = () => {
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            Lej en bil fra naboer eller professionelle udlejere. Book på sekunder, 
+            Lej biler, campingvogne og trailere fra naboer eller professionelle udlejere. Book på sekunder, 
             få kontrakten med det samme – og kør afsted.
           </p>
 
@@ -63,7 +63,7 @@ const Hero = () => {
                 <MapPin className="w-5 h-5 text-mint shrink-0" />
                 <input 
                   type="text" 
-                  placeholder="Hvor skal du hente bilen?"
+                  placeholder="Hvor skal du hente køretøjet?"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
@@ -94,7 +94,7 @@ const Hero = () => {
               </Popover>
               <Button variant="hero" size="xl" className="md:px-8 group" onClick={handleSearch}>
                 <Search className="w-5 h-5" />
-                <span className="hidden sm:inline">Find din bil nu</span>
+                <span className="hidden sm:inline">Find køretøj nu</span>
                 <span className="sm:hidden">Søg</span>
               </Button>
             </div>
@@ -120,8 +120,8 @@ const Hero = () => {
           <HeroAnimations />
         </div>
 
-        {/* Car cards floating below */}
-        <div className="mt-8 flex justify-center gap-4 md:gap-8 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+        {/* Vehicle cards floating below */}
+        <div className="mt-8 flex justify-center gap-4 md:gap-8 animate-fade-in flex-wrap" style={{ animationDelay: '0.8s' }}>
           <div className="bg-card rounded-2xl p-3 md:p-4 shadow-lg border-2 border-mint/30 animate-float" style={{ animationDelay: '0s' }}>
             <div className="w-16 h-12 md:w-20 md:h-14 bg-mint/20 rounded-xl flex items-center justify-center mb-2">
               <span className="text-xl md:text-2xl">🚗</span>
@@ -131,17 +131,24 @@ const Hero = () => {
           </div>
           <div className="bg-card rounded-2xl p-3 md:p-4 shadow-lg border-2 border-accent/30 animate-float" style={{ animationDelay: '0.5s' }}>
             <div className="w-16 h-12 md:w-20 md:h-14 bg-accent/20 rounded-xl flex items-center justify-center mb-2">
-              <span className="text-xl md:text-2xl">🚙</span>
+              <span className="text-xl md:text-2xl">🏕️</span>
             </div>
-            <div className="text-xs font-bold text-foreground">Tesla Model 3</div>
-            <div className="text-xs text-muted-foreground">Fra 599 kr/dag</div>
+            <div className="text-xs font-bold text-foreground">Campingvogn</div>
+            <div className="text-xs text-muted-foreground">Fra 399 kr/dag</div>
           </div>
           <div className="hidden sm:block bg-card rounded-2xl p-3 md:p-4 shadow-lg border-2 border-lavender/30 animate-float" style={{ animationDelay: '1s' }}>
             <div className="w-16 h-12 md:w-20 md:h-14 bg-lavender/20 rounded-xl flex items-center justify-center mb-2">
               <span className="text-xl md:text-2xl">🚐</span>
             </div>
-            <div className="text-xs font-bold text-foreground">VW Transporter</div>
-            <div className="text-xs text-muted-foreground">Fra 499 kr/dag</div>
+            <div className="text-xs font-bold text-foreground">Autocamper</div>
+            <div className="text-xs text-muted-foreground">Fra 699 kr/dag</div>
+          </div>
+          <div className="hidden md:block bg-card rounded-2xl p-3 md:p-4 shadow-lg border-2 border-secondary/30 animate-float" style={{ animationDelay: '1.5s' }}>
+            <div className="w-16 h-12 md:w-20 md:h-14 bg-secondary/20 rounded-xl flex items-center justify-center mb-2">
+              <span className="text-xl md:text-2xl">🚚</span>
+            </div>
+            <div className="text-xs font-bold text-foreground">Trailer</div>
+            <div className="text-xs text-muted-foreground">Fra 199 kr/dag</div>
           </div>
         </div>
       </div>

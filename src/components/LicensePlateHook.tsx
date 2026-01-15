@@ -43,10 +43,10 @@ const LicensePlateHook = () => {
         <div className="max-w-2xl mx-auto text-center">
           <span className="text-4xl mb-4 block animate-bounce-soft">🎰</span>
           <h2 className="font-display text-4xl sm:text-5xl font-black mb-4 animate-slide-up">
-            Hvad er din bil <span className="text-gradient-warm">værd?</span>
+            Hvad er dit køretøj <span className="text-gradient-warm">værd?</span>
           </h2>
           <p className="text-lg text-muted-foreground mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Indtast din nummerplade og se, hvad du kan tjene ved at leje din bil ud.
+            Indtast nummerplade og se, hvad du kan tjene ved at leje din bil, campingvogn eller trailer ud.
           </p>
 
           {/* License Plate Input - Designed to look like a real Danish plate */}
@@ -96,7 +96,7 @@ const LicensePlateHook = () => {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Henter bildata...
+                Henter køretøjsdata...
               </>
             ) : vehicle ? (
               <>
@@ -105,14 +105,14 @@ const LicensePlateHook = () => {
               </>
             ) : (
               <>
-                Find min bil
+                Find mit køretøj
                 <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
               </>
             )}
           </Button>
 
           <p className="text-sm text-muted-foreground mt-6 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            Vi henter bildata automatisk via Motorregisteret. Ingen binding.
+            Vi henter køretøjsdata automatisk via Motorregisteret. Ingen binding.
           </p>
         </div>
       </div>
