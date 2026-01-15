@@ -269,7 +269,6 @@ const Settings = () => {
     } finally {
       setSaving(false);
     }
-    }
   };
 
   if (authLoading) {
