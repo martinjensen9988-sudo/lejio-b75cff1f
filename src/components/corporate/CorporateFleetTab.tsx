@@ -1,16 +1,28 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Car, MapPin, Gauge, Fuel, Calendar, Plus } from 'lucide-react';
 import { CorporateFleetVehicle, CorporateDepartment } from '@/hooks/useCorporateFleet';
+import AddFleetVehicleDialog from './AddFleetVehicleDialog';
 
 interface CorporateFleetTabProps {
   vehicles: CorporateFleetVehicle[];
   departments: CorporateDepartment[];
   isAdmin: boolean;
+  corporateAccountId?: string;
+  onRefresh?: () => void;
 }
 
-const CorporateFleetTab = ({ vehicles, departments, isAdmin }: CorporateFleetTabProps) => {
+const CorporateFleetTab = ({ 
+  vehicles, 
+  departments, 
+  isAdmin, 
+  corporateAccountId,
+  onRefresh 
+}: CorporateFleetTabProps) => {
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
   const getDepartmentName = (departmentId: string | null) => {
     if (!departmentId) return 'Ikke tildelt';
     const dept = departments.find(d => d.id === departmentId);
@@ -26,8 +38,8 @@ const CorporateFleetTab = ({ vehicles, departments, isAdmin }: CorporateFleetTab
             {vehicles.length} køretøjer tilgængelige for booking
           </p>
         </div>
-        {isAdmin && (
-          <Button>
+        {isAdmin && corporateAccountId && (
+          <Button onClick={() => setShowAddDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Tilføj køretøj
           </Button>
@@ -43,8 +55,14 @@ const CorporateFleetTab = ({ vehicles, departments, isAdmin }: CorporateFleetTab
             <h3 className="text-lg font-medium mb-2">Ingen køretøjer endnu</h3>
             <p className="text-muted-foreground text-center max-w-md">
               Der er endnu ikke tilknyttet nogen køretøjer til virksomhedens flåde.
-              {isAdmin && ' Kontakt LEJIO for at tilføje køretøjer.'}
+              {isAdmin && ' Klik på "Tilføj køretøj" for at tilføje et.'}
             </p>
+            {isAdmin && corporateAccountId && (
+              <Button className="mt-4" onClick={() => setShowAddDialog(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Tilføj første køretøj
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -93,6 +111,20 @@ const CorporateFleetTab = ({ vehicles, departments, isAdmin }: CorporateFleetTab
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Add Fleet Vehicle Dialog */}
+      {corporateAccountId && (
+        <AddFleetVehicleDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          corporateAccountId={corporateAccountId}
+          departments={departments}
+          onSuccess={() => {
+            setShowAddDialog(false);
+            onRefresh?.();
+          }}
+        />
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, ChevronDown, Search, MessageCircle, FileText, Settings } from "lucide-react";
+import { Menu, X, LogOut, User, ChevronDown, Search, MessageCircle, FileText, Settings, Building2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -107,6 +107,10 @@ const Navigation = () => {
                     <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
                       <Settings className="w-4 h-4 mr-2" />
                       Indstillinger
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/corporate")} className="cursor-pointer">
+                      <Building2 className="w-4 h-4 mr-2" />
+                      Virksomhed
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/faq")} className="cursor-pointer">
                       <FileText className="w-4 h-4 mr-2" />
