@@ -297,6 +297,10 @@ const CorporateDashboard = () => {
               bookings={bookings}
               employees={employees}
               vehicles={fleetVehicles}
+              corporateAccountId={corporateAccount?.id}
+              currentEmployeeId={currentEmployee?.id}
+              currentDepartmentId={currentEmployee?.department_id}
+              onRefresh={refetch}
             />
           </TabsContent>
 
@@ -310,7 +314,12 @@ const CorporateDashboard = () => {
               </TabsContent>
 
               <TabsContent value="invoices">
-                <CorporateInvoicesTab invoices={invoices} />
+                <CorporateInvoicesTab 
+                  invoices={invoices} 
+                  corporateAccountId={corporateAccount?.id}
+                  isAdmin={isAdmin}
+                  onRefresh={refetch}
+                />
               </TabsContent>
 
               <TabsContent value="analytics">

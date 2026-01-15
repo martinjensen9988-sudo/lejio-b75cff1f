@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,22 +10,48 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { FileText, Download, Eye, Calendar, CreditCard } from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { FileText, Download, Eye, Calendar, CreditCard, Plus, Loader2 } from 'lucide-react';
 import { CorporateInvoice } from '@/hooks/useCorporateFleet';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { da } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface CorporateInvoicesTabProps {
   invoices: CorporateInvoice[];
+  corporateAccountId?: string;
+  isAdmin?: boolean;
+  onRefresh?: () => void;
 }
 
-const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
+const CorporateInvoicesTab = ({ 
+  invoices, 
+  corporateAccountId,
+  isAdmin = false,
+  onRefresh 
+}: CorporateInvoicesTabProps) => {
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const lastMonth = subMonths(new Date(), 1);
+    return format(lastMonth, 'yyyy-MM');
+  });
+
   const getStatusBadge = (status: CorporateInvoice['status']) => {
     switch (status) {
       case 'paid':
-        return <Badge className="bg-green-100 text-green-800">Betalt</Badge>;
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Betalt</Badge>;
       case 'issued':
-        return <Badge className="bg-blue-100 text-blue-800">Udstedt</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Udstedt</Badge>;
       case 'overdue':
         return <Badge variant="destructive">Forfalden</Badge>;
       case 'draft':
@@ -36,9 +63,46 @@ const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
     }
   };
 
+  const handleGenerateInvoice = async () => {
+    if (!corporateAccountId) return;
+
+    setGenerating(true);
+    try {
+      const periodStart = startOfMonth(new Date(selectedMonth + '-01'));
+      const periodEnd = endOfMonth(periodStart);
+
+      const { data, error } = await supabase.functions.invoke('generate-corporate-invoice', {
+        body: {
+          corporate_account_id: corporateAccountId,
+          period_start: format(periodStart, 'yyyy-MM-dd'),
+          period_end: format(periodEnd, 'yyyy-MM-dd'),
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success(`Faktura ${data.invoice.invoice_number} genereret!`);
+      setShowGenerateDialog(false);
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      toast.error('Kunne ikke generere faktura');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const unpaidTotal = invoices
     .filter(inv => inv.status === 'issued' || inv.status === 'overdue')
     .reduce((sum, inv) => sum + inv.total_amount, 0);
+
+  const paidTotal = invoices
+    .filter(inv => inv.status === 'paid')
+    .reduce((sum, inv) => sum + inv.total_amount, 0);
+
+  // Get next invoice date (1st of next month)
+  const nextInvoiceDate = startOfMonth(new Date());
+  nextInvoiceDate.setMonth(nextInvoiceDate.getMonth() + 1);
 
   return (
     <div className="space-y-6">
@@ -49,6 +113,12 @@ const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
             {invoices.length} fakturaer i alt
           </p>
         </div>
+        {isAdmin && corporateAccountId && (
+          <Button onClick={() => setShowGenerateDialog(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Generer faktura
+          </Button>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -60,8 +130,8 @@ const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
                 <FileText className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total fakturaer</p>
-                <p className="text-2xl font-bold">{invoices.length}</p>
+                <p className="text-sm text-muted-foreground">Total betalt</p>
+                <p className="text-2xl font-bold">{paidTotal.toLocaleString('da-DK')} kr</p>
               </div>
             </div>
           </CardContent>
@@ -89,7 +159,7 @@ const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Næste faktura</p>
-                <p className="text-2xl font-bold">1. feb</p>
+                <p className="text-2xl font-bold">{format(nextInvoiceDate, 'd. MMM', { locale: da })}</p>
               </div>
             </div>
           </CardContent>
@@ -111,7 +181,10 @@ const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
               </div>
               <h3 className="text-lg font-medium mb-2">Ingen fakturaer endnu</h3>
               <p className="text-muted-foreground">
-                Den første faktura genereres ved udgangen af den første måned
+                {isAdmin 
+                  ? 'Klik på "Generer faktura" for at oprette den første faktura'
+                  : 'Den første faktura genereres ved udgangen af den første måned'
+                }
               </p>
             </div>
           ) : (
@@ -149,8 +222,10 @@ const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
                             <Eye className="w-4 h-4" />
                           </Button>
                           {invoice.pdf_url && (
-                            <Button variant="ghost" size="sm">
-                              <Download className="w-4 h-4" />
+                            <Button variant="ghost" size="sm" asChild>
+                              <a href={invoice.pdf_url} target="_blank" rel="noopener noreferrer">
+                                <Download className="w-4 h-4" />
+                              </a>
                             </Button>
                           )}
                         </div>
@@ -163,6 +238,49 @@ const CorporateInvoicesTab = ({ invoices }: CorporateInvoicesTabProps) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Generate Invoice Dialog */}
+      <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Generer månedsfaktura</DialogTitle>
+            <DialogDescription>
+              Vælg den måned du vil generere faktura for
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label>Fakturaperiode</Label>
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="w-full mt-2 px-3 py-2 border rounded-md bg-background"
+              max={format(subMonths(new Date(), 1), 'yyyy-MM')}
+            />
+            <p className="text-sm text-muted-foreground mt-2">
+              Fakturaen vil inkludere alle bookinger i den valgte måned
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGenerateDialog(false)}>
+              Annuller
+            </Button>
+            <Button onClick={handleGenerateInvoice} disabled={generating}>
+              {generating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Genererer...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generer faktura
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
