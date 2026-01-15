@@ -1192,6 +1192,63 @@ export type Database = {
           },
         ]
       }
+      inspection_reminders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          due_date: string
+          id: string
+          inspection_type: string
+          is_completed: boolean
+          last_inspection_date: string | null
+          notes: string | null
+          reminder_sent_at: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          inspection_type?: string
+          is_completed?: boolean
+          last_inspection_date?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          inspection_type?: string
+          is_completed?: boolean
+          last_inspection_date?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_reminders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspection_reminders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           booking_id: string | null
@@ -2307,6 +2364,72 @@ export type Database = {
           },
           {
             foreignKeyName: "subscriptions_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tire_sets: {
+        Row: {
+          brand: string | null
+          created_at: string
+          dot_code: string | null
+          id: string
+          is_mounted: boolean
+          model: string | null
+          notes: string | null
+          purchase_date: string | null
+          size: string
+          storage_location: string | null
+          tire_type: string
+          tread_depth_mm: number | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          dot_code?: string | null
+          id?: string
+          is_mounted?: boolean
+          model?: string | null
+          notes?: string | null
+          purchase_date?: string | null
+          size: string
+          storage_location?: string | null
+          tire_type: string
+          tread_depth_mm?: number | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          dot_code?: string | null
+          id?: string
+          is_mounted?: boolean
+          model?: string | null
+          notes?: string | null
+          purchase_date?: string | null
+          size?: string
+          storage_location?: string | null
+          tire_type?: string
+          tread_depth_mm?: number | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tire_sets_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tire_sets_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
