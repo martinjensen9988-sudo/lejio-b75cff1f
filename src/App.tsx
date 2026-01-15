@@ -22,6 +22,7 @@ import GpsTracking from "./pages/GpsTracking";
 import Features from "./pages/Features";
 import CorporateDashboard from "./pages/CorporateDashboard";
 import PrivateFleet from "./pages/PrivateFleet";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/funktioner" element={<Features />} />
             <Route path="/corporate" element={<CorporateDashboard />} />
             <Route path="/privat-fleet" element={<PrivateFleet />} />
+            <Route path="/om-os" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
