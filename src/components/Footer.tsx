@@ -115,6 +115,7 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
               © {new Date().getFullYear()} LEJIO. Lavet med <Heart className="w-4 h-4 text-accent" /> i Danmark
             </p>
             <div className="flex gap-8 text-sm text-background/50">
+              <a href="/om-os" className="hover:text-primary transition-colors">Om os</a>
               <a href="/privatlivspolitik" className="hover:text-primary transition-colors">Privatlivspolitik</a>
               <a href="/handelsbetingelser" className="hover:text-primary transition-colors">Handelsbetingelser</a>
             </div>
