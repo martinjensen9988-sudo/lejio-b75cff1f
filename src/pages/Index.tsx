@@ -5,7 +5,6 @@ import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import LicensePlateHook from "@/components/LicensePlateHook";
 import HowItWorks from "@/components/HowItWorks";
-import PrivateFleetExplainer from "@/components/PrivateFleetExplainer";
 import Pricing from "@/components/Pricing";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -44,7 +43,6 @@ const Index = () => {
         <Features />
         <LicensePlateHook />
         <HowItWorks />
-        <PrivateFleetExplainer />
         <Pricing />
       </main>
       <Footer />
