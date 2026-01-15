@@ -35,8 +35,8 @@ const PrivateFleetExplainer = () => {
     {
       number: "3",
       icon: FileCheck,
-      title: "Kontrakt & forsikring",
-      description: "Vi genererer automatisk lejekontrakt med alle juridiske detaljer og sikrer korrekt forsikringsdækning.",
+      title: "Kontrakt & dokumentation",
+      description: "Vi genererer automatisk lejekontrakt med alle juridiske detaljer. Du sørger selv for din bilforsikring.",
       details: [
         "Professionel lejekontrakt genereres automatisk",
         "Lejers kørekort og ID verificeres",
@@ -272,7 +272,7 @@ const PrivateFleetExplainer = () => {
             {[
               {
                 q: "Hvem står for forsikringen?",
-                a: "Din bil er dækket af din egen forsikring. Lejeren accepterer i kontrakten at dække selvrisiko ved skader. Vi sørger for at alle lejere er over 21 år og har gyldigt kørekort."
+                a: "Du står selv for forsikringen af din bil – det er dit ansvar som ejer. Sørg for at din bilforsikring dækker udlejning til tredjemand. Lejeren accepterer i kontrakten at dække selvrisiko ved skader."
               },
               {
                 q: "Hvordan får jeg mine penge?",
