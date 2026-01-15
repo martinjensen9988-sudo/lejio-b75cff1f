@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
-import JanuaryPromoBanner from "@/components/JanuaryPromoBanner";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import LicensePlateHook from "@/components/LicensePlateHook";
@@ -41,7 +40,6 @@ const Index = () => {
       <Navigation />
       <main>
         <Hero />
-        <JanuaryPromoBanner />
         <Features />
         <LicensePlateHook />
         <HowItWorks />
