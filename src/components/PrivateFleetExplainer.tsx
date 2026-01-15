@@ -288,9 +288,11 @@ const PrivateFleetExplainer = () => {
             })}
           </div>
           
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            * Priserne er vejledende og afhænger af bilens stand, årgang og udstyr.
-          </p>
+          <div className="text-center mt-6 p-4 rounded-xl bg-muted/50 border border-border">
+            <p className="text-sm text-muted-foreground">
+              ⚠️ <strong>Bemærk:</strong> Priserne er vejledende. Den faktiske pris kan være <strong>højere eller lavere</strong> afhængigt af bilens stand, årgang, kilometertal og udstyr.
+            </p>
+          </div>
         </div>
 
         {/* FAQ */}
