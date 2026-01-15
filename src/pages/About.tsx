@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Car, Caravan, Truck, Scan, FileCheck, Shield, Wrench, RefreshCw, Leaf, Star, CreditCard, User } from 'lucide-react';
+import { ArrowLeft, Car, Caravan, Truck, Scan, FileCheck, Shield, Wrench, RefreshCw, Leaf, Star, CreditCard } from 'lucide-react';
+import rasmusImage from '@/assets/rasmus-damsgaard.jpg';
 
 const About = () => {
   const navigate = useNavigate();
@@ -65,8 +66,12 @@ const About = () => {
               <div className="max-w-2xl mx-auto">
                 <div className="bg-card rounded-2xl p-8 border border-border shadow-lg">
                   <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
-                      <User className="w-12 h-12 text-white" />
+                    <div className="w-28 h-28 rounded-full overflow-hidden shrink-0 ring-4 ring-primary/20">
+                      <img 
+                        src={rasmusImage} 
+                        alt="Rasmus Damsgaard - Daglig Leder" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="text-center sm:text-left">
                       <h3 className="font-display text-2xl font-bold mb-1">Rasmus Damsgaard</h3>

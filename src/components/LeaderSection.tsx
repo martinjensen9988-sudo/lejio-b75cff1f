@@ -1,4 +1,4 @@
-import { User } from 'lucide-react';
+import rasmusImage from '@/assets/rasmus-damsgaard.jpg';
 
 const LeaderSection = () => {
   return (
@@ -16,8 +16,12 @@ const LeaderSection = () => {
         <div className="max-w-xl mx-auto">
           <div className="bg-card rounded-2xl p-8 border border-border shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6">
-                <User className="w-12 h-12 text-white" />
+              <div className="w-28 h-28 rounded-full overflow-hidden mb-6 ring-4 ring-primary/20">
+                <img 
+                  src={rasmusImage} 
+                  alt="Rasmus Damsgaard - Daglig Leder" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h3 className="font-display text-2xl font-bold mb-1">Rasmus Damsgaard</h3>
               <p className="text-primary font-medium mb-4">Daglig Leder</p>
