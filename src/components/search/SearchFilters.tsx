@@ -1,4 +1,4 @@
-import { Calendar, Fuel, Clock, Car, Truck, Tent, Weight, Users, Ruler } from "lucide-react";
+import { Calendar, Fuel, Clock, Weight, Users, Ruler, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, addDays, addWeeks, addMonths } from "date-fns";
 import { da } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { SearchFiltersState, RentalPeriodType, VehicleTypeFilter } from "@/pages/Search";
+import { SearchFiltersState, RentalPeriodType } from "@/pages/Search";
 
 interface SearchFiltersProps {
   filters: SearchFiltersState;
@@ -40,7 +40,6 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
     setFilters((prev) => {
       const newFilters = { ...prev, periodType: type, periodCount: count };
       
-      // Auto-calculate end date based on period type and count
       if (prev.startDate) {
         let endDate: Date;
         switch (type) {
@@ -100,66 +99,21 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
   };
 
   return (
-    <div className="bg-card border-b border-border py-4 px-4 md:px-6">
+    <div className="py-6 px-6">
       <div className="container mx-auto">
-        <div className="flex flex-wrap gap-4 items-end">
-          {/* Vehicle Type - Primary Filter */}
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Køretøjstype</Label>
-            <Select
-              value={filters.vehicleType}
-              onValueChange={(value: VehicleTypeFilter) => 
-                setFilters((prev) => ({ ...prev, vehicleType: value, trailerType: 'all' }))
-              }
-            >
-              <SelectTrigger className="w-[160px]">
-                {filters.vehicleType === 'bil' && <Car className="mr-2 h-4 w-4" />}
-                {filters.vehicleType === 'trailer' && <Truck className="mr-2 h-4 w-4" />}
-                {filters.vehicleType === 'campingvogn' && <Tent className="mr-2 h-4 w-4" />}
-                {filters.vehicleType === 'all' && <Car className="mr-2 h-4 w-4" />}
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  <div className="flex items-center gap-2">
-                    <Car className="h-4 w-4" />
-                    Alle typer
-                  </div>
-                </SelectItem>
-                <SelectItem value="bil">
-                  <div className="flex items-center gap-2">
-                    <Car className="h-4 w-4" />
-                    Biler
-                  </div>
-                </SelectItem>
-                <SelectItem value="trailer">
-                  <div className="flex items-center gap-2">
-                    <Truck className="h-4 w-4" />
-                    Trailere
-                  </div>
-                </SelectItem>
-                <SelectItem value="campingvogn">
-                  <div className="flex items-center gap-2">
-                    <Tent className="h-4 w-4" />
-                    Campingvogne
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {/* Trailer-specific: Type filter */}
           {filters.vehicleType === 'trailer' && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Trailer-type</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">Trailer-type</Label>
               <Select
                 value={filters.trailerType || 'all'}
                 onValueChange={(value) => 
                   setFilters((prev) => ({ ...prev, trailerType: value }))
                 }
               >
-                <SelectTrigger className="w-[160px]">
-                  <Ruler className="mr-2 h-4 w-4" />
+                <SelectTrigger className="bg-card">
+                  <Ruler className="mr-2 h-4 w-4 text-muted-foreground" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -175,8 +129,8 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
 
           {/* Trailer/Campingvogn: Max Weight filter */}
           {(filters.vehicleType === 'trailer' || filters.vehicleType === 'campingvogn') && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Max totalvægt (kg)</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">Max totalvægt (kg)</Label>
               <div className="relative">
                 <Weight className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -188,7 +142,7 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
                       maxWeight: Number(e.target.value) || undefined,
                     }))
                   }
-                  className="w-28 pl-9"
+                  className="pl-10 bg-card"
                   placeholder="750"
                 />
               </div>
@@ -197,8 +151,8 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
 
           {/* Campingvogn: Sleeping capacity filter */}
           {filters.vehicleType === 'campingvogn' && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Min. sovepladser</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">Min. sovepladser</Label>
               <div className="relative">
                 <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -212,7 +166,7 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
                       minSleepingCapacity: Number(e.target.value) || undefined,
                     }))
                   }
-                  className="w-24 pl-9"
+                  className="pl-10 bg-card"
                   placeholder="2"
                 />
               </div>
@@ -220,14 +174,14 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
           )}
 
           {/* Rental Period Type */}
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Lejetype</Label>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Lejetype</Label>
             <Select
               value={filters.periodType}
               onValueChange={(value: RentalPeriodType) => handlePeriodChange(value, filters.periodCount)}
             >
-              <SelectTrigger className="w-[130px]">
-                <Clock className="mr-2 h-4 w-4" />
+              <SelectTrigger className="bg-card">
+                <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -239,8 +193,8 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
           </div>
 
           {/* Period Count */}
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">
               Antal {filters.periodType === 'daily' ? 'dage' : filters.periodType === 'weekly' ? 'uger' : 'måneder'}
             </Label>
             <Input
@@ -249,22 +203,22 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
               max={filters.periodType === 'monthly' ? 12 : filters.periodType === 'weekly' ? 52 : 365}
               value={filters.periodCount}
               onChange={(e) => handlePeriodChange(filters.periodType, Math.max(1, Number(e.target.value) || 1))}
-              className="w-20"
+              className="bg-card"
             />
           </div>
 
           {/* Start Date */}
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Startdato</Label>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Startdato</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-[140px] justify-start text-left font-normal"
+                  className="w-full justify-start text-left font-normal bg-card"
                 >
-                  <Calendar className="mr-2 h-4 w-4" />
+                  <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
                   {filters.startDate ? (
-                    format(filters.startDate, "dd. MMM", { locale: da })
+                    format(filters.startDate, "dd. MMM yyyy", { locale: da })
                   ) : (
                     <span className="text-muted-foreground">Vælg dato</span>
                   )}
@@ -284,69 +238,70 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
           </div>
 
           {/* End Date Display */}
-          {filters.endDate && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Slutdato</Label>
-              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 text-sm flex items-center">
-                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                {format(filters.endDate, "dd. MMM yyyy", { locale: da })}
-              </div>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Slutdato</Label>
+            <div className="h-10 px-3 py-2 rounded-md border border-input bg-card text-sm flex items-center">
+              <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+              {filters.endDate ? (
+                format(filters.endDate, "dd. MMM yyyy", { locale: da })
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Price Range */}
-          <div className="flex gap-2">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Min pris/dag</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kr</span>
-                <Input
-                  type="number"
-                  value={filters.priceMin}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      priceMin: Number(e.target.value) || 0,
-                    }))
-                  }
-                  className="w-28 pl-9"
-                  placeholder="0"
-                />
-              </div>
+          {/* Min Price */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Min pris/dag</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kr</span>
+              <Input
+                type="number"
+                value={filters.priceMin}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    priceMin: Number(e.target.value) || 0,
+                  }))
+                }
+                className="pl-10 bg-card"
+                placeholder="0"
+              />
             </div>
+          </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Max pris/dag</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kr</span>
-                <Input
-                  type="number"
-                  value={filters.priceMax}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      priceMax: Number(e.target.value) || 10000,
-                    }))
-                  }
-                  className="w-28 pl-9"
-                  placeholder="5000"
-                />
-              </div>
+          {/* Max Price */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Max pris/dag</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kr</span>
+              <Input
+                type="number"
+                value={filters.priceMax}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    priceMax: Number(e.target.value) || 10000,
+                  }))
+                }
+                className="pl-10 bg-card"
+                placeholder="5000"
+              />
             </div>
           </div>
 
           {/* Fuel Type - Only for Cars */}
           {filters.vehicleType === 'bil' && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Brændstof</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">Brændstof</Label>
               <Select
                 value={filters.fuelType}
                 onValueChange={(value) =>
                   setFilters((prev) => ({ ...prev, fuelType: value }))
                 }
               >
-                <SelectTrigger className="w-[140px]">
-                  <Fuel className="mr-2 h-4 w-4" />
+                <SelectTrigger className="bg-card">
+                  <Fuel className="mr-2 h-4 w-4 text-muted-foreground" />
                   <SelectValue placeholder="Alle typer" />
                 </SelectTrigger>
                 <SelectContent>
@@ -361,14 +316,17 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
           )}
 
           {/* Reset Filters */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={resetFilters}
-            className="text-muted-foreground"
-          >
-            Nulstil filtre
-          </Button>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-transparent">Reset</Label>
+            <Button
+              variant="ghost"
+              onClick={resetFilters}
+              className="w-full text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Nulstil
+            </Button>
+          </div>
         </div>
       </div>
     </div>

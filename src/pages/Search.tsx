@@ -6,7 +6,7 @@ import VehicleSearchCard from "@/components/search/VehicleSearchCard";
 import SearchMap from "@/components/search/SearchMap";
 import { VehicleDetailModal } from "@/components/search/VehicleDetailModal";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent } from "lucide-react";
+import { Loader2, Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -119,15 +119,18 @@ export interface SearchFiltersState {
   minSleepingCapacity?: number;
 }
 
+type ViewMode = 'grid' | 'list' | 'map';
+
 const Search = () => {
   const [vehicles, setVehicles] = useState<SearchVehicle[]>([]);
   const [filteredVehicles, setFilteredVehicles] = useState<SearchVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
   const [detailVehicle, setDetailVehicle] = useState<SearchVehicle | null>(null);
-  const [showMap, setShowMap] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('date_desc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<SearchFiltersState>({
     priceMin: 0,
     priceMax: 5000,
@@ -166,7 +169,6 @@ const Search = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true);
-      // Use public view that only exposes non-sensitive fields
       const { data, error } = await supabase
         .from("vehicles_public")
         .select("*");
@@ -177,13 +179,10 @@ const Search = () => {
         return;
       }
 
-      // Map database coordinates to lat/lng for map, with fallback for vehicles without coordinates
       const vehiclesWithLocations = (data || []).map((vehicle) => {
-        // Default location values
         let lat = vehicle.latitude || 55.6761;
         let lng = vehicle.longitude || 12.5683;
         
-        // Fallback: generate location based on postal code if no coordinates
         if (!vehicle.latitude || !vehicle.longitude) {
           const postalCode = vehicle.location_postal_code;
           if (postalCode) {
@@ -245,12 +244,10 @@ const Search = () => {
   useEffect(() => {
     let result = [...vehicles];
 
-    // Vehicle type filter
     if (filters.vehicleType !== "all") {
       result = result.filter((v) => v.vehicle_type === filters.vehicleType);
     }
 
-    // Search query filter (make/model)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       result = result.filter((v) => {
@@ -261,18 +258,15 @@ const Search = () => {
       });
     }
 
-    // Price filter
     result = result.filter((v) => {
       const price = v.daily_price || 0;
       return price >= filters.priceMin && price <= filters.priceMax;
     });
 
-    // Weight filter for trailers/campingvogne
     if (filters.maxWeight && (filters.vehicleType === 'trailer' || filters.vehicleType === 'campingvogn')) {
       result = result.filter((v) => !v.total_weight || v.total_weight <= filters.maxWeight!);
     }
 
-    // Sleeping capacity filter for campingvogne
     if (filters.minSleepingCapacity && filters.vehicleType === 'campingvogn') {
       const minCapacity = filters.minSleepingCapacity;
       result = result.filter((v) => {
@@ -281,7 +275,6 @@ const Search = () => {
       });
     }
 
-    // Trailer type filter
     if (filters.trailerType && filters.trailerType !== 'all' && filters.vehicleType === 'trailer') {
       result = result.filter((v) => v.trailer_type === filters.trailerType);
     }
@@ -289,7 +282,6 @@ const Search = () => {
     setFilteredVehicles(result);
   }, [filters, vehicles, searchQuery]);
 
-  // Get vehicle type label and count
   const getVehicleTypeLabel = () => {
     switch (filters.vehicleType) {
       case 'bil': return 'biler';
@@ -299,141 +291,257 @@ const Search = () => {
     }
   };
 
+  const vehicleTypeButtons = [
+    { value: 'all' as VehicleTypeFilter, label: 'Alle', icon: Sparkles, count: vehicles.length },
+    { value: 'bil' as VehicleTypeFilter, label: 'Biler', icon: Car, count: vehicles.filter(v => v.vehicle_type === 'bil').length },
+    { value: 'trailer' as VehicleTypeFilter, label: 'Trailere', icon: Truck, count: vehicles.filter(v => v.vehicle_type === 'trailer').length },
+    { value: 'campingvogn' as VehicleTypeFilter, label: 'Campingvogne', icon: Tent, count: vehicles.filter(v => v.vehicle_type === 'campingvogn').length },
+  ];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       
       <main className="pt-20">
-        {/* Search Header */}
-        <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 py-8 px-6">
-          <div className="container mx-auto">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Find dit næste køretøj
-            </h1>
-            <p className="text-muted-foreground">
-              {filteredVehicles.length} {getVehicleTypeLabel()} tilgængelige i Danmark
-            </p>
-          </div>
-        </div>
+        {/* Hero Header */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-mint/10" />
+          <div className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-primary rounded-full blur-[100px] opacity-10" />
+          <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-accent rounded-full blur-[80px] opacity-10" />
+          
+          <div className="container mx-auto px-6 py-12 relative z-10">
+            <div className="max-w-4xl">
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black mb-4 animate-slide-up">
+                Find dit{" "}
+                <span className="bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent">
+                  perfekte køretøj
+                </span>
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                {filteredVehicles.length} {getVehicleTypeLabel()} tilgængelige i hele Danmark
+              </p>
 
-        {/* Filters */}
-        <SearchFilters filters={filters} setFilters={setFilters} />
-
-        {/* Toggle Map/List on mobile */}
-        <div className="md:hidden px-4 py-3 border-b border-border">
-          <div className="flex gap-2">
-            <Button
-              variant={showMap ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowMap(true)}
-              className="flex-1"
-            >
-              <MapPin className="w-4 h-4 mr-2" />
-              Kort
-            </Button>
-            <Button
-              variant={!showMap ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowMap(false)}
-              className="flex-1"
-            >
-              <Car className="w-4 h-4 mr-2" />
-              Liste
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="container mx-auto px-4 py-6">
-          {loading ? (
-            <div className="flex items-center justify-center h-96">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="flex flex-col md:flex-row gap-6">
-              {/* Vehicle List - Shows by default */}
-              <div className={`${!showMap ? 'block' : 'hidden'} md:block ${showMap ? 'md:w-1/2 lg:w-2/5' : 'md:w-full'}`}>
-                <div className="flex flex-col gap-3 mb-4">
-                  {/* Search Input */}
-                  <div className="relative">
-                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Søg efter mærke eller model..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-10"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                  
-                  {/* Sort and Map Toggle */}
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <h2 className="font-semibold text-lg">{filteredVehicles.length} {getVehicleTypeLabel()}</h2>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                          <ArrowUpDown className="w-4 h-4 mr-2" />
-                          <SelectValue placeholder="Sorter efter" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="date_desc">Nyeste først</SelectItem>
-                          <SelectItem value="date_asc">Ældste først</SelectItem>
-                          <SelectItem value="price_asc">Pris: Lav til høj</SelectItem>
-                          <SelectItem value="price_desc">Pris: Høj til lav</SelectItem>
-                          <SelectItem value="rating_desc">Bedst bedømt</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowMap(!showMap)}
-                        className="hidden md:flex shrink-0"
-                      >
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {showMap ? 'Skjul kort' : 'Vis kort'}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className={`grid gap-4 ${!showMap ? 'md:grid-cols-2 lg:grid-cols-3' : ''}`}>
-                  {filteredVehicles.length === 0 ? (
-                    <div className="text-center py-12 bg-card rounded-2xl border border-border col-span-full">
-                      <Car className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Ingen biler fundet</h3>
-                      <p className="text-muted-foreground">
-                        Prøv at justere dine filtre for at se flere resultater
-                      </p>
-                    </div>
-                  ) : (
-                    sortedVehicles.map((vehicle) => (
-                      <VehicleSearchCard
-                        key={vehicle.id}
-                        vehicle={vehicle}
-                        isSelected={selectedVehicle === vehicle.id}
-                        onSelect={() => {
-                          setSelectedVehicle(vehicle.id);
-                          setDetailVehicle(vehicle);
-                        }}
-                        filters={filters}
+              {/* Search Input */}
+              <div className="relative max-w-2xl animate-scale-in" style={{ animationDelay: '0.2s' }}>
+                <div className="bg-card rounded-2xl p-2 shadow-xl border-2 border-primary/20">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl bg-background">
+                      <SearchIcon className="w-5 h-5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Søg efter mærke, model eller type..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                       />
-                    ))
-                  )}
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <Button 
+                      size="lg" 
+                      className="bg-gradient-to-r from-primary to-primary/80 font-bold px-6"
+                    >
+                      <SearchIcon className="w-5 h-5" />
+                      <span className="hidden sm:inline ml-2">Søg</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
 
-              {/* Map - Hidden by default, shown when toggled */}
-              {showMap && (
-                <div className={`${showMap ? 'block' : 'hidden'} md:block md:w-1/2 lg:w-3/5`}>
-                  <div className="sticky top-24 h-[500px] md:h-[calc(100vh-200px)] rounded-2xl overflow-hidden border border-border shadow-soft">
+        {/* Vehicle Type Tabs */}
+        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-lg border-b border-border">
+          <div className="container mx-auto px-6">
+            <div className="flex items-center justify-between py-4 gap-4">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {vehicleTypeButtons.map((type) => {
+                  const Icon = type.icon;
+                  const isActive = filters.vehicleType === type.value;
+                  return (
+                    <button
+                      key={type.value}
+                      onClick={() => setFilters(prev => ({ ...prev, vehicleType: type.value }))}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all whitespace-nowrap ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' 
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{type.label}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        isActive ? 'bg-primary-foreground/20' : 'bg-background'
+                      }`}>
+                        {type.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={showFilters ? 'border-primary text-primary' : ''}
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filtre
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters Panel */}
+        {showFilters && (
+          <div className="border-b border-border bg-muted/30 animate-fade-in">
+            <SearchFilters filters={filters} setFilters={setFilters} />
+          </div>
+        )}
+
+        {/* Results Section */}
+        <div className="container mx-auto px-6 py-8">
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <h2 className="font-display text-2xl font-bold">
+                {filteredVehicles.length} {getVehicleTypeLabel()}
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Sort */}
+              <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                <SelectTrigger className="w-[180px] bg-card">
+                  <ArrowUpDown className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Sorter efter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date_desc">Nyeste først</SelectItem>
+                  <SelectItem value="date_asc">Ældste først</SelectItem>
+                  <SelectItem value="price_asc">Pris: Lav til høj</SelectItem>
+                  <SelectItem value="price_desc">Pris: Høj til lav</SelectItem>
+                  <SelectItem value="rating_desc">Bedst bedømt</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* View Mode */}
+              <div className="hidden md:flex bg-muted rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <Map className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile View Toggle */}
+          <div className="md:hidden flex gap-2 mb-6">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="flex-1"
+            >
+              <Grid3X3 className="w-4 h-4 mr-2" />
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === 'map' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('map')}
+              className="flex-1"
+            >
+              <Map className="w-4 h-4 mr-2" />
+              Kort
+            </Button>
+          </div>
+
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-96 gap-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+              <p className="text-muted-foreground">Henter køretøjer...</p>
+            </div>
+          ) : (
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Vehicle Grid/List */}
+              <div className={`${viewMode === 'map' ? 'hidden lg:block lg:w-2/5' : 'w-full'}`}>
+                {filteredVehicles.length === 0 ? (
+                  <div className="text-center py-16 bg-card rounded-3xl border-2 border-dashed border-border">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-muted flex items-center justify-center mb-6">
+                      <Car className="w-10 h-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold mb-2">Ingen køretøjer fundet</h3>
+                    <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                      Prøv at justere dine filtre eller søgeord for at se flere resultater.
+                    </p>
+                    <Button variant="outline" onClick={() => {
+                      setSearchQuery('');
+                      setFilters(prev => ({ ...prev, vehicleType: 'all', priceMin: 0, priceMax: 5000 }));
+                    }}>
+                      Nulstil filtre
+                    </Button>
+                  </div>
+                ) : (
+                  <div className={`grid gap-6 ${
+                    viewMode === 'grid' && !viewMode.includes('map') 
+                      ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
+                      : viewMode === 'list' 
+                        ? 'grid-cols-1' 
+                        : 'grid-cols-1'
+                  }`}>
+                    {sortedVehicles.map((vehicle, index) => (
+                      <div 
+                        key={vehicle.id} 
+                        className="animate-scale-in"
+                        style={{ animationDelay: `${Math.min(index * 0.05, 0.5)}s` }}
+                      >
+                        <VehicleSearchCard
+                          vehicle={vehicle}
+                          isSelected={selectedVehicle === vehicle.id}
+                          onSelect={() => {
+                            setSelectedVehicle(vehicle.id);
+                            setDetailVehicle(vehicle);
+                          }}
+                          filters={filters}
+                          viewMode={viewMode}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Map View */}
+              {viewMode === 'map' && (
+                <div className="lg:w-3/5 lg:sticky lg:top-32 lg:h-[calc(100vh-10rem)]">
+                  <div className="h-[500px] lg:h-full rounded-3xl overflow-hidden border-2 border-border shadow-xl">
                     <SearchMap
                       vehicles={filteredVehicles}
                       selectedVehicle={selectedVehicle}
