@@ -46,8 +46,18 @@ import {
 import { 
   Truck, Search, MoreHorizontal, Plus, 
   Loader2, CheckCircle, DollarSign, TrendingUp,
-  Building2, Calendar, Car, UserPlus
+  Building2, Calendar, Car, UserPlus, Trash2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { LessorStatusBadge } from '@/components/ratings/LessorStatusBadge';
 import { RatingStars } from '@/components/ratings/RatingStars';
 
@@ -112,6 +122,9 @@ const AdminFleetManagement = () => {
     bookings_count: 0,
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [showDeleteVehicle, setShowDeleteVehicle] = useState(false);
+  const [selectedVehicleForDelete, setSelectedVehicleForDelete] = useState<FleetVehicle | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // New customer form
   const [newCustomerForm, setNewCustomerForm] = useState({
@@ -405,6 +418,38 @@ const AdminFleetManagement = () => {
     setShowFleetBooking(true);
   };
 
+  const handleDeleteVehicle = async () => {
+    if (!selectedVehicleForDelete) return;
+    setIsDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('id', selectedVehicleForDelete.id);
+
+      if (error) {
+        console.error('Error deleting vehicle:', error);
+        toast.error('Kunne ikke slette køretøj: ' + error.message);
+      } else {
+        toast.success('Køretøj slettet');
+        setShowDeleteVehicle(false);
+        setSelectedVehicleForDelete(null);
+        fetchData();
+      }
+    } catch (error: any) {
+      console.error('Error deleting vehicle:', error);
+      toast.error('Kunne ikke slette køretøj');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const openDeleteVehicleDialog = (vehicle: FleetVehicle) => {
+    setSelectedVehicleForDelete(vehicle);
+    setShowDeleteVehicle(true);
+  };
+
   const stats = {
     totalFleetCustomers: customers.length,
     privateCustomers: customers.filter(c => c.fleet_plan === 'fleet_private').length,
@@ -677,14 +722,24 @@ const AdminFleetManagement = () => {
                       <TableCell>{vehicle.weekly_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
                       <TableCell>{vehicle.monthly_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
                       <TableCell>
-                        <Button 
-                          size="sm" 
-                          onClick={() => openFleetBookingDialog(vehicle)}
-                          className="bg-primary hover:bg-primary/90"
-                        >
-                          <Calendar className="w-4 h-4 mr-1" />
-                          Book
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={() => openFleetBookingDialog(vehicle)}
+                            className="bg-primary hover:bg-primary/90"
+                          >
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Book
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => openDeleteVehicleDialog(vehicle)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -1180,6 +1235,36 @@ const AdminFleetManagement = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Vehicle Confirmation Dialog */}
+      <AlertDialog open={showDeleteVehicle} onOpenChange={setShowDeleteVehicle}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" />
+              Slet køretøj
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil slette <strong>{selectedVehicleForDelete?.make} {selectedVehicleForDelete?.model}</strong> ({selectedVehicleForDelete?.registration})?
+              <br /><br />
+              <span className="text-destructive font-medium">
+                Denne handling kan ikke fortrydes.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteVehicle}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Slet køretøj
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

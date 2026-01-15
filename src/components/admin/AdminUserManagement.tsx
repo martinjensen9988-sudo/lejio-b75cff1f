@@ -39,8 +39,18 @@ import {
 } from '@/components/ui/select';
 import { 
   Users, Search, MoreHorizontal, CheckCircle, XCircle, 
-  Pause, Ban, Edit, Eye, Loader2, AlertTriangle, Building2, Mail, Send
+  Pause, Ban, Edit, Eye, Loader2, AlertTriangle, Building2, Mail, Send, Trash2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface UserProfile {
   id: string;
@@ -77,6 +87,8 @@ const AdminUserManagement = () => {
   const [actionType, setActionType] = useState<'pause' | 'ban' | 'activate' | null>(null);
   const [actionReason, setActionReason] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Email dialog state
   const [showEmailDialog, setShowEmailDialog] = useState(false);
@@ -249,6 +261,39 @@ const AdminUserManagement = () => {
       fetchUsers();
     }
     setIsUpdating(false);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    setIsDeleting(true);
+
+    try {
+      // Delete user profile (this will cascade to related data based on your RLS)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', selectedUser.id);
+
+      if (profileError) {
+        console.error('Error deleting profile:', profileError);
+        toast.error('Kunne ikke slette bruger: ' + profileError.message);
+      } else {
+        toast.success('Bruger slettet permanent');
+        setShowDeleteDialog(false);
+        setSelectedUser(null);
+        fetchUsers();
+      }
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast.error('Kunne ikke slette bruger');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleOpenDelete = (user: UserProfile) => {
+    setSelectedUser(user);
+    setShowDeleteDialog(true);
   };
 
   const getAccountStatusBadge = (status: string) => {
@@ -437,6 +482,14 @@ const AdminUserManagement = () => {
                             Genaktiver bruger
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleOpenDelete(user)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Slet bruger permanent
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -617,6 +670,36 @@ const AdminUserManagement = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" />
+              Slet bruger permanent
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil slette <strong>{selectedUser?.full_name || selectedUser?.company_name || selectedUser?.email}</strong> permanent?
+              <br /><br />
+              <span className="text-destructive font-medium">
+                Denne handling kan ikke fortrydes. Alle brugerens data vil blive slettet.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Slet permanent
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
