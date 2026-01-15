@@ -1,4 +1,4 @@
-import { Car, Sparkles, Shield, Clock, CreditCard, FileCheck, ArrowRight } from "lucide-react";
+import { Car, Sparkles, Shield, Clock, CreditCard, FileCheck, ArrowRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -9,116 +9,136 @@ const Features = () => {
     {
       icon: Clock,
       title: "Book på sekunder",
-      description: "Find og book dit køretøj på under 2 minutter.",
+      description: "Find og book dit køretøj på under 2 minutter. Ingen ventetid.",
       color: "from-primary to-primary/60",
-      bgColor: "bg-primary/10"
+      bgColor: "bg-primary/5",
+      borderColor: "border-primary/20 hover:border-primary/50"
     },
     {
       icon: FileCheck,
       title: "Automatisk kontrakt",
-      description: "Juridisk bindende kontrakt genereres automatisk.",
+      description: "Juridisk bindende kontrakt genereres automatisk ved booking.",
       color: "from-mint to-mint/60",
-      bgColor: "bg-mint/10"
+      bgColor: "bg-mint/5",
+      borderColor: "border-mint/20 hover:border-mint/50"
     },
     {
       icon: Shield,
       title: "Tryg handel",
-      description: "Verificerede brugere og sikker betaling.",
+      description: "Verificerede brugere og fuld gennemsigtighed på alle udlejninger.",
       color: "from-accent to-accent/60",
-      bgColor: "bg-accent/10"
+      bgColor: "bg-accent/5",
+      borderColor: "border-accent/20 hover:border-accent/50"
     },
     {
       icon: CreditCard,
       title: "Nem betaling",
-      description: "Betal sikkert online med kort eller MobilePay.",
+      description: "Betal sikkert online med kort eller MobilePay. Simple og hurtigt.",
       color: "from-lavender to-lavender/60",
-      bgColor: "bg-lavender/10"
+      bgColor: "bg-lavender/5",
+      borderColor: "border-lavender/20 hover:border-lavender/50"
     },
     {
       icon: Car,
       title: "Alle køretøjer",
-      description: "Biler, campingvogne, trailere – alt samlet.",
+      description: "Biler, campingvogne, autocampere og trailere – alt samlet ét sted.",
       color: "from-secondary to-secondary/60",
-      bgColor: "bg-secondary/10"
+      bgColor: "bg-secondary/5",
+      borderColor: "border-secondary/20 hover:border-secondary/50"
     },
     {
       icon: Sparkles,
-      title: "AI-drevet",
-      description: "Smart prissætning og skadesregistrering.",
+      title: "AI-drevet platform",
+      description: "Smart prissætning, skadesregistrering og automatisk booking.",
       color: "from-mint to-accent",
-      bgColor: "bg-gradient-to-br from-mint/10 to-accent/10"
+      bgColor: "bg-gradient-to-br from-mint/5 to-accent/5",
+      borderColor: "border-mint/20 hover:border-mint/50"
     }
   ];
 
   return (
-    <section id="features" className="py-24 relative overflow-hidden bg-muted/30">
+    <section id="features" className="py-32 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary rounded-full blur-[150px] opacity-5" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-accent rounded-full blur-[120px] opacity-5" />
+      </div>
+
       <div className="container mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-16 animate-slide-up">
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
-            Hvorfor <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">LEJIO</span>?
+        <div className="text-center mb-20 animate-slide-up">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-bold text-primary mb-6">
+            <Zap className="w-4 h-4" />
+            <span>Hvorfor LEJIO?</span>
+          </div>
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
+            Alt du behøver til{" "}
+            <span className="bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent">
+              nem udlejning
+            </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Alt hvad du behøver til nem og tryg biludlejning.
+            Vi har bygget den mest komplette platform til køretøjsudlejning i Danmark.
           </p>
         </div>
 
         {/* Features grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-20">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20">
           {features.map((feature, i) => {
             const Icon = feature.icon;
             return (
               <div 
                 key={i}
-                className={`group ${feature.bgColor} rounded-3xl p-8 border-2 border-transparent hover:border-primary/30 transition-all hover:shadow-xl animate-scale-in`}
+                className={`group ${feature.bgColor} rounded-3xl p-8 border-2 ${feature.borderColor} transition-all hover:shadow-xl hover:-translate-y-1 animate-scale-in`}
                 style={{ animationDelay: `${i * 0.1}s` }}
               >
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
                   <Icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-display text-xl font-bold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <h3 className="font-display text-xl font-bold text-foreground mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             );
           })}
         </div>
 
-        {/* Vehicle types showcase */}
-        <div className="text-center mb-12">
-          <h3 className="font-display text-3xl font-black mb-8">
-            Find det rette køretøj
+        {/* Vehicle types */}
+        <div className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-5xl mx-auto">
+          <h3 className="font-display text-3xl font-black text-center mb-10">
+            Find det rette køretøj til din tur
           </h3>
-          <div className="flex flex-wrap justify-center gap-4">
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
             {[
-              { emoji: "🚗", label: "Biler", count: "350+" },
-              { emoji: "🏕️", label: "Campingvogne", count: "80+" },
-              { emoji: "🚐", label: "Autocampere", count: "45+" },
-              { emoji: "🚚", label: "Trailere", count: "60+" },
+              { emoji: "🚗", label: "Personbiler", desc: "Fra små bybiler til store familiebiler" },
+              { emoji: "🏕️", label: "Campingvogne", desc: "Til ferien i naturen" },
+              { emoji: "🚐", label: "Autocampere", desc: "Alt-i-én løsning til turen" },
+              { emoji: "🚚", label: "Trailere", desc: "Transport af gods og udstyr" },
             ].map((type, i) => (
               <div 
                 key={i}
-                className="bg-card rounded-2xl px-8 py-6 border-2 border-border hover:border-primary/40 transition-all cursor-pointer hover:shadow-lg group animate-scale-in"
-                style={{ animationDelay: `${0.4 + i * 0.1}s` }}
+                className="text-center p-6 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group animate-scale-in"
+                style={{ animationDelay: `${0.5 + i * 0.1}s` }}
                 onClick={() => navigate('/search')}
               >
-                <span className="text-4xl block mb-2 group-hover:scale-110 transition-transform">{type.emoji}</span>
-                <div className="font-bold text-foreground">{type.label}</div>
-                <div className="text-sm text-primary font-medium">{type.count}</div>
+                <span className="text-5xl block mb-4 group-hover:scale-125 transition-transform">{type.emoji}</span>
+                <div className="font-display font-bold text-foreground text-lg mb-1">{type.label}</div>
+                <div className="text-sm text-muted-foreground">{type.desc}</div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* CTA */}
-        <div className="text-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
-          <Button 
-            size="xl" 
-            className="bg-gradient-to-r from-primary to-primary/80 text-lg font-bold px-10"
-            onClick={() => navigate('/search')}
-          >
-            Udforsk alle køretøjer
-            <ArrowRight className="w-5 h-5" />
-          </Button>
+          {/* CTA */}
+          <div className="text-center">
+            <Button 
+              size="xl" 
+              className="bg-gradient-to-r from-primary to-primary/80 text-lg font-bold px-12 shadow-lg shadow-primary/20"
+              onClick={() => navigate('/search')}
+            >
+              Udforsk alle køretøjer
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </section>
