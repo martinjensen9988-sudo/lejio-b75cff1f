@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Booking } from '@/hooks/useBookings';
+import { Booking, useBookings } from '@/hooks/useBookings';
 import { Contract, useContracts } from '@/hooks/useContracts';
 import { useDamageReports } from '@/hooks/useDamageReports';
 import { useRenterRatings } from '@/hooks/useRenterRatings';
 import { useAuth } from '@/hooks/useAuth';
+import { useVehicles } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,10 +22,12 @@ import { RenterRatingModal } from '@/components/ratings/RenterRatingModal';
 import { RenterRatingBadge } from '@/components/ratings/RenterRatingBadge';
 import { CheckInOutWizard } from '@/components/checkinout/CheckInOutWizard';
 import { VehicleScanHistory } from '@/components/damage/VehicleScanHistory';
+import VehicleSwapDialog from '@/components/dashboard/VehicleSwapDialog';
+import DriverLicenseStatusBadge from '@/components/dashboard/DriverLicenseStatusBadge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star, ScanLine, History } from 'lucide-react';
+import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star, ScanLine, History, ArrowRightLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BookingsTableProps {
@@ -42,6 +45,8 @@ const statusConfig: Record<Booking['status'], { label: string; variant: 'default
 
 const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   const { profile } = useAuth();
+  const { vehicles } = useVehicles();
+  const { refetch: refetchBookings } = useBookings();
   const { contracts, generateContract, signContract, isLoading: contractsLoading } = useContracts();
   const [generatingContractFor, setGeneratingContractFor] = useState<string | null>(null);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
@@ -215,9 +220,16 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                         <p className="font-medium text-foreground">{booking.renter_name || 'Ukendt'}</p>
                         <p className="text-xs text-muted-foreground">{booking.renter_email}</p>
                       </div>
-                      {booking.renter_email && (
-                        <RenterRatingBadge renterEmail={booking.renter_email} size="sm" />
-                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {booking.renter_email && (
+                          <RenterRatingBadge renterEmail={booking.renter_email} size="sm" />
+                        )}
+                        <DriverLicenseStatusBadge 
+                          renterEmail={booking.renter_email} 
+                          renterId={booking.renter_id} 
+                          size="sm" 
+                        />
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -343,6 +355,25 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                     )}
                     {booking.status === 'active' && (
                       <div className="flex items-center gap-1">
+                        {(() => {
+                          const currentVehicle = vehicles.find(v => v.id === booking.vehicle_id);
+                          return currentVehicle ? (
+                            <VehicleSwapDialog
+                              booking={{
+                                id: booking.id,
+                                vehicle_id: booking.vehicle_id,
+                                renter_name: booking.renter_name,
+                                renter_email: booking.renter_email,
+                                start_date: booking.start_date,
+                                end_date: booking.end_date,
+                                status: booking.status,
+                              }}
+                              currentVehicle={currentVehicle}
+                              availableVehicles={vehicles}
+                              onSwapComplete={refetchBookings}
+                            />
+                          ) : null;
+                        })()}
                         <Button
                           size="sm"
                           variant="outline"
