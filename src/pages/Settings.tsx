@@ -255,13 +255,20 @@ const Settings = () => {
       });
     } catch (error) {
       console.error('Error saving profile:', error);
+      const msg =
+        error && typeof error === 'object'
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ((error as any).message || (error as any).details || (error as any).hint || 'Ukendt fejl')
+          : 'Ukendt fejl';
+
       toast({
         title: 'Fejl',
-        description: 'Kunne ikke gemme indstillinger',
+        description: `Kunne ikke gemme indstillinger: ${msg}`,
         variant: 'destructive',
       });
     } finally {
       setSaving(false);
+    }
     }
   };
 
