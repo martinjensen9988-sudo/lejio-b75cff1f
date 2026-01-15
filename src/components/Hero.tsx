@@ -143,18 +143,25 @@ const Hero = () => {
 
             {/* Udlejer */}
             <div 
-              className="group bg-card rounded-3xl p-8 border-2 border-accent/20 hover:border-accent/50 cursor-pointer transition-all hover:shadow-2xl hover:shadow-accent/10 animate-scale-in hover:-translate-y-2"
+              className="group relative bg-card rounded-3xl p-8 border-2 border-accent/20 hover:border-accent/50 cursor-pointer transition-all hover:shadow-2xl hover:shadow-accent/10 animate-scale-in hover:-translate-y-2"
               style={{ animationDelay: '0.4s' }}
               onClick={() => navigate('/auth')}
             >
+              {/* January promo bubble */}
+              <div className="absolute -top-3 -right-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold shadow-lg animate-pulse">
+                🎉 6 mdr. GRATIS
+              </div>
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-accent/30">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-display text-2xl font-black text-foreground mb-2">
                 Tjen penge
               </h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-4">
                 Lej dit køretøj ud og tjen op til 5.000+ kr om måneden.
+              </p>
+              <p className="text-xs text-green-600 font-semibold mb-4">
+                Tilmeld dig i januar – ingen kreditkort krævet!
               </p>
               <div className="flex items-center gap-2 text-accent font-bold group-hover:gap-3 transition-all">
                 <span>Bliv udlejer</span>
@@ -168,8 +175,8 @@ const Hero = () => {
               style={{ animationDelay: '0.5s' }}
               onClick={() => navigate('/privat-fleet')}
             >
-              <div className="absolute -top-3 right-6 px-3 py-1 rounded-full bg-gradient-to-r from-mint to-accent text-white text-xs font-bold shadow-lg">
-                NY ✨
+              <div className="absolute -top-3 -right-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold shadow-lg animate-pulse">
+                🎉 6 mdr. GRATIS
               </div>
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-mint to-mint/60 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-mint/30">
                 <Building2 className="w-8 h-8 text-white" />
@@ -177,8 +184,11 @@ const Hero = () => {
               <h3 className="font-display text-2xl font-black text-foreground mb-2">
                 Privat Fleet
               </h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-4">
                 Aflever din bil – vi klarer alt. Du får 70% udbetalt.
+              </p>
+              <p className="text-xs text-green-600 font-semibold mb-4">
+                Tilmeld dig i januar – ingen kreditkort krævet!
               </p>
               <div className="flex items-center gap-2 text-mint font-bold group-hover:gap-3 transition-all">
                 <span>Læs mere</span>
