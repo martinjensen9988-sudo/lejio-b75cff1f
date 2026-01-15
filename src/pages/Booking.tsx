@@ -38,6 +38,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import DeductibleInsuranceOption from "@/components/booking/DeductibleInsuranceOption";
+import ReferralCreditOption from "@/components/booking/ReferralCreditOption";
+import { useReferral } from "@/hooks/useReferral";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
@@ -116,6 +118,12 @@ const Booking = () => {
   
   // Deductible insurance
   const [deductibleInsurancePrice, setDeductibleInsurancePrice] = useState(0);
+  const [hasDeductibleInsurance, setHasDeductibleInsurance] = useState(false);
+
+  // Referral credit
+  const [referralCredit, setReferralCredit] = useState(0);
+  const [pendingRedemptionId, setPendingRedemptionId] = useState<string | undefined>();
+  const { useCredit, completePendingReferral } = useReferral();
 
   // Fetch vehicle data
   useEffect(() => {
@@ -195,11 +203,12 @@ const Booking = () => {
       deposit,
       prepaidRent,
       deductibleInsurance: deductibleInsurancePrice,
-      grandTotal: unitPrice + deposit + prepaidRent + deductibleInsurancePrice,
+      referralDiscount: referralCredit,
+      grandTotal: Math.max(0, unitPrice + deposit + prepaidRent + deductibleInsurancePrice - referralCredit),
       periodCount,
       periodType,
     };
-  }, [vehicle, periodType, periodCount, deductibleInsurancePrice]);
+  }, [vehicle, periodType, periodCount, deductibleInsurancePrice, referralCredit]);
 
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -325,6 +334,36 @@ const Booking = () => {
       
       // Store the booking ID for payment step
       setCreatedBookingId(bookingData.id);
+
+      // Save deductible insurance if selected
+      if (hasDeductibleInsurance && deductibleInsurancePrice > 0) {
+        const totalDays = periodType === 'monthly' 
+          ? periodCount * 30 
+          : periodType === 'weekly' 
+            ? periodCount * 7 
+            : periodCount;
+        
+        await supabase.from("deductible_insurance").insert({
+          booking_id: bookingData.id,
+          days_covered: totalDays,
+          daily_rate: 49,
+          total_amount: deductibleInsurancePrice,
+          original_deductible: 5000,
+          new_deductible: 0,
+          status: 'active',
+        });
+      }
+
+      // Handle referral credit/discount
+      if (referralCredit > 0) {
+        // If using available credit, deduct it
+        if (!pendingRedemptionId) {
+          await useCredit(referralCredit, bookingData.id);
+        } else {
+          // Complete the pending referral redemption
+          await completePendingReferral(pendingRedemptionId, bookingData.id);
+        }
+      }
 
       // Send notification
       await supabase.functions.invoke("send-booking-notification", {
@@ -913,7 +952,19 @@ const Booking = () => {
                       periodType={periodType}
                       periodCount={periodCount}
                       originalDeductible={5000}
-                      onSelect={(selected, price) => setDeductibleInsurancePrice(price)}
+                      onSelect={(selected, price) => {
+                        setHasDeductibleInsurance(selected);
+                        setDeductibleInsurancePrice(price);
+                      }}
+                    />
+
+                    {/* Referral Credit Option */}
+                    <ReferralCreditOption
+                      periodType={periodType}
+                      onCreditApplied={(credit, redemptionId) => {
+                        setReferralCredit(credit);
+                        setPendingRedemptionId(redemptionId);
+                      }}
                     />
 
                     {/* Acceptances */}
@@ -1096,12 +1147,26 @@ const Booking = () => {
                       </div>
                     )}
 
+                    {pricing.deductibleInsurance > 0 && (
+                      <div className="flex justify-between text-primary">
+                        <span className="text-muted-foreground">Nul selvrisiko-forsikring</span>
+                        <span>{pricing.deductibleInsurance.toLocaleString("da-DK")} kr</span>
+                      </div>
+                    )}
+
                     {vehicle.unlimited_km && (
                       <div className="flex justify-between text-accent">
                         <span>Kilometer</span>
                         <span className="flex items-center gap-1">
                           <Check className="w-4 h-4" /> Fri km
                         </span>
+                      </div>
+                    )}
+
+                    {pricing.referralDiscount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span className="text-green-600">Henvisningsrabat</span>
+                        <span>-{pricing.referralDiscount.toLocaleString("da-DK")} kr</span>
                       </div>
                     )}
 

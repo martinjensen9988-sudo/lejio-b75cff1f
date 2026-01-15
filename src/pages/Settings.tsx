@@ -62,6 +62,7 @@ interface ProfileData {
   fuel_policy_enabled: boolean;
   fuel_missing_fee: number;
   fuel_price_per_liter: number;
+  fine_admin_fee: number;
   company_logo_url: string;
 }
 
@@ -116,6 +117,7 @@ const Settings = () => {
     fuel_policy_enabled: false,
     fuel_missing_fee: 0,
     fuel_price_per_liter: 0,
+    fine_admin_fee: 500,
     company_logo_url: '',
   });
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -155,6 +157,7 @@ const Settings = () => {
         fuel_policy_enabled: (profile as any).fuel_policy_enabled || false,
         fuel_missing_fee: (profile as any).fuel_missing_fee || 0,
         fuel_price_per_liter: (profile as any).fuel_price_per_liter || 0,
+        fine_admin_fee: (profile as any).fine_admin_fee || 500,
         company_logo_url: (profile as any).company_logo_url || '',
       });
     }
@@ -235,6 +238,7 @@ const Settings = () => {
           fuel_policy_enabled: formData.fuel_policy_enabled,
           fuel_missing_fee: formData.fuel_missing_fee || 0,
           fuel_price_per_liter: formData.fuel_price_per_liter || 0,
+          fine_admin_fee: formData.fine_admin_fee || 500,
           company_logo_url: formData.company_logo_url || null,
         })
         .eq('id', user.id);
@@ -873,6 +877,22 @@ const Settings = () => {
                         />
                         <p className="text-xs text-muted-foreground">
                           Fast gebyr hvis tanken ikke er fyldt op
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="fine_admin_fee">Administrationsgebyr for bøder (kr)</Label>
+                        <Input
+                          id="fine_admin_fee"
+                          type="number"
+                          min="0"
+                          max="800"
+                          value={formData.fine_admin_fee || ''}
+                          onChange={(e) => setFormData(p => ({ ...p, fine_admin_fee: parseFloat(e.target.value) || 0 }))}
+                          placeholder="Standard: 500"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Dit gebyr ved videresendelse af bøder (0-800 kr.)
                         </p>
                       </div>
 

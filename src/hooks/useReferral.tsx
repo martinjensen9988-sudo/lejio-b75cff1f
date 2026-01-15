@@ -168,6 +168,45 @@ export const useReferral = () => {
     }
   };
 
+  const getPendingDiscount = async () => {
+    if (!user) return null;
+
+    try {
+      // Check if user has a pending referral redemption (as referred user)
+      const { data } = await supabase
+        .from('referral_redemptions')
+        .select('id, referred_discount')
+        .eq('referred_user_id', user.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      return data ? { id: data.id, discount: data.referred_discount || 500 } : null;
+    } catch (err) {
+      console.error('Error checking pending discount:', err);
+      return null;
+    }
+  };
+
+  const completePendingReferral = async (redemptionId: string, bookingId: string) => {
+    try {
+      // Update redemption to completed
+      const { error } = await supabase
+        .from('referral_redemptions')
+        .update({
+          status: 'completed',
+          booking_id: bookingId,
+          completed_at: new Date().toISOString(),
+        })
+        .eq('id', redemptionId);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (err) {
+      console.error('Error completing referral:', err);
+      return { success: false };
+    }
+  };
+
   const copyCodeToClipboard = () => {
     if (referralCode?.code) {
       navigator.clipboard.writeText(referralCode.code);
@@ -186,6 +225,8 @@ export const useReferral = () => {
     isLoading,
     applyReferralCode,
     useCredit,
+    getPendingDiscount,
+    completePendingReferral,
     copyCodeToClipboard,
     getShareUrl,
     refetch: fetchReferralData,
