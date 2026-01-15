@@ -109,10 +109,15 @@ const Pricing = () => {
               ))}
             </ul>
 
-            <Button variant="default" size="sm" className="w-full group bg-gradient-to-r from-mint to-accent hover:opacity-90" onClick={() => navigate('/auth')}>
-              Kom i gang
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <div className="space-y-2">
+              <Button variant="default" size="sm" className="w-full group bg-gradient-to-r from-mint to-accent hover:opacity-90" onClick={() => navigate('/auth')}>
+                Kom i gang
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button variant="ghost" size="sm" className="w-full text-mint hover:text-mint/80" onClick={() => navigate('/privat-fleet')}>
+                Læs mere om hvordan det virker
+              </Button>
+            </div>
           </div>
 
           {/* Pro Pricing */}
