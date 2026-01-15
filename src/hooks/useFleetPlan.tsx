@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
-export type FleetPlanType = 'fleet_basic' | 'fleet_premium' | null;
+export type FleetPlanType = 'fleet_private' | 'fleet_basic' | 'fleet_premium' | null;
 
 export interface FleetSettlement {
   id: string;
@@ -26,6 +26,20 @@ export interface FleetPlanInfo {
 
 // Fleet plan details
 export const FLEET_PLANS = {
+  fleet_private: {
+    name: 'Privat Fleet',
+    description: 'LEJIO varetager udlejningen af dine private biler',
+    commissionRate: 30,
+    features: [
+      'Booking og kalender-styring',
+      'Kundeservice og support',
+      'Kontrakt-generering',
+      'Betalingshåndtering',
+      'Afregning og fakturering',
+      'Skaderapporter',
+    ],
+    forPrivate: true,
+  },
   fleet_basic: {
     name: 'Fleet Basic',
     description: 'LEJIO varetager alt med udlejning af dine biler',
@@ -38,6 +52,7 @@ export const FLEET_PLANS = {
       'Afregning og fakturering',
       'Skaderapporter',
     ],
+    forPrivate: false,
   },
   fleet_premium: {
     name: 'Fleet Premium',
@@ -51,6 +66,7 @@ export const FLEET_PLANS = {
       'Genudlejning og vedligeholdelse',
       'Månedlig opgørelse og udbetaling',
     ],
+    forPrivate: false,
   },
 };
 
@@ -88,7 +104,7 @@ export const useFleetPlan = () => {
     }
   };
 
-  const requestFleetPlan = async (planType: 'fleet_basic' | 'fleet_premium'): Promise<boolean> => {
+  const requestFleetPlan = async (planType: 'fleet_private' | 'fleet_basic' | 'fleet_premium'): Promise<boolean> => {
     if (!user) {
       toast.error('Du skal være logget ind');
       return false;
@@ -100,7 +116,7 @@ export const useFleetPlan = () => {
       const { error } = await supabase
         .from('profiles')
         .update({
-          fleet_plan: planType,
+          fleet_plan: planType as any,
           fleet_commission_rate: commissionRate,
         })
         .eq('id', user.id);

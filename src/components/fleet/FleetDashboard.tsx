@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FleetPlanCard } from './FleetPlanCard';
 import { useFleetPlan, FleetSettlement, FLEET_PLANS } from '@/hooks/useFleetPlan';
 import { useAuth } from '@/hooks/useAuth';
-import { Building2, TrendingUp, Calendar, Wallet, Loader2, AlertTriangle } from 'lucide-react';
+import { Building2, TrendingUp, Calendar, Wallet, Loader2, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import {
@@ -24,11 +24,11 @@ export const FleetDashboard = () => {
   const { currentPlan, settlements, isLoading, requestFleetPlan, cancelFleetPlan } = useFleetPlan();
   const [isUpdating, setIsUpdating] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'fleet_basic' | 'fleet_premium' | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<'fleet_private' | 'fleet_basic' | 'fleet_premium' | null>(null);
 
   const isProfessional = profile?.user_type === 'professionel';
 
-  const handleSelectPlan = (plan: 'fleet_basic' | 'fleet_premium') => {
+  const handleSelectPlan = (plan: 'fleet_private' | 'fleet_basic' | 'fleet_premium') => {
     setSelectedPlan(plan);
     setShowConfirmDialog(true);
   };
@@ -49,68 +49,91 @@ export const FleetDashboard = () => {
     setIsUpdating(false);
   };
 
-  if (!isProfessional) {
-    return (
-      <Card className="border-amber-500/30 bg-amber-500/5">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5" />
-            <div>
-              <p className="font-medium">Fleet-planer er kun for virksomheder</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Opgrader til professionel konto med CVR-nummer for at få adgang til Fleet-planer.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Plan Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            Fleet Management Planer
-          </CardTitle>
-          <CardDescription>
-            Lad LEJIO varetage din biludlejning - vælg den plan der passer til din virksomhed
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <FleetPlanCard
-              planType="fleet_basic"
-              isActive={currentPlan.type === 'fleet_basic'}
-              onSelect={handleSelectPlan}
-              isLoading={isUpdating}
-            />
-            <FleetPlanCard
-              planType="fleet_premium"
-              isActive={currentPlan.type === 'fleet_premium'}
-              onSelect={handleSelectPlan}
-              isLoading={isUpdating}
-            />
-          </div>
-
-          {currentPlan.type && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <Button
-                variant="outline"
-                onClick={handleCancelPlan}
-                disabled={isUpdating}
-                className="text-destructive hover:text-destructive"
-              >
-                {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Annuller Fleet Plan
-              </Button>
+      {/* Plan Selection for Private Users */}
+      {!isProfessional && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Lad LEJIO udleje for dig
+            </CardTitle>
+            <CardDescription>
+              Slip for besværet - vi håndterer alt med udlejning af din bil mod 30% af omsætningen
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="max-w-md mx-auto">
+              <FleetPlanCard
+                planType="fleet_private"
+                isActive={currentPlan.type === 'fleet_private'}
+                onSelect={handleSelectPlan}
+                isLoading={isUpdating}
+              />
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {currentPlan.type && (
+              <div className="mt-6 pt-6 border-t border-border">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelPlan}
+                  disabled={isUpdating}
+                  className="text-destructive hover:text-destructive"
+                >
+                  {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Annuller Fleet Plan
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Plan Selection for Professional Users */}
+      {isProfessional && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5" />
+              Fleet Management Planer
+            </CardTitle>
+            <CardDescription>
+              Lad LEJIO varetage din biludlejning - vælg den plan der passer til din virksomhed
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              <FleetPlanCard
+                planType="fleet_basic"
+                isActive={currentPlan.type === 'fleet_basic'}
+                onSelect={handleSelectPlan}
+                isLoading={isUpdating}
+              />
+              <FleetPlanCard
+                planType="fleet_premium"
+                isActive={currentPlan.type === 'fleet_premium'}
+                onSelect={handleSelectPlan}
+                isLoading={isUpdating}
+              />
+            </div>
+
+            {currentPlan.type && (
+              <div className="mt-6 pt-6 border-t border-border">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelPlan}
+                  disabled={isUpdating}
+                  className="text-destructive hover:text-destructive"
+                >
+                  {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Annuller Fleet Plan
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Settlements */}
       {currentPlan.type && (
