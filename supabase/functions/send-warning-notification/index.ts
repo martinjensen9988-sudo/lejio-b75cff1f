@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,10 +78,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Validate appeal URL if provided
-    if (appealUrl && !isValidAppealUrl(appealUrl)) {
-      console.warn("Invalid appeal URL provided:", appealUrl);
-      // Don't include the URL in the email if it's invalid
+    // Get SMTP settings
+    const smtpHost = Deno.env.get("SMTP_HOST");
+    const smtpUser = Deno.env.get("SMTP_USER");
+    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
+    const smtpFromEmail = Deno.env.get("SMTP_FROM_EMAIL") || "noreply@lejio.dk";
+
+    if (!smtpHost || !smtpUser || !smtpPassword) {
+      console.error("SMTP not configured");
+      return new Response(
+        JSON.stringify({ error: "SMTP not configured" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     const reasonLabel = REASON_LABELS[reason] || escapeHtml(reason);
@@ -91,30 +101,86 @@ const handler = async (req: Request): Promise<Response> => {
     const safeAppealUrl = appealUrl && isValidAppealUrl(appealUrl) ? appealUrl : null;
 
     const appealLink = safeAppealUrl 
-      ? `<p><a href="${safeAppealUrl}">Indgiv klage her</a></p>`
+      ? `<p style="text-align: center; margin: 30px 0;">
+          <a href="${safeAppealUrl}" style="display: inline-block; background: #2962FF; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; font-weight: bold;">Indgiv klage</a>
+        </p>`
       : '<p>Kontakt venligst LEJIO support for at indgive en klage.</p>';
 
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${RESEND_API_KEY}`,
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Advarsel på din profil</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #DC2626, #EF4444); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .warning-box { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 20px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 style="margin: 0;">⚠️ Vigtig besked</h1>
+          </div>
+          <div class="content">
+            <p>Kære ${safeRenterName},</p>
+            
+            <div class="warning-box">
+              <p style="margin: 0;"><strong>En udlejer (${safeLessorName}) har oprettet en advarsel på din profil.</strong></p>
+              <p style="margin: 10px 0 0 0;"><strong>Årsag:</strong> ${reasonLabel}</p>
+            </div>
+            
+            <p>Hvis du mener, at denne advarsel er uberettiget, har du mulighed for at klage over beslutningen.</p>
+            
+            ${appealLink}
+            
+            <p>Med venlig hilsen,<br>LEJIO</p>
+          </div>
+          <div class="footer">
+            <p>Denne email er sendt automatisk fra LEJIO</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Initialize SMTP client
+    const client = new SMTPClient({
+      connection: {
+        hostname: smtpHost,
+        port: 587,
+        tls: true,
+        auth: {
+          username: smtpUser,
+          password: smtpPassword,
+        },
       },
-      body: JSON.stringify({
-        from: "LEJIO <noreply@lejio.dk>",
-        to: [renterEmail],
-        subject: "Vigtig besked: Der er oprettet en advarsel på din profil",
-        html: `<h1>Kære ${safeRenterName}</h1><p>En udlejer (${safeLessorName}) har oprettet en advarsel på din profil. Årsag: ${reasonLabel}.</p>${appealLink}`,
-      }),
     });
 
-    const data = await emailResponse.json();
-    return new Response(JSON.stringify({ success: true, data }), {
+    // Send email
+    await client.send({
+      from: smtpFromEmail,
+      to: renterEmail,
+      subject: "Vigtig besked: Der er oprettet en advarsel på din profil",
+      content: "auto",
+      html: emailHtml,
+    });
+
+    await client.close();
+
+    console.log("Warning notification email sent to:", renterEmail);
+
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
-    console.error("Error:", error);
+    console.error("Error sending warning notification:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
