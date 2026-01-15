@@ -69,7 +69,12 @@ serve(async (req) => {
   try {
     const encryptionSecret = Deno.env.get('ENCRYPTION_KEY');
     if (!encryptionSecret) {
-      throw new Error('ENCRYPTION_KEY not configured');
+      console.error('[GET-PAYMENT-SETTINGS] ENCRYPTION_KEY not found in environment');
+      // Return empty settings instead of throwing - settings just won't be decrypted
+      return new Response(
+        JSON.stringify({ settings: null, warning: 'Payment settings unavailable - encryption not configured' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

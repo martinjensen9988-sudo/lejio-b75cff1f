@@ -1,9 +1,10 @@
+import { forwardRef } from "react";
 import LejioLogo from "./LejioLogo";
 import { MapPin, Mail, Heart } from "lucide-react";
 
-const Footer = () => {
+const Footer = forwardRef<HTMLElement>((props, ref) => {
   return (
-    <footer className="py-16 bg-primary text-primary-foreground">
+    <footer ref={ref} className="py-16 bg-primary text-primary-foreground" {...props}>
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           <div className="md:col-span-1">
@@ -83,6 +84,8 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+});
+
+Footer.displayName = "Footer";
 
 export default Footer;

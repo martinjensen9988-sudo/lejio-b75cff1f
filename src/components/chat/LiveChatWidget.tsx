@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +21,7 @@ interface ChatSession {
   needs_human_support: boolean;
 }
 
-export const LiveChatWidget = () => {
+export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -442,7 +442,7 @@ export const LiveChatWidget = () => {
   };
 
   return (
-    <>
+    <div ref={ref} {...props}>
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(true)}
@@ -582,6 +582,8 @@ export const LiveChatWidget = () => {
           </div>
         </Card>
       )}
-    </>
+    </div>
   );
-};
+});
+
+LiveChatWidget.displayName = "LiveChatWidget";
