@@ -94,7 +94,7 @@ const Features = () => {
           <div className="text-center mb-12 animate-slide-up">
             <span className="text-3xl mb-4 block">🏢</span>
             <h3 className="font-display text-3xl font-bold text-foreground mb-2">
-              Er du professionel udlejer?
+              Er du forhandler?
             </h3>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Få superkræfter til din forretning. Behold din egen betalingsløsning og forsikring – vi leverer teknologien.
@@ -122,7 +122,7 @@ const Features = () => {
 
           <div className="text-center mt-8">
             <Button variant="glass" size="lg">
-              Læs mere om Pro-partnerskab
+              Læs mere om forhandler-program
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>

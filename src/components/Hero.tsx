@@ -52,7 +52,7 @@ const Hero = () => {
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            Lej biler, campingvogne og trailere fra naboer eller professionelle udlejere. Book på sekunder, 
+            Lej biler, campingvogne og trailere fra naboer eller forhandlere. Book på sekunder, 
             få kontrakten med det samme – og kør afsted.
           </p>
 

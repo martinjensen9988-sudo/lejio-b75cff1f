@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: "LEJIO – Find din lejebil",
         short_name: "LEJIO",
-        description: "LEJIO gør det nemt at leje en bil. Søg blandt private og professionelle udlejere.",
+        description: "LEJIO gør det nemt at leje køretøjer. Søg blandt private udlejere og forhandlere.",
         theme_color: "#2962FF",
         background_color: "#FDF8F3",
         display: "standalone",

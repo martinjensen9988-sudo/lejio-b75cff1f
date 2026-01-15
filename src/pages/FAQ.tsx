@@ -50,11 +50,11 @@ const FAQ = () => {
       questions: [
         {
           q: "Hvordan kommer jeg i gang som udlejer?",
-          a: "Opret en konto, vælg om du er privat eller professionel udlejer, tilføj dine køretøjer med billeder og priser, og du er klar til at modtage bookinger!"
+          a: "Opret en konto, vælg om du er privat udlejer eller forhandler, tilføj dine køretøjer med billeder og priser, og du er klar til at modtage bookinger!"
         },
         {
           q: "Hvad koster det at bruge LEJIO?",
-          a: "Private udlejere betaler 49 kr pr. gennemført booking. Pro Partner (CVR) betaler 299-799 kr/måned afhængig af antal køretøjer, uden pr. booking gebyr. LEJIO Varetager har 10-15% kommission."
+          a: "Private udlejere betaler 49 kr pr. gennemført booking. Forhandlere (CVR) betaler 299-799 kr/måned afhængig af antal køretøjer, uden pr. booking gebyr. LEJIO Varetager har 10-15% kommission."
         },
         {
           q: "Hvordan får jeg mine penge?",
@@ -69,8 +69,8 @@ const FAQ = () => {
           a: "Gå til din booking i dashboardet og vælg 'Opret advarsel'. Udfyld årsagen og beskrivelsen. Lejeren vil blive informeret og kan klage over advarslen."
         },
         {
-          q: "Hvad er forskellen på Privat og Pro Partner?",
-          a: "Private udlejere betaler pr. booking (49 kr), mens Pro Partnere (med CVR) betaler fast månedsbeløb uden pr. booking gebyr. Pro Partnere får også 14 dages gratis prøveperiode og kan uploade firmalogo til kontrakter."
+          q: "Hvad er forskellen på Privat og Forhandler?",
+          a: "Private udlejere betaler pr. booking (49 kr), mens Forhandlere (med CVR) betaler fast månedsbeløb uden pr. booking gebyr. Forhandlere får også 14 dages gratis prøveperiode og kan uploade firmalogo til kontrakter."
         },
         {
           q: "Hvordan fungerer LEJIO Varetager?",

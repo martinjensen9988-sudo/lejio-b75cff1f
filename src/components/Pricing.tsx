@@ -82,7 +82,7 @@ const Pricing = () => {
                 <Building2 className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-display text-xl font-black text-foreground">Pro Partner</h3>
+                <h3 className="font-display text-xl font-black text-foreground">Forhandler</h3>
                 <p className="text-xs text-muted-foreground">SaaS Abonnement</p>
               </div>
             </div>

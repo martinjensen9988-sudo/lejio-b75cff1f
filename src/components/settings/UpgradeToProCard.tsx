@@ -253,7 +253,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
           Opgrader til Pro
         </CardTitle>
         <CardDescription>
-          Bliv professionel udlejer og få adgang til alle funktioner
+          Bliv forhandler og få adgang til alle funktioner
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -275,7 +275,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
             <ArrowRight className="w-5 h-5 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Opgradér til</p>
-              <p className="font-semibold text-primary">Pro udlejer</p>
+              <p className="font-semibold text-primary">Forhandler</p>
             </div>
           </div>
 
@@ -293,7 +293,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   Opgrader til Pro-profil
                 </DialogTitle>
                 <DialogDescription>
-                  Indtast dine virksomhedsoplysninger for at blive professionel udlejer. Du får 14 dages gratis prøveperiode.
+                  Indtast dine virksomhedsoplysninger for at blive forhandler. Du får 14 dages gratis prøveperiode.
                 </DialogDescription>
               </DialogHeader>
 

@@ -436,7 +436,7 @@ const Settings = () => {
                     Virksomhedsoplysninger
                   </CardTitle>
                   <CardDescription>
-                    Kun for professionelle udlejere med CVR
+                    Kun for forhandlere med CVR
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
