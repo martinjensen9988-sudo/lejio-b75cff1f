@@ -20,6 +20,7 @@ import {
   ScanLine
 } from 'lucide-react';
 import { useCheckInOut } from '@/hooks/useCheckInOut';
+import { useVehicleScan } from '@/hooks/useVehicleScan';
 import { ARDamageScanner } from '@/components/damage/ARDamageScanner';
 import { toast } from 'sonner';
 
@@ -79,6 +80,7 @@ export const CheckInOutWizard = ({
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showDamageScanner, setShowDamageScanner] = useState(false);
   const [damageResults, setDamageResults] = useState<any[]>([]);
+  const [scanSessionId, setScanSessionId] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -93,6 +95,8 @@ export const CheckInOutWizard = ({
     createCheckInRecord,
     createCheckOutRecord,
   } = useCheckInOut();
+
+  const { createScanSession, saveScanResults, isSaving } = useVehicleScan();
 
   const expectedPlate = booking.vehicle?.registration || '';
 
@@ -159,11 +163,28 @@ export const CheckInOutWizard = ({
     }
   };
 
-  const handleDamageScanComplete = (results: any[]) => {
+  const handleDamageScanComplete = async (results: any[]) => {
     setDamageResults(results);
     setShowDamageScanner(false);
+    
+    // Save scan results to database
+    if (results.length > 0) {
+      const sessionId = await createScanSession({
+        bookingId: booking.id,
+        vehicleId: booking.vehicle_id,
+        lessorId: booking.lessor_id,
+        renterId: booking.renter_id,
+        scanType: mode,
+      });
+
+      if (sessionId) {
+        setScanSessionId(sessionId);
+        await saveScanResults(sessionId, results);
+        toast.success('Skadesscanning gemt');
+      }
+    }
+    
     setStep('dashboard');
-    toast.success('Skadesscanning afsluttet');
   };
 
   const handleSkipDamageScan = () => {
