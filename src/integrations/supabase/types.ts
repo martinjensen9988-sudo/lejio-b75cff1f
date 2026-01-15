@@ -594,6 +594,428 @@ export type Database = {
           },
         ]
       }
+      corporate_accounts: {
+        Row: {
+          billing_address: string | null
+          billing_city: string | null
+          billing_postal_code: string | null
+          commission_rate: number | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          contract_end_date: string | null
+          contract_start_date: string | null
+          created_at: string | null
+          cvr_number: string
+          ean_number: string | null
+          id: string
+          monthly_budget: number | null
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_postal_code?: string | null
+          commission_rate?: number | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string | null
+          cvr_number: string
+          ean_number?: string | null
+          id?: string
+          monthly_budget?: number | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_postal_code?: string | null
+          commission_rate?: number | null
+          company_name?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string | null
+          cvr_number?: string
+          ean_number?: string | null
+          id?: string
+          monthly_budget?: number | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      corporate_bookings: {
+        Row: {
+          booking_id: string
+          corporate_account_id: string
+          corporate_employee_id: string
+          cost_allocated: number | null
+          created_at: string | null
+          department_id: string | null
+          destination: string | null
+          fleet_vehicle_id: string | null
+          id: string
+          km_driven: number | null
+          purpose: string | null
+        }
+        Insert: {
+          booking_id: string
+          corporate_account_id: string
+          corporate_employee_id: string
+          cost_allocated?: number | null
+          created_at?: string | null
+          department_id?: string | null
+          destination?: string | null
+          fleet_vehicle_id?: string | null
+          id?: string
+          km_driven?: number | null
+          purpose?: string | null
+        }
+        Update: {
+          booking_id?: string
+          corporate_account_id?: string
+          corporate_employee_id?: string
+          cost_allocated?: number | null
+          created_at?: string | null
+          department_id?: string | null
+          destination?: string | null
+          fleet_vehicle_id?: string | null
+          id?: string
+          km_driven?: number | null
+          purpose?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_bookings_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corporate_bookings_corporate_employee_id_fkey"
+            columns: ["corporate_employee_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corporate_bookings_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corporate_bookings_fleet_vehicle_id_fkey"
+            columns: ["fleet_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corporate_departments: {
+        Row: {
+          corporate_account_id: string
+          cost_center_code: string | null
+          created_at: string | null
+          id: string
+          monthly_budget: number | null
+          name: string
+        }
+        Insert: {
+          corporate_account_id: string
+          cost_center_code?: string | null
+          created_at?: string | null
+          id?: string
+          monthly_budget?: number | null
+          name: string
+        }
+        Update: {
+          corporate_account_id?: string
+          cost_center_code?: string | null
+          created_at?: string | null
+          id?: string
+          monthly_budget?: number | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_departments_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corporate_employees: {
+        Row: {
+          corporate_account_id: string
+          created_at: string | null
+          department_id: string | null
+          driver_license_verified: boolean | null
+          email: string
+          employee_number: string | null
+          full_name: string
+          id: string
+          is_active: boolean | null
+          is_admin: boolean | null
+          phone: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          corporate_account_id: string
+          created_at?: string | null
+          department_id?: string | null
+          driver_license_verified?: boolean | null
+          email: string
+          employee_number?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          is_admin?: boolean | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          corporate_account_id?: string
+          created_at?: string | null
+          department_id?: string | null
+          driver_license_verified?: boolean | null
+          email?: string
+          employee_number?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_admin?: boolean | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_employees_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corporate_employees_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corporate_fleet_vehicles: {
+        Row: {
+          assigned_department_id: string | null
+          corporate_account_id: string
+          created_at: string | null
+          end_date: string | null
+          extra_km_rate: number | null
+          id: string
+          included_km_per_month: number | null
+          is_exclusive: boolean | null
+          lessor_id: string
+          monthly_rate: number
+          start_date: string
+          status: string | null
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          assigned_department_id?: string | null
+          corporate_account_id: string
+          created_at?: string | null
+          end_date?: string | null
+          extra_km_rate?: number | null
+          id?: string
+          included_km_per_month?: number | null
+          is_exclusive?: boolean | null
+          lessor_id: string
+          monthly_rate: number
+          start_date: string
+          status?: string | null
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          assigned_department_id?: string | null
+          corporate_account_id?: string
+          created_at?: string | null
+          end_date?: string | null
+          extra_km_rate?: number | null
+          id?: string
+          included_km_per_month?: number | null
+          is_exclusive?: boolean | null
+          lessor_id?: string
+          monthly_rate?: number
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_fleet_vehicles_assigned_department_id_fkey"
+            columns: ["assigned_department_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corporate_fleet_vehicles_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corporate_invoices: {
+        Row: {
+          corporate_account_id: string
+          created_at: string | null
+          department_breakdown: Json | null
+          due_date: string | null
+          id: string
+          invoice_number: string
+          invoice_period_end: string
+          invoice_period_start: string
+          issued_at: string | null
+          line_items: Json | null
+          paid_at: string | null
+          pdf_url: string | null
+          status: string | null
+          subtotal: number
+          total_amount: number
+          total_bookings: number | null
+          total_km_driven: number | null
+          updated_at: string | null
+          vat_amount: number
+        }
+        Insert: {
+          corporate_account_id: string
+          created_at?: string | null
+          department_breakdown?: Json | null
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          invoice_period_end: string
+          invoice_period_start: string
+          issued_at?: string | null
+          line_items?: Json | null
+          paid_at?: string | null
+          pdf_url?: string | null
+          status?: string | null
+          subtotal?: number
+          total_amount?: number
+          total_bookings?: number | null
+          total_km_driven?: number | null
+          updated_at?: string | null
+          vat_amount?: number
+        }
+        Update: {
+          corporate_account_id?: string
+          created_at?: string | null
+          department_breakdown?: Json | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          invoice_period_end?: string
+          invoice_period_start?: string
+          issued_at?: string | null
+          line_items?: Json | null
+          paid_at?: string | null
+          pdf_url?: string | null
+          status?: string | null
+          subtotal?: number
+          total_amount?: number
+          total_bookings?: number | null
+          total_km_driven?: number | null
+          updated_at?: string | null
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_invoices_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corporate_usage_stats: {
+        Row: {
+          avg_utilization_rate: number | null
+          co2_emissions_kg: number | null
+          corporate_account_id: string
+          created_at: string | null
+          department_stats: Json | null
+          id: string
+          most_used_vehicle_id: string | null
+          period_month: string
+          total_bookings: number | null
+          total_cost: number | null
+          total_km_driven: number | null
+        }
+        Insert: {
+          avg_utilization_rate?: number | null
+          co2_emissions_kg?: number | null
+          corporate_account_id: string
+          created_at?: string | null
+          department_stats?: Json | null
+          id?: string
+          most_used_vehicle_id?: string | null
+          period_month: string
+          total_bookings?: number | null
+          total_cost?: number | null
+          total_km_driven?: number | null
+        }
+        Update: {
+          avg_utilization_rate?: number | null
+          co2_emissions_kg?: number | null
+          corporate_account_id?: string
+          created_at?: string | null
+          department_stats?: Json | null
+          id?: string
+          most_used_vehicle_id?: string | null
+          period_month?: string
+          total_bookings?: number | null
+          total_cost?: number | null
+          total_km_driven?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_usage_stats_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_segments: {
         Row: {
           created_at: string
@@ -3465,6 +3887,7 @@ export type Database = {
         Returns: boolean
       }
       generate_contract_number: { Args: never; Returns: string }
+      generate_corporate_invoice_number: { Args: never; Returns: string }
       generate_invoice_number: { Args: never; Returns: string }
       get_renter_rating_stats: {
         Args: { renter_email_input: string }
