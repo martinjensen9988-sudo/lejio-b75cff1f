@@ -9,11 +9,11 @@ const PrivateFleetExplainer = () => {
     {
       number: "1",
       icon: Car,
-      title: "Tilmeld din bil",
-      description: "Kontakt os og fortæl om dit køretøj. Vi aftaler en pris og laver en aftale.",
+      title: "Kontakt os",
+      description: "Fortæl os om dit køretøj. Vi vurderer bilen og laver en aftale.",
       details: [
         "Kontakt LEJIO via telefon, mail eller formular",
-        "Vi gennemgår bilen og aftaler dagspris",
+        "Vi vurderer bilen og fastsætter månedsprisen",
         "Du sørger for forsikring der dækker udlejning",
         "Vi udarbejder en samarbejdsaftale"
       ],
@@ -23,64 +23,64 @@ const PrivateFleetExplainer = () => {
       number: "2",
       icon: Car,
       title: "Aflever bilen til os",
-      description: "Du afleverer bilen til LEJIO – herefter står vi for alt. Du behøver ikke gøre mere.",
+      description: "Du afleverer bilen til LEJIO – herefter tager vi os af absolut alt.",
       details: [
         "Aflever bilen på vores adresse",
-        "Vi dokumenterer bilens stand ved modtagelse",
-        "Bilen opbevares sikkert hos os",
-        "Du får besked når bilen udlejes"
+        "Vi tager professionelle billeder af bilen",
+        "Vi dokumenterer bilens stand grundigt",
+        "Bilen opbevares sikkert hos os"
       ],
       color: "accent"
     },
     {
       number: "3",
       icon: Users,
-      title: "Vi finder lejere",
-      description: "LEJIO markedsfører din bil og håndterer alle henvendelser fra potentielle lejere.",
+      title: "Vi opretter annoncen",
+      description: "LEJIO sætter prisen, tager billeder og opretter en professionel annonce.",
       details: [
-        "Professionelle billeder og annonce",
-        "Din bil vises på LEJIO's platform",
-        "Vi screener og verificerer alle lejere",
-        "Håndtering af alle spørgsmål og bookinger"
+        "Vi fastsætter den optimale månedspris",
+        "Professionelle billeder og beskrivelse",
+        "Din bil udbydes som abonnement (min. 30 dage)",
+        "Annoncen vises på LEJIO's platform"
       ],
       color: "primary"
     },
     {
       number: "4",
-      icon: FileCheck,
-      title: "Kontrakt & udlevering",
-      description: "Vi håndterer kontrakt, check-in og udlevering af bilen til lejeren.",
+      icon: Calendar,
+      title: "Vi finder abonnenter",
+      description: "Bilen udlejes kun på abonnement – minimum 30 dage ad gangen.",
       details: [
-        "Professionel lejekontrakt genereres",
-        "Lejers kørekort og ID verificeres",
-        "Grundig check-in med fotodokumentation",
-        "Nøgler udleveres af LEJIO"
+        "Vi screener og verificerer alle lejere",
+        "Håndtering af alle spørgsmål og bookinger",
+        "Lejer tegner abonnement – ikke dagsleje",
+        "Stabil indtægt måned efter måned"
       ],
       color: "lavender"
     },
     {
       number: "5",
-      icon: Camera,
-      title: "Check-ud & modtagelse",
-      description: "Når lejeren afleverer, tjekker vi bilen og dokumenterer alt.",
+      icon: FileCheck,
+      title: "Kontrakt & udlevering",
+      description: "Vi håndterer kontrakt, check-in og udlevering af bilen til lejeren.",
       details: [
-        "Lejer afleverer bilen til os",
-        "360° fotodokumentation af bilen",
-        "AI scanner for nye ridser og skader",
-        "Kilometertæller og brændstof registreres"
+        "Abonnementskontrakt genereres af os",
+        "Lejers kørekort og ID verificeres",
+        "Grundig check-in med fotodokumentation",
+        "Nøgler udleveres af LEJIO"
       ],
       color: "secondary"
     },
     {
       number: "6",
       icon: CreditCard,
-      title: "Betaling & udbetaling",
-      description: "Vi opkræver betaling fra lejer og overfører dit beløb direkte til din konto.",
+      title: "Månedlig udbetaling",
+      description: "Lejeren betaler månedligt, og vi overfører din andel til dig.",
       details: [
-        "Lejer betaler ved booking",
+        "Lejer betaler abonnement hver måned",
         "Vi tilbageholder 30% til LEJIO",
         "Du modtager 70% af lejeindtægten",
-        "Udbetaling hver 14. dag til din bankkonto"
+        "Fast udbetaling hver måned"
       ],
       color: "mint"
     },
@@ -90,8 +90,8 @@ const PrivateFleetExplainer = () => {
       title: "Skadeshåndtering",
       description: "Hvis uheldet er ude, håndterer vi hele processen med lejer.",
       details: [
-        "Skader opdages ved check-ud scanning",
-        "Vi opkræver selvrisiko fra lejer",
+        "Regelmæssig inspektion af bilen",
+        "Vi opkræver selvrisiko fra lejer ved skader",
         "Du kontaktes kun ved større skader",
         "Du skal ikke løfte en finger"
       ],
@@ -252,25 +252,21 @@ const PrivateFleetExplainer = () => {
             
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-border/50">
-                <span className="text-muted-foreground">Din bil udlejes for</span>
-                <span className="font-bold">450 kr/dag</span>
-              </div>
-              <div className="flex justify-between items-center py-3 border-b border-border/50">
-                <span className="text-muted-foreground">Udlejet 10 dage om måneden</span>
-                <span className="font-bold">4.500 kr</span>
+                <span className="text-muted-foreground">Månedligt abonnement</span>
+                <span className="font-bold">6.500 kr/md</span>
               </div>
               <div className="flex justify-between items-center py-3 border-b border-border/50">
                 <span className="text-muted-foreground">LEJIO's andel (30%)</span>
-                <span className="text-muted-foreground">-1.350 kr</span>
+                <span className="text-muted-foreground">-1.950 kr</span>
               </div>
               <div className="flex justify-between items-center py-3 bg-mint/10 rounded-xl px-4 -mx-4">
                 <span className="font-bold text-lg">Din indtjening</span>
-                <span className="font-display text-2xl font-black text-mint">3.150 kr/md</span>
+                <span className="font-display text-2xl font-black text-mint">4.550 kr/md</span>
               </div>
             </div>
             
             <p className="text-center text-sm text-muted-foreground mt-6">
-              * Uden at løfte en finger. Vi klarer alt arbejdet.
+              * Fast månedlig indtægt uden at løfte en finger.
             </p>
           </div>
         </div>
@@ -285,31 +281,35 @@ const PrivateFleetExplainer = () => {
             {[
               {
                 q: "Hvordan fungerer det i praksis?",
-                a: "Du afleverer din bil til os, og vi tager os af alt derefter. Vi opbevarer bilen, finder lejere, håndterer kontrakter, udlevering, check-in/ud og betaling. Du behøver ikke gøre noget."
+                a: "Du afleverer din bil til os, og vi tager os af absolut alt derefter. Vi tager billeder, sætter prisen, opretter annonce, finder abonnenter, håndterer kontrakter og betaling. Du behøver ikke gøre noget."
+              },
+              {
+                q: "Hvad betyder abonnement?",
+                a: "Bilen udlejes kun på abonnement med minimum 30 dages binding. Det giver dig stabil indtægt og mindre slid på bilen sammenlignet med korttidsudlejning."
+              },
+              {
+                q: "Hvem sætter prisen?",
+                a: "Det gør vi. LEJIO fastsætter den optimale månedspris baseret på bilens stand, model og markedet. Vi sørger for at maksimere din indtjening."
               },
               {
                 q: "Hvem står for forsikringen?",
-                a: "Du står selv for forsikringen af din bil – det er dit ansvar som ejer. Sørg for at din bilforsikring dækker udlejning til tredjemand. Lejeren accepterer i kontrakten at dække selvrisiko ved skader."
+                a: "Du står selv for forsikringen af din bil – det er dit ansvar som ejer. Sørg for at din bilforsikring dækker udlejning til tredjemand."
               },
               {
                 q: "Hvor afleverer jeg bilen?",
-                a: "Du afleverer bilen på vores adresse. Vi aftaler tid og sted når du tilmelder dig. Herefter står vi for alt."
+                a: "Du afleverer bilen på vores adresse. Vi tager professionelle billeder og dokumenterer bilens stand. Herefter står vi for alt."
               },
               {
                 q: "Hvordan får jeg mine penge?",
-                a: "Vi udbetaler til din bankkonto hver 14. dag. Du kan følge alle bookinger og indtjening i din LEJIO-app i realtid."
+                a: "Lejer betaler abonnement hver måned. Vi udbetaler din andel (70%) til din bankkonto månedligt."
               },
               {
-                q: "Hvad hvis bilen bliver skadet?",
-                a: "Vores check-in/check-ud system dokumenterer bilens stand med fotos og AI-scanning. Ved skader opkræver vi selvrisiko fra lejer. Du kontaktes kun hvis der er større skader."
-              },
-              {
-                q: "Kan jeg få bilen tilbage når jeg har brug for den?",
-                a: "Ja! Giv os besked i god tid, så sørger vi for at bilen er klar til afhentning. Vi aftaler nærmere detaljer i samarbejdsaftalen."
+                q: "Kan jeg få bilen tilbage?",
+                a: "Ja! Giv os besked i god tid (typisk 30 dage), så sørger vi for at bilen er klar til afhentning når nuværende abonnement udløber."
               },
               {
                 q: "Hvad koster det at komme i gang?",
-                a: "Ingenting! Der er ingen opstartsgebyr. Vi tager kun 30% af den faktiske omsætning, når din bil udlejes."
+                a: "Ingenting! Der er ingen opstartsgebyr. Vi tager kun 30% af abonnementsindtægten."
               }
             ].map((faq, index) => (
               <div 
