@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2, Car, Calendar, Fuel } from "lucide-react";
+import { Sparkles, Loader2, Car, Calendar, Fuel, ArrowRight } from "lucide-react";
 import { useVehicleLookup, VehicleData } from "@/hooks/useVehicleLookup";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const LicensePlateHook = () => {
+  const navigate = useNavigate();
   const [registration, setRegistration] = useState("");
   const { vehicle, isLoading, error, lookupVehicle, reset } = useVehicleLookup();
 
@@ -34,25 +36,27 @@ const LicensePlateHook = () => {
   };
 
   return (
-    <section className="py-24 relative overflow-hidden bg-lavender-gradient">
-      {/* Organic shapes */}
-      <div className="absolute top-10 left-10 w-48 h-48 bg-secondary/20 blob animate-blob animate-float" />
-      <div className="absolute bottom-10 right-10 w-64 h-64 bg-mint/15 blob-2 animate-blob animate-float-slow" style={{ animationDelay: '2s' }} />
+    <section className="py-24 relative overflow-hidden">
+      {/* Bold gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-secondary/10 to-mint/20" />
+      
+      {/* Animated blobs */}
+      <div className="absolute top-10 left-[10%] w-40 h-40 bg-secondary rounded-full blur-2xl opacity-50 animate-float" />
+      <div className="absolute bottom-10 right-[10%] w-56 h-56 bg-mint rounded-full blur-3xl opacity-40 animate-float-slow" />
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-2xl mx-auto text-center">
-          <span className="text-4xl mb-4 block animate-bounce-soft">🎰</span>
-          <h2 className="font-display text-4xl sm:text-5xl font-black mb-4 animate-slide-up">
-            Hvad er dit køretøj <span className="text-gradient-warm">værd?</span>
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-4 animate-slide-up">
+            <span className="bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">Hvad er din bil værd?</span>
           </h2>
-          <p className="text-lg text-muted-foreground mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Indtast nummerplade og se, hvad du kan tjene ved at leje din bil, campingvogn eller trailer ud.
+          <p className="text-xl text-muted-foreground mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            Indtast nummerplade og se hvad du kan tjene.
           </p>
 
-          {/* License Plate Input - Designed to look like a real Danish plate */}
+          {/* License Plate Input */}
           <div className="max-w-md mx-auto mb-8 animate-scale-in" style={{ animationDelay: '0.2s' }}>
-            <div className="bg-card rounded-2xl p-2 shadow-xl border-4 border-destructive/60 relative overflow-hidden">
-              {/* EU stripe on the left */}
+            <div className="bg-card rounded-2xl p-2 shadow-2xl border-4 border-destructive/60 relative overflow-hidden">
+              {/* EU stripe */}
               <div className="absolute left-0 top-0 bottom-0 w-10 bg-primary flex flex-col items-center justify-center">
                 <div className="text-[8px] text-primary-foreground font-bold">DK</div>
                 <div className="flex flex-wrap justify-center gap-0.5 mt-1">
@@ -75,33 +79,32 @@ const LicensePlateHook = () => {
             </div>
           </div>
 
-          {/* Error message */}
+          {/* Error */}
           {error && (
             <p className="text-destructive text-sm mb-4 animate-fade-in">{error}</p>
           )}
 
-          {/* Vehicle result card */}
+          {/* Vehicle result */}
           {vehicle && (
             <VehicleCard vehicle={vehicle} />
           )}
 
           <Button 
-            variant="warm" 
             size="xl" 
-            className="group animate-scale-in" 
+            className="bg-gradient-to-r from-accent to-secondary text-accent-foreground font-bold text-lg group animate-scale-in" 
             style={{ animationDelay: '0.3s' }}
-            onClick={handleLookup}
+            onClick={vehicle ? () => navigate('/auth') : handleLookup}
             disabled={isLoading}
           >
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Henter køretøjsdata...
+                Henter data...
               </>
             ) : vehicle ? (
               <>
-                Beregn min indtægt
-                <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                Opret og tjen penge
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </>
             ) : (
               <>
@@ -112,7 +115,7 @@ const LicensePlateHook = () => {
           </Button>
 
           <p className="text-sm text-muted-foreground mt-6 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            Vi henter køretøjsdata automatisk via Motorregisteret. Ingen binding.
+            Data hentes automatisk via Motorregisteret.
           </p>
         </div>
       </div>
@@ -122,10 +125,10 @@ const LicensePlateHook = () => {
 
 const VehicleCard = ({ vehicle }: { vehicle: VehicleData }) => {
   return (
-    <div className="bg-card rounded-2xl p-6 shadow-xl border border-border mb-8 animate-scale-in text-left">
+    <div className="bg-card rounded-2xl p-6 shadow-xl border-2 border-mint/40 mb-8 animate-scale-in text-left max-w-md mx-auto">
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Car className="w-7 h-7 text-primary" />
+        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-mint to-mint/60 flex items-center justify-center shadow-lg">
+          <Car className="w-7 h-7 text-white" />
         </div>
         <div>
           <h3 className="font-display text-xl font-bold text-foreground">
@@ -156,6 +159,14 @@ const VehicleCard = ({ vehicle }: { vehicle: VehicleData }) => {
             <span className="text-sm text-foreground capitalize">{vehicle.color}</span>
           </div>
         )}
+      </div>
+
+      {/* Estimated earnings */}
+      <div className="mt-4 pt-4 border-t border-border">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted-foreground">Estimeret indtjening</span>
+          <span className="font-display text-2xl font-black text-mint">3.000+ kr/md</span>
+        </div>
       </div>
     </div>
   );
