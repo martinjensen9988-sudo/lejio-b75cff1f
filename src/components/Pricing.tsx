@@ -116,21 +116,21 @@ const Pricing = () => {
             </Button>
           </div>
 
-          {/* LEJIO Varetager */}
+          {/* Fleet Basic */}
           <div className="rounded-3xl bg-gradient-to-br from-lavender/30 to-mint/20 border-2 border-lavender/40 p-6 hover:shadow-xl transition-all animate-scale-in" style={{ animationDelay: '0.2s' }}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-2xl bg-lavender/30 flex items-center justify-center">
                 <Shield className="w-6 h-6 text-lavender" />
               </div>
               <div>
-                <h3 className="font-display text-xl font-black text-foreground">LEJIO Varetager</h3>
+                <h3 className="font-display text-xl font-black text-foreground">Fleet Basic</h3>
                 <p className="text-xs text-muted-foreground">Vi driver din udlejning</p>
               </div>
             </div>
 
             <div className="mb-4">
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="font-display text-4xl font-black text-foreground">15%</span>
+                <span className="font-display text-4xl font-black text-foreground">20%</span>
               </div>
               <p className="text-lavender font-bold text-sm">af omsætningen</p>
               <p className="text-xs text-muted-foreground mt-1">Ingen månedlig udgift</p>
@@ -155,7 +155,7 @@ const Pricing = () => {
             </Button>
           </div>
 
-          {/* LEJIO Varetager Pro */}
+          {/* Fleet Premium */}
           <div className="rounded-3xl bg-gradient-to-br from-primary/20 to-lavender/20 border-2 border-primary/40 p-6 hover:shadow-xl transition-all relative animate-scale-in" style={{ animationDelay: '0.3s' }}>
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-lavender text-primary-foreground text-xs font-bold shadow-lg">
               🚀 Premium
@@ -166,22 +166,22 @@ const Pricing = () => {
                 <Shield className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-display text-xl font-black text-foreground">Varetager Pro</h3>
+                <h3 className="font-display text-xl font-black text-foreground">Fleet Premium</h3>
                 <p className="text-xs text-muted-foreground">Fuld service løsning</p>
               </div>
             </div>
 
             <div className="mb-4">
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="font-display text-4xl font-black text-foreground">10%</span>
+                <span className="font-display text-4xl font-black text-foreground">35%</span>
               </div>
               <p className="text-primary font-bold text-sm">af omsætningen</p>
-              <p className="text-xs text-muted-foreground mt-1">Lavere kommission</p>
+              <p className="text-xs text-muted-foreground mt-1">Alt inkluderet</p>
             </div>
 
             <ul className="space-y-2 mb-6 text-sm">
               {[
-                "Alt fra Varetager",
+                "Alt fra Fleet Basic",
                 "Prioriteret synlighed",
                 "Dedikeret kontaktperson",
               ].map((feature, i) => (
