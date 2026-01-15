@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu, Camera, Building2
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu, Camera, Building2, Facebook
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,7 @@ import AdminGpsDevices from '@/components/admin/AdminGpsDevices';
 import AdminBookingStats from '@/components/admin/AdminBookingStats';
 import { AdminCheckInOutSettings } from '@/components/admin/AdminCheckInOutSettings';
 import AdminCorporateAccounts from '@/components/admin/AdminCorporateAccounts';
+import AdminFacebookPosts from '@/components/admin/AdminFacebookPosts';
 
 interface Customer {
   id: string;
@@ -217,6 +218,7 @@ const AdminDashboard = () => {
     { value: 'gps', icon: MapPin, label: 'GPS' },
     { value: 'checkinout', icon: Camera, label: 'Check-in/out' },
     { value: 'corporate', icon: Building2, label: 'Virksomheder' },
+    { value: 'facebook', icon: Facebook, label: 'Facebook' },
     { value: 'stats', icon: BarChart3, label: 'Statistik' },
   ];
 
@@ -468,6 +470,11 @@ const AdminDashboard = () => {
           {/* Corporate Accounts Tab */}
           <TabsContent value="corporate">
             <AdminCorporateAccounts />
+          </TabsContent>
+
+          {/* Facebook Posts Tab */}
+          <TabsContent value="facebook">
+            <AdminFacebookPosts />
           </TabsContent>
 
           {/* Booking Stats Tab */}

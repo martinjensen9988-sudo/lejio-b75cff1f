@@ -1061,6 +1061,51 @@ export type Database = {
         }
         Relationships: []
       }
+      dagens_bil_settings: {
+        Row: {
+          auto_rotate: boolean | null
+          created_at: string
+          id: string
+          last_posted_at: string | null
+          post_time: string | null
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          auto_rotate?: boolean | null
+          created_at?: string
+          id?: string
+          last_posted_at?: string | null
+          post_time?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          auto_rotate?: boolean | null
+          created_at?: string
+          id?: string
+          last_posted_at?: string | null
+          post_time?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dagens_bil_settings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dagens_bil_settings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       damage_items: {
         Row: {
           created_at: string
@@ -1350,6 +1395,57 @@ export type Database = {
           verified_by?: string | null
         }
         Relationships: []
+      }
+      facebook_posts: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          is_dagens_bil: boolean | null
+          message: string
+          post_id: string
+          posted_at: string
+          posted_by: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_dagens_bil?: boolean | null
+          message: string
+          post_id: string
+          posted_at?: string
+          posted_by: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_dagens_bil?: boolean | null
+          message?: string
+          post_id?: string
+          posted_at?: string
+          posted_by?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_posts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facebook_posts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fleet_settlements: {
         Row: {

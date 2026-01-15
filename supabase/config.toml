@@ -119,3 +119,9 @@ verify_jwt = true
 
 [functions.generate-corporate-invoice]
 verify_jwt = true
+
+[functions.generate-facebook-post]
+verify_jwt = true
+
+[functions.post-to-facebook]
+verify_jwt = true
