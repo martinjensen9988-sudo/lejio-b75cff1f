@@ -1029,9 +1029,11 @@ export type Database = {
           center_latitude: number
           center_longitude: number
           created_at: string
+          geofence_type: string
           id: string
           is_active: boolean
           name: string
+          polygon_coordinates: Json | null
           radius_meters: number
           updated_at: string
           vehicle_id: string
@@ -1042,9 +1044,11 @@ export type Database = {
           center_latitude: number
           center_longitude: number
           created_at?: string
+          geofence_type?: string
           id?: string
           is_active?: boolean
           name: string
+          polygon_coordinates?: Json | null
           radius_meters?: number
           updated_at?: string
           vehicle_id: string
@@ -1055,9 +1059,11 @@ export type Database = {
           center_latitude?: number
           center_longitude?: number
           created_at?: string
+          geofence_type?: string
           id?: string
           is_active?: boolean
           name?: string
+          polygon_coordinates?: Json | null
           radius_meters?: number
           updated_at?: string
           vehicle_id?: string

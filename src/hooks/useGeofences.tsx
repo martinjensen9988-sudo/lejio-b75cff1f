@@ -11,6 +11,8 @@ export interface Geofence {
   center_latitude: number;
   center_longitude: number;
   radius_meters: number;
+  geofence_type: 'circle' | 'polygon';
+  polygon_coordinates: number[][] | null;
   is_active: boolean;
   alert_on_exit: boolean;
   alert_on_enter: boolean;
@@ -66,6 +68,8 @@ export const useGeofences = () => {
       center_latitude: number;
       center_longitude: number;
       radius_meters: number;
+      geofence_type?: 'circle' | 'polygon';
+      polygon_coordinates?: number[][] | null;
       alert_on_exit?: boolean;
       alert_on_enter?: boolean;
     }) => {

@@ -186,27 +186,40 @@ export const GpsTrackingMap = ({ devices, selectedDevice, onSelectDevice, geofen
       });
       geofenceLayersRef.current = [];
 
-      // Add geofence circles
+      // Add geofence shapes (circles or polygons)
       geofences.forEach((geofence) => {
         const sourceId = `geofence-${geofence.id}`;
         const fillLayerId = `geofence-fill-${geofence.id}`;
         const lineLayerId = `geofence-line-${geofence.id}`;
 
-        // Create a circle polygon from center and radius
-        const center = [geofence.center_longitude, geofence.center_latitude];
-        const radiusKm = geofence.radius_meters / 1000;
-        const points = 64;
-        const coords: [number, number][] = [];
+        let coords: [number, number][];
 
-        for (let i = 0; i < points; i++) {
-          const angle = (i / points) * 2 * Math.PI;
-          const dx = radiusKm * Math.cos(angle);
-          const dy = radiusKm * Math.sin(angle);
-          const lat = center[1] + (dy / 111.32);
-          const lng = center[0] + (dx / (111.32 * Math.cos(center[1] * Math.PI / 180)));
-          coords.push([lng, lat]);
+        // Check if this is a polygon geofence with stored coordinates
+        const gf = geofence as any;
+        if (gf.geofence_type === 'polygon' && gf.polygon_coordinates && Array.isArray(gf.polygon_coordinates) && gf.polygon_coordinates.length >= 3) {
+          // Use stored polygon coordinates
+          coords = gf.polygon_coordinates.map((p: number[]) => [p[0], p[1]] as [number, number]);
+          // Ensure polygon is closed
+          if (coords[0][0] !== coords[coords.length - 1][0] || coords[0][1] !== coords[coords.length - 1][1]) {
+            coords.push(coords[0]);
+          }
+        } else {
+          // Create a circle polygon from center and radius
+          const center = [geofence.center_longitude, geofence.center_latitude];
+          const radiusKm = geofence.radius_meters / 1000;
+          const points = 64;
+          coords = [];
+
+          for (let i = 0; i < points; i++) {
+            const angle = (i / points) * 2 * Math.PI;
+            const dx = radiusKm * Math.cos(angle);
+            const dy = radiusKm * Math.sin(angle);
+            const lat = center[1] + (dy / 111.32);
+            const lng = center[0] + (dx / (111.32 * Math.cos(center[1] * Math.PI / 180)));
+            coords.push([lng, lat]);
+          }
+          coords.push(coords[0]); // Close the polygon
         }
-        coords.push(coords[0]); // Close the polygon
 
         currentMap.addSource(sourceId, {
           type: 'geojson',

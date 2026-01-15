@@ -28,6 +28,8 @@ interface Geofence {
   center_latitude: number;
   center_longitude: number;
   radius_meters: number;
+  geofence_type: 'circle' | 'polygon';
+  polygon_coordinates: number[][] | null;
   is_active: boolean;
   alert_on_exit: boolean;
   alert_on_enter: boolean;
@@ -45,10 +47,36 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-// Check if point is inside geofence
+// Ray casting algorithm for point-in-polygon check
+const isPointInPolygon = (lat: number, lon: number, polygon: number[][]): boolean => {
+  if (!polygon || polygon.length < 3) return false;
+  
+  let inside = false;
+  const n = polygon.length;
+  
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = polygon[i][0], yi = polygon[i][1];
+    const xj = polygon[j][0], yj = polygon[j][1];
+    
+    if (((yi > lat) !== (yj > lat)) &&
+        (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  
+  return inside;
+};
+
+// Check if point is inside geofence (supports both circle and polygon)
 const isInsideGeofence = (lat: number, lon: number, geofence: Geofence): boolean => {
-  const distance = calculateDistance(lat, lon, geofence.center_latitude, geofence.center_longitude);
-  return distance <= geofence.radius_meters;
+  if (geofence.geofence_type === 'polygon' && geofence.polygon_coordinates && geofence.polygon_coordinates.length >= 3) {
+    // Use point-in-polygon algorithm for polygons
+    return isPointInPolygon(lat, lon, geofence.polygon_coordinates);
+  } else {
+    // Use distance-based check for circles
+    const distance = calculateDistance(lat, lon, geofence.center_latitude, geofence.center_longitude);
+    return distance <= geofence.radius_meters;
+  }
 };
 
 // Provider-specific data parsers
