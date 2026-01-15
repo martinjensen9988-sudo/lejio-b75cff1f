@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useCorporateFleet } from '@/hooks/useCorporateFleet';
@@ -19,7 +19,8 @@ import {
   Leaf,
   CreditCard,
   ArrowRight,
-  Plus
+  Plus,
+  ArrowLeft
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -28,6 +29,7 @@ import CorporateEmployeesTab from '@/components/corporate/CorporateEmployeesTab'
 import CorporateBookingsTab from '@/components/corporate/CorporateBookingsTab';
 import CorporateInvoicesTab from '@/components/corporate/CorporateInvoicesTab';
 import CorporateAnalyticsTab from '@/components/corporate/CorporateAnalyticsTab';
+import CorporateBookingDialog from '@/components/corporate/CorporateBookingDialog';
 
 const CorporateDashboard = () => {
   const navigate = useNavigate();
@@ -45,7 +47,10 @@ const CorporateDashboard = () => {
     currentEmployee,
     getFleetUtilization,
     getTotalMonthlySpend,
+    refetch,
   } = useCorporateFleet();
+
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -103,6 +108,9 @@ const CorporateDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Building2 className="w-6 h-6 text-primary" />
               </div>
@@ -115,11 +123,15 @@ const CorporateDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button onClick={() => setShowBookingDialog(true)} size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Book bil
+              </Button>
               <Badge variant={corporateAccount.status === 'active' ? 'default' : 'destructive'}>
                 {corporateAccount.status === 'active' ? 'Aktiv' : 'Suspenderet'}
               </Badge>
               {currentEmployee && (
-                <div className="text-right">
+                <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium">{currentEmployee.full_name}</p>
                   <p className="text-xs text-muted-foreground">
                     {isAdmin ? 'Administrator' : 'Medarbejder'}
@@ -196,7 +208,7 @@ const CorporateDashboard = () => {
         </div>
 
         {/* Quick Actions for Employees */}
-        {!isAdmin && (
+        {fleetVehicles.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -210,7 +222,11 @@ const CorporateDashboard = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {fleetVehicles.slice(0, 3).map((vehicle) => (
-                  <Card key={vehicle.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                  <Card 
+                    key={vehicle.id} 
+                    className="cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => setShowBookingDialog(true)}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-16 h-12 rounded-lg bg-muted flex items-center justify-center">
@@ -220,6 +236,9 @@ const CorporateDashboard = () => {
                           <p className="font-medium text-sm">Køretøj #{vehicle.id.slice(0, 8)}</p>
                           <p className="text-xs text-muted-foreground">
                             {vehicle.included_km_per_month} km/md inkl.
+                          </p>
+                          <p className="text-xs font-medium text-primary">
+                            {vehicle.monthly_rate.toLocaleString('da-DK')} kr/md
                           </p>
                         </div>
                         <Button size="sm" variant="ghost">
@@ -268,6 +287,8 @@ const CorporateDashboard = () => {
               vehicles={fleetVehicles} 
               departments={departments}
               isAdmin={isAdmin}
+              corporateAccountId={corporateAccount?.id}
+              onRefresh={refetch}
             />
           </TabsContent>
 
@@ -300,12 +321,25 @@ const CorporateDashboard = () => {
                   fleetVehicles={fleetVehicles}
                 />
               </TabsContent>
-            </>
-          )}
-        </Tabs>
-      </main>
-    </div>
-  );
-};
+              </>
+            )}
+          </Tabs>
+        </main>
+
+        {/* Booking Dialog */}
+        {corporateAccount && currentEmployee && (
+          <CorporateBookingDialog
+            open={showBookingDialog}
+            onOpenChange={setShowBookingDialog}
+            fleetVehicles={fleetVehicles}
+            corporateAccountId={corporateAccount.id}
+            currentEmployeeId={currentEmployee.id}
+            departmentId={currentEmployee.department_id}
+            onSuccess={refetch}
+          />
+        )}
+      </div>
+    );
+  };
 
 export default CorporateDashboard;

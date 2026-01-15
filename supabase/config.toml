@@ -116,3 +116,6 @@ verify_jwt = true
 
 [functions.analyze-dashboard]
 verify_jwt = true
+
+[functions.generate-corporate-invoice]
+verify_jwt = true
