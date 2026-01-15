@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu, Camera
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu, Camera, Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +39,7 @@ import AdminVehicleValueVerification from '@/components/admin/AdminVehicleValueV
 import AdminGpsDevices from '@/components/admin/AdminGpsDevices';
 import AdminBookingStats from '@/components/admin/AdminBookingStats';
 import { AdminCheckInOutSettings } from '@/components/admin/AdminCheckInOutSettings';
+import AdminCorporateAccounts from '@/components/admin/AdminCorporateAccounts';
 
 interface Customer {
   id: string;
@@ -215,6 +216,7 @@ const AdminDashboard = () => {
     { value: 'vehicle-values', icon: ShieldCheck, label: 'Bilværdier' },
     { value: 'gps', icon: MapPin, label: 'GPS' },
     { value: 'checkinout', icon: Camera, label: 'Check-in/out' },
+    { value: 'corporate', icon: Building2, label: 'Virksomheder' },
     { value: 'stats', icon: BarChart3, label: 'Statistik' },
   ];
 
@@ -461,6 +463,11 @@ const AdminDashboard = () => {
           {/* Check-in/out Settings Tab */}
           <TabsContent value="checkinout">
             <AdminCheckInOutSettings />
+          </TabsContent>
+
+          {/* Corporate Accounts Tab */}
+          <TabsContent value="corporate">
+            <AdminCorporateAccounts />
           </TabsContent>
 
           {/* Booking Stats Tab */}

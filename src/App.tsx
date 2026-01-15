@@ -20,6 +20,7 @@ import Messages from "./pages/Messages";
 import Install from "./pages/Install";
 import GpsTracking from "./pages/GpsTracking";
 import Features from "./pages/Features";
+import CorporateDashboard from "./pages/CorporateDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/install" element={<Install />} />
             <Route path="/gps" element={<GpsTracking />} />
             <Route path="/funktioner" element={<Features />} />
+            <Route path="/corporate" element={<CorporateDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
