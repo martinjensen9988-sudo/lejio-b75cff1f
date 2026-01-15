@@ -268,20 +268,23 @@ const AdminUserManagement = () => {
     setIsDeleting(true);
 
     try {
-      // Delete user profile (this will cascade to related data based on your RLS)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', selectedUser.id);
+      // Call edge function to fully delete user (auth + profile + vehicles)
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId: selectedUser.id },
+      });
 
-      if (profileError) {
-        console.error('Error deleting profile:', profileError);
-        toast.error('Kunne ikke slette bruger: ' + profileError.message);
+      if (error) {
+        console.error('Error deleting user:', error);
+        toast.error('Kunne ikke slette bruger: ' + error.message);
+      } else if (data?.error) {
+        console.error('Error deleting user:', data.error);
+        toast.error('Kunne ikke slette bruger: ' + data.error);
       } else {
-        toast.success('Bruger slettet permanent');
+        toast.success('Bruger og alle tilknyttede data slettet permanent');
         setShowDeleteDialog(false);
         setSelectedUser(null);
-        fetchUsers();
+        // Remove user from local state immediately
+        setUsers(prev => prev.filter(u => u.id !== selectedUser.id));
       }
     } catch (error: any) {
       console.error('Error deleting user:', error);
