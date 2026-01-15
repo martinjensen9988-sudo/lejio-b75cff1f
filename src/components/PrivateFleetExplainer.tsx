@@ -10,56 +10,69 @@ const PrivateFleetExplainer = () => {
       number: "1",
       icon: Car,
       title: "Tilmeld din bil",
-      description: "Upload billeder og oplysninger om dit køretøj. Vi laver en professionel annonce der tiltrækker lejere.",
+      description: "Kontakt os og fortæl om dit køretøj. Vi aftaler en pris og laver en aftale.",
       details: [
-        "Indtast registreringsnummer – vi henter automatisk bildata",
-        "Upload mindst 6 billeder af bilen",
-        "Angiv tilgængelighed og ønsket dagspris",
-        "Vi optimerer prisen baseret på markedet"
+        "Kontakt LEJIO via telefon, mail eller formular",
+        "Vi gennemgår bilen og aftaler dagspris",
+        "Du sørger for forsikring der dækker udlejning",
+        "Vi udarbejder en samarbejdsaftale"
       ],
       color: "mint"
     },
     {
       number: "2",
-      icon: Users,
-      title: "Vi finder lejere",
-      description: "LEJIO markedsfører din bil og håndterer alle henvendelser fra potentielle lejere.",
+      icon: Car,
+      title: "Aflever bilen til os",
+      description: "Du afleverer bilen til LEJIO – herefter står vi for alt. Du behøver ikke gøre mere.",
       details: [
-        "Din bil vises på LEJIO's platform",
-        "Vi besvarer alle spørgsmål fra interesserede",
-        "Screening af lejere – kørekort verificeres",
-        "Du godkender eller afviser bookinger i app'en"
+        "Aflever bilen på vores adresse",
+        "Vi dokumenterer bilens stand ved modtagelse",
+        "Bilen opbevares sikkert hos os",
+        "Du får besked når bilen udlejes"
       ],
       color: "accent"
     },
     {
       number: "3",
-      icon: FileCheck,
-      title: "Kontrakt & dokumentation",
-      description: "Vi genererer automatisk lejekontrakt med alle juridiske detaljer. Du sørger selv for din bilforsikring.",
+      icon: Users,
+      title: "Vi finder lejere",
+      description: "LEJIO markedsfører din bil og håndterer alle henvendelser fra potentielle lejere.",
       details: [
-        "Professionel lejekontrakt genereres automatisk",
-        "Lejers kørekort og ID verificeres",
-        "Selvrisiko og ansvar er klart defineret",
-        "Digital underskrift fra begge parter"
+        "Professionelle billeder og annonce",
+        "Din bil vises på LEJIO's platform",
+        "Vi screener og verificerer alle lejere",
+        "Håndtering af alle spørgsmål og bookinger"
       ],
       color: "primary"
     },
     {
       number: "4",
-      icon: Camera,
-      title: "Check-in & check-ud",
-      description: "Ved afhentning og aflevering dokumenterer vi bilens stand med fotos og AI-analyse.",
+      icon: FileCheck,
+      title: "Kontrakt & udlevering",
+      description: "Vi håndterer kontrakt, check-in og udlevering af bilen til lejeren.",
       details: [
-        "360° fotodokumentation af bilen",
-        "AI scanner for ridser og skader",
-        "Kilometertæller og brændstofniveau registreres",
-        "Tidsstemplet rapport gemmes som bevis"
+        "Professionel lejekontrakt genereres",
+        "Lejers kørekort og ID verificeres",
+        "Grundig check-in med fotodokumentation",
+        "Nøgler udleveres af LEJIO"
       ],
       color: "lavender"
     },
     {
       number: "5",
+      icon: Camera,
+      title: "Check-ud & modtagelse",
+      description: "Når lejeren afleverer, tjekker vi bilen og dokumenterer alt.",
+      details: [
+        "Lejer afleverer bilen til os",
+        "360° fotodokumentation af bilen",
+        "AI scanner for nye ridser og skader",
+        "Kilometertæller og brændstof registreres"
+      ],
+      color: "secondary"
+    },
+    {
+      number: "6",
       icon: CreditCard,
       title: "Betaling & udbetaling",
       description: "Vi opkræver betaling fra lejer og overfører dit beløb direkte til din konto.",
@@ -69,20 +82,20 @@ const PrivateFleetExplainer = () => {
         "Du modtager 70% af lejeindtægten",
         "Udbetaling hver 14. dag til din bankkonto"
       ],
-      color: "secondary"
+      color: "mint"
     },
     {
-      number: "6",
+      number: "7",
       icon: Shield,
       title: "Skadeshåndtering",
-      description: "Hvis uheldet er ude, håndterer vi hele processen med lejer og forsikring.",
+      description: "Hvis uheldet er ude, håndterer vi hele processen med lejer.",
       details: [
         "Skader opdages ved check-ud scanning",
         "Vi opkræver selvrisiko fra lejer",
-        "Forsikringssag oprettes om nødvendigt",
+        "Du kontaktes kun ved større skader",
         "Du skal ikke løfte en finger"
       ],
-      color: "mint"
+      color: "accent"
     }
   ];
 
@@ -271,8 +284,16 @@ const PrivateFleetExplainer = () => {
           <div className="space-y-4">
             {[
               {
+                q: "Hvordan fungerer det i praksis?",
+                a: "Du afleverer din bil til os, og vi tager os af alt derefter. Vi opbevarer bilen, finder lejere, håndterer kontrakter, udlevering, check-in/ud og betaling. Du behøver ikke gøre noget."
+              },
+              {
                 q: "Hvem står for forsikringen?",
                 a: "Du står selv for forsikringen af din bil – det er dit ansvar som ejer. Sørg for at din bilforsikring dækker udlejning til tredjemand. Lejeren accepterer i kontrakten at dække selvrisiko ved skader."
+              },
+              {
+                q: "Hvor afleverer jeg bilen?",
+                a: "Du afleverer bilen på vores adresse. Vi aftaler tid og sted når du tilmelder dig. Herefter står vi for alt."
               },
               {
                 q: "Hvordan får jeg mine penge?",
@@ -280,19 +301,15 @@ const PrivateFleetExplainer = () => {
               },
               {
                 q: "Hvad hvis bilen bliver skadet?",
-                a: "Vores check-in/check-ud system dokumenterer bilens stand med fotos og AI-scanning. Ved skader opkræver vi selvrisiko fra lejer og hjælper med forsikringssag om nødvendigt."
+                a: "Vores check-in/check-ud system dokumenterer bilens stand med fotos og AI-scanning. Ved skader opkræver vi selvrisiko fra lejer. Du kontaktes kun hvis der er større skader."
               },
               {
-                q: "Kan jeg selv bestemme hvornår bilen er tilgængelig?",
-                a: "Ja! Du styrer selv tilgængeligheden i kalenderen. Du kan også godkende eller afvise hver enkelt booking."
+                q: "Kan jeg få bilen tilbage når jeg har brug for den?",
+                a: "Ja! Giv os besked i god tid, så sørger vi for at bilen er klar til afhentning. Vi aftaler nærmere detaljer i samarbejdsaftalen."
               },
               {
                 q: "Hvad koster det at komme i gang?",
                 a: "Ingenting! Der er ingen opstartsgebyr. Vi tager kun 30% af den faktiske omsætning, når din bil udlejes."
-              },
-              {
-                q: "Hvordan afleverer lejeren nøglerne?",
-                a: "Det aftaler I selv – enten personlig overdragelse eller via nøgleboks. Vi guider jer gennem processen."
               }
             ].map((faq, index) => (
               <div 
