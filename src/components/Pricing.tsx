@@ -140,7 +140,7 @@ const Pricing = () => {
               {[
                 "LEJIO håndterer alt",
                 "Booking & kundeservice",
-                "Badge på dine biler",
+                "Badge på dine køretøjer",
               ].map((feature, i) => (
                 <li key={i} className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-lavender/20 flex items-center justify-center text-xs">✓</span>
