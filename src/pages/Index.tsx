@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import JanuaryPromoBanner from "@/components/JanuaryPromoBanner";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import LicensePlateHook from "@/components/LicensePlateHook";
@@ -37,6 +38,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <JanuaryPromoBanner />
       <Navigation />
       <main>
         <Hero />
