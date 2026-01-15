@@ -19,9 +19,12 @@ import ContractSigningModal from '@/components/contracts/ContractSigningModal';
 import DamageReportModal from '@/components/damage/DamageReportModal';
 import { RenterRatingModal } from '@/components/ratings/RenterRatingModal';
 import { RenterRatingBadge } from '@/components/ratings/RenterRatingBadge';
+import { CheckInOutWizard } from '@/components/checkinout/CheckInOutWizard';
+import { VehicleScanHistory } from '@/components/damage/VehicleScanHistory';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star } from 'lucide-react';
+import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star, ScanLine, History } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BookingsTableProps {
@@ -48,6 +51,15 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   // Damage report state
   const [damageReportOpen, setDamageReportOpen] = useState(false);
   const [selectedBookingForDamage, setSelectedBookingForDamage] = useState<Booking | null>(null);
+  
+  // Check-in/out wizard state
+  const [checkInOutOpen, setCheckInOutOpen] = useState(false);
+  const [checkInOutMode, setCheckInOutMode] = useState<'check_in' | 'check_out'>('check_in');
+  const [selectedBookingForCheckInOut, setSelectedBookingForCheckInOut] = useState<Booking | null>(null);
+  
+  // Scan history state
+  const [scanHistoryOpen, setScanHistoryOpen] = useState(false);
+  const [selectedBookingForHistory, setSelectedBookingForHistory] = useState<Booking | null>(null);
   
   // Renter rating state
   const [renterRatingOpen, setRenterRatingOpen] = useState(false);
@@ -300,6 +312,18 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                           size="sm"
                           variant="outline"
                           onClick={() => {
+                            setSelectedBookingForCheckInOut(booking);
+                            setCheckInOutMode('check_in');
+                            setCheckInOutOpen(true);
+                          }}
+                          title="AR Check-in Scanner"
+                        >
+                          <ScanLine className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
                             setSelectedBookingForDamage(booking);
                             setDamageReportType('pickup');
                             setDamageReportOpen(true);
@@ -323,6 +347,18 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                           size="sm"
                           variant="outline"
                           onClick={() => {
+                            setSelectedBookingForCheckInOut(booking);
+                            setCheckInOutMode('check_out');
+                            setCheckInOutOpen(true);
+                          }}
+                          title="AR Check-out Scanner"
+                        >
+                          <ScanLine className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
                             setSelectedBookingForDamage(booking);
                             setDamageReportType('return');
                             setDamageReportOpen(true);
@@ -330,6 +366,17 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                           title="Indleveringsrapport"
                         >
                           <ClipboardCheck className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedBookingForHistory(booking);
+                            setScanHistoryOpen(true);
+                          }}
+                          title="Se skanningshistorik"
+                        >
+                          <History className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
@@ -400,7 +447,6 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
           onClose={() => {
             setRenterRatingOpen(false);
             setSelectedBookingForRating(null);
-            // Mark as rated
             if (selectedBookingForRating) {
               setRatedBookings(prev => new Set([...prev, selectedBookingForRating.id]));
             }
@@ -411,6 +457,45 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
           renterId={selectedBookingForRating.renter_id}
         />
       )}
+
+      {/* Check-in/out Wizard with AR Scanner */}
+      {selectedBookingForCheckInOut && (
+        <CheckInOutWizard
+          open={checkInOutOpen}
+          onOpenChange={setCheckInOutOpen}
+          mode={checkInOutMode}
+          booking={{
+            id: selectedBookingForCheckInOut.id,
+            vehicle_id: selectedBookingForCheckInOut.vehicle_id,
+            lessor_id: selectedBookingForCheckInOut.lessor_id,
+            renter_id: selectedBookingForCheckInOut.renter_id,
+            vehicle: selectedBookingForCheckInOut.vehicle ? {
+              registration: selectedBookingForCheckInOut.vehicle.registration,
+              make: selectedBookingForCheckInOut.vehicle.make,
+              model: selectedBookingForCheckInOut.vehicle.model,
+            } : undefined,
+          }}
+          onComplete={() => {
+            setCheckInOutOpen(false);
+            setSelectedBookingForCheckInOut(null);
+          }}
+        />
+      )}
+
+      {/* Scan History Dialog */}
+      <Dialog open={scanHistoryOpen} onOpenChange={setScanHistoryOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5" />
+              Skanningshistorik
+            </DialogTitle>
+          </DialogHeader>
+          {selectedBookingForHistory && (
+            <VehicleScanHistory bookingId={selectedBookingForHistory.id} />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

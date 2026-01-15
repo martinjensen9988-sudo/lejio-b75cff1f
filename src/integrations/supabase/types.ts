@@ -2371,6 +2371,175 @@ export type Database = {
           },
         ]
       }
+      vehicle_scan_areas: {
+        Row: {
+          area_code: string
+          area_label: string
+          created_at: string
+          id: string
+          image_url: string | null
+          scan_session_id: string
+          scanned_at: string
+        }
+        Insert: {
+          area_code: string
+          area_label: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          scan_session_id: string
+          scanned_at?: string
+        }
+        Update: {
+          area_code?: string
+          area_label?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          scan_session_id?: string
+          scanned_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_scan_areas_scan_session_id_fkey"
+            columns: ["scan_session_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_scan_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_scan_damages: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          damage_type: string
+          description: string | null
+          id: string
+          image_url: string | null
+          position: string
+          scan_area_id: string
+          scan_session_id: string
+          severity: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          damage_type: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          position: string
+          scan_area_id: string
+          scan_session_id: string
+          severity: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          damage_type?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          position?: string
+          scan_area_id?: string
+          scan_session_id?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_scan_damages_scan_area_id_fkey"
+            columns: ["scan_area_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_scan_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_scan_damages_scan_session_id_fkey"
+            columns: ["scan_session_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_scan_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_scan_sessions: {
+        Row: {
+          booking_id: string
+          check_in_out_record_id: string | null
+          completed_at: string | null
+          created_at: string
+          has_severe_damage: boolean
+          id: string
+          lessor_id: string
+          renter_id: string | null
+          scan_type: string
+          total_areas_scanned: number
+          total_damages_found: number
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          booking_id: string
+          check_in_out_record_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          has_severe_damage?: boolean
+          id?: string
+          lessor_id: string
+          renter_id?: string | null
+          scan_type: string
+          total_areas_scanned?: number
+          total_damages_found?: number
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          booking_id?: string
+          check_in_out_record_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          has_severe_damage?: boolean
+          id?: string
+          lessor_id?: string
+          renter_id?: string | null
+          scan_type?: string
+          total_areas_scanned?: number
+          total_damages_found?: number
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_scan_sessions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_scan_sessions_check_in_out_record_id_fkey"
+            columns: ["check_in_out_record_id"]
+            isOneToOne: false
+            referencedRelation: "check_in_out_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_scan_sessions_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_scan_sessions_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_service_logs: {
         Row: {
           cost: number | null
