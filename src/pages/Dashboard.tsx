@@ -22,7 +22,9 @@ import InvoicesTab from '@/components/dashboard/InvoicesTab';
 import CustomerSegmentsTab from '@/components/dashboard/CustomerSegmentsTab';
 import FavoritesTab from '@/components/dashboard/FavoritesTab';
 import ServiceRemindersCard from '@/components/dashboard/ServiceRemindersCard';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles } from 'lucide-react';
+import TireManagementTab from '@/components/dashboard/TireManagementTab';
+import InspectionRemindersTab from '@/components/dashboard/InspectionRemindersTab';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles, CircleDot, Shield } from 'lucide-react';
 import { AIPriceSuggestions } from '@/components/dashboard/AIPriceSuggestions';
 
 const Dashboard = () => {
@@ -231,6 +233,14 @@ const Dashboard = () => {
                   <Wrench className="w-4 h-4" />
                   <span className="hidden sm:inline">Værksted</span>
                 </TabsTrigger>
+                <TabsTrigger value="tires" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <CircleDot className="w-4 h-4" />
+                  <span className="hidden sm:inline">Dæk</span>
+                </TabsTrigger>
+                <TabsTrigger value="inspections" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Shield className="w-4 h-4" />
+                  <span className="hidden sm:inline">Syn</span>
+                </TabsTrigger>
                 <TabsTrigger value="analytics" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
                   <BarChart3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Analytics</span>
@@ -327,6 +337,14 @@ const Dashboard = () => {
 
           <TabsContent value="analytics" className="mt-6">
             <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="tires" className="mt-6">
+            <TireManagementTab vehicles={vehicles} />
+          </TabsContent>
+
+          <TabsContent value="inspections" className="mt-6">
+            <InspectionRemindersTab vehicles={vehicles} />
           </TabsContent>
 
           <TabsContent value="ai-pricing" className="mt-6">
