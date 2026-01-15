@@ -20,7 +20,16 @@ import {
   FileCheck,
   Smartphone,
   Truck,
-  Star
+  Star,
+  Gift,
+  Receipt,
+  Camera,
+  Brain,
+  BadgeCheck,
+  Wallet,
+  Building2,
+  Scan,
+  ShieldCheck
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +59,11 @@ const Features = () => {
           title: "Abonnementsudlejning",
           description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.",
           icon: Repeat,
+        },
+        {
+          title: "AI-prissætning",
+          description: "Få intelligente prisforslag baseret på marked, sæson og efterspørgsel.",
+          icon: Brain,
           badge: "Ny",
         },
       ],
@@ -75,9 +89,38 @@ const Features = () => {
           icon: Smartphone,
         },
         {
-          title: "Skaderapporter",
-          description: "Dokumentér bilens stand ved udlevering og aflevering med fotos.",
-          icon: Shield,
+          title: "Skaderapporter med AI",
+          description: "Dokumentér bilens stand med AI-analyse af fotos og skader.",
+          icon: Scan,
+        },
+      ],
+    },
+    {
+      title: "Check-in & Check-out",
+      icon: Camera,
+      color: "bg-teal-500/10 text-teal-600",
+      features: [
+        {
+          title: "Nummerplade-scanning",
+          description: "Scan nummerpladen ved udlevering og aflevering for automatisk verifikation.",
+          icon: Scan,
+          badge: "Ny",
+        },
+        {
+          title: "Dashboard-foto med AI",
+          description: "Tag foto af instrumentbrættet – AI aflæser km-stand og brændstofniveau.",
+          icon: Camera,
+          badge: "Ny",
+        },
+        {
+          title: "GPS-lokationsverifikation",
+          description: "Bekræft at bilen afleveres det rigtige sted med GPS-tjek.",
+          icon: MapPin,
+        },
+        {
+          title: "Automatisk opgørelse",
+          description: "Systemet beregner km-overskridelse og brændstofgebyr automatisk.",
+          icon: Receipt,
         },
       ],
     },
@@ -95,7 +138,6 @@ const Features = () => {
           title: "Automatisk abonnementsbetaling",
           description: "Ved månedlig leje trækkes beløbet automatisk fra lejerens kort.",
           icon: Repeat,
-          badge: "Ny",
         },
         {
           title: "Depositumhåndtering",
@@ -103,9 +145,43 @@ const Features = () => {
           icon: Shield,
         },
         {
+          title: "Selvrisiko-forsikring",
+          description: "Tilbyd lejere at reducere selvrisiko til 0 kr. for kun 49 kr./dag.",
+          icon: ShieldCheck,
+          badge: "Ny",
+        },
+        {
           title: "Brændstofpolitik",
           description: "Automatisk beregning af brændstofgebyr ved manglende tank.",
           icon: Gauge,
+        },
+      ],
+    },
+    {
+      title: "Bøder & Afgifter",
+      icon: Receipt,
+      color: "bg-red-500/10 text-red-600",
+      features: [
+        {
+          title: "Bøde-håndtering",
+          description: "Upload bøder og afgifter og send dem automatisk videre til lejeren.",
+          icon: Receipt,
+          badge: "Ny",
+        },
+        {
+          title: "Auto-match med booking",
+          description: "Systemet finder automatisk den relevante booking baseret på dato og køretøj.",
+          icon: FileCheck,
+        },
+        {
+          title: "Fleksibelt administrationsgebyr",
+          description: "Indstil dit eget gebyr fra 0-800 kr. ved videresendelse af bøder.",
+          icon: Settings,
+        },
+        {
+          title: "Email-notifikation",
+          description: "Lejeren får automatisk en email med bødedetaljer og betalingsinfo.",
+          icon: Bell,
         },
       ],
     },
@@ -137,28 +213,48 @@ const Features = () => {
       color: "bg-orange-500/10 text-orange-600",
       features: [
         {
-          title: "Serviceintervaller",
-          description: "Hold styr på hvornår hver bil skal til service baseret på km eller tid.",
+          title: "Smart Service hos LEJIO",
+          description: "Book værkstedstider direkte i systemet – vi klarer servicen for dig.",
           icon: Wrench,
-          badge: "Kommer snart",
+          badge: "Ny",
         },
         {
-          title: "Synsdato-påmindelser",
+          title: "Syns-påmindelser",
           description: "Automatisk påmindelse når syn nærmer sig.",
           icon: Bell,
-          badge: "Kommer snart",
         },
         {
           title: "Dækstyring",
           description: "Administrer sommer/vinterdæk og dækhotel-lokationer.",
           icon: CircleDot,
-          badge: "Kommer snart",
         },
         {
           title: "Byttebil-funktion",
           description: "Udskift køretøj midt i lejeperiode ved service eller nedbrud.",
           icon: Truck,
-          badge: "Kommer snart",
+        },
+      ],
+    },
+    {
+      title: "Henvisningsprogram",
+      icon: Gift,
+      color: "bg-pink-500/10 text-pink-600",
+      features: [
+        {
+          title: "Del din kode",
+          description: "Få en unik henvisningskode som du kan dele med venner og familie.",
+          icon: Gift,
+          badge: "Ny",
+        },
+        {
+          title: "500 kr. til begge",
+          description: "Den henviste får 500 kr. rabat – og du får 500 kr. i kredit.",
+          icon: Wallet,
+        },
+        {
+          title: "Brug kredit ved booking",
+          description: "Anvend din optjente kredit direkte i booking-flowet.",
+          icon: CreditCard,
         },
       ],
     },
@@ -182,6 +278,12 @@ const Features = () => {
           description: "Bookingbekræftelser og påmindelser sendes automatisk.",
           icon: Smartphone,
         },
+        {
+          title: "Live Chat Support",
+          description: "AI-assisteret kundesupport direkte i appen.",
+          icon: MessageSquare,
+          badge: "Ny",
+        },
       ],
     },
     {
@@ -189,6 +291,12 @@ const Features = () => {
       icon: Users,
       color: "bg-blue-500/10 text-blue-600",
       features: [
+        {
+          title: "Kørekortsverifikation",
+          description: "AI-verificerer kørekort med foto-upload og automatisk godkendelse.",
+          icon: BadgeCheck,
+          badge: "Ny",
+        },
         {
           title: "Lejerhistorik",
           description: "Se alle tidligere bookinger og interaktioner med hver lejer.",
@@ -207,6 +315,34 @@ const Features = () => {
       ],
     },
     {
+      title: "Erhverv & Flåde",
+      icon: Building2,
+      color: "bg-slate-500/10 text-slate-600",
+      features: [
+        {
+          title: "Erhvervskonti",
+          description: "Særlige vilkår og fakturering for erhvervskunder med EAN-nummer.",
+          icon: Building2,
+          badge: "Ny",
+        },
+        {
+          title: "Afdelingsbudgetter",
+          description: "Fordel kørsel på afdelinger med separate budgetter og rapporter.",
+          icon: BarChart3,
+        },
+        {
+          title: "Medarbejder-administration",
+          description: "Administrer hvilke medarbejdere der må leje hvilke biler.",
+          icon: Users,
+        },
+        {
+          title: "Månedlig samlet faktura",
+          description: "Én faktura for alle bookinger med EAN/CVR-nummer.",
+          icon: Receipt,
+        },
+      ],
+    },
+    {
       title: "Statistik & Rapporter",
       icon: BarChart3,
       color: "bg-indigo-500/10 text-indigo-600",
@@ -220,6 +356,12 @@ const Features = () => {
           title: "Udnyttelsesgrad",
           description: "Analysér hvor ofte dine biler er udlejet.",
           icon: Gauge,
+        },
+        {
+          title: "AI Dashboard-analyse",
+          description: "Få AI-genererede indsigter og anbefalinger til din forretning.",
+          icon: Brain,
+          badge: "Ny",
         },
         {
           title: "Månedlige opgørelser",
