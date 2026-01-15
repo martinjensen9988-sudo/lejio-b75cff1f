@@ -347,8 +347,6 @@ export const AddGeofenceDialog = ({ open, onOpenChange }: AddGeofenceDialogProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // For now, store polygon as a large radius circle at center
-    // TODO: Add proper polygon support to database
     if (geofenceType === 'polygon') {
       const pointsToUse = selectedPreset 
         ? COUNTRY_BOUNDARIES[selectedPreset]?.coordinates || []
@@ -356,25 +354,32 @@ export const AddGeofenceDialog = ({ open, onOpenChange }: AddGeofenceDialogProps
       
       if (pointsToUse.length < 3) return;
       
-      // Calculate center and approximate radius
+      // Calculate center for display purposes
       const centerLng = pointsToUse.reduce((sum, p) => sum + p[0], 0) / pointsToUse.length;
       const centerLat = pointsToUse.reduce((sum, p) => sum + p[1], 0) / pointsToUse.length;
       
-      // Calculate max distance from center to any point (in km, then convert to meters)
+      // Calculate approximate radius for backwards compatibility
       const maxDistKm = pointsToUse.reduce((max, p) => {
         const dLat = (p[1] - centerLat) * 111.32;
         const dLng = (p[0] - centerLng) * 111.32 * Math.cos(centerLat * Math.PI / 180);
         return Math.max(max, Math.sqrt(dLat * dLat + dLng * dLng));
       }, 0);
       
+      // Store as proper polygon with coordinates
       await addGeofence.mutateAsync({
         ...formData,
         center_latitude: centerLat,
         center_longitude: centerLng,
         radius_meters: Math.round(maxDistKm * 1000),
+        geofence_type: 'polygon',
+        polygon_coordinates: pointsToUse,
       });
     } else {
-      await addGeofence.mutateAsync(formData);
+      await addGeofence.mutateAsync({
+        ...formData,
+        geofence_type: 'circle',
+        polygon_coordinates: null,
+      });
     }
     
     // Reset form
