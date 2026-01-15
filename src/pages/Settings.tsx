@@ -211,7 +211,7 @@ const Settings = () => {
 
     setSaving(true);
     try {
-      // Save profile data
+      // 1) Save profile data
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -237,9 +237,11 @@ const Settings = () => {
         })
         .eq('id', user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        throw new Error(`PROFIL: ${profileError.message}`);
+      }
 
-      // Save payment settings separately
+      // 2) Save payment settings separately
       const { error: paymentError } = await updatePaymentSettings({
         payment_gateway: paymentFormData.payment_gateway === 'none' ? null : paymentFormData.payment_gateway,
         gateway_api_key: paymentFormData.gateway_api_key || null,
@@ -247,7 +249,11 @@ const Settings = () => {
         bank_account: paymentFormData.bank_account || null,
       });
 
-      if (paymentError) throw paymentError;
+      if (paymentError) {
+        // paymentError may be an Error-like object from invoke(); normalize message
+        const pe = paymentError as unknown as { message?: string };
+        throw new Error(`BETALING: ${pe?.message || 'Ukendt fejl'}`);
+      }
 
       toast({
         title: 'Indstillinger gemt',
@@ -255,6 +261,7 @@ const Settings = () => {
       });
     } catch (error) {
       console.error('Error saving profile:', error);
+
       const msg =
         error && typeof error === 'object'
           ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
