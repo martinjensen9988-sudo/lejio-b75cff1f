@@ -3,12 +3,14 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SearchFilters from "@/components/search/SearchFilters";
 import VehicleSearchCard from "@/components/search/VehicleSearchCard";
+import VehicleCardSkeleton from "@/components/search/VehicleCardSkeleton";
+import ActiveFilterPills from "@/components/search/ActiveFilterPills";
+import EmptySearchState from "@/components/search/EmptySearchState";
 import SearchMap from "@/components/search/SearchMap";
 import { VehicleDetailModal } from "@/components/search/VehicleDetailModal";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map } from "lucide-react";
+import { Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -141,6 +143,21 @@ const Search = () => {
     periodCount: 1,
     vehicleType: 'all',
   });
+
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filters.priceMin > 0 ||
+      filters.priceMax < 5000 ||
+      filters.fuelType !== 'all' ||
+      filters.startDate !== undefined ||
+      filters.periodType !== 'daily' ||
+      filters.periodCount !== 1 ||
+      (filters.trailerType && filters.trailerType !== 'all') ||
+      filters.maxWeight !== undefined ||
+      filters.minSleepingCapacity !== undefined
+    );
+  }, [filters]);
 
   // Sort vehicles based on selected option
   const sortedVehicles = useMemo(() => {
@@ -291,6 +308,23 @@ const Search = () => {
     }
   };
 
+  const resetFilters = () => {
+    setSearchQuery('');
+    setFilters({
+      priceMin: 0,
+      priceMax: 5000,
+      fuelType: "all",
+      startDate: undefined,
+      endDate: undefined,
+      periodType: 'daily',
+      periodCount: 1,
+      vehicleType: 'all',
+      trailerType: 'all',
+      maxWeight: undefined,
+      minSleepingCapacity: undefined,
+    });
+  };
+
   const vehicleTypeButtons = [
     { value: 'all' as VehicleTypeFilter, label: 'Alle', icon: Sparkles, count: vehicles.length },
     { value: 'bil' as VehicleTypeFilter, label: 'Biler', icon: Car, count: vehicles.filter(v => v.vehicle_type === 'bil').length },
@@ -318,7 +352,7 @@ const Search = () => {
                 </span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                {filteredVehicles.length} {getVehicleTypeLabel()} tilgængelige i hele Danmark
+                {loading ? 'Henter køretøjer...' : `${filteredVehicles.length} ${getVehicleTypeLabel()} tilgængelige i hele Danmark`}
               </p>
 
               {/* Search Input */}
@@ -357,7 +391,7 @@ const Search = () => {
           </div>
         </div>
 
-        {/* Vehicle Type Tabs */}
+        {/* Sticky Vehicle Type Tabs + Filter Pills */}
         <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-lg border-b border-border">
           <div className="container mx-auto px-6">
             <div className="flex items-center justify-between py-4 gap-4">
@@ -399,6 +433,13 @@ const Search = () => {
                 </Button>
               </div>
             </div>
+
+            {/* Active Filter Pills - Sticky horizontal bar */}
+            {hasActiveFilters && (
+              <div className="pb-4 -mt-1">
+                <ActiveFilterPills filters={filters} setFilters={setFilters} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -415,7 +456,7 @@ const Search = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
               <h2 className="font-display text-2xl font-bold">
-                {filteredVehicles.length} {getVehicleTypeLabel()}
+                {loading ? 'Indlæser...' : `${filteredVehicles.length} ${getVehicleTypeLabel()}`}
               </h2>
             </div>
 
@@ -481,33 +522,27 @@ const Search = () => {
             </Button>
           </div>
 
+          {/* Loading State - Skeleton Loaders */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-96 gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-              <p className="text-muted-foreground">Henter køretøjer...</p>
+            <div className={`grid gap-6 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
+                : 'grid-cols-1'
+            }`}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <VehicleCardSkeleton key={i} viewMode={viewMode === 'list' ? 'list' : 'grid'} />
+              ))}
             </div>
           ) : (
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Vehicle Grid/List */}
               <div className={`${viewMode === 'map' ? 'hidden lg:block lg:w-2/5' : 'w-full'}`}>
                 {filteredVehicles.length === 0 ? (
-                  <div className="text-center py-16 bg-card rounded-3xl border-2 border-dashed border-border">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-muted flex items-center justify-center mb-6">
-                      <Car className="w-10 h-10 text-muted-foreground" />
-                    </div>
-                    <h3 className="font-display text-xl font-bold mb-2">Ingen køretøjer fundet</h3>
-                    <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                      Prøv at justere dine filtre eller søgeord for at se flere resultater.
-                    </p>
-                    <Button variant="outline" onClick={() => {
-                      setSearchQuery('');
-                      setFilters(prev => ({ ...prev, vehicleType: 'all', priceMin: 0, priceMax: 5000 }));
-                    }}>
-                      Nulstil filtre
-                    </Button>
-                  </div>
+                  <EmptySearchState 
+                    vehicleType={filters.vehicleType}
+                    onReset={resetFilters}
+                    hasFilters={hasActiveFilters || searchQuery.length > 0}
+                  />
                 ) : (
                   <div className={`grid gap-6 ${
                     viewMode === 'grid' && !viewMode.includes('map') 

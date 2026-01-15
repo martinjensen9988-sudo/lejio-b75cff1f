@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Car, Fuel, Calendar, Gauge, Check, Shield, Star, Truck, Tent, Users, ChefHat, Bath, Umbrella, Weight, MapPin, ArrowRight } from "lucide-react";
+import { useMemo, useState, useCallback } from "react";
+import { Car, Fuel, Calendar, Check, Shield, Star, Truck, Tent, Users, ChefHat, Bath, Umbrella, Weight, MapPin, ArrowRight, Zap, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,24 @@ const VehicleSearchCard = ({
   viewMode = 'grid',
 }: VehicleSearchCardProps) => {
   const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Generate multiple image URLs (simulating carousel with same image + variations)
+  const images = useMemo(() => {
+    if (!vehicle.image_url) return [];
+    // For now, use the single image - in production you'd have vehicle.images array
+    return [vehicle.image_url];
+  }, [vehicle.image_url]);
+
+  const nextImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % Math.max(images.length, 1));
+  }, [images.length]);
+
+  const prevImage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % Math.max(images.length, 1));
+  }, [images.length]);
 
   const VehicleIcon = useMemo(() => {
     switch (vehicle.vehicle_type) {
@@ -76,6 +94,8 @@ const VehicleSearchCard = ({
   }, [filters, vehicle]);
 
   const location = vehicle.location_city || vehicle.location_postal_code || 'Danmark';
+  const isElectric = vehicle.fuel_type?.toLowerCase() === 'el';
+  const isDealer = vehicle.owner_company_name && vehicle.owner_fleet_plan;
 
   if (viewMode === 'list') {
     return (
@@ -88,11 +108,11 @@ const VehicleSearchCard = ({
         onClick={onSelect}
       >
         <div className="flex">
-          {/* Image */}
-          <div className="w-64 h-48 relative shrink-0">
+          {/* Image with carousel */}
+          <div className="w-72 h-52 relative shrink-0 group/image">
             {vehicle.image_url ? (
               <img
-                src={vehicle.image_url}
+                src={images[currentImageIndex] || vehicle.image_url}
                 alt={`${vehicle.make} ${vehicle.model}`}
                 className="w-full h-full object-cover"
               />
@@ -101,16 +121,62 @@ const VehicleSearchCard = ({
                 <VehicleIcon className="w-16 h-16 text-muted-foreground/50" />
               </div>
             )}
+            
+            {/* Carousel controls */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-background/90 rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity shadow-lg"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-background/90 rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity shadow-lg"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                {/* Dots indicator */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {images.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${
+                        idx === currentImageIndex ? 'bg-white w-3' : 'bg-white/60'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Top floating badges */}
+            <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+              {isElectric && (
+                <Badge className="bg-green-500/90 backdrop-blur-sm text-white shadow-lg border-0">
+                  <Zap className="w-3 h-3 mr-1" />
+                  Elbil
+                </Badge>
+              )}
+              {isDealer && (
+                <Badge className="bg-blue-500/90 backdrop-blur-sm text-white shadow-lg border-0">
+                  <Building2 className="w-3 h-3 mr-1" />
+                  Forhandler
+                </Badge>
+              )}
+              {vehicle.owner_fleet_plan && (
+                <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg border-0">
+                  <Shield className="w-3 h-3 mr-1" />
+                  LEJIO
+                </Badge>
+              )}
+            </div>
+
             <FavoriteButton 
               vehicleId={vehicle.id} 
               className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm hover:bg-background shadow-lg"
             />
-            {vehicle.owner_fleet_plan && (
-              <Badge className="absolute bottom-3 left-3 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg">
-                <Shield className="w-3 h-3 mr-1" />
-                LEJIO Varetager
-              </Badge>
-            )}
           </div>
 
           {/* Content */}
@@ -125,11 +191,13 @@ const VehicleSearchCard = ({
                     <p className="text-muted-foreground">{vehicle.variant}</p>
                   )}
                 </div>
+                {/* Price hierarchy - Monthly prominent */}
                 <div className="text-right">
                   <div className="font-display text-2xl font-black text-primary">
                     {pricing.unitPrice.toLocaleString("da-DK")} kr
                   </div>
                   <span className="text-sm text-muted-foreground">{pricing.unitLabel}</span>
+                  <p className="text-xs text-muted-foreground mt-1">Inkl. forsikring</p>
                 </div>
               </div>
 
@@ -150,6 +218,12 @@ const VehicleSearchCard = ({
                   <MapPin className="w-4 h-4" />
                   {location}
                 </span>
+                {vehicle.unlimited_km && (
+                  <span className="flex items-center gap-1.5 text-green-600">
+                    <Check className="w-4 h-4" />
+                    Fri km
+                  </span>
+                )}
               </div>
             </div>
 
@@ -179,21 +253,21 @@ const VehicleSearchCard = ({
     );
   }
 
-  // Grid view (default)
+  // Grid view (default) - Modern card with carousel
   return (
     <div
-      className={`group bg-card rounded-3xl border-2 transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-2 ${
+      className={`group bg-card rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-2 hover:shadow-2xl ${
         isSelected
           ? "border-primary shadow-xl shadow-primary/10"
-          : "border-border hover:border-primary/30 hover:shadow-xl"
+          : "border-border hover:border-primary/30"
       }`}
       onClick={onSelect}
     >
-      {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      {/* Image with carousel */}
+      <div className="relative h-52 overflow-hidden group/image">
         {vehicle.image_url ? (
           <img
-            src={vehicle.image_url}
+            src={images[currentImageIndex] || vehicle.image_url}
             alt={`${vehicle.make} ${vehicle.model}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -203,19 +277,60 @@ const VehicleSearchCard = ({
           </div>
         )}
         
-        {/* Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        {/* Carousel controls */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-background/90 rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity shadow-lg hover:bg-background"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-background/90 rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity shadow-lg hover:bg-background"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            {/* Dots indicator */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {images.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    idx === currentImageIndex ? 'bg-white w-3' : 'bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
         
-        {/* Top badges */}
-        <div className="absolute top-3 left-3 flex gap-2">
+        {/* Gradient overlay for better badge visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+        
+        {/* Top floating badges - stacked for mobile */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[70%]">
+          {isElectric && (
+            <Badge className="bg-green-500/90 backdrop-blur-sm text-white shadow-lg border-0 text-xs">
+              <Zap className="w-3 h-3 mr-1" />
+              Elbil
+            </Badge>
+          )}
+          {isDealer && (
+            <Badge className="bg-blue-500/90 backdrop-blur-sm text-white shadow-lg border-0 text-xs">
+              <Building2 className="w-3 h-3 mr-1" />
+              Forhandler
+            </Badge>
+          )}
           {vehicle.vehicle_type !== 'bil' && (
-            <Badge className="bg-secondary/90 backdrop-blur-sm text-secondary-foreground shadow-lg">
+            <Badge className="bg-secondary/90 backdrop-blur-sm text-secondary-foreground shadow-lg border-0 text-xs">
               <VehicleIcon className="w-3 h-3 mr-1" />
               {vehicleTypeLabel}
             </Badge>
           )}
           {vehicle.unlimited_km && vehicle.vehicle_type === 'bil' && (
-            <Badge className="bg-accent/90 backdrop-blur-sm text-white shadow-lg">
+            <Badge className="bg-accent/90 backdrop-blur-sm text-white shadow-lg border-0 text-xs">
               <Check className="w-3 h-3 mr-1" />
               Fri km
             </Badge>
@@ -228,30 +343,20 @@ const VehicleSearchCard = ({
           className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm hover:bg-background shadow-lg"
         />
 
-        {/* Fleet badge */}
+        {/* Fleet badge - bottom right */}
         {vehicle.owner_fleet_plan && (
-          <Badge className="absolute bottom-3 right-3 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg">
+          <Badge className="absolute bottom-3 right-3 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg border-0">
             <Shield className="w-3 h-3 mr-1" />
             LEJIO
           </Badge>
         )}
-
-        {/* Price tag */}
-        <div className="absolute bottom-3 left-3 bg-card/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg">
-          <div className="flex items-baseline gap-1">
-            <span className="font-display text-xl font-black text-primary">
-              {pricing.unitPrice.toLocaleString("da-DK")}
-            </span>
-            <span className="text-sm text-muted-foreground">kr{pricing.unitLabel}</span>
-          </div>
-        </div>
       </div>
 
       {/* Content */}
       <div className="p-5">
-        {/* Title & Rating */}
-        <div className="mb-3">
-          <h3 className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+        {/* Title */}
+        <div className="mb-2">
+          <h3 className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
             {vehicle.make} {vehicle.model}
           </h3>
           {vehicle.variant && (
@@ -274,29 +379,29 @@ const VehicleSearchCard = ({
           </div>
         )}
 
-        {/* Features */}
-        <div className="flex flex-wrap gap-2 mb-4 text-sm text-muted-foreground">
+        {/* Features pills */}
+        <div className="flex flex-wrap gap-1.5 mb-3 text-xs">
           {vehicle.year && (
-            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-lg">
-              <Calendar className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full text-muted-foreground">
+              <Calendar className="w-3 h-3" />
               {vehicle.year}
             </span>
           )}
           {vehicle.vehicle_type === 'bil' && vehicle.fuel_type && (
-            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-lg">
-              <Fuel className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full text-muted-foreground">
+              <Fuel className="w-3 h-3" />
               {vehicle.fuel_type}
             </span>
           )}
           {vehicle.vehicle_type === 'trailer' && vehicle.total_weight && (
-            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-lg">
-              <Weight className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full text-muted-foreground">
+              <Weight className="w-3 h-3" />
               {vehicle.total_weight} kg
             </span>
           )}
           {vehicle.vehicle_type === 'campingvogn' && vehicle.sleeping_capacity && (
-            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-lg">
-              <Users className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full text-muted-foreground">
+              <Users className="w-3 h-3" />
               {vehicle.sleeping_capacity} pers.
             </span>
           )}
@@ -310,21 +415,21 @@ const VehicleSearchCard = ({
 
         {/* Campingvogn amenities */}
         {vehicle.vehicle_type === 'campingvogn' && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
+          <div className="flex flex-wrap gap-1 mb-4">
             {vehicle.has_kitchen && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 <ChefHat className="w-3 h-3 mr-1" />
                 Køkken
               </Badge>
             )}
             {vehicle.has_bathroom && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 <Bath className="w-3 h-3 mr-1" />
                 Bad
               </Badge>
             )}
             {vehicle.has_awning && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 <Umbrella className="w-3 h-3 mr-1" />
                 Markise
               </Badge>
@@ -332,18 +437,27 @@ const VehicleSearchCard = ({
           </div>
         )}
 
-        {/* Total price & Book button */}
+        {/* Price section - Monthly price prominent */}
         <div className="pt-4 border-t border-border">
-          {filters.startDate ? (
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-muted-foreground">
-                {pricing.periodCount} {pricing.periodLabel}
-              </span>
-              <span className="font-bold text-foreground">
-                {pricing.totalPrice.toLocaleString("da-DK")} kr
-              </span>
+          <div className="flex items-end justify-between mb-3">
+            <div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-display text-2xl font-black text-primary">
+                  {pricing.unitPrice.toLocaleString("da-DK")}
+                </span>
+                <span className="text-sm font-medium text-muted-foreground">kr{pricing.unitLabel}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Inkl. forsikring & afgift</p>
             </div>
-          ) : null}
+            {filters.startDate && (
+              <div className="text-right">
+                <span className="text-xs text-muted-foreground block">{pricing.periodCount} {pricing.periodLabel}</span>
+                <span className="font-bold text-foreground text-sm">
+                  {pricing.totalPrice.toLocaleString("da-DK")} kr
+                </span>
+              </div>
+            )}
+          </div>
           <Button
             className="w-full bg-gradient-to-r from-primary to-primary/80 font-bold shadow-lg shadow-primary/20 group-hover:shadow-primary/30 transition-all"
             onClick={(e) => {
