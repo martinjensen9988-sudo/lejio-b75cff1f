@@ -243,32 +243,54 @@ const PrivateFleetExplainer = () => {
           </div>
         </div>
 
-        {/* Example calculation */}
-        <div className="max-w-2xl mx-auto mb-16">
-          <div className="rounded-3xl bg-gradient-to-br from-mint/20 to-accent/10 border-2 border-mint/30 p-8">
-            <h3 className="font-display text-xl font-bold text-center mb-6">
-              💰 Eksempel: Hvad kan du tjene?
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-3 border-b border-border/50">
-                <span className="text-muted-foreground">Månedligt abonnement</span>
-                <span className="font-bold">6.500 kr/md</span>
-              </div>
-              <div className="flex justify-between items-center py-3 border-b border-border/50">
-                <span className="text-muted-foreground">LEJIO's andel (30%)</span>
-                <span className="text-muted-foreground">-1.950 kr</span>
-              </div>
-              <div className="flex justify-between items-center py-3 bg-mint/10 rounded-xl px-4 -mx-4">
-                <span className="font-bold text-lg">Din indtjening</span>
-                <span className="font-display text-2xl font-black text-mint">4.550 kr/md</span>
-              </div>
-            </div>
-            
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              * Fast månedlig indtægt uden at løfte en finger.
-            </p>
+        {/* Pricing by car size */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <h3 className="font-display text-2xl font-bold text-center mb-8">
+            💰 Hvad kan du tjene?
+          </h3>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { size: "Lille bil", example: "Aygo, Up, i10", price: 3500, icon: "🚗" },
+              { size: "Mellem bil", example: "Golf, Ceed, Focus", price: 4500, icon: "🚙" },
+              { size: "Stor bil", example: "Passat, Mondeo, A4", price: 5500, icon: "🚘" },
+              { size: "SUV", example: "Tiguan, Tucson, Q5", price: 6000, icon: "🚐" },
+            ].map((tier, index) => {
+              const yourShare = Math.round(tier.price * 0.7);
+              return (
+                <div 
+                  key={index}
+                  className="rounded-2xl bg-gradient-to-br from-mint/10 to-accent/5 border border-mint/30 p-5 text-center"
+                >
+                  <span className="text-3xl mb-2 block">{tier.icon}</span>
+                  <h4 className="font-bold text-lg mb-1">{tier.size}</h4>
+                  <p className="text-xs text-muted-foreground mb-3">{tier.example}</p>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Abonnement</span>
+                      <span className="font-medium">{tier.price.toLocaleString('da-DK')} kr</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">LEJIO (30%)</span>
+                      <span className="text-muted-foreground">-{Math.round(tier.price * 0.3).toLocaleString('da-DK')} kr</span>
+                    </div>
+                    <div className="pt-2 border-t border-border/50">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Du får</span>
+                        <span className="font-display text-xl font-black text-mint">{yourShare.toLocaleString('da-DK')} kr</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">pr. måned</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
+          
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            * Priserne er vejledende og afhænger af bilens stand, årgang og udstyr.
+          </p>
         </div>
 
         {/* FAQ */}
