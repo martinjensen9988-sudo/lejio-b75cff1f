@@ -300,7 +300,7 @@ const Settings = () => {
         <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
           {/* Mobile-friendly scrollable tabs */}
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className={cn("w-max sm:w-full inline-flex sm:grid", isProfessional ? "sm:grid-cols-7" : "sm:grid-cols-5")}>
+            <TabsList className={cn("w-max sm:w-full inline-flex sm:grid", isProfessional ? "sm:grid-cols-7" : "sm:grid-cols-6")}>
               <TabsTrigger value="profile" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
                 <User className="w-4 h-4" />
                 <span className="hidden xs:inline sm:inline">Profil</span>
@@ -327,12 +327,10 @@ const Settings = () => {
                 <AlertTriangle className="w-4 h-4" />
                 <span className="hidden sm:inline">Skader</span>
               </TabsTrigger>
-              {isProfessional && (
-                <TabsTrigger value="fleet" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Truck className="w-4 h-4" />
-                  <span className="hidden sm:inline">Fleet</span>
-                </TabsTrigger>
-              )}
+              <TabsTrigger value="fleet" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                <Truck className="w-4 h-4" />
+                <span className="hidden sm:inline">Fleet</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -894,15 +892,13 @@ const Settings = () => {
             </TabsContent>
           )}
 
-          {/* Fleet Tab */}
-          {isProfessional && (
-            <TabsContent value="fleet" className="space-y-6">
-              <FleetDashboard />
-              
-              {/* Lessor Rating Card */}
-              {user && <LessorRatingsCard lessorId={user.id} />}
-            </TabsContent>
-          )}
+          {/* Fleet Tab - Available for all users */}
+          <TabsContent value="fleet" className="space-y-6">
+            <FleetDashboard />
+            
+            {/* Lessor Rating Card */}
+            {user && <LessorRatingsCard lessorId={user.id} />}
+          </TabsContent>
         </Tabs>
 
         {/* Save Button */}

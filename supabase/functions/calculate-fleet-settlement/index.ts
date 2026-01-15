@@ -58,11 +58,11 @@ serve(async (req: Request): Promise<Response> => {
       end: endOfMonth.toISOString()
     });
 
-    // Find all fleet lessors (fleet_basic or fleet_premium)
+    // Find all fleet lessors (fleet_private, fleet_basic or fleet_premium)
     const { data: fleetLessors, error: lessorsError } = await supabase
       .from('profiles')
       .select('id, email, full_name, company_name, fleet_plan, fleet_commission_rate')
-      .in('fleet_plan', ['fleet_basic', 'fleet_premium']);
+      .in('fleet_plan', ['fleet_private', 'fleet_basic', 'fleet_premium']);
 
     if (lessorsError) {
       logStep("Error fetching fleet lessors", lessorsError);
@@ -117,8 +117,9 @@ serve(async (req: Request): Promise<Response> => {
       const totalRevenue = bookings?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;
       const bookingsCount = bookings?.length || 0;
       
-      // Commission rate: 15% for fleet_basic, 10% for fleet_premium
-      const commissionRate = lessor.fleet_plan === 'fleet_premium' ? 0.10 : 0.15;
+      // Commission rate: 30% for fleet_private, 20% for fleet_basic, 35% for fleet_premium
+      const commissionRate = lessor.fleet_plan === 'fleet_private' ? 0.30 : 
+                              lessor.fleet_plan === 'fleet_basic' ? 0.20 : 0.35;
       const commissionAmount = totalRevenue * commissionRate;
       const netPayout = totalRevenue - commissionAmount;
 

@@ -1,20 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Sparkles, Building2 } from 'lucide-react';
-import { FLEET_PLANS, FleetPlanType } from '@/hooks/useFleetPlan';
+import { Check, Sparkles, Building2, User } from 'lucide-react';
+import { FLEET_PLANS } from '@/hooks/useFleetPlan';
 import { cn } from '@/lib/utils';
 
 interface FleetPlanCardProps {
-  planType: 'fleet_basic' | 'fleet_premium';
+  planType: 'fleet_private' | 'fleet_basic' | 'fleet_premium';
   isActive: boolean;
-  onSelect: (plan: 'fleet_basic' | 'fleet_premium') => void;
+  onSelect: (plan: 'fleet_private' | 'fleet_basic' | 'fleet_premium') => void;
   isLoading?: boolean;
 }
 
 export const FleetPlanCard = ({ planType, isActive, onSelect, isLoading }: FleetPlanCardProps) => {
   const plan = FLEET_PLANS[planType];
   const isPremium = planType === 'fleet_premium';
+  const isPrivate = planType === 'fleet_private';
 
   return (
     <Card
@@ -33,7 +34,11 @@ export const FleetPlanCard = ({ planType, isActive, onSelect, isLoading }: Fleet
       
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Building2 className={cn('w-5 h-5', isPremium ? 'text-accent' : 'text-primary')} />
+          {isPrivate ? (
+            <User className="w-5 h-5 text-primary" />
+          ) : (
+            <Building2 className={cn('w-5 h-5', isPremium ? 'text-accent' : 'text-primary')} />
+          )}
           {plan.name}
         </CardTitle>
         <CardDescription>{plan.description}</CardDescription>
