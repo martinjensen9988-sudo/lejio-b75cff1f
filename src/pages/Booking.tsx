@@ -37,6 +37,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import DeductibleInsuranceOption from "@/components/booking/DeductibleInsuranceOption";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
@@ -112,6 +113,9 @@ const Booking = () => {
   // Step 3: Confirmation
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptVanvid, setAcceptVanvid] = useState(false);
+  
+  // Deductible insurance
+  const [deductibleInsurancePrice, setDeductibleInsurancePrice] = useState(0);
 
   // Fetch vehicle data
   useEffect(() => {
@@ -190,11 +194,12 @@ const Booking = () => {
       rentalTotal,
       deposit,
       prepaidRent,
-      grandTotal: unitPrice + deposit + prepaidRent, // Only unit price + deposit + prepaid, not entire period
+      deductibleInsurance: deductibleInsurancePrice,
+      grandTotal: unitPrice + deposit + prepaidRent + deductibleInsurancePrice,
       periodCount,
       periodType,
     };
-  }, [vehicle, periodType, periodCount]);
+  }, [vehicle, periodType, periodCount, deductibleInsurancePrice]);
 
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -902,6 +907,14 @@ const Booking = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Deductible Insurance Option */}
+                    <DeductibleInsuranceOption
+                      periodType={periodType}
+                      periodCount={periodCount}
+                      originalDeductible={5000}
+                      onSelect={(selected, price) => setDeductibleInsurancePrice(price)}
+                    />
 
                     {/* Acceptances */}
                     <div className="space-y-4">

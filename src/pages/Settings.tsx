@@ -30,6 +30,7 @@ import {
   AlertTriangle,
   Crown,
   Bell,
+  Gift,
 } from 'lucide-react';
 import { FleetDashboard } from '@/components/fleet/FleetDashboard';
 import { LessorRatingsCard } from '@/components/ratings/LessorRatingsCard';
@@ -39,6 +40,7 @@ import { cn } from '@/lib/utils';
 import ProSubscriptionCard from '@/components/settings/ProSubscriptionCard';
 import UpgradeToProCard from '@/components/settings/UpgradeToProCard';
 import PushNotificationSettings from '@/components/settings/PushNotificationSettings';
+import ReferralCard from '@/components/settings/ReferralCard';
 
 interface ProfileData {
   full_name: string;
@@ -313,10 +315,14 @@ const Settings = () => {
         <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
           {/* Mobile-friendly scrollable tabs */}
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className={cn("w-max sm:w-full inline-flex sm:grid", isProfessional ? "sm:grid-cols-7" : "sm:grid-cols-6")}>
+            <TabsList className={cn("w-max sm:w-full inline-flex sm:grid", isProfessional ? "sm:grid-cols-8" : "sm:grid-cols-7")}>
               <TabsTrigger value="profile" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
                 <User className="w-4 h-4" />
                 <span className="hidden xs:inline sm:inline">Profil</span>
+              </TabsTrigger>
+              <TabsTrigger value="referral" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                <Gift className="w-4 h-4" />
+                <span className="hidden sm:inline">Henvisning</span>
               </TabsTrigger>
               <TabsTrigger value="notifications" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
                 <Bell className="w-4 h-4" />
@@ -346,6 +352,11 @@ const Settings = () => {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          {/* Referral Tab */}
+          <TabsContent value="referral" className="space-y-6">
+            <ReferralCard />
+          </TabsContent>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
