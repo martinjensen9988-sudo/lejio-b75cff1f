@@ -1,4 +1,4 @@
-import { Car, Sparkles, Shield, Clock, CreditCard, FileCheck, ArrowRight, Zap } from "lucide-react";
+import { Car, Sparkles, Shield, Clock, CreditCard, FileCheck, ArrowRight, Zap, Bike } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -41,7 +41,7 @@ const Features = () => {
     {
       icon: Car,
       title: "Alle køretøjer",
-      description: "Biler, campingvogne, autocampere og trailere – alt samlet ét sted.",
+      description: "Biler, MC, scootere, campingvogne og trailere – alt samlet ét sted.",
       color: "from-secondary to-secondary/60",
       bgColor: "bg-secondary/5",
       borderColor: "border-secondary/20 hover:border-secondary/50"
@@ -108,22 +108,24 @@ const Features = () => {
             Find det rette køretøj til din tur
           </h3>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
             {[
               { emoji: "🚗", label: "Personbiler", desc: "Fra små bybiler til store familiebiler" },
+              { emoji: "🏍️", label: "Motorcykler", desc: "Fra A1 til stor MC" },
+              { emoji: "🛵", label: "Scootere", desc: "30 og 45 km/t" },
               { emoji: "🏕️", label: "Campingvogne", desc: "Til ferien i naturen" },
-              { emoji: "🚐", label: "Autocampere", desc: "Alt-i-én løsning til turen" },
-              { emoji: "🚚", label: "Trailere", desc: "Transport af gods og udstyr" },
+              { emoji: "🚐", label: "Autocampere", desc: "Alt-i-én løsning" },
+              { emoji: "🚚", label: "Trailere", desc: "Transport af gods" },
             ].map((type, i) => (
               <div 
                 key={i}
-                className="text-center p-6 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group animate-scale-in"
+                className="text-center p-4 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group animate-scale-in"
                 style={{ animationDelay: `${0.5 + i * 0.1}s` }}
                 onClick={() => navigate('/search')}
               >
-                <span className="text-5xl block mb-4 group-hover:scale-125 transition-transform">{type.emoji}</span>
-                <div className="font-display font-bold text-foreground text-lg mb-1">{type.label}</div>
-                <div className="text-sm text-muted-foreground">{type.desc}</div>
+                <span className="text-4xl block mb-3 group-hover:scale-125 transition-transform">{type.emoji}</span>
+                <div className="font-display font-bold text-foreground text-base mb-1">{type.label}</div>
+                <div className="text-xs text-muted-foreground">{type.desc}</div>
               </div>
             ))}
           </div>
