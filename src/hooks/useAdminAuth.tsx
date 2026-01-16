@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
@@ -8,36 +8,37 @@ export const useAdminAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [adminRole, setAdminRole] = useState<AdminRole>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const checkAdminStatus = useCallback(async (userId: string): Promise<AdminRole> => {
+    try {
+      // Check roles in order of privilege (highest first)
+      const roles: ('super_admin' | 'admin' | 'support')[] = ['super_admin', 'admin', 'support'];
+      
+      for (const role of roles) {
+        const { data, error } = await supabase.rpc('has_role', {
+          _user_id: userId,
+          _role: role
+        });
+        
+        if (error) {
+          console.error(`Error checking ${role} status:`, error);
+          continue;
+        }
+        
+        if (data === true) {
+          return role;
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error('Error in checkAdminStatus:', err);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
-
-    const checkAdminStatus = async (userId: string): Promise<AdminRole> => {
-      try {
-        // Check roles in order of privilege (highest first)
-        const roles: ('super_admin' | 'admin' | 'support')[] = ['super_admin', 'admin', 'support'];
-        
-        for (const role of roles) {
-          const { data, error } = await supabase.rpc('has_role', {
-            _user_id: userId,
-            _role: role
-          });
-          
-          if (error) {
-            console.error(`Error checking ${role} status:`, error);
-            continue;
-          }
-          
-          if (data === true) {
-            return role;
-          }
-        }
-        return null;
-      } catch (err) {
-        console.error('Error in checkAdminStatus:', err);
-        return null;
-      }
-    };
 
     // Initial session check
     const initializeAuth = async () => {
@@ -58,9 +59,14 @@ export const useAdminAuth = () => {
         }
       } catch (err) {
         console.error('Error initializing auth:', err);
+        if (mounted) {
+          setUser(null);
+          setAdminRole(null);
+        }
       } finally {
         if (mounted) {
           setIsLoading(false);
+          setIsInitialized(true);
         }
       }
     };
@@ -72,18 +78,28 @@ export const useAdminAuth = () => {
       async (event, session) => {
         if (!mounted) return;
         
-        setUser(session?.user ?? null);
+        // Handle sign out event immediately
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setAdminRole(null);
+          setIsLoading(false);
+          return;
+        }
         
         if (session?.user) {
-          const role = await checkAdminStatus(session.user.id);
-          if (mounted) {
-            setAdminRole(role);
+          setUser(session.user);
+          // Only check admin status if we're already initialized
+          if (isInitialized) {
+            const role = await checkAdminStatus(session.user.id);
+            if (mounted) {
+              setAdminRole(role);
+            }
           }
         } else {
+          setUser(null);
           setAdminRole(null);
         }
         
-        // Always set loading to false after processing any auth state change
         if (mounted) {
           setIsLoading(false);
         }
@@ -94,42 +110,58 @@ export const useAdminAuth = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [checkAdminStatus, isInitialized]);
 
   const signIn = async (email: string, password: string) => {
+    setIsLoading(true);
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) return { error };
+    if (error) {
+      setIsLoading(false);
+      return { error };
+    }
 
     // Check if user has any admin role
     if (data.user) {
-      // Using type assertion since the function is newly created
       const { data: hasAnyRole } = await (supabase.rpc as any)('has_any_admin_role', {
         _user_id: data.user.id
       });
 
       if (!hasAnyRole) {
         await supabase.auth.signOut();
+        setIsLoading(false);
         return { error: { message: 'Du har ikke adgang til admin-panelet' } };
       }
+      
+      // Set user and check role
+      setUser(data.user);
+      const role = await checkAdminStatus(data.user.id);
+      setAdminRole(role);
     }
 
+    setIsLoading(false);
     return { error: null };
   };
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    } finally {
+      // Clear state immediately for responsive UI
       setUser(null);
       setAdminRole(null);
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+      }
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
-  };
+  }, []);
 
   // Computed properties for backwards compatibility
   const isSuperAdmin = adminRole === 'super_admin';
