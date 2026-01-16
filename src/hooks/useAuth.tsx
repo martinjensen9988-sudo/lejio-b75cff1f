@@ -155,11 +155,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
     setProfile(null);
     
-    // Then try to sign out from Supabase (ignore errors)
+    // Sign out from Supabase with scope 'local' to clear local storage
     try {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
     } catch (error) {
       console.error('Sign out error:', error);
+      // If signOut fails, manually clear localStorage to prevent auto-login
+      localStorage.removeItem('sb-aqzggwewjttbkaqnbmrb-auth-token');
     }
   };
 
