@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useVehicleLookup } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
 import { useAuth } from '@/hooks/useAuth';
+import { useDealerLocations } from '@/hooks/useDealerLocations';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit, Truck, Tent, Bike } from 'lucide-react';
 import { toast } from 'sonner';
@@ -73,7 +74,8 @@ const AddVehicleDialog = () => {
   
   const { vehicle, isLoading: lookupLoading, error, lookupVehicle, reset } = useVehicleLookup();
   const { vehicles, addVehicle, isLoading: addingVehicle } = useVehicles();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const { locations } = useDealerLocations(user?.id);
 
   const isProfessional = profile?.user_type === 'professionel';
 
@@ -519,6 +521,28 @@ const AddVehicleDialog = () => {
                 </div>
               </div>
             </div>
+
+            {/* Location Assignment */}
+            {locations.length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Placering (afdeling)
+                </Label>
+                <select
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={vehicleDetails.current_location_id || ''}
+                  onChange={(e) => setVehicleDetails(prev => ({ ...prev, current_location_id: e.target.value || undefined }))}
+                >
+                  <option value="">Vælg lokation (valgfrit)</option>
+                  {locations.filter(l => l.is_active).map(location => (
+                    <option key={location.id} value={location.id}>
+                      {location.name} - {location.city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Vehicle Value */}
             <div className="space-y-3">

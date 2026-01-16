@@ -9,6 +9,7 @@ export type VehicleType = 'bil' | 'trailer' | 'campingvogn' | 'motorcykel' | 'sc
 export interface Vehicle {
   id: string;
   owner_id: string;
+  current_location_id: string | null;
   registration: string;
   make: string;
   model: string;
@@ -130,6 +131,7 @@ export interface VehicleInsert {
   registration: string;
   make: string;
   model: string;
+  current_location_id?: string;
   variant?: string;
   year?: number;
   fuel_type?: string;

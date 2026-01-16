@@ -21,7 +21,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Vehicle } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, CalendarIcon, Loader2, AlertTriangle } from 'lucide-react';
+import { useDealerLocations } from '@/hooks/useDealerLocations';
+import { Plus, CalendarIcon, Loader2, AlertTriangle, MapPin } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -43,6 +44,7 @@ interface SubscriptionStatus {
 const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialogProps) => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const { locations } = useDealerLocations(user?.id);
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
@@ -50,6 +52,7 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
   
   const [formData, setFormData] = useState({
     vehicle_id: '',
+    pickup_location_id: '',
     start_date: undefined as Date | undefined,
     end_date: undefined as Date | undefined,
     renter_name: '',
@@ -93,6 +96,7 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
   const resetForm = () => {
     setFormData({
       vehicle_id: '',
+      pickup_location_id: '',
       start_date: undefined,
       end_date: undefined,
       renter_name: '',
@@ -152,6 +156,8 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
         notes: formData.notes || null,
         total_price: totalPrice,
         status: 'confirmed',
+        pickup_location_id: formData.pickup_location_id || null,
+        dropoff_location_id: formData.pickup_location_id || null,
       });
 
       if (error) throw error;
@@ -238,6 +244,31 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
               </SelectContent>
             </Select>
           </div>
+
+          {/* Location Selection */}
+          {locations.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Afhentningssted
+              </Label>
+              <Select
+                value={formData.pickup_location_id}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, pickup_location_id: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Vælg lokation (valgfrit)" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  {locations.filter(l => l.is_active).map(location => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name} - {location.address}, {location.postal_code} {location.city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Date Selection */}
           <div className="grid grid-cols-2 gap-4">

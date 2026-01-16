@@ -71,6 +71,17 @@ serve(async (req) => {
       });
     }
 
+    // Fetch pickup location if set
+    let pickupLocation = null;
+    if (booking.pickup_location_id) {
+      const { data: locationData } = await supabase
+        .from('dealer_locations')
+        .select('name, address, city, postal_code, phone')
+        .eq('id', booking.pickup_location_id)
+        .single();
+      pickupLocation = locationData;
+    }
+
     // Verify user is the lessor
     if (booking.lessor_id !== user.id) {
       return new Response(JSON.stringify({ error: 'Not authorized' }), {
@@ -145,6 +156,12 @@ serve(async (req) => {
       renter_email: booking.renter_email || '',
       renter_phone: booking.renter_phone,
       renter_license_number: renterLicenseNumber,
+      
+      // Pickup location details
+      pickup_location_name: pickupLocation?.name || null,
+      pickup_location_address: pickupLocation ? 
+        `${pickupLocation.address}, ${pickupLocation.postal_code} ${pickupLocation.city}` : null,
+      pickup_location_phone: pickupLocation?.phone || null,
       
       // Insurance
       insurance_company: lessorProfile?.insurance_company,
