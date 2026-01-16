@@ -49,7 +49,7 @@ export const useDeductibleProfiles = () => {
         .order('base_deductible', { ascending: true });
 
       if (error) throw error;
-      setProfiles((data || []) as DeductibleProfile[]);
+      setProfiles((data || []) as unknown as DeductibleProfile[]);
     } catch (err) {
       console.error('Error fetching deductible profiles:', err);
     } finally {
@@ -82,7 +82,7 @@ export const useDeductibleProfiles = () => {
 
       toast.success('Selvrisiko-profil oprettet');
       await fetchProfiles();
-      return data as DeductibleProfile;
+      return data as unknown as DeductibleProfile;
     } catch (err) {
       console.error('Error creating profile:', err);
       toast.error('Kunne ikke oprette profil');
@@ -200,7 +200,7 @@ export const useDeductibleProfiles = () => {
         .single();
 
       if (error) throw error;
-      return data as BookingDeductibleSelection;
+      return data as unknown as BookingDeductibleSelection;
     } catch (err) {
       console.error('Error selecting deductible:', err);
       return null;

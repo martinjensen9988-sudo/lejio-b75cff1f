@@ -60,7 +60,7 @@ export const useAutoDispatch = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRecommendations((data || []) as DispatchRecommendation[]);
+      setRecommendations((data || []) as unknown as DispatchRecommendation[]);
     } catch (err) {
       console.error('Error fetching recommendations:', err);
     } finally {
