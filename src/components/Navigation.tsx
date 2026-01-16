@@ -148,7 +148,7 @@ const Navigation = () => {
             ) : (
               <>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Log ind</Button>
-                <Button variant="warm" size="sm" onClick={() => navigate("/auth")}>Bliv Udlejer</Button>
+                <Button variant="warm" size="sm" onClick={() => navigate("/bliv-udlejer")}>Bliv Udlejer</Button>
               </>
             )}
           </div>
@@ -215,7 +215,7 @@ const Navigation = () => {
                   
                   <div className="flex flex-col gap-2 pt-4 border-t border-border mt-2">
                     <Button variant="ghost" size="sm" className="w-full" onClick={() => { navigate("/auth"); setIsOpen(false); }}>Log ind</Button>
-                    <Button variant="warm" size="sm" className="w-full" onClick={() => { navigate("/auth"); setIsOpen(false); }}>Bliv Udlejer</Button>
+                    <Button variant="warm" size="sm" className="w-full" onClick={() => { navigate("/bliv-udlejer"); setIsOpen(false); }}>Bliv Udlejer</Button>
                   </div>
                 </>
               )}

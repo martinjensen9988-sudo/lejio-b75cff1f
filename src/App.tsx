@@ -24,6 +24,7 @@ import CorporateDashboard from "./pages/CorporateDashboard";
 import PrivateFleet from "./pages/PrivateFleet";
 import About from "./pages/About";
 import WhatIsLejio from "./pages/WhatIsLejio";
+import BecomeLessor from "./pages/BecomeLessor";
 import NotFound from "./pages/NotFound";
 
 // Dashboard sub-pages
@@ -133,6 +134,7 @@ const App = () => (
             <Route path="/privat-fleet" element={<PrivateFleet />} />
             <Route path="/om-os" element={<About />} />
             <Route path="/hvad-er-lejio" element={<WhatIsLejio />} />
+            <Route path="/bliv-udlejer" element={<BecomeLessor />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
