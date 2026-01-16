@@ -115,9 +115,10 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (bookingError || !booking) {
-      console.error('Booking not found:', bookingError);
-      return new Response(JSON.stringify({ error: 'Booking not found' }), {
-        status: 404,
+      console.error('Booking lookup failed:', bookingError);
+      // Return generic error to prevent booking ID enumeration
+      return new Response(JSON.stringify({ error: 'Unable to process request' }), {
+        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -141,9 +142,10 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (lessorError || !lessor) {
-      console.error('Lessor profile not found:', lessorError);
-      return new Response(JSON.stringify({ error: 'Lessor profile not found' }), {
-        status: 404,
+      console.error('Lessor profile lookup failed:', lessorError);
+      // Return generic error to prevent enumeration
+      return new Response(JSON.stringify({ error: 'Unable to process request' }), {
+        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -233,8 +235,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error) {
     console.error("Error processing payment:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    // Return generic error to avoid leaking internal details
+    return new Response(JSON.stringify({ error: 'Payment processing failed' }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
