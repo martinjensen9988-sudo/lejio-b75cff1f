@@ -335,12 +335,24 @@ const AdminDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 md:space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => {
+            console.log('AdminDashboard tab change:', v);
+            setActiveTab(v);
+          }}
+          className="space-y-4 md:space-y-6"
+        >
           {/* Always visible (mobile + desktop). On mobile it scrolls horizontally */}
           <div className="-mx-2 px-2 md:mx-0 md:px-0 overflow-x-auto">
             <TabsList className="flex w-max md:w-full flex-nowrap md:flex-wrap h-auto gap-1 p-1">
               {menuItems.map((item) => (
-                <TabsTrigger key={item.value} value={item.value} className="text-xs lg:text-sm">
+                <TabsTrigger
+                  key={item.value}
+                  value={item.value}
+                  className="text-xs lg:text-sm"
+                  onClick={() => setActiveTab(item.value)}
+                >
                   <item.icon className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                   <span className="whitespace-nowrap">{item.label}</span>
                 </TabsTrigger>
@@ -357,17 +369,17 @@ const AdminDashboard = () => {
           </div>
 
           {/* User Management Tab */}
-          <TabsContent value="users" forceMount>
+          <TabsContent value="users">
             <AdminUserManagement />
           </TabsContent>
 
           {/* Staff Management Tab */}
-          <TabsContent value="staff" forceMount>
+          <TabsContent value="staff">
             <AdminStaffManagement />
           </TabsContent>
 
           {/* Bookings Tab */}
-          <TabsContent value="bookings" forceMount>
+          <TabsContent value="bookings">
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -427,67 +439,67 @@ const AdminDashboard = () => {
           </TabsContent>
 
           {/* Platform Fees Tab */}
-          <TabsContent value="fees" forceMount>
+          <TabsContent value="fees">
             <AdminPlatformFees />
           </TabsContent>
 
           {/* Discount Codes Tab */}
-          <TabsContent value="discounts" forceMount>
+          <TabsContent value="discounts">
             <AdminDiscountCodes />
           </TabsContent>
 
           {/* Fleet Management Tab */}
-          <TabsContent value="fleet" forceMount>
+          <TabsContent value="fleet">
             <AdminFleetManagement />
           </TabsContent>
 
           {/* Warnings Tab */}
-          <TabsContent value="warnings" forceMount>
+          <TabsContent value="warnings">
             <AdminWarnings />
           </TabsContent>
 
           {/* Lessor Reports Tab */}
-          <TabsContent value="lessor-reports" forceMount>
+          <TabsContent value="lessor-reports">
             <AdminLessorReports />
           </TabsContent>
 
           {/* Messages Tab */}
-          <TabsContent value="messages" forceMount>
+          <TabsContent value="messages">
             <AdminMessages />
           </TabsContent>
 
           {/* Live Chat Tab */}
-          <TabsContent value="live-chat" forceMount>
+          <TabsContent value="live-chat">
             <AdminLiveChat />
           </TabsContent>
 
           {/* Vehicle Value Verification Tab */}
-          <TabsContent value="vehicle-values" forceMount>
+          <TabsContent value="vehicle-values">
             <AdminVehicleValueVerification />
           </TabsContent>
 
           {/* GPS Devices Tab */}
-          <TabsContent value="gps" forceMount>
+          <TabsContent value="gps">
             <AdminGpsDevices />
           </TabsContent>
 
           {/* Check-in/out Settings Tab */}
-          <TabsContent value="checkinout" forceMount>
+          <TabsContent value="checkinout">
             <AdminCheckInOutSettings />
           </TabsContent>
 
           {/* Corporate Accounts Tab */}
-          <TabsContent value="corporate" forceMount>
+          <TabsContent value="corporate">
             <AdminCorporateAccounts />
           </TabsContent>
 
           {/* Facebook Posts Tab */}
-          <TabsContent value="facebook" forceMount>
+          <TabsContent value="facebook">
             <AdminFacebookPosts />
           </TabsContent>
 
           {/* Booking Stats Tab */}
-          <TabsContent value="stats" forceMount>
+          <TabsContent value="stats">
             <AdminBookingStats />
           </TabsContent>
         </Tabs>
