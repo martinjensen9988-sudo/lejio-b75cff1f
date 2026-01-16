@@ -106,7 +106,8 @@ export const useAdminAuth = () => {
 
     // Check if user has any admin role
     if (data.user) {
-      const { data: hasAnyRole } = await supabase.rpc('has_any_admin_role', {
+      // Using type assertion since the function is newly created
+      const { data: hasAnyRole } = await (supabase.rpc as any)('has_any_admin_role', {
         _user_id: data.user.id
       });
 
