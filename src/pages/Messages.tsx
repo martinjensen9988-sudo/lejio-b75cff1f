@@ -17,8 +17,12 @@ import {
   Paperclip,
   X,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Languages,
+  Loader2
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
 
@@ -40,8 +44,48 @@ const Messages = () => {
   const [sending, setSending] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
+  const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const translateMessage = async (messageId: string, content: string) => {
+    if (translatedMessages[messageId]) {
+      // Toggle off translation
+      setTranslatedMessages(prev => {
+        const copy = { ...prev };
+        delete copy[messageId];
+        return copy;
+      });
+      return;
+    }
+
+    setTranslatingId(messageId);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-message', {
+        body: { 
+          message_id: messageId,
+          message_content: content, 
+          target_language: 'da' 
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.translated_content) {
+        setTranslatedMessages(prev => ({
+          ...prev,
+          [messageId]: data.translated_content
+        }));
+        toast.success(`Oversat fra ${data.original_language || 'ukendt sprog'}`);
+      }
+    } catch (err) {
+      console.error('Translation error:', err);
+      toast.error('Kunne ikke oversætte besked');
+    } finally {
+      setTranslatingId(null);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -246,6 +290,11 @@ const Messages = () => {
                       ) : (
                         messages.map((message) => {
                           const isOwn = message.sender_id === user?.id;
+                          const isTranslated = !!translatedMessages[message.id];
+                          const displayContent = isTranslated 
+                            ? translatedMessages[message.id] 
+                            : message.content;
+                          
                           return (
                             <div
                               key={message.id}
@@ -283,16 +332,40 @@ const Messages = () => {
                                     )}
                                   </div>
                                 )}
-                                {message.content && !message.content.startsWith('📎 ') && (
-                                  <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                {displayContent && !displayContent.startsWith('📎 ') && (
+                                  <p className="whitespace-pre-wrap break-words">
+                                    {displayContent}
+                                    {isTranslated && (
+                                      <span className="block text-xs opacity-70 mt-1 italic">
+                                        (Oversat)
+                                      </span>
+                                    )}
+                                  </p>
                                 )}
-                                <p
-                                  className={`text-xs mt-1 ${
-                                    isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
-                                  }`}
-                                >
-                                  {format(new Date(message.created_at), "HH:mm", { locale: da })}
-                                </p>
+                                <div className={`flex items-center justify-between gap-2 mt-1`}>
+                                  <p
+                                    className={`text-xs ${
+                                      isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                                    }`}
+                                  >
+                                    {format(new Date(message.created_at), "HH:mm", { locale: da })}
+                                  </p>
+                                  {!isOwn && message.content && (
+                                    <button
+                                      onClick={() => translateMessage(message.id, message.content)}
+                                      disabled={translatingId === message.id}
+                                      className={`text-xs flex items-center gap-1 hover:opacity-80 transition-opacity ${
+                                        isTranslated ? "text-primary" : "text-muted-foreground"
+                                      }`}
+                                    >
+                                      {translatingId === message.id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                      ) : (
+                                        <Languages className="w-3 h-3" />
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );

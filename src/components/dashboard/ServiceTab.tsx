@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -26,10 +27,12 @@ import {
   CircleDot,
   MapPin,
   Plus,
-  Edit
+  Edit,
+  ClipboardList
 } from 'lucide-react';
 import { format, differenceInDays, parseISO, addMonths } from 'date-fns';
 import { da } from 'date-fns/locale';
+import { ServiceTasksCard } from './ServiceTasksCard';
 
 interface ServiceTabProps {
   vehicles: Vehicle[];
@@ -232,9 +235,21 @@ const ServiceTab = ({ vehicles, onUpdate }: ServiceTabProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <Tabs defaultValue="overview" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="overview" className="gap-2">
+          <Car className="w-4 h-4" />
+          Køretøjer
+        </TabsTrigger>
+        <TabsTrigger value="tasks" className="gap-2">
+          <ClipboardList className="w-4 h-4" />
+          Opgaver
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="overview" className="space-y-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
@@ -538,7 +553,12 @@ const ServiceTab = ({ vehicles, onUpdate }: ServiceTabProps) => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="tasks">
+        <ServiceTasksCard />
+      </TabsContent>
+    </Tabs>
   );
 };
 
