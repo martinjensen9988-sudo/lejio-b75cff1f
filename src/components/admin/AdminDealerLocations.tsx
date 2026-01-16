@@ -31,11 +31,6 @@ interface Partner {
   user_type: string;
 }
 
-interface LocationCount {
-  partner_id: string;
-  count: number;
-}
-
 const AdminDealerLocations = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [locationCounts, setLocationCounts] = useState<Record<string, number>>({});
@@ -63,14 +58,14 @@ const AdminDealerLocations = () => {
       setPartners(partnersData || []);
 
       // Fetch location counts per partner
-      const { data: locationsData, error: locationsError } = await supabase
-        .from('dealer_locations')
-        .select('partner_id');
+      const { data: locationsData, error: locationsError } = await (supabase
+        .from('dealer_locations' as any)
+        .select('partner_id') as any);
 
       if (locationsError) throw locationsError;
 
       const counts: Record<string, number> = {};
-      (locationsData || []).forEach(loc => {
+      ((locationsData || []) as Array<{ partner_id: string }>).forEach(loc => {
         counts[loc.partner_id] = (counts[loc.partner_id] || 0) + 1;
       });
       setLocationCounts(counts);
