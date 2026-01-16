@@ -63,7 +63,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 animate-slide-up font-medium" style={{ animationDelay: '0.1s' }}>
-              Lejio er den nye, intelligente vej til leje af biler, trailere og campingvogne. Vi er lige startet, men vores ambition er klar: Vi vil være dit foretrukne valg. Find det køretøj der passer dig, book lynhurtigt til en skarp pris og kom afsted med det samme – med fuld gennemsigtighed og fleksible vilkår.
+              Den nye, intelligente vej til leje af biler, trailere og campingvogne. Book hurtigt, få skarpe priser og kom afsted med det samme.
             </p>
 
             {/* Search Box - Prominent for lejere */}
