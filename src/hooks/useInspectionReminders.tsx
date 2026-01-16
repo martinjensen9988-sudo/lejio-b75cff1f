@@ -157,7 +157,7 @@ export const useInspectionReminders = (vehicleId?: string) => {
 
   const calculateNextInspectionDate = (
     firstRegistrationDate: string,
-    vehicleType: 'bil' | 'trailer' | 'campingvogn'
+    vehicleType: string
   ): string => {
     const regDate = parseISO(firstRegistrationDate);
     const now = new Date();

@@ -2139,6 +2139,118 @@ export type Database = {
         }
         Relationships: []
       }
+      mc_check_photos: {
+        Row: {
+          ai_analysis: Json | null
+          booking_id: string
+          captured_at: string
+          check_type: string
+          created_at: string
+          id: string
+          photo_type: string
+          photo_url: string
+          vehicle_id: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          booking_id: string
+          captured_at?: string
+          check_type: string
+          created_at?: string
+          id?: string
+          photo_type: string
+          photo_url: string
+          vehicle_id: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          booking_id?: string
+          captured_at?: string
+          check_type?: string
+          created_at?: string
+          id?: string
+          photo_type?: string
+          photo_url?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mc_check_photos_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_check_photos_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_check_photos_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mc_maintenance_log: {
+        Row: {
+          created_at: string
+          id: string
+          maintenance_type: string
+          next_service_date: string | null
+          next_service_km: number | null
+          notes: string | null
+          odometer_reading: number | null
+          performed_at: string
+          performed_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          maintenance_type: string
+          next_service_date?: string | null
+          next_service_km?: number | null
+          notes?: string | null
+          odometer_reading?: number | null
+          performed_at?: string
+          performed_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          maintenance_type?: string
+          next_service_date?: string | null
+          next_service_km?: number | null
+          notes?: string | null
+          odometer_reading?: number | null
+          performed_at?: string
+          performed_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mc_maintenance_log_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_maintenance_log_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -3621,6 +3733,8 @@ export type Database = {
         Row: {
           adult_sleeping_capacity: number | null
           camping_furniture_included: boolean | null
+          chain_last_checked_at: string | null
+          chain_last_checked_km: number | null
           child_sleeping_capacity: number | null
           color: string | null
           created_at: string
@@ -3629,33 +3743,48 @@ export type Database = {
           deposit_amount: number | null
           deposit_required: boolean
           description: string | null
+          engine_cc: number | null
+          engine_kw: number | null
           extra_km_price: number | null
           features: string[] | null
           festival_use_allowed: boolean | null
           fuel_type: string | null
           gas_bottle_included: boolean | null
+          has_abs: boolean | null
           has_ac: boolean | null
           has_adapter: boolean | null
           has_awning: boolean | null
           has_awning_tent: boolean | null
           has_bathroom: boolean | null
           has_bike_rack: boolean | null
+          has_chain_lock: boolean | null
+          has_disc_lock: boolean | null
           has_floor_heating: boolean | null
           has_freezer: boolean | null
           has_fridge: boolean | null
           has_gas_burner: boolean | null
+          has_heated_grips: boolean | null
           has_hot_water: boolean | null
           has_jockey_wheel: boolean | null
           has_kitchen: boolean | null
           has_lock_included: boolean | null
           has_mover: boolean | null
           has_net: boolean | null
+          has_phone_mount: boolean | null
           has_ramps: boolean | null
           has_shower: boolean | null
+          has_side_bags: boolean | null
+          has_steering_lock: boolean | null
+          has_tank_bag: boolean | null
           has_tarpaulin: boolean | null
           has_toilet: boolean | null
+          has_top_box: boolean | null
           has_tv: boolean | null
+          has_usb_outlet: boolean | null
           has_winch: boolean | null
+          has_windscreen: boolean | null
+          helmet_included: boolean | null
+          helmet_size: string | null
           id: string
           image_url: string | null
           included_km: number | null
@@ -3672,6 +3801,8 @@ export type Database = {
           location_postal_code: string | null
           longitude: number | null
           make: string
+          mc_category: string | null
+          mc_daily_km_limit: number | null
           model: string
           monthly_price: number | null
           next_inspection_date: string | null
@@ -3683,8 +3814,10 @@ export type Database = {
           plug_type: string | null
           prepaid_rent_enabled: boolean
           prepaid_rent_months: number | null
+          rain_guarantee_enabled: boolean | null
           registration: string
           requires_b_license: boolean | null
+          seat_height_mm: number | null
           service_included: boolean | null
           service_interval_km: number | null
           service_interval_months: number | null
@@ -3697,6 +3830,8 @@ export type Database = {
           tire_change_reminder_sent: boolean | null
           tire_hotel_location: string | null
           tire_size: string | null
+          tire_tread_front_mm: number | null
+          tire_tread_rear_mm: number | null
           tire_type: string | null
           total_weight: number | null
           trailer_type: string | null
@@ -3714,11 +3849,14 @@ export type Database = {
           vehicle_value: number | null
           vin: string | null
           weekly_price: number | null
+          winter_deactivated: boolean | null
           year: number | null
         }
         Insert: {
           adult_sleeping_capacity?: number | null
           camping_furniture_included?: boolean | null
+          chain_last_checked_at?: string | null
+          chain_last_checked_km?: number | null
           child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
@@ -3727,33 +3865,48 @@ export type Database = {
           deposit_amount?: number | null
           deposit_required?: boolean
           description?: string | null
+          engine_cc?: number | null
+          engine_kw?: number | null
           extra_km_price?: number | null
           features?: string[] | null
           festival_use_allowed?: boolean | null
           fuel_type?: string | null
           gas_bottle_included?: boolean | null
+          has_abs?: boolean | null
           has_ac?: boolean | null
           has_adapter?: boolean | null
           has_awning?: boolean | null
           has_awning_tent?: boolean | null
           has_bathroom?: boolean | null
           has_bike_rack?: boolean | null
+          has_chain_lock?: boolean | null
+          has_disc_lock?: boolean | null
           has_floor_heating?: boolean | null
           has_freezer?: boolean | null
           has_fridge?: boolean | null
           has_gas_burner?: boolean | null
+          has_heated_grips?: boolean | null
           has_hot_water?: boolean | null
           has_jockey_wheel?: boolean | null
           has_kitchen?: boolean | null
           has_lock_included?: boolean | null
           has_mover?: boolean | null
           has_net?: boolean | null
+          has_phone_mount?: boolean | null
           has_ramps?: boolean | null
           has_shower?: boolean | null
+          has_side_bags?: boolean | null
+          has_steering_lock?: boolean | null
+          has_tank_bag?: boolean | null
           has_tarpaulin?: boolean | null
           has_toilet?: boolean | null
+          has_top_box?: boolean | null
           has_tv?: boolean | null
+          has_usb_outlet?: boolean | null
           has_winch?: boolean | null
+          has_windscreen?: boolean | null
+          helmet_included?: boolean | null
+          helmet_size?: string | null
           id?: string
           image_url?: string | null
           included_km?: number | null
@@ -3770,6 +3923,8 @@ export type Database = {
           location_postal_code?: string | null
           longitude?: number | null
           make: string
+          mc_category?: string | null
+          mc_daily_km_limit?: number | null
           model: string
           monthly_price?: number | null
           next_inspection_date?: string | null
@@ -3781,8 +3936,10 @@ export type Database = {
           plug_type?: string | null
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
+          rain_guarantee_enabled?: boolean | null
           registration: string
           requires_b_license?: boolean | null
+          seat_height_mm?: number | null
           service_included?: boolean | null
           service_interval_km?: number | null
           service_interval_months?: number | null
@@ -3795,6 +3952,8 @@ export type Database = {
           tire_change_reminder_sent?: boolean | null
           tire_hotel_location?: string | null
           tire_size?: string | null
+          tire_tread_front_mm?: number | null
+          tire_tread_rear_mm?: number | null
           tire_type?: string | null
           total_weight?: number | null
           trailer_type?: string | null
@@ -3812,11 +3971,14 @@ export type Database = {
           vehicle_value?: number | null
           vin?: string | null
           weekly_price?: number | null
+          winter_deactivated?: boolean | null
           year?: number | null
         }
         Update: {
           adult_sleeping_capacity?: number | null
           camping_furniture_included?: boolean | null
+          chain_last_checked_at?: string | null
+          chain_last_checked_km?: number | null
           child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
@@ -3825,33 +3987,48 @@ export type Database = {
           deposit_amount?: number | null
           deposit_required?: boolean
           description?: string | null
+          engine_cc?: number | null
+          engine_kw?: number | null
           extra_km_price?: number | null
           features?: string[] | null
           festival_use_allowed?: boolean | null
           fuel_type?: string | null
           gas_bottle_included?: boolean | null
+          has_abs?: boolean | null
           has_ac?: boolean | null
           has_adapter?: boolean | null
           has_awning?: boolean | null
           has_awning_tent?: boolean | null
           has_bathroom?: boolean | null
           has_bike_rack?: boolean | null
+          has_chain_lock?: boolean | null
+          has_disc_lock?: boolean | null
           has_floor_heating?: boolean | null
           has_freezer?: boolean | null
           has_fridge?: boolean | null
           has_gas_burner?: boolean | null
+          has_heated_grips?: boolean | null
           has_hot_water?: boolean | null
           has_jockey_wheel?: boolean | null
           has_kitchen?: boolean | null
           has_lock_included?: boolean | null
           has_mover?: boolean | null
           has_net?: boolean | null
+          has_phone_mount?: boolean | null
           has_ramps?: boolean | null
           has_shower?: boolean | null
+          has_side_bags?: boolean | null
+          has_steering_lock?: boolean | null
+          has_tank_bag?: boolean | null
           has_tarpaulin?: boolean | null
           has_toilet?: boolean | null
+          has_top_box?: boolean | null
           has_tv?: boolean | null
+          has_usb_outlet?: boolean | null
           has_winch?: boolean | null
+          has_windscreen?: boolean | null
+          helmet_included?: boolean | null
+          helmet_size?: string | null
           id?: string
           image_url?: string | null
           included_km?: number | null
@@ -3868,6 +4045,8 @@ export type Database = {
           location_postal_code?: string | null
           longitude?: number | null
           make?: string
+          mc_category?: string | null
+          mc_daily_km_limit?: number | null
           model?: string
           monthly_price?: number | null
           next_inspection_date?: string | null
@@ -3879,8 +4058,10 @@ export type Database = {
           plug_type?: string | null
           prepaid_rent_enabled?: boolean
           prepaid_rent_months?: number | null
+          rain_guarantee_enabled?: boolean | null
           registration?: string
           requires_b_license?: boolean | null
+          seat_height_mm?: number | null
           service_included?: boolean | null
           service_interval_km?: number | null
           service_interval_months?: number | null
@@ -3893,6 +4074,8 @@ export type Database = {
           tire_change_reminder_sent?: boolean | null
           tire_hotel_location?: string | null
           tire_size?: string | null
+          tire_tread_front_mm?: number | null
+          tire_tread_rear_mm?: number | null
           tire_type?: string | null
           total_weight?: number | null
           trailer_type?: string | null
@@ -3910,6 +4093,7 @@ export type Database = {
           vehicle_value?: number | null
           vin?: string | null
           weekly_price?: number | null
+          winter_deactivated?: boolean | null
           year?: number | null
         }
         Relationships: []
