@@ -25,6 +25,26 @@ import PrivateFleet from "./pages/PrivateFleet";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
+// Dashboard sub-pages
+import VehiclesPage from "./pages/dashboard/Vehicles";
+import CalendarPage from "./pages/dashboard/Calendar";
+import BookingsPage from "./pages/dashboard/Bookings";
+import CreateBookingPage from "./pages/dashboard/CreateBooking";
+import AddVehiclePage from "./pages/dashboard/AddVehicle";
+import InvoicesPage from "./pages/dashboard/Invoices";
+import FinesPage from "./pages/dashboard/Fines";
+import RevenueLossPage from "./pages/dashboard/RevenueLoss";
+import CustomersPage from "./pages/dashboard/Customers";
+import FavoritesPage from "./pages/dashboard/Favorites";
+import RecurringPage from "./pages/dashboard/Recurring";
+import ServicePage from "./pages/dashboard/Service";
+import TiresPage from "./pages/dashboard/Tires";
+import InspectionsPage from "./pages/dashboard/Inspections";
+import AnalyticsPage from "./pages/dashboard/Analytics";
+import AIPricingPage from "./pages/dashboard/AIPricing";
+import FleetAIPage from "./pages/dashboard/FleetAI";
+import DeductiblesPage from "./pages/dashboard/Deductibles";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -38,6 +58,25 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            {/* Dashboard sub-routes */}
+            <Route path="/dashboard/vehicles" element={<VehiclesPage />} />
+            <Route path="/dashboard/vehicles/add" element={<AddVehiclePage />} />
+            <Route path="/dashboard/calendar" element={<CalendarPage />} />
+            <Route path="/dashboard/bookings" element={<BookingsPage />} />
+            <Route path="/dashboard/bookings/create" element={<CreateBookingPage />} />
+            <Route path="/dashboard/invoices" element={<InvoicesPage />} />
+            <Route path="/dashboard/fines" element={<FinesPage />} />
+            <Route path="/dashboard/revenue-loss" element={<RevenueLossPage />} />
+            <Route path="/dashboard/customers" element={<CustomersPage />} />
+            <Route path="/dashboard/favorites" element={<FavoritesPage />} />
+            <Route path="/dashboard/recurring" element={<RecurringPage />} />
+            <Route path="/dashboard/service" element={<ServicePage />} />
+            <Route path="/dashboard/tires" element={<TiresPage />} />
+            <Route path="/dashboard/inspections" element={<InspectionsPage />} />
+            <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+            <Route path="/dashboard/ai-pricing" element={<AIPricingPage />} />
+            <Route path="/dashboard/fleet-ai" element={<FleetAIPage />} />
+            <Route path="/dashboard/deductibles" element={<DeductiblesPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/search" element={<Search />} />
             <Route path="/booking/:vehicleId" element={<Booking />} />

@@ -63,12 +63,38 @@ interface DashboardSidebarProps {
 
 export const DashboardSidebar = ({
   activeTab,
-  onTabChange,
   unreadCount = 0,
   pendingBookings = 0,
   onSignOut,
 }: DashboardSidebarProps) => {
   const navigate = useNavigate();
+
+  // Map tab values to routes
+  const getRouteForTab = (tab: string) => {
+    const routeMap: Record<string, string> = {
+      'vehicles': '/dashboard/vehicles',
+      'calendar': '/dashboard/calendar',
+      'bookings': '/dashboard/bookings',
+      'invoices': '/dashboard/invoices',
+      'fines': '/dashboard/fines',
+      'revenue-loss': '/dashboard/revenue-loss',
+      'customers': '/dashboard/customers',
+      'favorites': '/dashboard/favorites',
+      'recurring': '/dashboard/recurring',
+      'service': '/dashboard/service',
+      'tires': '/dashboard/tires',
+      'inspections': '/dashboard/inspections',
+      'analytics': '/dashboard/analytics',
+      'ai-pricing': '/dashboard/ai-pricing',
+      'fleet-ai': '/dashboard/fleet-ai',
+      'deductibles': '/dashboard/deductibles',
+    };
+    return routeMap[tab] || '/dashboard/vehicles';
+  };
+
+  const handleNavigate = (tab: string) => {
+    navigate(getRouteForTab(tab));
+  };
 
   const menuGroups: MenuGroup[] = [
     {
@@ -220,7 +246,7 @@ export const DashboardSidebar = ({
               {group.items.map((item) => (
                 <button
                   key={item.value}
-                  onClick={() => onTabChange(item.value)}
+                  onClick={() => handleNavigate(item.value)}
                   className={cn(
                     "w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-xl transition-all",
                     activeTab === item.value
