@@ -56,7 +56,7 @@ export const useRevenueLoss = (vehicleId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setCalculations((data || []) as RevenueLossCalculation[]);
+      setCalculations((data || []) as unknown as RevenueLossCalculation[]);
     } catch (err) {
       console.error('Error fetching revenue loss calculations:', err);
     } finally {
@@ -157,7 +157,7 @@ export const useRevenueLoss = (vehicleId?: string) => {
 
       toast.success(`Tab af indtægt beregnet: ${Math.round(totalLoss).toLocaleString('da-DK')} kr`);
       await fetchCalculations();
-      return data as RevenueLossCalculation;
+      return data as unknown as RevenueLossCalculation;
     } catch (err) {
       console.error('Error calculating revenue loss:', err);
       toast.error('Kunne ikke beregne tab af indtægt');

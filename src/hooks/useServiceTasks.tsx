@@ -70,7 +70,7 @@ export const useServiceTasks = (vehicleId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setTasks((data || []) as ServiceTask[]);
+      setTasks((data || []) as unknown as ServiceTask[]);
     } catch (err) {
       console.error('Error fetching service tasks:', err);
     } finally {
@@ -95,7 +95,7 @@ export const useServiceTasks = (vehicleId?: string) => {
 
       toast.success('Opgave oprettet');
       await fetchTasks();
-      return data as ServiceTask;
+      return data as unknown as ServiceTask;
     } catch (err) {
       console.error('Error creating task:', err);
       toast.error('Kunne ikke oprette opgave');
