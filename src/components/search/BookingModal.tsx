@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { differenceInDays, format } from "date-fns";
 import { da } from "date-fns/locale";
-import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin } from "lucide-react";
+import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin, Bike } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { SearchVehicle, SearchFiltersState } from "@/pages/Search";
 import { supabase } from "@/integrations/supabase/client";
 import VehicleLocationMap from "./VehicleLocationMap";
+import { MCLicenseCheck } from "./MCLicenseCheck";
+import { MCCategory } from "@/lib/mcLicenseValidation";
 
 interface BookingModalProps {
   open: boolean;
@@ -37,6 +39,16 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
     notes: "",
     acceptTerms: false,
   });
+  const [licenseValid, setLicenseValid] = useState(true);
+
+  // Determine if this is a motorcycle/scooter
+  const vehicleType = (vehicle as any).vehicle_type as string;
+  const isMCOrScooter = vehicleType === 'motorcykel' || vehicleType === 'scooter';
+  const mcCategory = isMCOrScooter ? (vehicle as any).mc_category as MCCategory : null;
+
+  const handleLicenseValidationChange = useCallback((isValid: boolean) => {
+    setLicenseValid(isValid);
+  }, []);
 
   // Calculate pricing based on period type
   const pricing = useMemo(() => {
@@ -94,6 +106,16 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
       toast({
         title: "Acceptér betingelser",
         description: "Du skal acceptere lejebetingelserne for at fortsætte",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // License validation for MC/Scooter
+    if (isMCOrScooter && !licenseValid) {
+      toast({
+        title: "Kørekort kræves",
+        description: "Du skal have gyldigt kørekort til denne køretøjstype",
         variant: "destructive",
       });
       return;
@@ -213,10 +235,14 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         {step === "details" ? (
-          <>
+        <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Car className="w-5 h-5 text-primary" />
+                {isMCOrScooter ? (
+                  <Bike className="w-5 h-5 text-primary" />
+                ) : (
+                  <Car className="w-5 h-5 text-primary" />
+                )}
                 Book {vehicle.make} {vehicle.model}
               </DialogTitle>
               <DialogDescription>
@@ -291,6 +317,14 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
                 </span>
               </div>
             </div>
+
+            {/* MC/Scooter License Check */}
+            {isMCOrScooter && mcCategory && (
+              <MCLicenseCheck 
+                mcCategory={mcCategory} 
+                onValidationChange={handleLicenseValidationChange}
+              />
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -385,7 +419,12 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
                 >
                   Annuller
                 </Button>
-                <Button type="submit" variant="warm" className="flex-1" disabled={loading}>
+                <Button 
+                  type="submit" 
+                  variant="warm" 
+                  className="flex-1" 
+                  disabled={loading || (isMCOrScooter && !licenseValid)}
+                >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   ) : (

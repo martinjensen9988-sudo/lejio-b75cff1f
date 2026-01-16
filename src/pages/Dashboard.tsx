@@ -26,7 +26,8 @@ import TireManagementTab from '@/components/dashboard/TireManagementTab';
 import InspectionRemindersTab from '@/components/dashboard/InspectionRemindersTab';
 import FinesTab from '@/components/dashboard/FinesTab';
 import { ServiceBookingCard } from '@/components/dashboard/ServiceBookingCard';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles, CircleDot, Shield, AlertCircle } from 'lucide-react';
+import { MCMaintenanceCard } from '@/components/dashboard/MCMaintenanceCard';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles, CircleDot, Shield, AlertCircle, Bike } from 'lucide-react';
 import { AIPriceSuggestions } from '@/components/dashboard/AIPriceSuggestions';
 
 const Dashboard = () => {
@@ -339,6 +340,7 @@ const Dashboard = () => {
                   model: v.model,
                   registration: v.registration
                 }))} />
+                <MCMaintenanceCard vehicles={vehicles} />
               </div>
               <ServiceBookingCard />
             </div>

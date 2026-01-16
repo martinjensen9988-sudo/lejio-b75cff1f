@@ -199,6 +199,29 @@ export interface VehicleInsert {
   pets_allowed?: boolean;
   smoking_allowed?: boolean;
   festival_use_allowed?: boolean;
+  // Motorcycle/Scooter specific
+  mc_category?: string;
+  engine_cc?: number;
+  engine_kw?: number;
+  has_abs?: boolean;
+  seat_height_mm?: number;
+  helmet_included?: boolean;
+  helmet_size?: string;
+  has_disc_lock?: boolean;
+  has_chain_lock?: boolean;
+  has_steering_lock?: boolean;
+  has_top_box?: boolean;
+  has_side_bags?: boolean;
+  has_tank_bag?: boolean;
+  has_phone_mount?: boolean;
+  has_usb_outlet?: boolean;
+  has_heated_grips?: boolean;
+  has_windscreen?: boolean;
+  tire_tread_front_mm?: number;
+  tire_tread_rear_mm?: number;
+  mc_daily_km_limit?: number;
+  winter_deactivated?: boolean;
+  rain_guarantee_enabled?: boolean;
 }
 
 export const useVehicles = () => {
