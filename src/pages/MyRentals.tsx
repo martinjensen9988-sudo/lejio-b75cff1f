@@ -208,43 +208,55 @@ const MyRentals = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
 
-      <main className="pt-20 pb-12">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <main className="pt-20 pb-12 relative">
+        {/* Background Effects */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-20 right-10 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[150px]" />
+          <div className="absolute bottom-20 left-10 w-[400px] h-[400px] bg-mint/5 rounded-full blur-[120px]" />
+        </div>
+
+        <div className="container mx-auto px-4 max-w-5xl relative z-10">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Mine lejeaftaler</h1>
-            <p className="text-muted-foreground">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-bold text-primary mb-4">
+              <Car className="w-4 h-4" />
+              <span>Dine udlejninger</span>
+            </div>
+            <h1 className="font-display text-4xl font-black mb-2">Mine lejeaftaler</h1>
+            <p className="text-muted-foreground text-lg">
               Se dine bookinger, underskriv kontrakter og genbestil biler
             </p>
           </div>
 
           {/* Profile Summary */}
-          <Card className="mb-8">
+          <Card className="mb-8 bg-card/50 backdrop-blur-sm border-2 border-border/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+                  <User className="w-5 h-5 text-white" />
+                </div>
                 Min profil
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-3 gap-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                   <User className="w-4 h-4 text-muted-foreground" />
-                  <span>{profile?.full_name || "Ikke angivet"}</span>
+                  <span className="font-medium">{profile?.full_name || "Ikke angivet"}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                   <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span>{user.email}</span>
+                  <span className="font-medium truncate">{user.email}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                   <Phone className="w-4 h-4 text-muted-foreground" />
-                  <span>{profile?.phone || "Ikke angivet"}</span>
+                  <span className="font-medium">{profile?.phone || "Ikke angivet"}</span>
                 </div>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-4"
+                className="mt-4 font-medium"
                 onClick={() => navigate("/settings")}
               >
                 Rediger profil
@@ -253,12 +265,12 @@ const MyRentals = () => {
           </Card>
 
           <Tabs defaultValue="active" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="active" className="gap-2">
+            <TabsList className="grid w-full grid-cols-2 max-w-md h-12 p-1 bg-muted/50">
+              <TabsTrigger value="active" className="gap-2 font-bold data-[state=active]:shadow-lg">
                 <Car className="w-4 h-4" />
                 Aktive ({activeBookings.length})
               </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2">
+              <TabsTrigger value="history" className="gap-2 font-bold data-[state=active]:shadow-lg">
                 <Clock className="w-4 h-4" />
                 Historik ({pastBookings.length})
               </TabsTrigger>
