@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
@@ -8,11 +8,10 @@ export const useAdminAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [adminRole, setAdminRole] = useState<AdminRole>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const isInitializedRef = useRef(false);
 
   const checkAdminStatus = useCallback(async (userId: string): Promise<AdminRole> => {
     try {
-      // Check roles in order of privilege (highest first)
       const roles: ('super_admin' | 'admin' | 'support')[] = ['super_admin', 'admin', 'support'];
       
       for (const role of roles) {
@@ -40,8 +39,9 @@ export const useAdminAuth = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Initial session check
     const initializeAuth = async () => {
+      if (isInitializedRef.current) return;
+      
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
@@ -66,14 +66,13 @@ export const useAdminAuth = () => {
       } finally {
         if (mounted) {
           setIsLoading(false);
-          setIsInitialized(true);
+          isInitializedRef.current = true;
         }
       }
     };
 
     initializeAuth();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
@@ -88,19 +87,17 @@ export const useAdminAuth = () => {
         
         if (session?.user) {
           setUser(session.user);
-          // Only check admin status if we're already initialized
-          if (isInitialized) {
+          // Check admin status after initialization
+          if (isInitializedRef.current) {
             const role = await checkAdminStatus(session.user.id);
             if (mounted) {
               setAdminRole(role);
+              setIsLoading(false);
             }
           }
         } else {
           setUser(null);
           setAdminRole(null);
-        }
-        
-        if (mounted) {
           setIsLoading(false);
         }
       }
@@ -110,7 +107,7 @@ export const useAdminAuth = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [checkAdminStatus, isInitialized]);
+  }, [checkAdminStatus]);
 
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
@@ -125,7 +122,6 @@ export const useAdminAuth = () => {
       return { error };
     }
 
-    // Check if user has any admin role
     if (data.user) {
       const { data: hasAnyRole } = await (supabase.rpc as any)('has_any_admin_role', {
         _user_id: data.user.id
@@ -137,7 +133,6 @@ export const useAdminAuth = () => {
         return { error: { message: 'Du har ikke adgang til admin-panelet' } };
       }
       
-      // Set user and check role
       setUser(data.user);
       const role = await checkAdminStatus(data.user.id);
       setAdminRole(role);
@@ -148,22 +143,17 @@ export const useAdminAuth = () => {
   };
 
   const signOut = useCallback(async () => {
+    // Clear state immediately
+    setUser(null);
+    setAdminRole(null);
+    
     try {
-      // Clear state immediately for responsive UI
-      setUser(null);
-      setAdminRole(null);
-      
-      // Then sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-      }
+      await supabase.auth.signOut();
     } catch (error) {
       console.error('Error signing out:', error);
     }
   }, []);
 
-  // Computed properties for backwards compatibility
   const isSuperAdmin = adminRole === 'super_admin';
   const isAdmin = adminRole === 'admin' || adminRole === 'super_admin';
   const isSupport = adminRole === 'support' || isAdmin;

@@ -10,16 +10,16 @@ import { toast } from 'sonner';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const { user, isSuperAdmin, isLoading, signIn } = useAdminAuth();
+  const { user, hasAccess, isLoading, signIn } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && user && isSuperAdmin) {
+    if (!isLoading && user && hasAccess) {
       navigate('/admin/dashboard');
     }
-  }, [user, isSuperAdmin, isLoading, navigate]);
+  }, [user, hasAccess, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
