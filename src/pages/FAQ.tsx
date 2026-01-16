@@ -6,7 +6,27 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Car, User, CreditCard, Shield, FileText, HelpCircle, Bot, Wrench, TrendingDown, Languages, Percent } from "lucide-react";
+import { 
+  Car, 
+  User, 
+  CreditCard, 
+  Shield, 
+  FileText, 
+  HelpCircle, 
+  Bot, 
+  Wrench, 
+  TrendingDown, 
+  Languages, 
+  Percent,
+  Store,
+  Camera,
+  Receipt,
+  MapPin,
+  Bike,
+  Gift,
+  Building2,
+  BarChart3
+} from "lucide-react";
 
 const FAQ = () => {
   const faqCategories = [
@@ -49,6 +69,14 @@ const FAQ = () => {
         {
           q: "Hvordan fungerer dynamisk selvrisiko?",
           a: "Nogle udlejere tilbyder reduceret selvrisiko baseret på din lejerhistorik. Har du mange gode bookinger og høje ratings, kan du kvalificere dig til lavere selvrisiko. Dette ses ved booking."
+        },
+        {
+          q: "Kan jeg bruge en rabatkode?",
+          a: "Ja! Hvis du har en rabatkode, kan du indtaste den ved booking. Rabatten trækkes automatisk fra den samlede pris."
+        },
+        {
+          q: "Hvad er henvisningsprogrammet?",
+          a: "Når du henviser en ven til LEJIO, får I begge 500 kr. i kredit. Del din personlige henvisningskode, og få kredit når din ven gennemfører sin første booking."
         }
       ]
     },
@@ -83,6 +111,230 @@ const FAQ = () => {
         {
           q: "Hvordan fungerer LEJIO Varetager?",
           a: "Med LEJIO Varetager håndterer vi platform og kundeservice (15% kommission), eller alt inkl. afhentning, levering og rengøring (10% kommission). Kontakt os for mere info."
+        },
+        {
+          q: "Kan jeg have flere udlejningslokationer?",
+          a: "Ja! Som forhandler kan du oprette flere lokationer med individuelle adresser, åbningstider og kontaktinfo. Hver lokation kan have egne køretøjer tilknyttet."
+        },
+        {
+          q: "Hvordan fungerer sæsonpriser?",
+          a: "Du kan indstille forskellige priser for høj- og lavsæson. Systemet skifter automatisk mellem priserne baseret på de datoer, du definerer."
+        }
+      ]
+    },
+    {
+      title: "Lokationer & Afdelinger",
+      icon: Store,
+      questions: [
+        {
+          q: "Hvordan opretter jeg en ny lokation?",
+          a: "Gå til 'Lokationer' i dit dashboard og klik 'Tilføj lokation'. Indtast navn, adresse, telefon, email og åbningstider. Du kan også angive forberedelsestid mellem bookinger."
+        },
+        {
+          q: "Hvad er forberedelsestid?",
+          a: "Forberedelsestid er den tid du skal bruge til at klargøre bilen mellem to bookinger (rengøring, tankning, tjek). Du kan indstille dette individuelt for hver lokation."
+        },
+        {
+          q: "Kan lejere vælge afhentningslokation?",
+          a: "Ja! Ved booking kan lejere se alle dine aktive lokationer og vælge, hvor de vil afhente og aflevere bilen. Lokationsinfo inkluderes automatisk i kontrakten."
+        },
+        {
+          q: "Hvordan tilknytter jeg biler til lokationer?",
+          a: "Ved oprettelse eller redigering af et køretøj kan du vælge, hvilken lokation bilen tilhører. Dette hjælper med overblik og vises til lejere ved søgning."
+        },
+        {
+          q: "Kan jeg have forskellige åbningstider pr. lokation?",
+          a: "Ja! Hver lokation kan have sine egne åbningstider og særlige lukkedage. Dette påvirker, hvornår lejere kan afhente og aflevere."
+        }
+      ]
+    },
+    {
+      title: "Check-in & Check-out",
+      icon: Camera,
+      questions: [
+        {
+          q: "Hvordan fungerer nummerplade-scanning?",
+          a: "Ved udlevering og aflevering scanner du bilens nummerplade med kameraet. Systemet verificerer automatisk, at det er den rigtige bil og registrerer tidspunktet."
+        },
+        {
+          q: "Hvad er dashboard-foto med AI?",
+          a: "Tag et foto af instrumentbrættet ved check-in og check-out. Vores AI aflæser automatisk kilometerstand og brændstofniveau, så du slipper for manuel indtastning."
+        },
+        {
+          q: "Hvad er GPS-lokationsverifikation?",
+          a: "Ved aflevering kan systemet tjekke, om bilen befinder sig på den aftalte lokation. Du får en advarsel, hvis bilen afleveres et forkert sted."
+        },
+        {
+          q: "Hvordan beregnes km-overskridelse?",
+          a: "Systemet sammenligner start- og slut-kilometertal med det inkluderede antal km på kontrakten. Overskridelser ganges med den aftalte km-pris og tilføjes automatisk til opgørelsen."
+        },
+        {
+          q: "Hvad er QR-kode check-in?",
+          a: "Du kan generere en QR-kode, som lejeren scanner ved afhentning. Dette starter check-in processen automatisk og gør selv-check-in muligt uden fysisk overdragelse."
+        },
+        {
+          q: "Hvordan dokumenterer jeg bilens stand?",
+          a: "Brug skaderapport-funktionen til at fotografere og markere eksisterende skader på et visuelt diagram af bilen. Begge parter godkender rapporten digitalt."
+        }
+      ]
+    },
+    {
+      title: "Bøder & Afgifter",
+      icon: Receipt,
+      questions: [
+        {
+          q: "Hvordan sender jeg en bøde videre til lejeren?",
+          a: "Gå til 'Bøder' i dit dashboard, upload bøden som PDF eller foto, og vælg det relevante køretøj og dato. Systemet finder automatisk den rette booking."
+        },
+        {
+          q: "Kan jeg tage et administrationsgebyr?",
+          a: "Ja! Du kan indstille et gebyr fra 0-800 kr, som lægges oven i bødens beløb. Dette dækker din tid til at håndtere bøden og kommunikere med lejeren."
+        },
+        {
+          q: "Hvordan ved lejeren, at de har fået en bøde?",
+          a: "Lejeren modtager automatisk en email med bødedetaljer, dokumentation og betalingsinstruktioner. Du kan følge status fra 'Afventer' til 'Betalt' i systemet."
+        },
+        {
+          q: "Hvad hvis lejeren bestrider bøden?",
+          a: "Kommuniker med lejeren via beskedsystemet. Har du dokumentation fra check-in/check-out, kan denne bruges som bevis. Ved alvorlige tvister kan LEJIO mægle."
+        },
+        {
+          q: "Hvilke typer afgifter kan jeg registrere?",
+          a: "Du kan registrere fartbøder, parkeringsbøder, brobizz-afgifter, P-afgifter og andre trafikrelaterede afgifter. Hver type får sin egen kategori."
+        }
+      ]
+    },
+    {
+      title: "GPS & Flådestyring",
+      icon: MapPin,
+      questions: [
+        {
+          q: "Hvordan forbinder jeg en GPS-tracker?",
+          a: "Gå til 'GPS-sporing' i dit dashboard og tilføj din GPS-enhed. Vi understøtter de fleste GPS-udbydere via webhook-integration. Du får en unik webhook-URL til din tracker."
+        },
+        {
+          q: "Hvad er geofencing?",
+          a: "Geofencing lader dig definere et område på kortet. Du får automatisk besked, når en bil kører ind i eller ud af området – nyttigt ved landeoverskridende kørsel."
+        },
+        {
+          q: "Kan jeg se bilernes position i realtid?",
+          a: "Ja! GPS-kortet viser alle dine biler med aktuel position, hastighed og retning. Du kan klikke på en bil for at se historik og detaljer."
+        },
+        {
+          q: "Opdateres kilometertallet automatisk?",
+          a: "Ja, hvis din GPS-tracker sender kilometerdata, opdateres køretøjets kilometertal automatisk. Dette bruges til serviceintervaller og check-in/check-out."
+        },
+        {
+          q: "Hvilke GPS-udbydere understøttes?",
+          a: "Vi understøtter alle GPS-udbydere der kan sende data via webhook (HTTP POST). Det inkluderer bl.a. Teltonika, Ruptela, Concox og mange andre. Kontakt os for hjælp til opsætning."
+        }
+      ]
+    },
+    {
+      title: "Motorcykel & Scooter",
+      icon: Bike,
+      questions: [
+        {
+          q: "Hvordan validerer LEJIO MC-kørekort?",
+          a: "Ved booking af motorcykler tjekker systemet automatisk lejerens kørekorttype (A1, A2, A) mod motorcyklens effekt. Er kørekortet ikke tilstrækkeligt, afvises bookingen."
+        },
+        {
+          q: "Hvad er MC-specifik vedligeholdelse?",
+          a: "Ud over standard service kan du spore MC-specifikke ting som kædeservice, dækslid, bremseklodser og væskestand. Systemet minder dig, når det er tid til vedligeholdelse."
+        },
+        {
+          q: "Hvad er sæson-tjeklisten?",
+          a: "Om foråret og efteråret får du automatiske påmindelser om at gøre motorcyklerne klar til sæsonen – batteritjek, dækskift, væskestand og generel gennemgang."
+        },
+        {
+          q: "Er der særlig check-in for motorcykler?",
+          a: "Ja! MC Check-in guiden fokuserer på MC-specifikke kontrolpunkter som kæde, dæk, bremser, lys og udstyr (hjelm, handsker). Dette sikrer grundig dokumentation."
+        },
+        {
+          q: "Kan jeg leje scootere ud via LEJIO?",
+          a: "Absolut! Scootere og knallerter håndteres på samme måde som motorcykler, med passende kørekortvalidering (AM/A1) afhængig af scooterens specifikationer."
+        }
+      ]
+    },
+    {
+      title: "Henvisning & Rabatter",
+      icon: Gift,
+      questions: [
+        {
+          q: "Hvordan fungerer henvisningsprogrammet?",
+          a: "Del din personlige henvisningskode med venner. Når de opretter sig og gennemfører en booking, får I begge 500 kr. i kredit, som kan bruges på fremtidige bookinger."
+        },
+        {
+          q: "Hvordan finder jeg min henvisningskode?",
+          a: "Gå til 'Indstillinger' og find afsnittet 'Henvisning'. Her ser du din unikke kode og kan dele den direkte på sociale medier eller via SMS."
+        },
+        {
+          q: "Hvornår kan jeg bruge min kredit?",
+          a: "Kredit tildeles, når den henviste person gennemfører sin første booking. Du kan derefter bruge kreditten på din næste booking – den trækkes automatisk fra."
+        },
+        {
+          q: "Hvordan opretter jeg rabatkoder som udlejer?",
+          a: "Gå til 'Rabatkoder' i dit dashboard. Opret koder med procentrabat eller fast beløb, sæt gyldighedsperiode og maksimalt antal brug. Del koderne med dine kunder."
+        },
+        {
+          q: "Kan rabatkoder kombineres med henvisningskredit?",
+          a: "Ja! En lejer kan både bruge en rabatkode og sin optjente henvisningskredit på samme booking for maksimal besparelse."
+        }
+      ]
+    },
+    {
+      title: "Erhverv & Flåde",
+      icon: Building2,
+      questions: [
+        {
+          q: "Hvad er en erhvervskonto?",
+          a: "Erhvervskonti giver virksomheder særlige vilkår: månedlig samlet faktura, EAN-understøttelse, afdelingsbudgetter og mulighed for at administrere flere medarbejderes adgang."
+        },
+        {
+          q: "Hvordan oprettes afdelingsbudgetter?",
+          a: "Som erhvervskunde kan du oprette afdelinger med separate budgetter. Når medarbejdere booker, allokeres udgiften til deres afdeling, og du kan trække rapporter pr. afdeling."
+        },
+        {
+          q: "Kan medarbejdere booke selv?",
+          a: "Ja! Du inviterer medarbejdere til erhvervskontoen, og de kan herefter selv booke biler inden for deres afdelings budget og regler. Alt samles på virksomhedens faktura."
+        },
+        {
+          q: "Hvad er flåde-afregning?",
+          a: "Store flådeejere kan få månedlig afregning med kommission i stedet for pr. booking gebyr. Kontakt os for at høre om betingelserne."
+        },
+        {
+          q: "Understøtter I EAN-fakturering?",
+          a: "Ja! Erhvervskunder kan angive EAN-nummer, og alle fakturaer sendes automatisk via EAN til jeres økonomisystem."
+        },
+        {
+          q: "Hvad er CVR-opslag?",
+          a: "Når du indtaster et CVR-nummer, henter systemet automatisk virksomhedsoplysninger som navn, adresse og kontaktinfo fra CVR-registeret."
+        }
+      ]
+    },
+    {
+      title: "Statistik & Rapporter",
+      icon: BarChart3,
+      questions: [
+        {
+          q: "Hvilke statistikker kan jeg se?",
+          a: "Du får overblik over indtjening, antal bookinger, udnyttelsesgrad, gennemsnitlig dagspris og mest populære køretøjer – alt fordelt på perioder og køretøjer."
+        },
+        {
+          q: "Hvad er udnyttelsesgrad?",
+          a: "Udnyttelsesgraden viser, hvor mange dage dine biler har været udlejet i forhold til tilgængelige dage. 80% udnyttelse betyder, at bilen var lejet ud 80% af tiden."
+        },
+        {
+          q: "Kan jeg eksportere data til regnskab?",
+          a: "Ja! Du kan downloade månedlige rapporter som PDF eller Excel med alle bookinger, indtægter og gebyrer – perfekt til bogføring og SKAT."
+        },
+        {
+          q: "Hvad er AI Dashboard-analyse?",
+          a: "Vores AI analyserer dine data og giver dig personlige anbefalinger: prisjusteringer, optimale lokationer, populære perioder og forslag til at øge din indtjening."
+        },
+        {
+          q: "Kan jeg se udvikling over tid?",
+          a: "Ja! Grafer viser din indtjening, bookinger og udnyttelse over tid. Sammenlign måneder og år for at se, hvordan din forretning udvikler sig."
         }
       ]
     },
@@ -135,6 +387,10 @@ const FAQ = () => {
         {
           q: "Understøtter I dækhotel-funktion?",
           a: "Ja! Du kan registrere, hvilken dæktype hver bil kører på (sommer/vinter/helårs), dækstørrelse og dækhotel-lokation. Systemet kan minde dig om dækskift ved sæsonskift."
+        },
+        {
+          q: "Hvad er km-trigger opgaver?",
+          a: "Du kan oprette opgaver der automatisk aktiveres, når et køretøj når et bestemt kilometertal – f.eks. 'Kædeskift ved 15.000 km' for motorcykler."
         }
       ]
     },
@@ -213,6 +469,10 @@ const FAQ = () => {
         {
           q: "Hvordan kontakter jeg kundeservice?",
           a: "Tryk på 'Kontakt kundeservice' i beskedsystemet for at starte en samtale med LEJIO's supportteam. Vi svarer typisk inden for et par timer."
+        },
+        {
+          q: "Får jeg notifikationer ved nye beskeder?",
+          a: "Ja! Du får push-notifikationer på telefonen og kan se antal ulæste beskeder i menuen. Du kan indstille notifikationer i dine indstillinger."
         }
       ]
     },
@@ -235,16 +495,24 @@ const FAQ = () => {
         {
           q: "Hvad sker der med depositummet?",
           a: "Depositummet returneres efter lejeperioden, hvis bilen afleveres i samme stand som ved modtagelse. Eventuelle skader eller manglende brændstof fratrækkes."
+        },
+        {
+          q: "Hvordan fungerer platformgebyr-betaling?",
+          a: "Som udlejer kan du se og betale dine platformgebyrer direkte i dashboardet. Du får oversigt over afventende gebyrer og kan betale samlet eller enkeltvis."
+        },
+        {
+          q: "Hvad er AI-prissætning?",
+          a: "Vores AI analyserer markedet, sæson og efterspørgsel og giver dig prisanbefalinger. Du kan se foreslået pris og begrundelse, men bestemmer altid selv den endelige pris."
         }
       ]
     },
     {
-      title: "Kontrakter & juridisk",
+      title: "Kontrakter & Dokumentation",
       icon: FileText,
       questions: [
         {
           q: "Hvordan fungerer lejekontrakten?",
-          a: "Når en booking bekræftes, genereres en lejekontrakt automatisk. Både lejer og udlejer skal underskrive digitalt, før udlejningen kan begynde."
+          a: "Når en booking bekræftes, genereres en lejekontrakt automatisk med alle detaljer: køretøj, periode, pris, selvrisiko, forsikring og vilkår. Både lejer og udlejer skal underskrive digitalt."
         },
         {
           q: "Hvad er vanvidskørselsklausulen?",
@@ -257,11 +525,19 @@ const FAQ = () => {
         {
           q: "Hvad dækker udlejers forsikring?",
           a: "Det afhænger af udlejers forsikringspolice. Detaljer om forsikringsdækning og selvrisiko fremgår af lejekontrakten."
+        },
+        {
+          q: "Kan jeg uploade mit firmalogo til kontrakterne?",
+          a: "Ja! Som forhandler kan du uploade dit firmalogo i indstillinger. Logoet vises øverst på alle dine kontrakter for professionelt udseende."
+        },
+        {
+          q: "Hvad er skaderapporter med AI?",
+          a: "Ved check-in og check-out kan du fotografere bilen. Vores AI analyserer billederne og kan identificere skader automatisk. Du markerer skaderne på et visuelt diagram, og begge parter godkender."
         }
       ]
     },
     {
-      title: "Sikkerhed & advarsler",
+      title: "Sikkerhed & Advarsler",
       icon: Shield,
       questions: [
         {
@@ -274,11 +550,15 @@ const FAQ = () => {
         },
         {
           q: "Hvad sker der ved en tvist mellem lejer og udlejer?",
-          a: "Vi opfordrer til dialog mellem parterne. Hvis det ikke lykkes, kan du kontakte vores kundeservice via beskedsystemet. Alvorlige tvister kan indbringes for Forbrugerklagenævnet."
+          a: "Vi opfordrer til dialog mellem parterne via beskedsystemet. Hvis det ikke lykkes, kan du kontakte vores kundeservice. Alvorlige tvister kan indbringes for Forbrugerklagenævnet."
         },
         {
           q: "Hvordan rapporterer jeg en udlejer?",
           a: "Du kan indgive en klage mod en udlejer via din booking eller kontakte vores kundeservice. Vi undersøger alle henvendelser."
+        },
+        {
+          q: "Hvordan verificeres kørekort?",
+          a: "Lejere uploader billede af deres kørekort. Vores AI verificerer ægthed og udløbsdato. Udlejere kan se verifikationsstatus før de accepterer bookinger."
         }
       ]
     },
@@ -301,6 +581,14 @@ const FAQ = () => {
         {
           q: "Hvordan kontakter jeg kundeservice?",
           a: "Du kan bruge beskedsystemet til at starte en samtale med kundeservice, eller sende en e-mail til hej@lejio.dk."
+        },
+        {
+          q: "Fungerer LEJIO på mobil?",
+          a: "Ja! LEJIO er fuldt responsivt og fungerer på alle enheder. Du kan også installere LEJIO som app på din telefon via browseren for hurtig adgang."
+        },
+        {
+          q: "Hvad gør jeg, hvis en funktion ikke virker?",
+          a: "Prøv først at genindlæse siden. Hvis problemet fortsætter, kontakt kundeservice med en beskrivelse af fejlen, så hjælper vi dig hurtigt."
         }
       ]
     }
