@@ -4270,6 +4270,13 @@ export type Database = {
       }
     }
     Functions: {
+      assign_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _target_user_id: string
+        }
+        Returns: boolean
+      }
       can_view_vehicle_sensitive_data: {
         Args: { vehicle_id: string }
         Returns: boolean
@@ -4278,6 +4285,16 @@ export type Database = {
       generate_corporate_invoice_number: { Args: never; Returns: string }
       generate_invoice_number: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
+      get_admin_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
       get_renter_rating_stats: {
         Args: { renter_email_input: string }
         Returns: {
@@ -4285,6 +4302,7 @@ export type Database = {
           total_ratings: number
         }[]
       }
+      has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4292,9 +4310,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      remove_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _target_user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "super_admin"
+      app_role: "admin" | "super_admin" | "support"
       appeal_status: "pending" | "reviewing" | "approved" | "rejected"
       fleet_plan_type: "fleet_basic" | "fleet_premium"
       lessor_status: "bronze" | "silver" | "gold" | "platinum"
@@ -4443,7 +4468,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "super_admin"],
+      app_role: ["admin", "super_admin", "support"],
       appeal_status: ["pending", "reviewing", "approved", "rejected"],
       fleet_plan_type: ["fleet_basic", "fleet_premium"],
       lessor_status: ["bronze", "silver", "gold", "platinum"],

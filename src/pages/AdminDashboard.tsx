@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Car, Calendar, CreditCard, Tag, 
   LogOut, Loader2, CheckCircle, XCircle, Clock,
-  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu, Camera, Building2, Facebook
+  Plus, Search, MoreHorizontal, Eye, Receipt, Truck, AlertTriangle, Flag, UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3, Menu, Camera, Building2, Facebook, UsersRound
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +41,7 @@ import AdminBookingStats from '@/components/admin/AdminBookingStats';
 import { AdminCheckInOutSettings } from '@/components/admin/AdminCheckInOutSettings';
 import AdminCorporateAccounts from '@/components/admin/AdminCorporateAccounts';
 import AdminFacebookPosts from '@/components/admin/AdminFacebookPosts';
+import { AdminStaffManagement } from '@/components/admin/AdminStaffManagement';
 
 interface Customer {
   id: string;
@@ -68,7 +69,7 @@ interface AdminBooking {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { user, isSuperAdmin, isLoading, signOut } = useAdminAuth();
+  const { user, hasAccess, isSuperAdmin, isLoading, signOut } = useAdminAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,16 +79,16 @@ const AdminDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && (!user || !isSuperAdmin)) {
+    if (!isLoading && (!user || !hasAccess)) {
       navigate('/admin');
     }
-  }, [user, isSuperAdmin, isLoading, navigate]);
+  }, [user, hasAccess, isLoading, navigate]);
 
   useEffect(() => {
-    if (isSuperAdmin) {
+    if (hasAccess) {
       fetchData();
     }
-  }, [isSuperAdmin]);
+  }, [hasAccess]);
 
   const fetchData = async () => {
     setLoadingData(true);
@@ -206,6 +207,7 @@ const AdminDashboard = () => {
 
   const menuItems = [
     { value: 'users', icon: UserCog, label: 'Brugerstyring' },
+    { value: 'staff', icon: UsersRound, label: 'Medarbejdere' },
     { value: 'bookings', icon: Calendar, label: 'Bookinger' },
     { value: 'fees', icon: Receipt, label: 'Gebyrer' },
     { value: 'discounts', icon: Tag, label: 'Rabatkoder' },
@@ -355,6 +357,11 @@ const AdminDashboard = () => {
           {/* User Management Tab */}
           <TabsContent value="users">
             <AdminUserManagement />
+          </TabsContent>
+
+          {/* Staff Management Tab */}
+          <TabsContent value="staff">
+            <AdminStaffManagement />
           </TabsContent>
 
           {/* Bookings Tab */}
