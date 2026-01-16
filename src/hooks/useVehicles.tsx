@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
 export type PaymentScheduleType = 'upfront' | 'monthly';
-export type VehicleType = 'bil' | 'trailer' | 'campingvogn';
+export type VehicleType = 'bil' | 'trailer' | 'campingvogn' | 'motorcykel' | 'scooter';
 
 export interface Vehicle {
   id: string;
@@ -97,6 +97,31 @@ export interface Vehicle {
   tire_size: string | null;
   tire_hotel_location: string | null;
   tire_change_reminder_sent: boolean;
+  // Motorcycle/Scooter specific
+  mc_category: string | null;
+  engine_cc: number | null;
+  engine_kw: number | null;
+  has_abs: boolean;
+  seat_height_mm: number | null;
+  helmet_included: boolean;
+  helmet_size: string | null;
+  has_disc_lock: boolean;
+  has_chain_lock: boolean;
+  has_steering_lock: boolean;
+  has_top_box: boolean;
+  has_side_bags: boolean;
+  has_tank_bag: boolean;
+  has_phone_mount: boolean;
+  has_usb_outlet: boolean;
+  has_heated_grips: boolean;
+  has_windscreen: boolean;
+  chain_last_checked_at: string | null;
+  chain_last_checked_km: number | null;
+  tire_tread_front_mm: number | null;
+  tire_tread_rear_mm: number | null;
+  mc_daily_km_limit: number | null;
+  winter_deactivated: boolean;
+  rain_guarantee_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
