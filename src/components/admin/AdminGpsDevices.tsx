@@ -82,51 +82,69 @@ const AdminGpsDevices = () => {
   const fetchData = async () => {
     setLoading(true);
 
-    // Fetch all GPS devices with vehicle info
-    const { data: devicesData, error: devicesError } = await supabase
-      .from('gps_devices')
-      .select(`
-        *,
-        vehicle:vehicles(make, model, registration, owner_id)
-      `)
-      .order('created_at', { ascending: false });
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: data kunne ikke hentes. Prøv igen.')), 12000)
+    );
 
-    if (devicesError) {
-      console.error('Error fetching devices:', devicesError);
-    } else if (devicesData) {
-      // Fetch owner profiles for each device
-      const ownerIds = [...new Set(devicesData.map(d => d.vehicle?.owner_id).filter(Boolean))];
-      
-      if (ownerIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('id, email, company_name, full_name')
-          .in('id', ownerIds);
+    try {
+      await Promise.race([
+        (async () => {
+          const { data: devicesData, error: devicesError } = await supabase
+            .from('gps_devices')
+            .select(`
+              *,
+              vehicle:vehicles(make, model, registration, owner_id)
+            `)
+            .order('created_at', { ascending: false });
 
-        const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-        
-        const devicesWithOwners = devicesData.map(device => ({
-          ...device,
-          owner: device.vehicle?.owner_id ? profileMap.get(device.vehicle.owner_id) : undefined,
-        }));
-        
-        setDevices(devicesWithOwners);
-      } else {
-        setDevices(devicesData);
-      }
+          if (devicesError) {
+            console.error('Error fetching devices:', devicesError);
+            toast.error('Kunne ikke hente GPS enheder');
+            setDevices([]);
+          } else if (devicesData) {
+            const ownerIds = [...new Set(devicesData.map(d => d.vehicle?.owner_id).filter(Boolean))] as string[];
+
+            if (ownerIds.length > 0) {
+              const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, email, company_name, full_name')
+                .in('id', ownerIds);
+
+              if (profilesError) {
+                console.error('Error fetching owner profiles:', profilesError);
+              }
+
+              const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+              const devicesWithOwners = devicesData.map(device => ({
+                ...device,
+                owner: device.vehicle?.owner_id ? profileMap.get(device.vehicle.owner_id) : undefined,
+              }));
+
+              setDevices(devicesWithOwners);
+            } else {
+              setDevices(devicesData);
+            }
+          }
+
+          const { data: allProfiles, error: allProfilesError } = await supabase
+            .from('profiles')
+            .select('id, email, company_name, full_name')
+            .order('email');
+
+          if (allProfilesError) {
+            console.error('Error fetching profiles:', allProfilesError);
+          } else {
+            setProfiles(allProfiles || []);
+          }
+        })(),
+        timeout,
+      ]);
+    } catch (err: any) {
+      console.error('AdminGpsDevices fetchData failed:', err);
+      toast.error(err?.message || 'Kunne ikke hente GPS data');
+    } finally {
+      setLoading(false);
     }
-
-    // Fetch all profiles for dropdown
-    const { data: allProfiles } = await supabase
-      .from('profiles')
-      .select('id, email, company_name, full_name')
-      .order('email');
-
-    if (allProfiles) {
-      setProfiles(allProfiles);
-    }
-
-    setLoading(false);
   };
 
   const fetchUserVehicles = async (userId: string) => {

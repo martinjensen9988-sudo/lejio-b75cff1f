@@ -68,28 +68,57 @@ const AdminWarnings = () => {
   const fetchData = async () => {
     setIsLoading(true);
 
-    // Fetch all warnings
-    const { data: warningsData } = await supabase
-      .from('renter_warnings')
-      .select('*')
-      .order('created_at', { ascending: false });
-    setWarnings((warningsData || []) as RenterWarning[]);
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: data kunne ikke hentes. Prøv igen.')), 12000)
+    );
 
-    // Fetch all appeals
-    const { data: appealsData } = await supabase
-      .from('warning_appeals')
-      .select('*')
-      .order('created_at', { ascending: false });
-    setAppeals((appealsData || []) as WarningAppeal[]);
+    try {
+      await Promise.race([
+        (async () => {
+          const { data: warningsData, error: warningsError } = await supabase
+            .from('renter_warnings')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-    // Fetch messages
-    const { data: messagesData } = await supabase
-      .from('admin_messages')
-      .select('*')
-      .order('created_at', { ascending: false });
-    setMessages((messagesData || []) as AdminMessage[]);
+          if (warningsError) {
+            console.error('Error fetching warnings:', warningsError);
+            toast.error('Kunne ikke hente advarsler');
+          } else {
+            setWarnings((warningsData || []) as RenterWarning[]);
+          }
 
-    setIsLoading(false);
+          const { data: appealsData, error: appealsError } = await supabase
+            .from('warning_appeals')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (appealsError) {
+            console.error('Error fetching appeals:', appealsError);
+            toast.error('Kunne ikke hente klager');
+          } else {
+            setAppeals((appealsData || []) as WarningAppeal[]);
+          }
+
+          const { data: messagesData, error: messagesError } = await supabase
+            .from('admin_messages')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (messagesError) {
+            console.error('Error fetching admin messages:', messagesError);
+            toast.error('Kunne ikke hente admin beskeder');
+          } else {
+            setMessages((messagesData || []) as AdminMessage[]);
+          }
+        })(),
+        timeout,
+      ]);
+    } catch (err: any) {
+      console.error('AdminWarnings fetchData failed:', err);
+      toast.error(err?.message || 'Kunne ikke hente data');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
