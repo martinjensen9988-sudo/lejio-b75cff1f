@@ -133,10 +133,10 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
     setLoading(true);
 
     try {
-      // Fetch full vehicle data including owner_id and registration (not in public view)
+      // Fetch full vehicle data including owner_id, registration, and current_location_id (not in public view)
       const { data: vehicleData, error: vehicleError } = await supabase
         .from('vehicles')
-        .select('owner_id, registration')
+        .select('owner_id, registration, current_location_id')
         .eq('id', vehicle.id)
         .single();
 
@@ -171,6 +171,8 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
           renter_email: formData.email,
           renter_phone: formData.phone,
           notes: formData.notes || null,
+          pickup_location_id: vehicleData.current_location_id || null,
+          dropoff_location_id: vehicleData.current_location_id || null,
         });
 
       if (bookingError) {
