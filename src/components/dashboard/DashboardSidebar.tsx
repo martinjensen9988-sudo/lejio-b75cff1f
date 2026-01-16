@@ -56,7 +56,6 @@ interface MenuGroup {
 
 interface DashboardSidebarProps {
   activeTab: string;
-  onTabChange: (tab: string) => void;
   unreadCount?: number;
   pendingBookings?: number;
   onSignOut: () => void;
