@@ -6,6 +6,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-secret',
 };
 
+// Security limits
+const MAX_PAYLOAD_SIZE = 100000; // 100KB max payload
+const MAX_DEVICE_ID_LENGTH = 100;
+const MAX_PROVIDER_LENGTH = 50;
+const MAX_OBJECT_DEPTH = 5;
+const MAX_DATA_POINTS = 100;
+
+// Limit object depth to prevent stack overflow attacks
+const limitObjectDepth = (obj: unknown, maxDepth: number, currentDepth: number = 0): unknown => {
+  if (currentDepth >= maxDepth) {
+    return '[max depth reached]';
+  }
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.slice(0, 100).map(item => limitObjectDepth(item, maxDepth, currentDepth + 1));
+  }
+  const result: Record<string, unknown> = {};
+  const keys = Object.keys(obj as Record<string, unknown>).slice(0, 50);
+  for (const key of keys) {
+    result[key] = limitObjectDepth((obj as Record<string, unknown>)[key], maxDepth, currentDepth + 1);
+  }
+  return result;
+};
+
+// Sanitize string for logging (remove potential injection characters)
+const sanitizeForLog = (str: string, maxLength: number = 100): string => {
+  return str.slice(0, maxLength).replace(/[\x00-\x1f\x7f]/g, '');
+};
+
 interface GpsDataPoint {
   device_id: string;
   latitude: number;
@@ -276,6 +307,16 @@ serve(async (req) => {
   }
 
   try {
+    // Check payload size before parsing
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > MAX_PAYLOAD_SIZE) {
+      console.warn('Payload too large:', contentLength);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Request too large' }),
+        { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -283,35 +324,78 @@ serve(async (req) => {
     // Get webhook secret from header for authentication
     const webhookSecret = req.headers.get('x-webhook-secret');
 
-    // Get provider from query params or header
+    // Get provider from query params or header with validation
     const url = new URL(req.url);
-    const provider = url.searchParams.get('provider') || req.headers.get('x-gps-provider') || 'generic';
+    let provider = url.searchParams.get('provider') || req.headers.get('x-gps-provider') || 'generic';
+    
+    // Validate and sanitize provider string
+    if (provider.length > MAX_PROVIDER_LENGTH) {
+      console.warn('Provider name too long');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid provider' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    provider = sanitizeForLog(provider, MAX_PROVIDER_LENGTH);
     
     console.log(`Received GPS webhook from provider: ${provider}`);
 
-    // Parse request body
-    const body = await req.json();
-    console.log('Raw webhook data:', JSON.stringify(body).substring(0, 500));
+    // Parse request body with size check
+    const rawText = await req.text();
+    if (rawText.length > MAX_PAYLOAD_SIZE) {
+      console.warn('Payload too large after reading');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Request too large' }),
+        { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const body = JSON.parse(rawText);
+    
+    // Limit object depth to prevent stack overflow
+    const sanitizedBody = limitObjectDepth(body, MAX_OBJECT_DEPTH) as Record<string, unknown> | unknown[];
+    
+    // Log truncated data for debugging (avoid logging full payload)
+    console.log('Webhook data received, size:', rawText.length);
 
     // Handle both single data point and array of data points
-    const dataPoints = Array.isArray(body) ? body : (body.data ? (Array.isArray(body.data) ? body.data : [body.data]) : [body]);
+    let dataPoints = Array.isArray(sanitizedBody) 
+      ? sanitizedBody 
+      : ((sanitizedBody as Record<string, unknown>).data 
+          ? (Array.isArray((sanitizedBody as Record<string, unknown>).data) 
+              ? (sanitizedBody as Record<string, unknown>).data as unknown[]
+              : [(sanitizedBody as Record<string, unknown>).data]) 
+          : [sanitizedBody]);
+    
+    // Limit number of data points to process
+    if (dataPoints.length > MAX_DATA_POINTS) {
+      console.warn(`Too many data points: ${dataPoints.length}, limiting to ${MAX_DATA_POINTS}`);
+      dataPoints = dataPoints.slice(0, MAX_DATA_POINTS);
+    }
 
     const results = [];
     const errors = [];
 
     for (const rawData of dataPoints) {
-      const parsed = parseProviderData(provider, rawData);
+      const parsed = parseProviderData(provider, rawData as Record<string, unknown>);
       
       if (!parsed || !parsed.device_id || !parsed.latitude || !parsed.longitude) {
-        errors.push({ error: 'Invalid data format', raw: rawData });
+        errors.push({ error: 'INVALID_FORMAT' });
+        continue;
+      }
+
+      // Validate device_id length
+      if (parsed.device_id.length > MAX_DEVICE_ID_LENGTH) {
+        console.warn('Device ID too long');
+        errors.push({ error: 'INVALID_DEVICE' });
         continue;
       }
 
       // Validate GPS data ranges
       const validation = validateGpsData(parsed);
       if (!validation.valid) {
-        console.warn(`Invalid GPS data for device ${parsed.device_id}:`, validation.errors);
-        errors.push({ error: 'Invalid GPS data', device_id: parsed.device_id, validation_errors: validation.errors });
+        console.warn(`Invalid GPS data for device ${sanitizeForLog(parsed.device_id)}:`, validation.errors);
+        errors.push({ error: 'INVALID_DATA' });
         continue;
       }
 
@@ -323,21 +407,21 @@ serve(async (req) => {
         .single();
 
       if (deviceError || !device) {
-        console.log(`Unknown device: ${parsed.device_id}`);
-        errors.push({ error: 'Unknown device', device_id: parsed.device_id });
+        console.log(`Unknown device: ${sanitizeForLog(parsed.device_id)}`);
+        errors.push({ error: 'DEVICE_NOT_FOUND' });
         continue;
       }
 
       // Validate webhook secret if configured for this device
       if (device.webhook_secret && device.webhook_secret !== webhookSecret) {
-        console.warn(`Invalid webhook secret for device: ${parsed.device_id}`);
-        errors.push({ error: 'Unauthorized - invalid webhook secret', device_id: parsed.device_id });
+        console.warn(`Invalid webhook secret for device: ${sanitizeForLog(parsed.device_id)}`);
+        errors.push({ error: 'UNAUTHORIZED' });
         continue;
       }
 
       if (!device.is_active) {
-        console.log(`Inactive device: ${parsed.device_id}`);
-        errors.push({ error: 'Device is inactive', device_id: parsed.device_id });
+        console.log(`Inactive device: ${sanitizeForLog(parsed.device_id)}`);
+        errors.push({ error: 'DEVICE_INACTIVE' });
         continue;
       }
 
@@ -363,7 +447,7 @@ serve(async (req) => {
 
       if (insertError) {
         console.error('Error inserting GPS data:', insertError);
-        errors.push({ error: insertError.message, device_id: parsed.device_id });
+        errors.push({ error: 'PROCESSING_ERROR' });
         continue;
       }
 
@@ -459,9 +543,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('GPS webhook error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    // Return generic error to avoid leaking internal details
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
+      JSON.stringify({ success: false, error: 'Processing failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
