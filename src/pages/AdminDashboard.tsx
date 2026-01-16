@@ -42,6 +42,7 @@ import { AdminCheckInOutSettings } from '@/components/admin/AdminCheckInOutSetti
 import AdminCorporateAccounts from '@/components/admin/AdminCorporateAccounts';
 import AdminFacebookPosts from '@/components/admin/AdminFacebookPosts';
 import { AdminStaffManagement } from '@/components/admin/AdminStaffManagement';
+import AdminDealerLocations from '@/components/admin/AdminDealerLocations';
 
 interface Customer {
   id: string;
@@ -209,6 +210,7 @@ const AdminDashboard = () => {
     { value: 'users', icon: UserCog, label: 'Brugerstyring' },
     { value: 'staff', icon: UsersRound, label: 'Medarbejdere' },
     { value: 'bookings', icon: Calendar, label: 'Bookinger' },
+    { value: 'locations', icon: MapPin, label: 'Lokationer' },
     { value: 'fees', icon: Receipt, label: 'Gebyrer' },
     { value: 'discounts', icon: Tag, label: 'Rabatkoder' },
     { value: 'fleet', icon: Truck, label: 'Fleet' },
@@ -436,6 +438,11 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Dealer Locations Tab */}
+          <TabsContent value="locations">
+            <AdminDealerLocations />
           </TabsContent>
 
           {/* Platform Fees Tab */}
