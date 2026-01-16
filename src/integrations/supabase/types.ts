@@ -71,6 +71,7 @@ export type Database = {
       bookings: {
         Row: {
           created_at: string
+          dropoff_location_id: string | null
           end_date: string
           extra_driver_birth_date: string | null
           extra_driver_first_name: string | null
@@ -83,6 +84,7 @@ export type Database = {
           id: string
           lessor_id: string
           notes: string | null
+          pickup_location_id: string | null
           renter_address: string | null
           renter_birth_date: string | null
           renter_city: string | null
@@ -104,6 +106,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dropoff_location_id?: string | null
           end_date: string
           extra_driver_birth_date?: string | null
           extra_driver_first_name?: string | null
@@ -116,6 +119,7 @@ export type Database = {
           id?: string
           lessor_id: string
           notes?: string | null
+          pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
           renter_city?: string | null
@@ -137,6 +141,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dropoff_location_id?: string | null
           end_date?: string
           extra_driver_birth_date?: string | null
           extra_driver_first_name?: string | null
@@ -149,6 +154,7 @@ export type Database = {
           id?: string
           lessor_id?: string
           notes?: string | null
+          pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
           renter_city?: string | null
@@ -169,6 +175,20 @@ export type Database = {
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_dropoff_location_id_fkey"
+            columns: ["dropoff_location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_pickup_location_id_fkey"
+            columns: ["pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -404,6 +424,9 @@ export type Database = {
           lessor_signed_at: string | null
           logo_url: string | null
           pdf_url: string | null
+          pickup_location_address: string | null
+          pickup_location_name: string | null
+          pickup_location_phone: string | null
           renter_address: string | null
           renter_email: string
           renter_id: string | null
@@ -456,6 +479,9 @@ export type Database = {
           lessor_signed_at?: string | null
           logo_url?: string | null
           pdf_url?: string | null
+          pickup_location_address?: string | null
+          pickup_location_name?: string | null
+          pickup_location_phone?: string | null
           renter_address?: string | null
           renter_email: string
           renter_id?: string | null
@@ -508,6 +534,9 @@ export type Database = {
           lessor_signed_at?: string | null
           logo_url?: string | null
           pdf_url?: string | null
+          pickup_location_address?: string | null
+          pickup_location_name?: string | null
+          pickup_location_phone?: string | null
           renter_address?: string | null
           renter_email?: string
           renter_id?: string | null
@@ -1220,6 +1249,71 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dealer_locations: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          is_headquarters: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          notes: string | null
+          partner_id: string
+          phone: string | null
+          postal_code: string
+          preparation_time_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_headquarters?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          notes?: string | null
+          partner_id: string
+          phone?: string | null
+          postal_code: string
+          preparation_time_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_headquarters?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          notes?: string | null
+          partner_id?: string
+          phone?: string | null
+          postal_code?: string
+          preparation_time_minutes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dealer_locations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2138,6 +2232,82 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      location_opening_hours: {
+        Row: {
+          closes_at: string | null
+          day_of_week: number
+          id: string
+          is_closed: boolean
+          location_id: string
+          opens_at: string | null
+        }
+        Insert: {
+          closes_at?: string | null
+          day_of_week: number
+          id?: string
+          is_closed?: boolean
+          location_id: string
+          opens_at?: string | null
+        }
+        Update: {
+          closes_at?: string | null
+          day_of_week?: number
+          id?: string
+          is_closed?: boolean
+          location_id?: string
+          opens_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_opening_hours_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      location_special_days: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          date: string
+          id: string
+          is_closed: boolean
+          location_id: string
+          opens_at: string | null
+          reason: string | null
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          is_closed?: boolean
+          location_id: string
+          opens_at?: string | null
+          reason?: string | null
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          is_closed?: boolean
+          location_id?: string
+          opens_at?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_special_days_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mc_check_photos: {
         Row: {
@@ -3738,6 +3908,7 @@ export type Database = {
           child_sleeping_capacity: number | null
           color: string | null
           created_at: string
+          current_location_id: string | null
           current_odometer: number | null
           daily_price: number | null
           deposit_amount: number | null
@@ -3860,6 +4031,7 @@ export type Database = {
           child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
+          current_location_id?: string | null
           current_odometer?: number | null
           daily_price?: number | null
           deposit_amount?: number | null
@@ -3982,6 +4154,7 @@ export type Database = {
           child_sleeping_capacity?: number | null
           color?: string | null
           created_at?: string
+          current_location_id?: string | null
           current_odometer?: number | null
           daily_price?: number | null
           deposit_amount?: number | null
@@ -4096,7 +4269,15 @@ export type Database = {
           winter_deactivated?: boolean | null
           year?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_current_location_id_fkey"
+            columns: ["current_location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       visitor_chat_messages: {
         Row: {
@@ -4492,6 +4673,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_location_open: {
+        Args: { _datetime: string; _location_id: string }
         Returns: boolean
       }
       remove_role: {
