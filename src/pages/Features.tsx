@@ -29,7 +29,17 @@ import {
   Wallet,
   Building2,
   Scan,
-  ShieldCheck
+  ShieldCheck,
+  Navigation as NavigationIcon,
+  Store,
+  Bike,
+  CalendarClock,
+  Thermometer,
+  AlertTriangle,
+  QrCode,
+  Share2,
+  Globe,
+  Zap
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +76,49 @@ const Features = () => {
           icon: Brain,
           badge: "Ny",
         },
+        {
+          title: "Sæsonpriser",
+          description: "Indstil forskellige priser for høj- og lavsæson automatisk.",
+          icon: CalendarClock,
+          badge: "Ny",
+        },
+      ],
+    },
+    {
+      title: "Lokationer & Afdelinger",
+      icon: Store,
+      color: "bg-emerald-500/10 text-emerald-600",
+      features: [
+        {
+          title: "Multi-lokation support",
+          description: "Administrer flere udlejningslokationer fra ét dashboard.",
+          icon: Store,
+          badge: "Ny",
+        },
+        {
+          title: "Åbningstider pr. lokation",
+          description: "Indstil individuelle åbningstider for hver lokation.",
+          icon: Clock,
+          badge: "Ny",
+        },
+        {
+          title: "Særlige lukkedage",
+          description: "Tilføj helligdage og særlige lukkedage pr. lokation.",
+          icon: CalendarClock,
+          badge: "Ny",
+        },
+        {
+          title: "Forberedelsestid",
+          description: "Indstil hvor lang tid der skal bruges til klargøring mellem bookinger.",
+          icon: Wrench,
+          badge: "Ny",
+        },
+        {
+          title: "Lokation på køretøj",
+          description: "Tildel køretøjer til specifikke lokationer for bedre overblik.",
+          icon: MapPin,
+          badge: "Ny",
+        },
       ],
     },
     {
@@ -93,6 +146,12 @@ const Features = () => {
           description: "Dokumentér bilens stand med AI-analyse af fotos og skader.",
           icon: Scan,
         },
+        {
+          title: "Lokationsinfo i kontrakt",
+          description: "Afhentningslokation med adresse og telefonnummer inkluderes automatisk.",
+          icon: Store,
+          badge: "Ny",
+        },
       ],
     },
     {
@@ -104,13 +163,11 @@ const Features = () => {
           title: "Nummerplade-scanning",
           description: "Scan nummerpladen ved udlevering og aflevering for automatisk verifikation.",
           icon: Scan,
-          badge: "Ny",
         },
         {
           title: "Dashboard-foto med AI",
           description: "Tag foto af instrumentbrættet – AI aflæser km-stand og brændstofniveau.",
           icon: Camera,
-          badge: "Ny",
         },
         {
           title: "GPS-lokationsverifikation",
@@ -121,6 +178,12 @@ const Features = () => {
           title: "Automatisk opgørelse",
           description: "Systemet beregner km-overskridelse og brændstofgebyr automatisk.",
           icon: Receipt,
+        },
+        {
+          title: "QR-kode check-in",
+          description: "Generér QR-koder til hurtig selv-check-in for lejere.",
+          icon: QrCode,
+          badge: "Ny",
         },
       ],
     },
@@ -148,12 +211,17 @@ const Features = () => {
           title: "Selvrisiko-forsikring",
           description: "Tilbyd lejere at reducere selvrisiko til 0 kr. for kun 49 kr./dag.",
           icon: ShieldCheck,
-          badge: "Ny",
         },
         {
           title: "Brændstofpolitik",
           description: "Automatisk beregning af brændstofgebyr ved manglende tank.",
           icon: Gauge,
+        },
+        {
+          title: "Platformgebyr-betaling",
+          description: "Administrer og betal platformgebyrer direkte i systemet.",
+          icon: Wallet,
+          badge: "Ny",
         },
       ],
     },
@@ -166,7 +234,6 @@ const Features = () => {
           title: "Bøde-håndtering",
           description: "Upload bøder og afgifter og send dem automatisk videre til lejeren.",
           icon: Receipt,
-          badge: "Ny",
         },
         {
           title: "Auto-match med booking",
@@ -205,6 +272,43 @@ const Features = () => {
           description: "Automatisk opdatering af kilometertal via GPS-tracker.",
           icon: Gauge,
         },
+        {
+          title: "Webhook-integration",
+          description: "Modtag GPS-data fra alle førende GPS-udbydere via webhook.",
+          icon: Zap,
+          badge: "Ny",
+        },
+      ],
+    },
+    {
+      title: "Motorcykel & Scooter",
+      icon: Bike,
+      color: "bg-yellow-500/10 text-yellow-600",
+      features: [
+        {
+          title: "MC-kørekort validering",
+          description: "Automatisk tjek af kørekortstype (A1, A2, A) mod motorcyklens effekt.",
+          icon: BadgeCheck,
+          badge: "Ny",
+        },
+        {
+          title: "MC-specifik vedligeholdelse",
+          description: "Spor kædeservice, dækslid og andre MC-specifikke serviceintervaller.",
+          icon: Wrench,
+          badge: "Ny",
+        },
+        {
+          title: "Sæson-tjekliste",
+          description: "Automatiske påmindelser om forårsgøring og vinterklargøring.",
+          icon: Thermometer,
+          badge: "Ny",
+        },
+        {
+          title: "MC Check-in guide",
+          description: "Specialiseret check-in flow med MC-specifikke kontrolpunkter.",
+          icon: FileCheck,
+          badge: "Ny",
+        },
       ],
     },
     {
@@ -216,7 +320,6 @@ const Features = () => {
           title: "Smart Service hos LEJIO",
           description: "Book værkstedstider direkte i systemet – vi klarer servicen for dig.",
           icon: Wrench,
-          badge: "Ny",
         },
         {
           title: "Syns-påmindelser",
@@ -233,6 +336,12 @@ const Features = () => {
           description: "Udskift køretøj midt i lejeperiode ved service eller nedbrud.",
           icon: Truck,
         },
+        {
+          title: "Service-booking",
+          description: "Book og administrer service- og værkstedsaftaler direkte i systemet.",
+          icon: CalendarClock,
+          badge: "Ny",
+        },
       ],
     },
     {
@@ -244,7 +353,6 @@ const Features = () => {
           title: "Del din kode",
           description: "Få en unik henvisningskode som du kan dele med venner og familie.",
           icon: Gift,
-          badge: "Ny",
         },
         {
           title: "500 kr. til begge",
@@ -255,6 +363,12 @@ const Features = () => {
           title: "Brug kredit ved booking",
           description: "Anvend din optjente kredit direkte i booking-flowet.",
           icon: CreditCard,
+        },
+        {
+          title: "Del på sociale medier",
+          description: "Del nemt din henvisningskode på Facebook, Instagram og SMS.",
+          icon: Share2,
+          badge: "Ny",
         },
       ],
     },
@@ -282,6 +396,11 @@ const Features = () => {
           title: "Live Chat Support",
           description: "AI-assisteret kundesupport direkte i appen.",
           icon: MessageSquare,
+        },
+        {
+          title: "Ulæste beskeder",
+          description: "Se altid hvor mange ulæste beskeder du har i menuen.",
+          icon: Bell,
           badge: "Ny",
         },
       ],
@@ -295,7 +414,6 @@ const Features = () => {
           title: "Kørekortsverifikation",
           description: "AI-verificerer kørekort med foto-upload og automatisk godkendelse.",
           icon: BadgeCheck,
-          badge: "Ny",
         },
         {
           title: "Lejerhistorik",
@@ -310,7 +428,19 @@ const Features = () => {
         {
           title: "Advarselsregister",
           description: "Se advarsler på problematiske lejere på tværs af platformen.",
-          icon: Shield,
+          icon: AlertTriangle,
+        },
+        {
+          title: "Kundesegmenter",
+          description: "Opdel dine lejere i segmenter baseret på adfærd og værdi.",
+          icon: Users,
+          badge: "Ny",
+        },
+        {
+          title: "Favorit-lejere",
+          description: "Gem dine bedste lejere som favoritter for hurtig adgang.",
+          icon: Star,
+          badge: "Ny",
         },
       ],
     },
@@ -323,7 +453,6 @@ const Features = () => {
           title: "Erhvervskonti",
           description: "Særlige vilkår og fakturering for erhvervskunder med EAN-nummer.",
           icon: Building2,
-          badge: "Ny",
         },
         {
           title: "Afdelingsbudgetter",
@@ -339,6 +468,49 @@ const Features = () => {
           title: "Månedlig samlet faktura",
           description: "Én faktura for alle bookinger med EAN/CVR-nummer.",
           icon: Receipt,
+        },
+        {
+          title: "Flåde-afregning",
+          description: "Månedlig afregning med kommission for store flådeejere.",
+          icon: Wallet,
+          badge: "Ny",
+        },
+        {
+          title: "CVR-opslag",
+          description: "Automatisk opslag af virksomhedsdata via CVR-nummer.",
+          icon: Building2,
+          badge: "Ny",
+        },
+      ],
+    },
+    {
+      title: "Private Flåder",
+      icon: Car,
+      color: "bg-cyan-500/10 text-cyan-600",
+      features: [
+        {
+          title: "Flåde-abonnementer",
+          description: "Tilbyd private flådeabonnementer med fast månedspris.",
+          icon: Car,
+          badge: "Ny",
+        },
+        {
+          title: "Dedikeret kontaktperson",
+          description: "Alle flådekunder får en personlig kontaktperson.",
+          icon: Users,
+          badge: "Ny",
+        },
+        {
+          title: "Grøn flåde-rapport",
+          description: "CO2-udledningsrapporter for miljøbevidste virksomheder.",
+          icon: Globe,
+          badge: "Ny",
+        },
+        {
+          title: "Fleksible vilkår",
+          description: "Tilpassede lejevilkår og priser for flådekunder.",
+          icon: Settings,
+          badge: "Ny",
         },
       ],
     },
@@ -361,12 +533,48 @@ const Features = () => {
           title: "AI Dashboard-analyse",
           description: "Få AI-genererede indsigter og anbefalinger til din forretning.",
           icon: Brain,
-          badge: "Ny",
         },
         {
           title: "Månedlige opgørelser",
           description: "Detaljerede rapporter til regnskab og SKAT.",
           icon: FileText,
+        },
+        {
+          title: "Udlejer-rapport",
+          description: "Komplet månedlig rapport med alle udlejninger og indtægter.",
+          icon: Receipt,
+          badge: "Ny",
+        },
+      ],
+    },
+    {
+      title: "Rabatter & Kampagner",
+      icon: Gift,
+      color: "bg-rose-500/10 text-rose-600",
+      features: [
+        {
+          title: "Rabatkoder",
+          description: "Opret og administrer rabatkoder til dine kampagner.",
+          icon: Gift,
+          badge: "Ny",
+        },
+        {
+          title: "Procentrabat",
+          description: "Tilbyd procentvise rabatter på udlejninger.",
+          icon: Receipt,
+          badge: "Ny",
+        },
+        {
+          title: "Fast rabat",
+          description: "Giv et fast kronebeløb i rabat på bookinger.",
+          icon: Wallet,
+          badge: "Ny",
+        },
+        {
+          title: "Tidsbegrænsede tilbud",
+          description: "Sæt start- og slutdato på dine rabatkampagner.",
+          icon: Clock,
+          badge: "Ny",
         },
       ],
     },
@@ -388,7 +596,7 @@ const Features = () => {
               Alle funktioner i LEJIO
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Fra booking til kontrakter, betaling til GPS-sporing – vi har samlet alt du behøver for at drive din udlejningsforretning.
+              Fra booking til kontrakter, betaling til GPS-sporing – vi har samlet alt du behøver for at drive din udlejningsforretning. Over 80+ funktioner i én platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -454,6 +662,30 @@ const Features = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">80+</div>
+              <div className="text-muted-foreground">Funktioner</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">16</div>
+              <div className="text-muted-foreground">Kategorier</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-muted-foreground">AI Support</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">100%</div>
+              <div className="text-muted-foreground">Dansk</div>
+            </div>
           </div>
         </div>
       </section>
