@@ -16,6 +16,8 @@ import {
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const { user, profile, signOut, loading } = useAuth();
   const { unreadCount } = useUnreadMessages();
   const navigate = useNavigate();
@@ -26,10 +28,29 @@ const Navigation = () => {
   const showLandingLinks = isHomePage && !user;
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Always show navbar at top of page
+      if (currentScrollY < 20) {
+        setIsVisible(true);
+        setIsScrolled(false);
+      } else {
+        setIsScrolled(true);
+        // Show when scrolling up, hide when scrolling down
+        if (currentScrollY < lastScrollY) {
+          setIsVisible(true);
+        } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          setIsVisible(false);
+        }
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
   // Close menu when route changes
   useEffect(() => {
@@ -43,7 +64,7 @@ const Navigation = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || isOpen ? "bg-card/95 backdrop-blur-md shadow-soft border-b border-border" : "bg-transparent"}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${!isVisible && !isOpen ? "-translate-y-full" : "translate-y-0"} ${isScrolled || isOpen ? "bg-card/95 backdrop-blur-md shadow-soft border-b border-border" : "bg-transparent"}`}>
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <a href={user ? "/dashboard" : "/"} onClick={(e) => { e.preventDefault(); navigate(user ? "/dashboard" : "/"); }}>
