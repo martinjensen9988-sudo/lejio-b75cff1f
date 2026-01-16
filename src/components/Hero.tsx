@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Search, ArrowRight, Sparkles, Car, Building2, Zap } from "lucide-react";
+import { MapPin, Calendar, Search, ArrowRight, Sparkles, Car, Building2, Zap, Bike } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -63,7 +63,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-12 animate-slide-up font-medium" style={{ animationDelay: '0.1s' }}>
-              Biler, campingvogne og trailere – lej fra private og forhandlere i hele Danmark.
+              Biler, motorcykler, scootere, campingvogne og trailere – lej fra private og forhandlere i hele Danmark.
             </p>
 
             {/* Search Box - Bold version */}
@@ -133,7 +133,7 @@ const Hero = () => {
                 Lej et køretøj
               </h3>
               <p className="text-muted-foreground mb-6">
-                Find biler, campingvogne og trailere fra lokale udlejere.
+                Find biler, MC, scootere, campingvogne og trailere fra lokale udlejere.
               </p>
               <div className="flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
                 <span>Søg køretøjer</span>
