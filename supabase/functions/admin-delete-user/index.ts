@@ -44,15 +44,23 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check if requester is admin
-    const { data: adminProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('id')
-      .eq('id', userData.user.id)
-      .single();
+    // Verify the requester has super_admin role
+    const { data: hasAdminRole, error: roleError } = await supabaseAdmin.rpc('has_role', {
+      _user_id: userData.user.id,
+      _role: 'super_admin'
+    });
 
-    // For now, we'll allow any authenticated user to delete (you can add admin check later)
-    logStep("Requester authenticated", { requesterId: userData.user.id });
+    if (roleError) {
+      logStep("Role check error", { error: roleError.message });
+      throw new Error("Failed to verify admin permissions");
+    }
+
+    if (!hasAdminRole) {
+      logStep("Unauthorized access attempt", { requesterId: userData.user.id });
+      throw new Error("Unauthorized: Super admin role required to delete users");
+    }
+
+    logStep("Super admin verified", { requesterId: userData.user.id });
 
     // Step 1: Delete user's vehicles first (and related bookings, contracts, etc.)
     const { data: vehicles, error: vehiclesQueryError } = await supabaseAdmin
