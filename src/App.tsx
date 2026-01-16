@@ -45,6 +45,25 @@ import AIPricingPage from "./pages/dashboard/AIPricing";
 import FleetAIPage from "./pages/dashboard/FleetAI";
 import DeductiblesPage from "./pages/dashboard/Deductibles";
 
+// Admin sub-pages
+import AdminUsersPage from "./pages/admin/Users";
+import AdminStaffPage from "./pages/admin/Staff";
+import AdminBookingsPage from "./pages/admin/Bookings";
+import AdminLocationsPage from "./pages/admin/Locations";
+import AdminFeesPage from "./pages/admin/Fees";
+import AdminDiscountsPage from "./pages/admin/Discounts";
+import AdminFleetPage from "./pages/admin/Fleet";
+import AdminWarningsPage from "./pages/admin/Warnings";
+import AdminReportsPage from "./pages/admin/Reports";
+import AdminMessagesPage from "./pages/admin/Messages";
+import AdminLiveChatPage from "./pages/admin/LiveChat";
+import AdminVehicleValuesPage from "./pages/admin/VehicleValues";
+import AdminGpsPage from "./pages/admin/Gps";
+import AdminCheckInOutPage from "./pages/admin/CheckInOut";
+import AdminCorporatePage from "./pages/admin/Corporate";
+import AdminFacebookPage from "./pages/admin/Facebook";
+import AdminStatsPage from "./pages/admin/Stats";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -83,6 +102,24 @@ const App = () => (
             <Route path="/my-rentals" element={<MyRentals />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* Admin sub-routes */}
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/staff" element={<AdminStaffPage />} />
+            <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+            <Route path="/admin/locations" element={<AdminLocationsPage />} />
+            <Route path="/admin/fees" element={<AdminFeesPage />} />
+            <Route path="/admin/discounts" element={<AdminDiscountsPage />} />
+            <Route path="/admin/fleet" element={<AdminFleetPage />} />
+            <Route path="/admin/warnings" element={<AdminWarningsPage />} />
+            <Route path="/admin/reports" element={<AdminReportsPage />} />
+            <Route path="/admin/messages" element={<AdminMessagesPage />} />
+            <Route path="/admin/live-chat" element={<AdminLiveChatPage />} />
+            <Route path="/admin/vehicle-values" element={<AdminVehicleValuesPage />} />
+            <Route path="/admin/gps" element={<AdminGpsPage />} />
+            <Route path="/admin/checkinout" element={<AdminCheckInOutPage />} />
+            <Route path="/admin/corporate" element={<AdminCorporatePage />} />
+            <Route path="/admin/facebook" element={<AdminFacebookPage />} />
+            <Route path="/admin/stats" element={<AdminStatsPage />} />
             <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
             <Route path="/handelsbetingelser" element={<Terms />} />
             <Route path="/faq" element={<FAQ />} />
