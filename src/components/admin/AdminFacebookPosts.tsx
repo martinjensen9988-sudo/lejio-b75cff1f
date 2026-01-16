@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -76,6 +76,7 @@ interface DagensBilSetting {
 }
 
 const AdminFacebookPosts = () => {
+  const isMountedRef = useRef(true);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [posts, setPosts] = useState<FacebookPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,37 +93,55 @@ const AdminFacebookPosts = () => {
 
   const fetchData = async () => {
     setIsLoading(true);
-    
-    // Fetch all vehicles with specific columns
-    const { data: vehiclesData, error: vehiclesError } = await supabase
-      .from('vehicles')
-      .select('id, make, model, year, registration, daily_price, weekly_price, monthly_price, description, image_url, fuel_type, owner_id')
-      .order('created_at', { ascending: false });
 
-    if (vehiclesError) {
-      console.error('Error fetching vehicles:', vehiclesError);
-    } else {
-      setVehicles((vehiclesData || []) as Vehicle[]);
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: data kunne ikke hentes. Prøv igen.')), 12000)
+    );
+
+    try {
+      await Promise.race([
+        (async () => {
+          const { data: vehiclesData, error: vehiclesError } = await supabase
+            .from('vehicles')
+            .select('id, make, model, year, registration, daily_price, weekly_price, monthly_price, description, image_url, fuel_type, owner_id')
+            .order('created_at', { ascending: false });
+
+          if (vehiclesError) {
+            console.error('Error fetching vehicles:', vehiclesError);
+            toast.error('Kunne ikke hente køretøjer');
+          } else if (isMountedRef.current) {
+            setVehicles((vehiclesData || []) as Vehicle[]);
+          }
+
+          const { data: postsData, error: postsError } = await supabase
+            .from('facebook_posts')
+            .select('*')
+            .order('posted_at', { ascending: false })
+            .limit(50);
+
+          if (postsError) {
+            console.error('Error fetching posts:', postsError);
+            toast.error('Kunne ikke hente Facebook opslag');
+          } else if (isMountedRef.current) {
+            setPosts((postsData || []) as FacebookPost[]);
+          }
+        })(),
+        timeout,
+      ]);
+    } catch (err: any) {
+      console.error('AdminFacebookPosts fetchData failed:', err);
+      toast.error(err?.message || 'Der skete en fejl ved hentning af data');
+    } finally {
+      if (isMountedRef.current) setIsLoading(false);
     }
-
-    // Fetch Facebook posts from the table
-    const { data: postsData, error: postsError } = await supabase
-      .from('facebook_posts')
-      .select('*')
-      .order('posted_at', { ascending: false })
-      .limit(50);
-
-    if (postsError) {
-      console.error('Error fetching posts:', postsError);
-    } else {
-      setPosts((postsData || []) as FacebookPost[]);
-    }
-
-    setIsLoading(false);
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
     fetchData();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   const handleGeneratePost = async () => {
