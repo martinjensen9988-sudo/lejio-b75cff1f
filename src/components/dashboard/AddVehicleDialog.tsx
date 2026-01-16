@@ -15,11 +15,11 @@ import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
 import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit, Truck, Tent } from 'lucide-react';
+import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit, Truck, Tent, Bike } from 'lucide-react';
 import { toast } from 'sonner';
 import { TrailerFields } from './TrailerFields';
 import { CaravanFields } from './CaravanFields';
-
+import { MotorcycleFields } from './MotorcycleFields';
 interface SubscriptionLimits {
   max_vehicles: number;
   subscribed: boolean;
@@ -27,10 +27,12 @@ interface SubscriptionLimits {
   tier: string | null;
 }
 
-type VehicleType = 'bil' | 'trailer' | 'campingvogn';
+type VehicleType = 'bil' | 'trailer' | 'campingvogn' | 'motorcykel' | 'scooter';
 
 const VEHICLE_TYPES = [
   { value: 'bil' as VehicleType, label: 'Bil', icon: Car, description: 'Personbiler og varevogne' },
+  { value: 'motorcykel' as VehicleType, label: 'Motorcykel', icon: Bike, description: 'MC i alle kategorier' },
+  { value: 'scooter' as VehicleType, label: 'Scooter', icon: Bike, description: 'Scooter 30/45 km/t' },
   { value: 'trailer' as VehicleType, label: 'Trailer', icon: Truck, description: 'Alle typer trailere' },
   { value: 'campingvogn' as VehicleType, label: 'Campingvogn', icon: Tent, description: 'Campingvogne og autocampere' },
 ];
@@ -94,11 +96,11 @@ const AddVehicleDialog = () => {
         fuel_type: result.fuel_type,
         color: result.color,
         vin: result.vin,
-        daily_price: selectedType === 'bil' ? 499 : selectedType === 'trailer' ? 199 : 799,
-        weekly_price: selectedType === 'bil' ? 2800 : selectedType === 'trailer' ? 999 : 4500,
-        monthly_price: selectedType === 'bil' ? 9900 : selectedType === 'trailer' ? 2900 : 14900,
-        included_km: selectedType === 'bil' ? 100 : undefined,
-        extra_km_price: selectedType === 'bil' ? 2.50 : undefined,
+        daily_price: selectedType === 'bil' ? 499 : selectedType === 'trailer' ? 199 : selectedType === 'motorcykel' ? 599 : selectedType === 'scooter' ? 299 : 799,
+        weekly_price: selectedType === 'bil' ? 2800 : selectedType === 'trailer' ? 999 : selectedType === 'motorcykel' ? 3500 : selectedType === 'scooter' ? 1800 : 4500,
+        monthly_price: selectedType === 'bil' ? 9900 : selectedType === 'trailer' ? 2900 : selectedType === 'motorcykel' ? 12900 : selectedType === 'scooter' ? 5900 : 14900,
+        included_km: selectedType === 'bil' ? 100 : (selectedType === 'motorcykel' || selectedType === 'scooter') ? 200 : undefined,
+        extra_km_price: selectedType === 'bil' ? 2.50 : (selectedType === 'motorcykel' || selectedType === 'scooter') ? 2.00 : undefined,
         deposit_required: false,
         deposit_amount: 0,
         prepaid_rent_enabled: false,
@@ -117,6 +119,9 @@ const AddVehicleDialog = () => {
         has_kitchen: selectedType === 'campingvogn' ? false : undefined,
         has_bathroom: selectedType === 'campingvogn' ? false : undefined,
         has_awning: selectedType === 'campingvogn' ? false : undefined,
+        // MC/Scooter specific defaults
+        mc_category: selectedType === 'scooter' ? 'scooter_45' : selectedType === 'motorcykel' ? 'a2' : undefined,
+        mc_daily_km_limit: (selectedType === 'motorcykel' || selectedType === 'scooter') ? 200 : undefined,
       });
       setStep('details');
     }
@@ -183,11 +188,11 @@ const AddVehicleDialog = () => {
       fuel_type: selectedType === 'bil' ? '' : undefined,
       color: '',
       vin: '',
-      daily_price: selectedType === 'bil' ? 499 : selectedType === 'trailer' ? 199 : 799,
-      weekly_price: selectedType === 'bil' ? 2800 : selectedType === 'trailer' ? 999 : 4500,
-      monthly_price: selectedType === 'bil' ? 9900 : selectedType === 'trailer' ? 2900 : 14900,
-      included_km: selectedType === 'bil' ? 100 : undefined,
-      extra_km_price: selectedType === 'bil' ? 2.50 : undefined,
+      daily_price: selectedType === 'bil' ? 499 : selectedType === 'trailer' ? 199 : selectedType === 'motorcykel' ? 599 : selectedType === 'scooter' ? 299 : 799,
+      weekly_price: selectedType === 'bil' ? 2800 : selectedType === 'trailer' ? 999 : selectedType === 'motorcykel' ? 3500 : selectedType === 'scooter' ? 1800 : 4500,
+      monthly_price: selectedType === 'bil' ? 9900 : selectedType === 'trailer' ? 2900 : selectedType === 'motorcykel' ? 12900 : selectedType === 'scooter' ? 5900 : 14900,
+      included_km: selectedType === 'bil' ? 100 : (selectedType === 'motorcykel' || selectedType === 'scooter') ? 200 : undefined,
+      extra_km_price: selectedType === 'bil' ? 2.50 : (selectedType === 'motorcykel' || selectedType === 'scooter') ? 2.00 : undefined,
       deposit_required: false,
       deposit_amount: 0,
       prepaid_rent_enabled: false,
@@ -206,6 +211,9 @@ const AddVehicleDialog = () => {
       has_kitchen: selectedType === 'campingvogn' ? false : undefined,
       has_bathroom: selectedType === 'campingvogn' ? false : undefined,
       has_awning: selectedType === 'campingvogn' ? false : undefined,
+      // MC/Scooter specific defaults
+      mc_category: selectedType === 'scooter' ? 'scooter_45' : selectedType === 'motorcykel' ? 'a2' : undefined,
+      mc_daily_km_limit: (selectedType === 'motorcykel' || selectedType === 'scooter') ? 200 : undefined,
     });
     setStep('manual');
   };
@@ -260,7 +268,7 @@ const AddVehicleDialog = () => {
         {/* Step 1: Choose vehicle type */}
         {step === 'type' ? (
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {VEHICLE_TYPES.map((type) => (
                 <button
                   key={type.value}
@@ -442,6 +450,14 @@ const AddVehicleDialog = () => {
                 <CaravanFields 
                   vehicleDetails={vehicleDetails as Record<string, unknown>}
                   setVehicleDetails={setVehicleDetails as (fn: (prev: Record<string, unknown>) => Record<string, unknown>) => void}
+                />
+              )}
+
+              {/* MC/Scooter specific fields */}
+              {(selectedType === 'motorcykel' || selectedType === 'scooter') && (
+                <MotorcycleFields 
+                  formData={vehicleDetails}
+                  onChange={(field, value) => setVehicleDetails(prev => ({ ...prev, [field]: value }))}
                 />
               )}
             </div>
