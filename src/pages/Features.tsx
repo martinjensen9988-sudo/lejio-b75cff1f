@@ -580,6 +580,44 @@ const Features = () => {
       ],
     },
     {
+      title: "Sikkerhed & Advarsler",
+      icon: Shield,
+      color: "bg-amber-500/10 text-amber-600",
+      features: [
+        {
+          title: "Advarselsregister",
+          description: "Se advarsler på problematiske lejere fra hele platformen.",
+          icon: AlertTriangle,
+        },
+        {
+          title: "Opret advarsler",
+          description: "Registrer problemer med lejere så andre udlejere kan se dem.",
+          icon: Shield,
+        },
+        {
+          title: "Klage-system",
+          description: "Lejere kan klage over uberettigede advarsler til LEJIO.",
+          icon: FileCheck,
+        },
+        {
+          title: "Kørekortsverifikation",
+          description: "AI-verificerer kørekort med foto-upload og automatisk godkendelse.",
+          icon: BadgeCheck,
+        },
+        {
+          title: "Vanvidskørsel-klausul",
+          description: "Lejere accepterer fuldt ansvar ved groft uagtsom kørsel.",
+          icon: ShieldCheck,
+        },
+        {
+          title: "Tvistmægling",
+          description: "LEJIO mægler ved konflikter mellem lejer og udlejer.",
+          icon: Users,
+          badge: "Ny",
+        },
+      ],
+    },
+    {
       title: "Lejio 2.0 - AI Flåde",
       icon: Truck,
       color: "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-600",
@@ -827,11 +865,11 @@ const Features = () => {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">80+</div>
+              <div className="text-4xl font-bold text-primary mb-2">100+</div>
               <div className="text-muted-foreground">Funktioner</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">16</div>
+              <div className="text-4xl font-bold text-primary mb-2">22</div>
               <div className="text-muted-foreground">Kategorier</div>
             </div>
             <div>
