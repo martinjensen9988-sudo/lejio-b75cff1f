@@ -9,9 +9,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle, Save, MapPin, Download, Loader2 } from 'lucide-react';
+import { Camera, Plus, Trash2, Car, Fuel, FileCheck, Upload, X, AlertTriangle, Save, MapPin, Download, Loader2, TrendingDown } from 'lucide-react';
 import { useDamageReports, DamageReport, DamageItem, CreateDamageItemInput } from '@/hooks/useDamageReports';
 import { useContracts, Contract } from '@/hooks/useContracts';
+import { useRevenueLoss } from '@/hooks/useRevenueLoss';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import VehicleDamageSelector from './VehicleDamageSelector';
@@ -89,6 +90,7 @@ export const DamageReportModal = ({
 }: DamageReportModalProps) => {
   const { createReport, updateReport, addDamageItem, removeDamageItem, uploadDamagePhoto, generatePdfReport } = useDamageReports(bookingId);
   const { getContractByBookingId, contracts } = useContracts();
+  const { calculateRevenueLoss, isCalculating: isCalculatingRevenueLoss } = useRevenueLoss(vehicleId);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [report, setReport] = useState<DamageReport | null>(existingReport || null);
@@ -96,6 +98,7 @@ export const DamageReportModal = ({
   const [isAddingDamage, setIsAddingDamage] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showRevenueLossOption, setShowRevenueLossOption] = useState(false);
   
   // Form state
   const [odometerReading, setOdometerReading] = useState(existingReport?.odometer_reading?.toString() || '');
@@ -258,6 +261,11 @@ export const DamageReportModal = ({
       setNewDamage({ position: '', damage_type: '', severity: 'minor', description: '' });
       setPendingPhoto(null);
       setPendingPhotoPreview(null);
+      
+      // Show revenue loss option for severe damage on return
+      if (reportType === 'return' && newDamage.severity === 'severe') {
+        setShowRevenueLossOption(true);
+      }
     } finally {
       setIsAddingDamage(false);
     }
@@ -467,6 +475,48 @@ export const DamageReportModal = ({
                   ))}
                 </div>
               </div>
+              
+              {/* Revenue Loss Calculation Option */}
+              {(showRevenueLossOption || report.damage_items.some(d => d.severity === 'severe')) && reportType === 'return' && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <TrendingDown className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm text-orange-900">Beregn tab af indtægt?</h4>
+                      <p className="text-xs text-orange-700 mt-1">
+                        Ved alvorlige skader kan du beregne det potentielle tab af indtægt mens køretøjet er på værksted.
+                      </p>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="mt-3 bg-white"
+                        disabled={isCalculatingRevenueLoss}
+                        onClick={async () => {
+                          await calculateRevenueLoss(
+                            vehicleId,
+                            report.id,
+                            bookingId
+                          );
+                          setShowRevenueLossOption(false);
+                          toast.success('Tab af indtægt beregnet - se under "Tabt Indtægt" tab');
+                        }}
+                      >
+                        {isCalculatingRevenueLoss ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Beregner...
+                          </>
+                        ) : (
+                          <>
+                            <TrendingDown className="w-4 h-4 mr-2" />
+                            Beregn tabt indtægt
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
