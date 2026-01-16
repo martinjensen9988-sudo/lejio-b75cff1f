@@ -108,18 +108,32 @@ const AdminUserManagement = () => {
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Kunne ikke hente brugere');
-    } else {
-      setUsers(data || []);
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: kunne ikke hente brugere. Prøv igen.')), 12000)
+    );
+
+    try {
+      const { data, error } = await Promise.race([
+        supabase
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false }),
+        timeout,
+      ]);
+
+      if (error) {
+        console.error('Error fetching users:', error);
+        toast.error('Kunne ikke hente brugere');
+      } else {
+        setUsers(data || []);
+      }
+    } catch (err: any) {
+      console.error('fetchUsers failed:', err);
+      toast.error(err?.message || 'Kunne ikke hente brugere');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {

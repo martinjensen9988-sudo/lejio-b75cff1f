@@ -163,44 +163,63 @@ const AdminFleetManagement = () => {
   const fetchData = async () => {
     setIsLoading(true);
 
-    // Fetch fleet customers
-    const { data: customersData, error: customersError } = await supabase
-      .from('profiles')
-      .select('id, email, full_name, company_name, fleet_plan, fleet_commission_rate, average_rating, total_rating_count, lessor_status, created_at')
-      .not('fleet_plan', 'is', null)
-      .order('created_at', { ascending: false });
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: data kunne ikke hentes. Prøv igen.')), 12000)
+    );
 
-    if (customersError) {
-      console.error('Error fetching fleet customers:', customersError);
-    } else {
-      setCustomers((customersData || []) as FleetCustomer[]);
+    try {
+      await Promise.race([
+        (async () => {
+          const { data: customersData, error: customersError } = await supabase
+            .from('profiles')
+            .select('id, email, full_name, company_name, fleet_plan, fleet_commission_rate, average_rating, total_rating_count, lessor_status, created_at')
+            .not('fleet_plan', 'is', null)
+            .order('created_at', { ascending: false });
+
+          if (customersError) {
+            console.error('Error fetching fleet customers:', customersError);
+            toast.error('Kunne ikke hente fleet kunder');
+          } else {
+            setCustomers((customersData || []) as FleetCustomer[]);
+          }
+
+          const { data: settlementsData, error: settlementsError } = await supabase
+            .from('fleet_settlements')
+            .select('*')
+            .order('settlement_month', { ascending: false });
+
+          if (settlementsError) {
+            console.error('Error fetching settlements:', settlementsError);
+            toast.error('Kunne ikke hente settlements');
+          } else {
+            setSettlements(settlementsData || []);
+          }
+
+          const ownerIds = (customersData || []).map(c => c.id);
+          if (ownerIds.length > 0) {
+            const { data: vehiclesData, error: vehiclesError } = await supabase
+              .from('vehicles')
+              .select('id, make, model, registration, year, daily_price, weekly_price, monthly_price, owner_id')
+              .in('owner_id', ownerIds);
+
+            if (vehiclesError) {
+              console.error('Error fetching fleet vehicles:', vehiclesError);
+              toast.error('Kunne ikke hente fleet køretøjer');
+            } else {
+              setVehicles(vehiclesData || []);
+            }
+          } else {
+            setVehicles([]);
+          }
+        })(),
+        timeout,
+      ]);
+    } catch (err: any) {
+      console.error('AdminFleetManagement fetchData failed:', err);
+      toast.error(err?.message || 'Kunne ikke hente fleet data');
+    } finally {
+      setIsLoading(false);
     }
-
-    // Fetch all settlements
-    const { data: settlementsData, error: settlementsError } = await supabase
-      .from('fleet_settlements')
-      .select('*')
-      .order('settlement_month', { ascending: false });
-
-    if (settlementsError) {
-      console.error('Error fetching settlements:', settlementsError);
-    } else {
-      setSettlements(settlementsData || []);
-    }
-
-    // Fetch fleet vehicles
-    const { data: vehiclesData, error: vehiclesError } = await supabase
-      .from('vehicles')
-      .select('id, make, model, registration, year, daily_price, weekly_price, monthly_price, owner_id')
-      .in('owner_id', (customersData || []).map(c => c.id));
-
-    if (vehiclesError) {
-      console.error('Error fetching fleet vehicles:', vehiclesError);
-    } else {
-      setVehicles(vehiclesData || []);
-    }
-
-    setIsLoading(false);
   };
 
   useEffect(() => {

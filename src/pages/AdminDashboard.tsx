@@ -355,17 +355,17 @@ const AdminDashboard = () => {
           </div>
 
           {/* User Management Tab */}
-          <TabsContent value="users">
+          <TabsContent value="users" forceMount>
             <AdminUserManagement />
           </TabsContent>
 
           {/* Staff Management Tab */}
-          <TabsContent value="staff">
+          <TabsContent value="staff" forceMount>
             <AdminStaffManagement />
           </TabsContent>
 
           {/* Bookings Tab */}
-          <TabsContent value="bookings">
+          <TabsContent value="bookings" forceMount>
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -425,67 +425,67 @@ const AdminDashboard = () => {
           </TabsContent>
 
           {/* Platform Fees Tab */}
-          <TabsContent value="fees">
+          <TabsContent value="fees" forceMount>
             <AdminPlatformFees />
           </TabsContent>
 
           {/* Discount Codes Tab */}
-          <TabsContent value="discounts">
+          <TabsContent value="discounts" forceMount>
             <AdminDiscountCodes />
           </TabsContent>
 
           {/* Fleet Management Tab */}
-          <TabsContent value="fleet">
+          <TabsContent value="fleet" forceMount>
             <AdminFleetManagement />
           </TabsContent>
 
           {/* Warnings Tab */}
-          <TabsContent value="warnings">
+          <TabsContent value="warnings" forceMount>
             <AdminWarnings />
           </TabsContent>
 
           {/* Lessor Reports Tab */}
-          <TabsContent value="lessor-reports">
+          <TabsContent value="lessor-reports" forceMount>
             <AdminLessorReports />
           </TabsContent>
 
           {/* Messages Tab */}
-          <TabsContent value="messages">
+          <TabsContent value="messages" forceMount>
             <AdminMessages />
           </TabsContent>
 
           {/* Live Chat Tab */}
-          <TabsContent value="live-chat">
+          <TabsContent value="live-chat" forceMount>
             <AdminLiveChat />
           </TabsContent>
 
           {/* Vehicle Value Verification Tab */}
-          <TabsContent value="vehicle-values">
+          <TabsContent value="vehicle-values" forceMount>
             <AdminVehicleValueVerification />
           </TabsContent>
 
           {/* GPS Devices Tab */}
-          <TabsContent value="gps">
+          <TabsContent value="gps" forceMount>
             <AdminGpsDevices />
           </TabsContent>
 
           {/* Check-in/out Settings Tab */}
-          <TabsContent value="checkinout">
+          <TabsContent value="checkinout" forceMount>
             <AdminCheckInOutSettings />
           </TabsContent>
 
           {/* Corporate Accounts Tab */}
-          <TabsContent value="corporate">
+          <TabsContent value="corporate" forceMount>
             <AdminCorporateAccounts />
           </TabsContent>
 
           {/* Facebook Posts Tab */}
-          <TabsContent value="facebook">
+          <TabsContent value="facebook" forceMount>
             <AdminFacebookPosts />
           </TabsContent>
 
           {/* Booking Stats Tab */}
-          <TabsContent value="stats">
+          <TabsContent value="stats" forceMount>
             <AdminBookingStats />
           </TabsContent>
         </Tabs>
