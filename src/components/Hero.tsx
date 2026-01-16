@@ -63,7 +63,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 animate-slide-up font-medium" style={{ animationDelay: '0.1s' }}>
-              Vi vil være Danmarks største udvalg af køretøjer til leje. Book direkte hos lokale udlejere med sikker betaling og automatiske kontrakter.
+              Vi er på vej til at blive Danmarks største markedsplads for køretøjer til leje. Book direkte hos lokale udlejere med sikker betaling og automatiske kontrakter.
             </p>
 
             {/* Search Box - Prominent for lejere */}
