@@ -334,17 +334,19 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Tabs - hidden on mobile, uses sheet menu instead */}
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 md:space-y-6">
-          <TabsList className="hidden md:flex flex-wrap h-auto gap-1 p-1">
-            {menuItems.map((item) => (
-              <TabsTrigger key={item.value} value={item.value} className="text-xs lg:text-sm">
-                <item.icon className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
-                <span className="hidden lg:inline">{item.label}</span>
-                <span className="lg:hidden">{item.label.split(' ')[0]}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          {/* Always visible (mobile + desktop). On mobile it scrolls horizontally */}
+          <div className="-mx-2 px-2 md:mx-0 md:px-0 overflow-x-auto">
+            <TabsList className="flex w-max md:w-full flex-nowrap md:flex-wrap h-auto gap-1 p-1">
+              {menuItems.map((item) => (
+                <TabsTrigger key={item.value} value={item.value} className="text-xs lg:text-sm">
+                  <item.icon className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {/* Mobile current tab indicator */}
           <div className="md:hidden flex items-center gap-2 px-1">
