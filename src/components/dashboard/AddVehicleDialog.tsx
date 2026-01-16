@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useVehicleLookup, VehicleData } from '@/hooks/useVehicleLookup';
-import { useVehicles, VehicleInsert, VehicleType as VehicleTypeHook } from '@/hooks/useVehicles';
+import { useVehicleLookup } from '@/hooks/useVehicleLookup';
+import { useVehicles, VehicleInsert } from '@/hooks/useVehicles';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Search, Loader2, Car, Check, CreditCard, CalendarClock, MapPin, AlertTriangle, Lock, Edit, Truck, Tent, Bike } from 'lucide-react';
@@ -29,6 +29,30 @@ interface SubscriptionLimits {
 
 type VehicleType = 'bil' | 'trailer' | 'campingvogn' | 'motorcykel' | 'scooter';
 
+// Extended vehicle details type to support new MC fields not yet in generated Supabase types
+type VehicleDetailsState = Partial<VehicleInsert> & {
+  mc_category?: string;
+  mc_daily_km_limit?: number;
+  engine_cc?: number;
+  engine_kw?: number;
+  has_abs?: boolean;
+  seat_height_mm?: number;
+  helmet_included?: boolean;
+  helmet_size?: string;
+  has_disc_lock?: boolean;
+  has_chain_lock?: boolean;
+  has_steering_lock?: boolean;
+  has_top_box?: boolean;
+  has_side_bags?: boolean;
+  has_tank_bag?: boolean;
+  has_phone_mount?: boolean;
+  has_usb_outlet?: boolean;
+  has_heated_grips?: boolean;
+  has_windscreen?: boolean;
+  rain_guarantee_enabled?: boolean;
+  winter_deactivated?: boolean;
+};
+
 const VEHICLE_TYPES = [
   { value: 'bil' as VehicleType, label: 'Bil', icon: Car, description: 'Personbiler og varevogne' },
   { value: 'motorcykel' as VehicleType, label: 'Motorcykel', icon: Bike, description: 'MC i alle kategorier' },
@@ -43,7 +67,7 @@ const AddVehicleDialog = () => {
   const [step, setStep] = useState<'type' | 'lookup' | 'details' | 'manual'>('type');
   const [selectedType, setSelectedType] = useState<VehicleType>('bil');
   const [manualMode, setManualMode] = useState(false);
-  const [vehicleDetails, setVehicleDetails] = useState<Partial<VehicleInsert>>({});
+  const [vehicleDetails, setVehicleDetails] = useState<VehicleDetailsState>({});
   const [subscriptionLimits, setSubscriptionLimits] = useState<SubscriptionLimits | null>(null);
   const [checkingLimits, setCheckingLimits] = useState(false);
   

@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bike, ShieldCheck, AlertTriangle, CheckCircle, XCircle, Info, HelpCircle } from 'lucide-react';
+import { Bike, ShieldCheck, CheckCircle, XCircle, Info, HelpCircle } from 'lucide-react';
 import { 
   MCCategory, 
   LicenseCategory, 
