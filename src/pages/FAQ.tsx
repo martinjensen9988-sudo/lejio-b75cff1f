@@ -25,7 +25,8 @@ import {
   Bike,
   Gift,
   Building2,
-  BarChart3
+  BarChart3,
+  Zap
 } from "lucide-react";
 
 const FAQ = () => {
