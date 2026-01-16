@@ -27,7 +27,11 @@ import InspectionRemindersTab from '@/components/dashboard/InspectionRemindersTa
 import FinesTab from '@/components/dashboard/FinesTab';
 import { ServiceBookingCard } from '@/components/dashboard/ServiceBookingCard';
 import { MCMaintenanceCard } from '@/components/dashboard/MCMaintenanceCard';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles, CircleDot, Shield, AlertCircle, Bike } from 'lucide-react';
+import { AutoDispatchCard } from '@/components/dashboard/AutoDispatchCard';
+import { ServiceTasksCard } from '@/components/dashboard/ServiceTasksCard';
+import { DeductibleProfilesCard } from '@/components/dashboard/DeductibleProfilesCard';
+import { RevenueLossCard } from '@/components/dashboard/RevenueLossCard';
+import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles, CircleDot, Shield, AlertCircle, Bike, Truck, TrendingDown } from 'lucide-react';
 import { AIPriceSuggestions } from '@/components/dashboard/AIPriceSuggestions';
 
 const Dashboard = () => {
@@ -256,6 +260,18 @@ const Dashboard = () => {
                   <Sparkles className="w-4 h-4" />
                   <span className="hidden sm:inline">AI Priser</span>
                 </TabsTrigger>
+                <TabsTrigger value="fleet-ai" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Truck className="w-4 h-4" />
+                  <span className="hidden sm:inline">Flåde AI</span>
+                </TabsTrigger>
+                <TabsTrigger value="deductibles" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <Shield className="w-4 h-4" />
+                  <span className="hidden sm:inline">Selvrisiko</span>
+                </TabsTrigger>
+                <TabsTrigger value="revenue-loss" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
+                  <TrendingDown className="w-4 h-4" />
+                  <span className="hidden sm:inline">Tabt Indtægt</span>
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -342,7 +358,10 @@ const Dashboard = () => {
                 }))} />
                 <MCMaintenanceCard vehicles={vehicles} />
               </div>
-              <ServiceBookingCard />
+              <div className="space-y-6">
+                <ServiceBookingCard />
+                <ServiceTasksCard />
+              </div>
             </div>
           </TabsContent>
 
@@ -364,6 +383,21 @@ const Dashboard = () => {
 
           <TabsContent value="ai-pricing" className="mt-6">
             <AIPriceSuggestions vehicles={vehicles} onApplyPrice={async (id, updates) => updateVehicle(id, updates)} />
+          </TabsContent>
+
+          <TabsContent value="fleet-ai" className="mt-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AutoDispatchCard />
+              <ServiceTasksCard />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="deductibles" className="mt-6">
+            <DeductibleProfilesCard />
+          </TabsContent>
+
+          <TabsContent value="revenue-loss" className="mt-6">
+            <RevenueLossCard />
           </TabsContent>
         </Tabs>
       </main>
