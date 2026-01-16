@@ -51,19 +51,20 @@ const Hero = () => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 border border-secondary/40 text-sm font-bold text-foreground mb-8 animate-scale-in">
               <Zap className="w-4 h-4 text-secondary" />
-              <span>Danmarks smarteste udlejningsplatform</span>
+              <span>100+ funktioner • 22 kategorier • AI-drevet</span>
             </div>
 
             {/* Bold headline */}
             <h1 className="font-display text-5xl sm:text-7xl lg:text-[6rem] font-black leading-[0.9] mb-6 animate-slide-up">
-              <span className="block text-foreground">FIND DIN</span>
+              <span className="block text-foreground">DANMARKS</span>
               <span className="block bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent py-2">
-                NÆSTE TUR
+                KOMPLETTE
               </span>
+              <span className="block text-foreground">UDLEJNINGSPLATFORM</span>
             </h1>
 
-            <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-12 animate-slide-up font-medium" style={{ animationDelay: '0.1s' }}>
-              Biler, motorcykler, scootere, campingvogne og trailere – lej fra private og forhandlere i hele Danmark.
+            <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 animate-slide-up font-medium" style={{ animationDelay: '0.1s' }}>
+              Alt-i-én løsning med AI-prissætning, GPS-sporing, automatiske kontrakter, flådestyring, service-logistik og meget mere.
             </p>
 
             {/* Search Box - Bold version */}

@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useVehicles } from '@/hooks/useVehicles';
 import { useBookings } from '@/hooks/useBookings';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import LejioLogo from '@/components/LejioLogo';
 import AddVehicleDialog from '@/components/dashboard/AddVehicleDialog';
 import VehicleCard from '@/components/dashboard/VehicleCard';
@@ -31,8 +31,21 @@ import { AutoDispatchCard } from '@/components/dashboard/AutoDispatchCard';
 import { ServiceTasksCard } from '@/components/dashboard/ServiceTasksCard';
 import { DeductibleProfilesCard } from '@/components/dashboard/DeductibleProfilesCard';
 import { RevenueLossCard } from '@/components/dashboard/RevenueLossCard';
-import { Car, Calendar, LogOut, Home, Loader2, Settings, CalendarDays, BarChart3, Repeat, MessageCircle, FileText, Search, MapPin, Wrench, Receipt, Users, Heart, Sparkles, CircleDot, Shield, AlertCircle, Bike, Truck, TrendingDown } from 'lucide-react';
 import { AIPriceSuggestions } from '@/components/dashboard/AIPriceSuggestions';
+import { 
+  Car, 
+  Calendar, 
+  Loader2, 
+  Menu,
+  X,
+  MessageCircle,
+  Settings,
+  LogOut,
+  Search,
+  MapPin,
+  FileText
+} from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -40,6 +53,8 @@ const Dashboard = () => {
   const { vehicles, isLoading: vehiclesLoading, updateVehicle, deleteVehicle } = useVehicles();
   const { bookings, isLoading: bookingsLoading, updateBookingStatus, refetch: refetchBookings } = useBookings();
   const { unreadCount } = useUnreadMessages();
+  const [activeTab, setActiveTab] = useState('vehicles');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -56,6 +71,11 @@ const Dashboard = () => {
     await updateVehicle(id, { is_available: available } as any);
   };
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -69,221 +89,20 @@ const Dashboard = () => {
   const pendingBookings = bookings.filter(b => b.status === 'pending').length;
   const activeBookings = bookings.filter(b => b.status === 'active').length;
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <LejioLogo size="sm" />
-              <div className="hidden sm:block h-6 w-px bg-border" />
-              <h1 className="hidden sm:block font-display font-bold text-foreground">Dashboard</h1>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => navigate('/search')}>
-                <Search className="w-4 h-4 mr-2" />
-                Find bil
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/my-rentals')}>
-                <FileText className="w-4 h-4 mr-2" />
-                Mine lejeaftaler
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/messages')} className="relative">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Beskeder
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-destructive text-destructive-foreground rounded-full px-1">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </Button>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 border border-border">
-                <div className={`w-2 h-2 rounded-full ${profile?.user_type === 'professionel' ? 'bg-primary' : 'bg-accent'}`} />
-                <span className="text-sm font-medium text-foreground">
-                  {profile?.full_name || user.email?.split('@')[0]}
-                </span>
-                {profile?.user_type === 'professionel' && (
-                  <span className="text-xs px-1.5 py-0.5 rounded-md bg-primary/20 text-primary font-medium">Pro</span>
-                )}
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'vehicles':
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Mine biler</h2>
+                <p className="text-muted-foreground">Administrer dine køretøjer</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/settings')}>
-                <Settings className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleSignOut} className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                <LogOut className="w-4 h-4 mr-2" />
-                Log ud
-              </Button>
-            </div>
-
-            {/* Mobile Navigation */}
-            <div className="flex md:hidden items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/messages')} className="relative">
-                <MessageCircle className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full px-0.5">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
-                <Settings className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                <LogOut className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Quick Navigation */}
-      <div className="md:hidden bg-card border-b border-border overflow-x-auto">
-        <div className="flex gap-2 px-4 py-2">
-          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/search')}>
-            <Search className="w-4 h-4 mr-1" />
-            Find bil
-          </Button>
-          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/my-rentals')}>
-            <FileText className="w-4 h-4 mr-1" />
-            Mine lejeaftaler
-          </Button>
-          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/gps')}>
-            <MapPin className="w-4 h-4 mr-1" />
-            GPS
-          </Button>
-        </div>
-      </div>
-
-      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        {/* Trial Status for Professional Users */}
-        <div className="mb-6">
-          <TrialStatusCard />
-        </div>
-
-        {/* Pending Fees for Private Users */}
-        <div className="mb-6">
-          <PendingFeesCard />
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8">
-          <StatCard
-            icon={Car}
-            label="Dine biler"
-            value={vehicles.length}
-            loading={vehiclesLoading}
-          />
-          <StatCard
-            icon={Calendar}
-            label="Afventende"
-            value={pendingBookings}
-            loading={bookingsLoading}
-            highlight={pendingBookings > 0}
-          />
-          <StatCard
-            icon={Calendar}
-            label="Aktive"
-            value={activeBookings}
-            loading={bookingsLoading}
-          />
-          <StatCard
-            icon={Calendar}
-            label="Total"
-            value={bookings.length}
-            loading={bookingsLoading}
-          />
-        </div>
-
-        {/* Tabs */}
-        <Tabs defaultValue="vehicles" className="space-y-4 sm:space-y-6">
-          {/* Mobile: Scrollable tabs */}
-          <div className="flex flex-col gap-3">
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-              <TabsList className="w-max sm:w-auto inline-flex">
-                <TabsTrigger value="vehicles" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Car className="w-4 h-4" />
-                  <span>Biler</span>
-                </TabsTrigger>
-                <TabsTrigger value="calendar" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <CalendarDays className="w-4 h-4" />
-                  <span className="hidden xs:inline">Kalender</span>
-                </TabsTrigger>
-                <TabsTrigger value="bookings" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Calendar className="w-4 h-4" />
-                  <span>Bookinger</span>
-                  {pendingBookings > 0 && (
-                    <span className="ml-0.5 px-1 py-0.5 text-[10px] rounded-full bg-accent text-accent-foreground">
-                      {pendingBookings}
-                    </span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="invoices" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Receipt className="w-4 h-4" />
-                  <span className="hidden sm:inline">Fakturaer</span>
-                </TabsTrigger>
-                <TabsTrigger value="customers" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Users className="w-4 h-4" />
-                  <span className="hidden sm:inline">Kunder</span>
-                </TabsTrigger>
-                <TabsTrigger value="favorites" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Heart className="w-4 h-4" />
-                  <span className="hidden sm:inline">Favoritter</span>
-                </TabsTrigger>
-                <TabsTrigger value="recurring" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Repeat className="w-4 h-4" />
-                  <span className="hidden sm:inline">Abonnementer</span>
-                </TabsTrigger>
-                <TabsTrigger value="service" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Wrench className="w-4 h-4" />
-                  <span className="hidden sm:inline">Værksted</span>
-                </TabsTrigger>
-                <TabsTrigger value="tires" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <CircleDot className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dæk</span>
-                </TabsTrigger>
-                <TabsTrigger value="inspections" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Shield className="w-4 h-4" />
-                  <span className="hidden sm:inline">Syn</span>
-                </TabsTrigger>
-                <TabsTrigger value="fines" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <AlertCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">Bøder</span>
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <BarChart3 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Analytics</span>
-                </TabsTrigger>
-                <TabsTrigger value="ai-pricing" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="hidden sm:inline">AI Priser</span>
-                </TabsTrigger>
-                <TabsTrigger value="fleet-ai" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Truck className="w-4 h-4" />
-                  <span className="hidden sm:inline">Flåde AI</span>
-                </TabsTrigger>
-                <TabsTrigger value="deductibles" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Shield className="w-4 h-4" />
-                  <span className="hidden sm:inline">Selvrisiko</span>
-                </TabsTrigger>
-                <TabsTrigger value="revenue-loss" className="gap-1.5 px-2 sm:px-3 text-xs sm:text-sm">
-                  <TrendingDown className="w-4 h-4" />
-                  <span className="hidden sm:inline">Tabt Indtægt</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-              <CreateBookingDialog vehicles={vehicles} onBookingCreated={refetchBookings} />
               <AddVehicleDialog />
             </div>
-          </div>
-
-          <TabsContent value="vehicles" className="mt-6">
             {vehiclesLoading ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {[1, 2, 3].map(i => (
                   <Skeleton key={i} className="h-48 rounded-2xl" />
                 ))}
@@ -295,12 +114,12 @@ const Dashboard = () => {
                   Ingen biler endnu
                 </h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Tilføj din første bil ved at indtaste nummerpladen. Vi henter automatisk bildata fra Motorregisteret.
+                  Tilføj din første bil ved at indtaste nummerpladen.
                 </p>
                 <AddVehicleDialog />
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {vehicles.map(vehicle => (
                   <VehicleCard
                     key={vehicle.id}
@@ -312,41 +131,79 @@ const Dashboard = () => {
                 ))}
               </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="calendar" className="mt-6">
+          </div>
+        );
+      case 'calendar':
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Booking-kalender</h2>
+                <p className="text-muted-foreground">Overblik over alle bookinger</p>
+              </div>
+              <CreateBookingDialog vehicles={vehicles} onBookingCreated={refetchBookings} />
+            </div>
             {bookingsLoading || vehiclesLoading ? (
               <Skeleton className="h-[600px] rounded-2xl" />
             ) : (
               <BookingCalendar bookings={bookings} vehicles={vehicles} />
             )}
-          </TabsContent>
-
-          <TabsContent value="bookings" className="mt-6">
+          </div>
+        );
+      case 'bookings':
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Bookinger</h2>
+                <p className="text-muted-foreground">{pendingBookings} afventer godkendelse</p>
+              </div>
+              <CreateBookingDialog vehicles={vehicles} onBookingCreated={refetchBookings} />
+            </div>
             {bookingsLoading ? (
               <Skeleton className="h-64 rounded-2xl" />
             ) : (
               <BookingsTable bookings={bookings} onUpdateStatus={updateBookingStatus} />
             )}
-          </TabsContent>
-
-          <TabsContent value="invoices" className="mt-6">
+          </div>
+        );
+      case 'invoices':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Fakturaer</h2>
+            <p className="text-muted-foreground mb-6">Opret og administrer fakturaer</p>
             <InvoicesTab />
-          </TabsContent>
-
-          <TabsContent value="customers" className="mt-6">
+          </div>
+        );
+      case 'customers':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Kundesegmenter</h2>
+            <p className="text-muted-foreground mb-6">Opdel dine kunder i segmenter</p>
             <CustomerSegmentsTab />
-          </TabsContent>
-
-          <TabsContent value="favorites" className="mt-6">
+          </div>
+        );
+      case 'favorites':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Favoritter</h2>
+            <p className="text-muted-foreground mb-6">Dine favoritlejere</p>
             <FavoritesTab />
-          </TabsContent>
-
-          <TabsContent value="recurring" className="mt-6">
+          </div>
+        );
+      case 'recurring':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Abonnementer</h2>
+            <p className="text-muted-foreground mb-6">Månedlige lejeaftaler</p>
             <RecurringRentalsTable />
-          </TabsContent>
-
-          <TabsContent value="service" className="mt-6">
+          </div>
+        );
+      case 'service':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Værksted & Service</h2>
+            <p className="text-muted-foreground mb-6">Administrer service og vedligeholdelse</p>
             <div className="grid lg:grid-cols-2 gap-6">
               <div className="space-y-6">
                 <ServiceTab vehicles={vehicles} onUpdate={updateVehicle} />
@@ -363,43 +220,172 @@ const Dashboard = () => {
                 <ServiceTasksCard />
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="mt-6">
-            <AnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="tires" className="mt-6">
+          </div>
+        );
+      case 'tires':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Dækstyring</h2>
+            <p className="text-muted-foreground mb-6">Administrer sommer/vinterdæk</p>
             <TireManagementTab vehicles={vehicles} />
-          </TabsContent>
-
-          <TabsContent value="inspections" className="mt-6">
+          </div>
+        );
+      case 'inspections':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Syn</h2>
+            <p className="text-muted-foreground mb-6">Hold styr på synstidspunkter</p>
             <InspectionRemindersTab vehicles={vehicles} />
-          </TabsContent>
-
-          <TabsContent value="fines" className="mt-6">
+          </div>
+        );
+      case 'fines':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Bøder & Afgifter</h2>
+            <p className="text-muted-foreground mb-6">Håndter bøder fra lejere</p>
             <FinesTab />
-          </TabsContent>
-
-          <TabsContent value="ai-pricing" className="mt-6">
+          </div>
+        );
+      case 'analytics':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Analytics</h2>
+            <p className="text-muted-foreground mb-6">Indsigt i din forretning</p>
+            <AnalyticsDashboard />
+          </div>
+        );
+      case 'ai-pricing':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">AI Prissætning</h2>
+            <p className="text-muted-foreground mb-6">Intelligente prisanbefalinger</p>
             <AIPriceSuggestions vehicles={vehicles} onApplyPrice={async (id, updates) => updateVehicle(id, updates)} />
-          </TabsContent>
-
-          <TabsContent value="fleet-ai" className="mt-6">
+          </div>
+        );
+      case 'fleet-ai':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Flåde AI</h2>
+            <p className="text-muted-foreground mb-6">AI-drevet flådestyring og anbefalinger</p>
             <div className="grid lg:grid-cols-2 gap-6">
               <AutoDispatchCard />
               <ServiceTasksCard />
             </div>
-          </TabsContent>
-
-          <TabsContent value="deductibles" className="mt-6">
+          </div>
+        );
+      case 'deductibles':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Dynamisk Selvrisiko</h2>
+            <p className="text-muted-foreground mb-6">Opret selvrisko-profiler for forskellige lejere</p>
             <DeductibleProfilesCard />
-          </TabsContent>
-
-          <TabsContent value="revenue-loss" className="mt-6">
+          </div>
+        );
+      case 'revenue-loss':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Tab af Indtægt</h2>
+            <p className="text-muted-foreground mb-6">Beregn tabt indtægt ved skader</p>
             <RevenueLossCard />
-          </TabsContent>
-        </Tabs>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <DashboardSidebar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          unreadCount={unreadCount}
+          pendingBookings={pendingBookings}
+          onSignOut={handleSignOut}
+        />
+      </div>
+
+      {/* Mobile Header & Sidebar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-72">
+                <DashboardSidebar
+                  activeTab={activeTab}
+                  onTabChange={handleTabChange}
+                  unreadCount={unreadCount}
+                  pendingBookings={pendingBookings}
+                  onSignOut={handleSignOut}
+                />
+              </SheetContent>
+            </Sheet>
+            <LejioLogo size="sm" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/messages')} className="relative">
+              <MessageCircle className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full px-0.5">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 lg:h-screen lg:overflow-y-auto">
+        <div className="p-4 sm:p-6 lg:p-8 pt-20 lg:pt-8">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <StatCard
+              icon={Car}
+              label="Dine biler"
+              value={vehicles.length}
+              loading={vehiclesLoading}
+            />
+            <StatCard
+              icon={Calendar}
+              label="Afventende"
+              value={pendingBookings}
+              loading={bookingsLoading}
+              highlight={pendingBookings > 0}
+            />
+            <StatCard
+              icon={Calendar}
+              label="Aktive"
+              value={activeBookings}
+              loading={bookingsLoading}
+            />
+            <StatCard
+              icon={Calendar}
+              label="Total"
+              value={bookings.length}
+              loading={bookingsLoading}
+            />
+          </div>
+
+          {/* Trial/Pending Fees */}
+          <div className="space-y-4 mb-6">
+            <TrialStatusCard />
+            <PendingFeesCard />
+          </div>
+
+          {/* Active Content */}
+          {renderContent()}
+        </div>
       </main>
     </div>
   );
