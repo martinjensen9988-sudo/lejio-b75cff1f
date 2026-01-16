@@ -28,6 +28,7 @@ import {
   Bike,
   ChevronDown,
   ChevronRight,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +51,7 @@ interface MenuGroup {
   icon: React.ElementType;
   items: MenuItem[];
   defaultOpen?: boolean;
+  gradient?: string;
 }
 
 interface DashboardSidebarProps {
@@ -74,6 +76,7 @@ export const DashboardSidebar = ({
       title: "Overblik",
       icon: Home,
       defaultOpen: true,
+      gradient: "from-primary to-primary/60",
       items: [
         { label: "Mine biler", icon: Car, value: "vehicles" },
         { label: "Kalender", icon: CalendarDays, value: "calendar" },
@@ -83,6 +86,7 @@ export const DashboardSidebar = ({
     {
       title: "Økonomi",
       icon: Receipt,
+      gradient: "from-accent to-accent/60",
       items: [
         { label: "Fakturaer", icon: Receipt, value: "invoices" },
         { label: "Bøder", icon: AlertCircle, value: "fines" },
@@ -92,6 +96,7 @@ export const DashboardSidebar = ({
     {
       title: "Kunder",
       icon: Users,
+      gradient: "from-mint to-mint/60",
       items: [
         { label: "Kundesegmenter", icon: Users, value: "customers" },
         { label: "Favoritter", icon: Heart, value: "favorites" },
@@ -101,6 +106,7 @@ export const DashboardSidebar = ({
     {
       title: "Værksted & Service",
       icon: Wrench,
+      gradient: "from-orange-500 to-orange-500/60",
       items: [
         { label: "Service", icon: Wrench, value: "service" },
         { label: "Dæk", icon: CircleDot, value: "tires" },
@@ -110,6 +116,7 @@ export const DashboardSidebar = ({
     {
       title: "AI & Analytics",
       icon: Sparkles,
+      gradient: "from-lavender to-lavender/60",
       items: [
         { label: "Analytics", icon: BarChart3, value: "analytics" },
         { label: "AI Priser", icon: Sparkles, value: "ai-pricing" },
@@ -119,6 +126,7 @@ export const DashboardSidebar = ({
     {
       title: "Selvrisiko",
       icon: Shield,
+      gradient: "from-teal-500 to-teal-500/60",
       items: [
         { label: "Selvrisko-profiler", icon: Shield, value: "deductibles" },
       ],
@@ -140,18 +148,24 @@ export const DashboardSidebar = ({
   };
 
   return (
-    <div className="w-64 bg-card border-r border-border h-screen flex flex-col overflow-hidden">
-      {/* Logo */}
-      <div className="p-4 border-b border-border">
-        <LejioLogo size="sm" />
+    <div className="w-64 bg-card/50 backdrop-blur-sm border-r border-border/50 h-screen flex flex-col overflow-hidden">
+      {/* Logo with gradient accent */}
+      <div className="p-4 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <LejioLogo size="sm" />
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs font-bold text-primary">
+            <Zap className="w-3 h-3" />
+            Pro
+          </div>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="p-3 border-b border-border space-y-2">
+      {/* Quick Actions - styled buttons */}
+      <div className="p-3 border-b border-border/50 space-y-2">
         <Button
           variant="outline"
           size="sm"
-          className="w-full justify-start"
+          className="w-full justify-start font-medium hover:bg-primary/10 hover:border-primary/30 transition-all"
           onClick={() => navigate("/search")}
         >
           <Search className="w-4 h-4 mr-2" />
@@ -160,13 +174,13 @@ export const DashboardSidebar = ({
         <Button
           variant="outline"
           size="sm"
-          className="w-full justify-start relative"
+          className="w-full justify-start font-medium relative hover:bg-accent/10 hover:border-accent/30 transition-all"
           onClick={() => navigate("/messages")}
         >
           <MessageCircle className="w-4 h-4 mr-2" />
           Beskeder
           {unreadCount > 0 && (
-            <span className="absolute right-2 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-destructive text-destructive-foreground rounded-full px-1">
+            <span className="absolute right-2 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-destructive text-destructive-foreground rounded-full px-1 shadow-lg">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
@@ -174,7 +188,7 @@ export const DashboardSidebar = ({
         <Button
           variant="outline"
           size="sm"
-          className="w-full justify-start"
+          className="w-full justify-start font-medium hover:bg-mint/10 hover:border-mint/30 transition-all"
           onClick={() => navigate("/gps")}
         >
           <MapPin className="w-4 h-4 mr-2" />
@@ -182,7 +196,7 @@ export const DashboardSidebar = ({
         </Button>
       </div>
 
-      {/* Menu Groups */}
+      {/* Menu Groups - with gradient icons */}
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {menuGroups.map((group) => (
           <Collapsible
@@ -190,9 +204,11 @@ export const DashboardSidebar = ({
             open={openGroups[group.title]}
             onOpenChange={() => toggleGroup(group.title)}
           >
-            <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors">
-              <div className="flex items-center gap-2">
-                <group.icon className="w-4 h-4" />
+            <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all">
+              <div className="flex items-center gap-3">
+                <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center`}>
+                  <group.icon className="w-4 h-4 text-white" />
+                </div>
                 <span>{group.title}</span>
               </div>
               {openGroups[group.title] ? (
@@ -207,9 +223,9 @@ export const DashboardSidebar = ({
                   key={item.value}
                   onClick={() => onTabChange(item.value)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors",
+                    "w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-xl transition-all",
                     activeTab === item.value
-                      ? "bg-primary text-primary-foreground font-medium"
+                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium shadow-lg shadow-primary/20"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   )}
                 >
@@ -218,7 +234,7 @@ export const DashboardSidebar = ({
                     <span>{item.label}</span>
                   </div>
                   {item.badge && item.badge > 0 && (
-                    <span className="min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-accent text-accent-foreground rounded-full px-1">
+                    <span className="min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-accent text-white rounded-full px-1 shadow-md">
                       {item.badge}
                     </span>
                   )}
@@ -229,12 +245,12 @@ export const DashboardSidebar = ({
         ))}
       </div>
 
-      {/* Bottom Actions */}
-      <div className="p-3 border-t border-border space-y-2">
+      {/* Bottom Actions - refined styling */}
+      <div className="p-3 border-t border-border/50 space-y-1">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start"
+          className="w-full justify-start font-medium hover:bg-muted/50 rounded-xl"
           onClick={() => navigate("/my-rentals")}
         >
           <FileText className="w-4 h-4 mr-2" />
@@ -243,7 +259,7 @@ export const DashboardSidebar = ({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start"
+          className="w-full justify-start font-medium hover:bg-muted/50 rounded-xl"
           onClick={() => navigate("/settings")}
         >
           <Settings className="w-4 h-4 mr-2" />
@@ -252,7 +268,7 @@ export const DashboardSidebar = ({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="w-full justify-start font-medium text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl"
           onClick={onSignOut}
         >
           <LogOut className="w-4 h-4 mr-2" />

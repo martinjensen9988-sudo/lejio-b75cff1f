@@ -102,20 +102,26 @@ const CorporateDashboard = () => {
   const recentBookings = bookings.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-mint/5 rounded-full blur-[120px]" />
+      </div>
+
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+                <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">{corporateAccount.company_name}</h1>
+                <h1 className="text-xl font-display font-bold">{corporateAccount.company_name}</h1>
                 <p className="text-sm text-muted-foreground">
                   CVR: {corporateAccount.cvr_number}
                   {corporateAccount.ean_number && ` • EAN: ${corporateAccount.ean_number}`}
@@ -123,11 +129,11 @@ const CorporateDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={() => setShowBookingDialog(true)} size="sm">
+              <Button onClick={() => setShowBookingDialog(true)} size="sm" className="font-bold shadow-lg shadow-primary/20">
                 <Plus className="w-4 h-4 mr-2" />
                 Book bil
               </Button>
-              <Badge variant={corporateAccount.status === 'active' ? 'default' : 'destructive'}>
+              <Badge variant={corporateAccount.status === 'active' ? 'default' : 'destructive'} className="font-medium">
                 {corporateAccount.status === 'active' ? 'Aktiv' : 'Suspenderet'}
               </Badge>
               {currentEmployee && (
@@ -143,63 +149,63 @@ const CorporateDashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats Grid */}
+      <main className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+        {/* Stats Grid - with gradient styling */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Car className="w-6 h-6 text-blue-600" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-500/60 flex items-center justify-center shadow-lg">
+                  <Car className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Flåde</p>
-                  <p className="text-2xl font-bold">{fleetVehicles.length}</p>
+                  <p className="text-sm text-muted-foreground font-medium">Flåde</p>
+                  <p className="font-display text-3xl font-black">{fleetVehicles.length}</p>
                   <p className="text-xs text-muted-foreground">køretøjer</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-mint/30 transition-all hover:shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <Gauge className="w-6 h-6 text-green-600" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-mint to-mint/60 flex items-center justify-center shadow-lg">
+                  <Gauge className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Udnyttelse</p>
-                  <p className="text-2xl font-bold">{utilization}%</p>
+                  <p className="text-sm text-muted-foreground font-medium">Udnyttelse</p>
+                  <p className="font-display text-3xl font-black">{utilization}%</p>
                   <p className="text-xs text-muted-foreground">sidste 30 dage</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-lavender/30 transition-all hover:shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-600" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-lavender to-lavender/60 flex items-center justify-center shadow-lg">
+                  <Users className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Medarbejdere</p>
-                  <p className="text-2xl font-bold">{employees.length}</p>
+                  <p className="text-sm text-muted-foreground font-medium">Medarbejdere</p>
+                  <p className="font-display text-3xl font-black">{employees.length}</p>
                   <p className="text-xs text-muted-foreground">aktive brugere</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-accent/30 transition-all hover:shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-amber-600" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg">
+                  <CreditCard className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Denne måned</p>
-                  <p className="text-2xl font-bold">{monthlySpend.toLocaleString('da-DK')} kr</p>
+                  <p className="text-sm text-muted-foreground font-medium">Denne måned</p>
+                  <p className="font-display text-3xl font-black">{monthlySpend.toLocaleString('da-DK')} kr</p>
                   <p className="text-xs text-muted-foreground">forbrug</p>
                 </div>
               </div>

@@ -308,7 +308,7 @@ const Dashboard = () => {
       </div>
 
       {/* Mobile Header & Sidebar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -348,13 +348,14 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="flex-1 lg:h-screen lg:overflow-y-auto">
         <div className="p-4 sm:p-6 lg:p-8 pt-20 lg:pt-8">
-          {/* Stats Cards */}
+          {/* Stats Cards with gradient styling */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <StatCard
               icon={Car}
               label="Dine biler"
               value={vehicles.length}
               loading={vehiclesLoading}
+              gradient="from-primary to-primary/60"
             />
             <StatCard
               icon={Calendar}
@@ -362,18 +363,21 @@ const Dashboard = () => {
               value={pendingBookings}
               loading={bookingsLoading}
               highlight={pendingBookings > 0}
+              gradient="from-accent to-accent/60"
             />
             <StatCard
               icon={Calendar}
               label="Aktive"
               value={activeBookings}
               loading={bookingsLoading}
+              gradient="from-mint to-mint/60"
             />
             <StatCard
               icon={Calendar}
               label="Total"
               value={bookings.length}
               loading={bookingsLoading}
+              gradient="from-lavender to-lavender/60"
             />
           </div>
 
@@ -397,21 +401,22 @@ interface StatCardProps {
   value: number;
   loading?: boolean;
   highlight?: boolean;
+  gradient?: string;
 }
 
-const StatCard = ({ icon: Icon, label, value, loading, highlight }: StatCardProps) => (
-  <div className={`bg-card rounded-xl sm:rounded-2xl p-3 sm:p-5 border ${highlight ? 'border-accent shadow-glow-peach' : 'border-border'}`}>
-    <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center ${highlight ? 'bg-accent/20' : 'bg-muted'}`}>
-        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${highlight ? 'text-accent' : 'text-muted-foreground'}`} />
+const StatCard = ({ icon: Icon, label, value, loading, highlight, gradient = "from-primary to-primary/60" }: StatCardProps) => (
+  <div className={`bg-card/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-5 border-2 transition-all hover:shadow-lg ${highlight ? 'border-accent shadow-lg shadow-accent/10' : 'border-border/50 hover:border-border'}`}>
+    <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
       </div>
     </div>
     {loading ? (
-      <Skeleton className="h-6 sm:h-8 w-10 sm:w-12" />
+      <Skeleton className="h-7 sm:h-9 w-12 sm:w-14" />
     ) : (
-      <p className="font-display text-2xl sm:text-3xl font-black text-foreground">{value}</p>
+      <p className="font-display text-2xl sm:text-4xl font-black text-foreground">{value}</p>
     )}
-    <p className="text-xs sm:text-sm text-muted-foreground truncate">{label}</p>
+    <p className="text-xs sm:text-sm text-muted-foreground font-medium truncate">{label}</p>
   </div>
 );
 

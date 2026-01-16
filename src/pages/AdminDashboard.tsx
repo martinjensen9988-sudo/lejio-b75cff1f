@@ -227,10 +227,16 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-background">
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[120px]" />
+      </div>
+
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Mobile menu button */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -240,9 +246,11 @@ const AdminDashboard = () => {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-72 p-0">
-                <div className="flex items-center gap-3 p-4 border-b">
-                  <Shield className="w-6 h-6 text-primary" />
-                  <span className="font-bold">LEJIO Admin</span>
+                <div className="flex items-center gap-3 p-4 border-b bg-gradient-to-r from-primary/10 to-accent/10">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="font-display font-bold">LEJIO Admin</span>
                 </div>
                 <nav className="p-2">
                   {menuItems.map((item) => (
@@ -252,87 +260,81 @@ const AdminDashboard = () => {
                         setActiveTab(item.value);
                         setMobileMenuOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
                         activeTab === item.value 
-                          ? 'bg-primary text-primary-foreground' 
+                          ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg' 
                           : 'hover:bg-muted'
                       }`}
                     >
                       <item.icon className="w-4 h-4" />
-                      <span className="text-sm">{item.label}</span>
+                      <span className="text-sm font-medium">{item.label}</span>
                     </button>
                   ))}
                 </nav>
               </SheetContent>
             </Sheet>
 
-            <Shield className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <Shield className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-bold">LEJIO Admin</h1>
+              <h1 className="text-lg md:text-xl font-display font-bold">LEJIO Admin</h1>
               <p className="text-xs text-muted-foreground truncate max-w-[200px]">{user?.email}</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
+          <Button variant="outline" size="sm" onClick={handleSignOut} className="font-medium">
             <LogOut className="w-4 h-4 md:mr-2" />
             <span className="hidden md:inline">Log ud</span>
           </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-2 sm:px-4 py-4 md:py-8">
-        {/* Stats - more compact on mobile */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
-          <Card className="p-3 md:p-0">
-            <CardContent className="p-0 md:pt-6 md:px-6 md:pb-6">
-              <div className="flex items-center gap-2 md:gap-4">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-primary/10 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4 md:w-6 md:h-6 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-lg md:text-2xl font-bold">{stats.totalCustomers}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground truncate">Kunder</p>
-                </div>
+      <main className="container mx-auto px-2 sm:px-4 py-4 md:py-8 relative z-10">
+        {/* Stats - gradient styled */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+          <Card className="p-4 md:p-6 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+                <Users className="w-6 h-6 md:w-7 md:h-7 text-white" />
               </div>
-            </CardContent>
+              <div className="min-w-0">
+                <p className="font-display text-2xl md:text-3xl font-black">{stats.totalCustomers}</p>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium truncate">Kunder</p>
+              </div>
+            </div>
           </Card>
-          <Card className="p-3 md:p-0">
-            <CardContent className="p-0 md:pt-6 md:px-6 md:pb-6">
-              <div className="flex items-center gap-2 md:gap-4">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-accent/10 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
-                  <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-accent" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-lg md:text-2xl font-bold">{stats.activeCustomers}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground truncate">Aktive</p>
-                </div>
+          <Card className="p-4 md:p-6 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-accent/30 transition-all hover:shadow-lg">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg">
+                <CheckCircle className="w-6 h-6 md:w-7 md:h-7 text-white" />
               </div>
-            </CardContent>
+              <div className="min-w-0">
+                <p className="font-display text-2xl md:text-3xl font-black">{stats.activeCustomers}</p>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium truncate">Aktive</p>
+              </div>
+            </div>
           </Card>
-          <Card className="p-3 md:p-0">
-            <CardContent className="p-0 md:pt-6 md:px-6 md:pb-6">
-              <div className="flex items-center gap-2 md:gap-4">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-secondary/10 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
-                  <Clock className="w-4 h-4 md:w-6 md:h-6 text-secondary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-lg md:text-2xl font-bold">{stats.trialCustomers}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground truncate">Prøve</p>
-                </div>
+          <Card className="p-4 md:p-6 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-mint/30 transition-all hover:shadow-lg">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-mint to-mint/60 flex items-center justify-center shadow-lg">
+                <Clock className="w-6 h-6 md:w-7 md:h-7 text-white" />
               </div>
-            </CardContent>
+              <div className="min-w-0">
+                <p className="font-display text-2xl md:text-3xl font-black">{stats.trialCustomers}</p>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium truncate">Prøve</p>
+              </div>
+            </div>
           </Card>
-          <Card className="p-3 md:p-0">
-            <CardContent className="p-0 md:pt-6 md:px-6 md:pb-6">
-              <div className="flex items-center gap-2 md:gap-4">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-warm/10 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
-                  <Calendar className="w-4 h-4 md:w-6 md:h-6 text-warm" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-lg md:text-2xl font-bold">{stats.totalBookings}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground truncate">Bookinger</p>
-                </div>
+          <Card className="p-4 md:p-6 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-lavender/30 transition-all hover:shadow-lg">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-lavender to-lavender/60 flex items-center justify-center shadow-lg">
+                <Calendar className="w-6 h-6 md:w-7 md:h-7 text-white" />
               </div>
-            </CardContent>
+              <div className="min-w-0">
+                <p className="font-display text-2xl md:text-3xl font-black">{stats.totalBookings}</p>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium truncate">Bookinger</p>
+              </div>
+            </div>
           </Card>
         </div>
 
