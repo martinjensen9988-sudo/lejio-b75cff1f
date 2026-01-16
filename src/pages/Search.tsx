@@ -9,7 +9,7 @@ import EmptySearchState from "@/components/search/EmptySearchState";
 import SearchMap from "@/components/search/SearchMap";
 import { VehicleDetailModal } from "@/components/search/VehicleDetailModal";
 import { supabase } from "@/integrations/supabase/client";
-import { Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map, Bike } from "lucide-react";
+import { Car, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map, Bike } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,

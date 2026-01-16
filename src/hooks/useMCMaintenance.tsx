@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
-interface MaintenanceLog {
+export interface MaintenanceLog {
   id: string;
   vehicle_id: string;
   maintenance_type: string;
@@ -14,6 +14,16 @@ interface MaintenanceLog {
   next_service_km: number | null;
   next_service_date: string | null;
   created_at: string;
+}
+
+interface MaintenanceLogInsert {
+  vehicle_id: string;
+  maintenance_type: string;
+  performed_by?: string;
+  odometer_reading?: number;
+  notes?: string;
+  next_service_km?: number;
+  next_service_date?: string;
 }
 
 interface MaintenanceStats {
@@ -38,14 +48,15 @@ export const useMCMaintenance = (vehicleId: string | null) => {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('mc_maintenance_log')
+      // Use type assertion since mc_maintenance_log is a new table not yet in generated types
+      const { data, error } = await (supabase
+        .from('mc_maintenance_log' as any)
         .select('*')
         .eq('vehicle_id', vehicleId)
-        .order('performed_at', { ascending: false });
+        .order('performed_at', { ascending: false }) as any);
 
       if (error) throw error;
-      setLogs(data || []);
+      setLogs((data || []) as MaintenanceLog[]);
     } catch (error) {
       console.error('Error fetching maintenance logs:', error);
     } finally {
@@ -70,36 +81,39 @@ export const useMCMaintenance = (vehicleId: string | null) => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('mc_maintenance_log')
-        .insert({
-          vehicle_id: vehicleId,
-          maintenance_type: maintenanceType,
-          performed_by: user.id,
-          odometer_reading: odometerReading,
-          notes,
-          next_service_km: nextServiceKm,
-          next_service_date: nextServiceDate,
-        })
+      const insertData: MaintenanceLogInsert = {
+        vehicle_id: vehicleId,
+        maintenance_type: maintenanceType,
+        performed_by: user.id,
+        odometer_reading: odometerReading,
+        notes,
+        next_service_km: nextServiceKm,
+        next_service_date: nextServiceDate,
+      };
+
+      // Use type assertion since mc_maintenance_log is a new table not yet in generated types
+      const { data, error } = await (supabase
+        .from('mc_maintenance_log' as any)
+        .insert(insertData as any)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
 
-      // If chain check, update vehicle table
+      // If chain check, update vehicle table with new MC fields
       if (maintenanceType === 'chain_check' || maintenanceType === 'chain_service') {
-        await supabase
+        await (supabase
           .from('vehicles')
           .update({
             chain_last_checked_at: new Date().toISOString(),
             chain_last_checked_km: odometerReading,
-          })
-          .eq('id', vehicleId);
+          } as any)
+          .eq('id', vehicleId) as any);
       }
 
       toast.success('Vedligeholdelse registreret');
       fetchLogs();
-      return data;
+      return data as MaintenanceLog;
     } catch (error) {
       console.error('Error adding maintenance log:', error);
       toast.error('Kunne ikke registrere vedligeholdelse');
@@ -111,16 +125,18 @@ export const useMCMaintenance = (vehicleId: string | null) => {
     if (!vehicleId) return null;
 
     try {
-      const { data: vehicle, error } = await supabase
+      // Use type assertion for new MC-specific fields
+      const { data: vehicle, error } = await (supabase
         .from('vehicles')
         .select('current_odometer, chain_last_checked_km, tire_tread_front_mm, tire_tread_rear_mm')
         .eq('id', vehicleId)
-        .single();
+        .single() as any);
 
       if (error) throw error;
 
-      const currentKm = vehicle?.current_odometer || 0;
-      const chainLastKm = vehicle?.chain_last_checked_km || 0;
+      const v = vehicle as any;
+      const currentKm = v?.current_odometer || 0;
+      const chainLastKm = v?.chain_last_checked_km || 0;
       const kmSinceChain = currentKm - chainLastKm;
 
       // Tire status
@@ -138,8 +154,8 @@ export const useMCMaintenance = (vehicleId: string | null) => {
         chainServiceDue: kmSinceChain >= CHAIN_SERVICE_INTERVAL_KM,
         chainLastCheckedKm: chainLastKm,
         kmSinceChainCheck: kmSinceChain,
-        tireFrontStatus: getTireStatus(vehicle?.tire_tread_front_mm),
-        tireRearStatus: getTireStatus(vehicle?.tire_tread_rear_mm),
+        tireFrontStatus: getTireStatus(v?.tire_tread_front_mm),
+        tireRearStatus: getTireStatus(v?.tire_tread_rear_mm),
         nextServiceDate: latestService?.next_service_date || null,
         nextServiceKm: latestService?.next_service_km || null,
       };
