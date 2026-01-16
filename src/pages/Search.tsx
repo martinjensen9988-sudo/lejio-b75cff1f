@@ -9,7 +9,7 @@ import EmptySearchState from "@/components/search/EmptySearchState";
 import SearchMap from "@/components/search/SearchMap";
 import { VehicleDetailModal } from "@/components/search/VehicleDetailModal";
 import { supabase } from "@/integrations/supabase/client";
-import { Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map } from "lucide-react";
+import { Car, MapPin, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map, Bike } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,7 +21,7 @@ import {
 
 type SortOption = 'price_asc' | 'price_desc' | 'date_desc' | 'date_asc' | 'rating_desc';
 
-export type VehicleTypeFilter = 'all' | 'bil' | 'trailer' | 'campingvogn';
+export type VehicleTypeFilter = 'all' | 'bil' | 'trailer' | 'campingvogn' | 'motorcykel' | 'scooter';
 
 // Public vehicle data - no sensitive fields like owner_id, vin, registration
 export interface SearchVehicle {
@@ -48,7 +48,7 @@ export interface SearchVehicle {
   location_city: string | null;
   latitude: number | null;
   longitude: number | null;
-  vehicle_type: 'bil' | 'trailer' | 'campingvogn';
+  vehicle_type: 'bil' | 'trailer' | 'campingvogn' | 'motorcykel' | 'scooter';
   total_weight: number | null;
   requires_b_license: boolean;
   sleeping_capacity: number | null;
@@ -91,6 +91,15 @@ export interface SearchVehicle {
   pets_allowed: boolean;
   smoking_allowed: boolean;
   festival_use_allowed: boolean;
+  // MC/Scooter fields
+  mc_category: string | null;
+  engine_cc: number | null;
+  engine_kw: number | null;
+  has_abs: boolean;
+  seat_height_mm: number | null;
+  helmet_included: boolean;
+  helmet_size: string | null;
+  rain_guarantee_enabled: boolean;
   // Display/owner fields
   display_address?: string | null;
   display_postal_code?: string | null;
@@ -235,6 +244,7 @@ const Search = () => {
           }
         }
         
+        const v = vehicle as any;
         return {
           ...vehicle,
           vehicle_type: vehicle.vehicle_type || 'bil',
@@ -244,6 +254,15 @@ const Search = () => {
           has_kitchen: vehicle.has_kitchen || false,
           has_bathroom: vehicle.has_bathroom || false,
           has_awning: vehicle.has_awning || false,
+          // MC/Scooter defaults (may not exist in view yet)
+          mc_category: v.mc_category || null,
+          engine_cc: v.engine_cc || null,
+          engine_kw: v.engine_kw || null,
+          has_abs: v.has_abs || false,
+          seat_height_mm: v.seat_height_mm || null,
+          helmet_included: v.helmet_included || false,
+          helmet_size: v.helmet_size || null,
+          rain_guarantee_enabled: v.rain_guarantee_enabled || false,
           lat,
           lng,
         } as SearchVehicle;
@@ -304,6 +323,8 @@ const Search = () => {
       case 'bil': return 'biler';
       case 'trailer': return 'trailere';
       case 'campingvogn': return 'campingvogne';
+      case 'motorcykel': return 'motorcykler';
+      case 'scooter': return 'scootere';
       default: return 'køretøjer';
     }
   };
@@ -328,8 +349,10 @@ const Search = () => {
   const vehicleTypeButtons = [
     { value: 'all' as VehicleTypeFilter, label: 'Alle', icon: Sparkles, count: vehicles.length },
     { value: 'bil' as VehicleTypeFilter, label: 'Biler', icon: Car, count: vehicles.filter(v => v.vehicle_type === 'bil').length },
+    { value: 'motorcykel' as VehicleTypeFilter, label: 'MC', icon: Bike, count: vehicles.filter(v => v.vehicle_type === 'motorcykel').length },
+    { value: 'scooter' as VehicleTypeFilter, label: 'Scooter', icon: Bike, count: vehicles.filter(v => v.vehicle_type === 'scooter').length },
     { value: 'trailer' as VehicleTypeFilter, label: 'Trailere', icon: Truck, count: vehicles.filter(v => v.vehicle_type === 'trailer').length },
-    { value: 'campingvogn' as VehicleTypeFilter, label: 'Campingvogne', icon: Tent, count: vehicles.filter(v => v.vehicle_type === 'campingvogn').length },
+    { value: 'campingvogn' as VehicleTypeFilter, label: 'Camping', icon: Tent, count: vehicles.filter(v => v.vehicle_type === 'campingvogn').length },
   ];
 
   return (
