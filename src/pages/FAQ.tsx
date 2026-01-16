@@ -357,308 +357,273 @@ const FAQ = () => {
         },
         {
           q: "Kan jeg se efterspørgslen i forskellige områder?",
-          a: "Ja! I Flåde AI-fanen kan du se en oversigt over søgeaktivitet fordelt på lokationer og køretøjstyper. Dette hjælper dig med at forstå, hvor der er størst efterspørgsel."
+          a: "Ja! Dashboard-kortet viser et heatmap over søgeaktivitet. Røde områder har høj efterspørgsel, grønne har lav. Placér dine biler hvor efterspørgslen er størst."
         },
         {
-          q: "Hvad koster AI-funktionerne?",
-          a: "AI-funktionerne er inkluderet i dit LEJIO-abonnement uden ekstra omkostninger."
-        }
-      ]
-    },
-    {
-      title: "Service & Vedligeholdelse",
-      icon: Wrench,
-      questions: [
-        {
-          q: "Hvordan holder jeg styr på serviceintervaller?",
-          a: "I Service-fanen kan du indstille serviceintervaller baseret på kilometer og tid. Systemet advarer dig automatisk, når et køretøj nærmer sig service."
-        },
-        {
-          q: "Hvad er Service-Logistik funktionen?",
-          a: "Service-Logistik giver dig en opgaveliste med planlagte services, dækskift, syn og andre vedligeholdelsesopgaver. Du kan oprette opgaver manuelt eller lade systemet foreslå dem baseret på kørte kilometer."
-        },
-        {
-          q: "Kan jeg få påmindelser om syn?",
-          a: "Ja! Når du indtaster næste synsdato på et køretøj, får du automatisk påmindelser 30 dage og 7 dage før. Køretøjer med udløbet syn markeres som 'spærret' og kan ikke udlejes."
-        },
-        {
-          q: "Hvordan registrerer jeg udført service?",
-          a: "Gå til Service-fanen, find køretøjet, og klik 'Log service'. Indtast kilometerstand, servicetype, omkostninger og hvem der udførte servicen. Dette nulstiller serviceintervallet."
-        },
-        {
-          q: "Understøtter I dækhotel-funktion?",
-          a: "Ja! Du kan registrere, hvilken dæktype hver bil kører på (sommer/vinter/helårs), dækstørrelse og dækhotel-lokation. Systemet kan minde dig om dækskift ved sæsonskift."
-        },
-        {
-          q: "Hvad er km-trigger opgaver?",
-          a: "Du kan oprette opgaver der automatisk aktiveres, når et køretøj når et bestemt kilometertal – f.eks. 'Kædeskift ved 15.000 km' for motorcykler."
+          q: "Hvordan bruger jeg AI prisforslag?",
+          a: "AI-systemet analyserer markedet og foreslår optimale priser for hvert køretøj. Du kan godkende forslagene med ét klik eller justere manuelt."
         }
       ]
     },
     {
       title: "Dynamisk Selvrisiko",
-      icon: Percent,
-      questions: [
-        {
-          q: "Hvad er dynamisk selvrisiko?",
-          a: "Dynamisk selvrisiko lader dig oprette forskellige selvrisikoniveauer baseret på lejerens profil. Erfarne lejere med gode ratings kan tilbydes lavere selvrisiko, mens nye lejere får standard selvrisiko."
-        },
-        {
-          q: "Hvordan opretter jeg selvrisikoeprofiler?",
-          a: "Gå til Selvrisiko-fanen i dit dashboard. Her kan du oprette profiler med forskellige niveauer: Basis (f.eks. 10.000 kr), Standard (5.000 kr) og Premium (2.500 kr) med tilhørende daglige præmier."
-        },
-        {
-          q: "Hvordan kvalificerer lejere sig til lavere selvrisiko?",
-          a: "Du kan sætte krav som minimum antal gennemførte bookinger, minimum rating (f.eks. 4.5 stjerner), eller maksimum bilværdi. Systemet matcher automatisk lejere med den rigtige profil."
-        },
-        {
-          q: "Kan lejere købe nedsat selvrisiko?",
-          a: "Ja! Ved booking kan lejere vælge at betale en daglig præmie for at reducere selvrisikoen. F.eks. 79 kr/dag for at reducere fra 10.000 kr til 2.500 kr selvrisiko."
-        },
-        {
-          q: "Hvad sker der ved skade?",
-          a: "Ved skade gælder den selvrisiko, som lejeren har valgt/kvalificeret sig til. Dette registreres automatisk på bookingen og fremgår af kontrakten."
-        }
-      ]
-    },
-    {
-      title: "Tab af Indtægt",
       icon: TrendingDown,
       questions: [
         {
-          q: "Hvad er Tab af Indtægt-funktionen?",
-          a: "Når et køretøj er ude af drift pga. skade eller reparation, kan du beregne det potentielle indtægtstab. Systemet bruger historiske data til at estimere, hvad du ville have tjent."
+          q: "Hvad er dynamisk selvrisiko?",
+          a: "Dynamisk selvrisiko betyder at erfarne lejere med god historik kan få lavere selvrisiko. Du som udlejer definerer reglerne."
         },
         {
-          q: "Hvordan beregnes tabet?",
-          a: "Systemet kigger på de seneste 20 bookinger og beregner gennemsnitlig dagspris og udnyttelsesgrad. Tabet beregnes som: Dagspris × Dage ude af drift × Udnyttelsesgrad."
+          q: "Hvordan opsætter jeg selvrisiko-profiler?",
+          a: "Gå til 'Selvrisiko' i dashboardet og opret profiler. For hver profil kan du sætte krav til antal gennemførte bookinger, minimum rating og maksimal bilværdi."
         },
         {
-          q: "Hvornår kan jeg bruge denne funktion?",
-          a: "Du kan bruge den når som helst et køretøj er på værksted. Ved registrering af alvorlige skader ved indlevering, får du automatisk mulighed for at beregne tabet direkte fra skadesrapporten."
+          q: "Kan lejeren se sin selvrisiko før booking?",
+          a: "Ja! Ved booking vises den aktuelle selvrisiko baseret på lejerens profil. Dette skaber gennemsigtighed og incitament til god opførsel."
         },
         {
-          q: "Kan jeg indsende krav til forsikringen?",
-          a: "Ja! Når tabet er beregnet, kan du klikke 'Indsend krav' for at markere det til forsikringssag. Du kan følge status fra 'Beregnet' til 'Indsendt' til 'Godkendt' til 'Udbetalt'."
+          q: "Kan jeg tilbyde selvrisikonedsættelse mod betaling?",
+          a: "Ja! Du kan aktivere en premium-mulighed, hvor lejere kan betale ekstra pr. dag for at få reduceret selvrisiko – uanset deres historik."
         },
         {
-          q: "Er beregningen juridisk bindende?",
-          a: "Nej, beregningen er et estimat til brug ved forsikringssager og interne beslutninger. Den faktiske erstatning afhænger af din forsikringspolice og forsikringsselskabets vurdering."
+          q: "Hvad sker der ved skader?",
+          a: "Ved skader opkræves selvrisikoen fra lejeren. Er skaden mindre end selvrisikoen, betaler lejeren kun skadens størrelse."
         }
       ]
     },
     {
-      title: "Messenger & Kommunikation",
+      title: "Oversættelse & Sprog",
       icon: Languages,
       questions: [
         {
-          q: "Hvordan fungerer beskedsystemet?",
-          a: "Du kan kommunikere direkte med lejere og udlejere via vores beskedsystem. Alle beskeder gemmes sikkert og kan bruges som dokumentation ved eventuelle tvister."
+          q: "Hvordan fungerer automatisk oversættelse?",
+          a: "Vores AI kan oversætte beskeder mellem lejer og udlejer. Tryk på oversæt-ikonet ved en besked for at få den oversat til dit foretrukne sprog."
         },
         {
-          q: "Kan jeg vedhæfte filer til beskeder?",
-          a: "Ja! Du kan vedhæfte billeder, PDF'er og dokumenter op til 10 MB. Dette er nyttigt til at dele kørekort, kontrakter eller skadesbilleder."
+          q: "Hvilke sprog understøttes?",
+          a: "Vi understøtter de fleste europæiske sprog, inklusiv dansk, engelsk, tysk, fransk, spansk, italiensk, polsk og nederlandsk."
         },
         {
-          q: "Hvordan virker oversættelsesfunktionen?",
-          a: "Modtager du beskeder på et andet sprog, kan du trykke på oversæt-ikonet (🌐) for at få beskeden oversat til dansk med AI. Systemet registrerer også det originale sprog."
-        },
-        {
-          q: "Understøtter I flere sprog?",
-          a: "Ja! Vores AI-oversættelse kan oversætte fra de fleste sprog til dansk, hvilket gør det nemt at kommunikere med internationale lejere og turister."
-        },
-        {
-          q: "Hvordan kontakter jeg kundeservice?",
-          a: "Tryk på 'Kontakt kundeservice' i beskedsystemet for at starte en samtale med LEJIO's supportteam. Vi svarer typisk inden for et par timer."
-        },
-        {
-          q: "Får jeg notifikationer ved nye beskeder?",
-          a: "Ja! Du får push-notifikationer på telefonen og kan se antal ulæste beskeder i menuen. Du kan indstille notifikationer i dine indstillinger."
+          q: "Oversættes kontrakter automatisk?",
+          a: "Kontrakter genereres altid på dansk, da de er juridisk bindende. Lejeren kan dog få en automatisk oversættelse til forståelse."
         }
       ]
     },
     {
-      title: "Betaling & priser",
-      icon: CreditCard,
+      title: "Rabatkoder",
+      icon: Percent,
       questions: [
         {
-          q: "Hvilke betalingsmetoder accepteres?",
-          a: "Udlejere kan vælge at acceptere kort (via Stripe, Quickpay, PensoPay, Reepay eller OnPay), bankoverførsel, MobilePay eller kontant. Det fremgår af den enkelte udlejers profil."
+          q: "Hvordan opretter jeg en rabatkode?",
+          a: "Gå til 'Rabatkoder' i dit dashboard. Vælg type (procent eller fast beløb), indstil værdi, gyldighedsperiode og evt. brugsbegrænsning."
         },
         {
-          q: "Er der skjulte gebyrer?",
-          a: "Nej, alle priser er transparente. Udlejerens pris vises tydeligt, og eventuelle tillæg som depositum eller brændstofpolitik fremgår også."
+          q: "Kan jeg begrænse brugen af koder?",
+          a: "Ja! Du kan sætte maksimalt antal brug, begrænse til specifikke køretøjer, definere minimum lejeperiode og sætte udløbsdato."
         },
         {
-          q: "Hvordan fungerer månedlig betaling?",
-          a: "Nogle udlejere tilbyder månedlig betaling for længerevarende lejeaftaler. Betalingen trækkes automatisk hver måned via udlejerens betalingsgateway."
+          q: "Kan jeg se hvem der har brugt mine koder?",
+          a: "Ja! Under hver rabatkode kan du se statistik: antal brug, samlet rabat givet og hvornår koden sidst blev brugt."
         },
         {
-          q: "Hvad sker der med depositummet?",
-          a: "Depositummet returneres efter lejeperioden, hvis bilen afleveres i samme stand som ved modtagelse. Eventuelle skader eller manglende brændstof fratrækkes."
-        },
-        {
-          q: "Hvordan fungerer platformgebyr-betaling?",
-          a: "Som udlejer kan du se og betale dine platformgebyrer direkte i dashboardet. Du får oversigt over afventende gebyrer og kan betale samlet eller enkeltvis."
-        },
-        {
-          q: "Hvad er AI-prissætning?",
-          a: "Vores AI analyserer markedet, sæson og efterspørgsel og giver dig prisanbefalinger. Du kan se foreslået pris og begrundelse, men bestemmer altid selv den endelige pris."
+          q: "Kan lejere kombinere rabatkoder?",
+          a: "Nej, kun én rabatkode kan bruges pr. booking. Dog kan rabatkoder kombineres med henvisningskredit."
         }
       ]
     },
     {
-      title: "Kontrakter & Dokumentation",
-      icon: FileText,
-      questions: [
-        {
-          q: "Hvordan fungerer lejekontrakten?",
-          a: "Når en booking bekræftes, genereres en lejekontrakt automatisk med alle detaljer: køretøj, periode, pris, selvrisiko, forsikring og vilkår. Både lejer og udlejer skal underskrive digitalt."
-        },
-        {
-          q: "Hvad er vanvidskørselsklausulen?",
-          a: "Lejere accepterer fuldt økonomisk ansvar for køretøjets værdi, hvis skade skyldes vanvidskørsel eller groft uagtsom kørsel. Dette gælder uanset forsikringsdækning."
-        },
-        {
-          q: "Hvem er ansvarlig for bøder under lejeperioden?",
-          a: "Lejeren er ansvarlig for alle bøder, parkeringsafgifter og andre afgifter pådraget i lejeperioden."
-        },
-        {
-          q: "Hvad dækker udlejers forsikring?",
-          a: "Det afhænger af udlejers forsikringspolice. Detaljer om forsikringsdækning og selvrisiko fremgår af lejekontrakten."
-        },
-        {
-          q: "Kan jeg uploade mit firmalogo til kontrakterne?",
-          a: "Ja! Som forhandler kan du uploade dit firmalogo i indstillinger. Logoet vises øverst på alle dine kontrakter for professionelt udseende."
-        },
-        {
-          q: "Hvad er skaderapporter med AI?",
-          a: "Ved check-in og check-out kan du fotografere bilen. Vores AI analyserer billederne og kan identificere skader automatisk. Du markerer skaderne på et visuelt diagram, og begge parter godkender."
-        }
-      ]
-    },
-    {
-      title: "Sikkerhed & Advarsler",
+      title: "Sikkerhed & Forsikring",
       icon: Shield,
       questions: [
         {
-          q: "Hvordan beskytter LEJIO mig som udlejer?",
-          a: "Vores advarselssystem giver dig indblik i potentielle problematiske lejere. Du kan se aktive advarsler før du accepterer en booking."
+          q: "Hvordan verificerer LEJIO lejeres identitet?",
+          a: "Vi kræver foto-upload af kørekort, som valideres med AI. Derudover kan du som udlejer kræve fysisk fremvisning ved afhentning."
         },
         {
-          q: "Hvordan klager jeg over en advarsel?",
-          a: "Hvis du har modtaget en advarsel, kan du klikke på linket i notifikations-e-mailen for at indgive en klage. LEJIO's administration behandler alle klager."
+          q: "Hvad dækker forsikringen?",
+          a: "LEJIO håndterer ikke forsikring – det er udlejers ansvar. Sørg for at din bilforsikring dækker udlejning til tredjemand og notér policenummer i systemet."
         },
         {
-          q: "Hvad sker der ved en tvist mellem lejer og udlejer?",
-          a: "Vi opfordrer til dialog mellem parterne via beskedsystemet. Hvis det ikke lykkes, kan du kontakte vores kundeservice. Alvorlige tvister kan indbringes for Forbrugerklagenævnet."
+          q: "Hvordan håndteres skader?",
+          a: "Skader dokumenteres via check-in/check-out systemet. Selvrisiko opkræves fra lejeren, og du kan evt. anmelde til din forsikring for resten."
         },
         {
-          q: "Hvordan rapporterer jeg en udlejer?",
-          a: "Du kan indgive en klage mod en udlejer via din booking eller kontakte vores kundeservice. Vi undersøger alle henvendelser."
-        },
-        {
-          q: "Hvordan verificeres kørekort?",
-          a: "Lejere uploader billede af deres kørekort. Vores AI verificerer ægthed og udløbsdato. Udlejere kan se verifikationsstatus før de accepterer bookinger."
+          q: "Hvad er vanvidskørsel-klausulen?",
+          a: "Kontrakten indeholder en klausul om fuld erstatningspligt ved vanvidskørsel (hasarderet kørsel, spirituskørsel m.m.). Lejeren hæfter for hele bilens værdi."
         }
       ]
     },
     {
-      title: "Teknisk hjælp",
+      title: "Betaling & Økonomi",
+      icon: CreditCard,
+      questions: [
+        {
+          q: "Hvordan modtager jeg betaling?",
+          a: "Du opsætter selv din betalingsmetode i indstillinger (MobilePay, bankoverførsel, kort). LEJIO håndterer ikke pengene mellem dig og lejeren."
+        },
+        {
+          q: "Hvad koster det at bruge LEJIO?",
+          a: "Private: 49 kr/booking. Forhandlere: 299-799 kr/md uden pr. booking gebyr. Fleet-planer: 10-15% kommission."
+        },
+        {
+          q: "Hvordan betaler jeg platformgebyr?",
+          a: "Platformgebyrer faktureres månedligt. Du kan betale via kort eller bankoverførsel direkte i systemet."
+        },
+        {
+          q: "Kan jeg se min betalingshistorik?",
+          a: "Ja! Under 'Økonomi' kan du se alle transaktioner, indbetalinger fra lejere og platformgebyrer."
+        }
+      ]
+    },
+    {
+      title: "Kontrakter & Dokumenter",
+      icon: FileText,
+      questions: [
+        {
+          q: "Hvordan genereres kontrakter?",
+          a: "Kontrakter genereres automatisk med alle bookingdetaljer, køretøjsinfo, vilkår og priser. Begge parter underskriver digitalt."
+        },
+        {
+          q: "Kan jeg tilpasse kontrakterne?",
+          a: "Du kan uploade dit firmalogo og tilføje specielle vilkår. Standard juridiske vilkår kan ikke ændres for at sikre gyldighed."
+        },
+        {
+          q: "Hvor længe gemmes kontrakter?",
+          a: "Alle kontrakter gemmes permanent i systemet og kan downloades som PDF når som helst."
+        },
+        {
+          q: "Hvad hvis lejeren ikke underskriver?",
+          a: "Bookingen kan ikke starte før begge parter har underskrevet. Du får besked når lejeren har underskrevet."
+        }
+      ]
+    },
+    {
+      title: "Teknisk Support",
       icon: HelpCircle,
       questions: [
         {
-          q: "Jeg kan ikke logge ind - hvad gør jeg?",
-          a: "Prøv at nulstille din adgangskode via 'Glemt adgangskode' på login-siden. Hvis problemet fortsætter, kontakt vores kundeservice."
+          q: "Hvordan kontakter jeg support?",
+          a: "Brug Live Chat i appen for hurtig hjælp. Du kan også sende email til support@lejio.dk eller ringe på hverdage 9-17."
         },
         {
-          q: "Hvordan ændrer jeg mine profiloplysninger?",
-          a: "Gå til 'Indstillinger' i din dashboard, hvor du kan opdatere kontaktoplysninger, betalingsmetoder og forsikringsdetaljer."
+          q: "Er der videoguides?",
+          a: "Ja! Vi har videoguides til alle funktioner. Find dem under 'Hjælp' i menuen eller på vores YouTube-kanal."
         },
         {
-          q: "Hvordan sletter jeg min konto?",
-          a: "Kontakt vores kundeservice for at slette din konto. Bemærk at visse data skal opbevares i henhold til bogføringsloven."
+          q: "Hvad gør jeg ved tekniske fejl?",
+          a: "Prøv først at genindlæse siden. Virker det ikke, kontakt support med en beskrivelse og evt. screenshots."
         },
         {
-          q: "Hvordan kontakter jeg kundeservice?",
-          a: "Du kan bruge beskedsystemet til at starte en samtale med kundeservice, eller sende en e-mail til hej@lejio.dk."
+          q: "Kan jeg foreslå nye funktioner?",
+          a: "Absolut! Vi elsker feedback. Send dine idéer via Live Chat eller email – vi læser alle forslag."
+        }
+      ]
+    },
+    {
+      title: "Værksted & Service",
+      icon: Wrench,
+      questions: [
+        {
+          q: "Hvad er Smart Service?",
+          a: "Smart Service er vores samarbejde med værksteder. Du kan booke service direkte i systemet, og vi koordinerer afhentning og levering."
         },
         {
-          q: "Fungerer LEJIO på mobil?",
-          a: "Ja! LEJIO er fuldt responsivt og fungerer på alle enheder. Du kan også installere LEJIO som app på din telefon via browseren for hurtig adgang."
+          q: "Hvordan fungerer syns-påmindelser?",
+          a: "Systemet holder styr på synsdatoer og minder dig i god tid. Du kan markere synet som gennemført og opdatere næste synsdato."
         },
         {
-          q: "Hvad gør jeg, hvis en funktion ikke virker?",
-          a: "Prøv først at genindlæse siden. Hvis problemet fortsætter, kontakt kundeservice med en beskrivelse af fejlen, så hjælper vi dig hurtigt."
+          q: "Kan jeg registrere dækskift?",
+          a: "Ja! Under hvert køretøj kan du registrere dæksæt (sommer/vinter), dækhotel-lokation og seneste skiftedato."
+        },
+        {
+          q: "Hvad er byttebil-funktionen?",
+          a: "Hvis en bil skal på værksted midt i en booking, kan du tilbyde lejeren en byttebil. Systemet håndterer kontrakttilpasning automatisk."
         }
       ]
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       
-      <main className="container mx-auto px-6 py-24">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="font-display text-4xl font-bold text-foreground mb-4">
-              Ofte stillede spørgsmål
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Find svar på de mest almindelige spørgsmål om LEJIO
-            </p>
+      <main className="pt-16">
+        {/* Hero Section */}
+        <section className="relative py-24 sm:py-32 overflow-hidden">
+          {/* Background Effects */}
+          <div className="absolute inset-0">
+            <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-[100px]" />
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-[120px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-mint/10 rounded-full blur-[150px] rotate-12" />
           </div>
-
-          <div className="space-y-8">
-            {faqCategories.map((category, categoryIndex) => (
-              <div key={categoryIndex} className="bg-card rounded-2xl border border-border p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <category.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <h2 className="font-display text-xl font-semibold text-foreground">
-                    {category.title}
-                  </h2>
-                </div>
-
-                <Accordion type="single" collapsible className="space-y-2">
-                  {category.questions.map((item, index) => (
-                    <AccordionItem 
-                      key={index} 
-                      value={`${categoryIndex}-${index}`}
-                      className="border border-border rounded-xl px-4 data-[state=open]:bg-muted/50"
-                    >
-                      <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">
-                        {item.q}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground pb-4">
-                        {item.a}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+          
+          {/* Geometric shapes */}
+          <div className="absolute top-32 right-20 w-24 h-24 border-4 border-primary/20 rotate-45 hidden lg:block" />
+          <div className="absolute bottom-32 left-20 w-16 h-16 bg-accent/10 rounded-full hidden lg:block" />
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-bold text-primary mb-8 animate-slide-up">
+                <Zap className="w-4 h-4" />
+                <span>Alt du skal vide om LEJIO</span>
               </div>
-            ))}
+              
+              <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-black mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                <span className="block">OFTE STILLEDE</span>
+                <span className="block bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent">
+                  SPØRGSMÅL
+                </span>
+              </h1>
+              
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                Find svar på alle dine spørgsmål om billedning, udlejning, kontrakter, betalinger og meget mere.
+              </p>
+            </div>
           </div>
+        </section>
 
-          <div className="mt-12 text-center bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8">
-            <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-              Fandt du ikke svaret?
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Kontakt vores kundeservice - vi hjælper gerne!
-            </p>
-            <a 
-              href="mailto:hej@lejio.dk" 
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
-            >
-              Kontakt os
-            </a>
+        {/* FAQ Categories */}
+        <section className="py-16 relative">
+          <div className="container mx-auto px-6">
+            <div className="max-w-4xl mx-auto space-y-8">
+              {faqCategories.map((category, categoryIndex) => {
+                const Icon = category.icon;
+                return (
+                  <div 
+                    key={categoryIndex} 
+                    className="rounded-3xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 sm:p-8 hover:shadow-xl transition-all"
+                  >
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20">
+                        <Icon className="w-7 h-7 text-white" />
+                      </div>
+                      <h2 className="font-display text-2xl font-black">{category.title}</h2>
+                    </div>
+
+                    <Accordion type="single" collapsible className="space-y-2">
+                      {category.questions.map((faq, faqIndex) => (
+                        <AccordionItem 
+                          key={faqIndex} 
+                          value={`${categoryIndex}-${faqIndex}`}
+                          className="border-b border-border/50 last:border-b-0"
+                        >
+                          <AccordionTrigger className="text-left font-semibold hover:text-primary transition-colors py-4">
+                            {faq.q}
+                          </AccordionTrigger>
+                          <AccordionContent className="text-muted-foreground pb-4">
+                            {faq.a}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        </section>
       </main>
-
+      
       <Footer />
     </div>
   );
