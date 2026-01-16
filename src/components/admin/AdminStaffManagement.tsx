@@ -118,14 +118,18 @@ export const AdminStaffManagement = () => {
     
     try {
       // Using type assertion since the function is newly created
-      const { error } = await (supabase.rpc as any)('assign_role', {
+      const { data, error } = await (supabase.rpc as any)('assign_role', {
         _target_user_id: selectedUserId,
         _role: selectedRole,
       });
       
       if (error) {
         console.error('Error assigning role:', error);
-        toast.error('Kunne ikke tildele rolle: ' + error.message);
+        if (error.message?.includes('super_admin') || error.message?.includes('Only super admins')) {
+          toast.error('Kun Super Admins kan tildele roller. Kontakt en Super Admin.');
+        } else {
+          toast.error('Kunne ikke tildele rolle: ' + error.message);
+        }
         return;
       }
       
@@ -136,7 +140,11 @@ export const AdminStaffManagement = () => {
       fetchAdminUsers();
     } catch (err: any) {
       console.error('Error:', err);
-      toast.error('Kunne ikke tildele rolle');
+      if (err?.message?.includes('super_admin') || err?.message?.includes('Only super admins')) {
+        toast.error('Kun Super Admins kan tildele roller. Kontakt en Super Admin.');
+      } else {
+        toast.error('Kunne ikke tildele rolle: ' + (err?.message || 'Ukendt fejl'));
+      }
     } finally {
       setIsAdding(false);
     }
