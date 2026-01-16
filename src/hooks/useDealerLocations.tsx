@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Dealer Location Management Hook
+
 export interface DealerLocation {
   id: string;
   partner_id: string;
