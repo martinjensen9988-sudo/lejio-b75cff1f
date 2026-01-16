@@ -39,7 +39,8 @@ import {
   QrCode,
   Share2,
   Globe,
-  Zap
+  Zap,
+  TrendingDown
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -575,6 +576,161 @@ const Features = () => {
           description: "Sæt start- og slutdato på dine rabatkampagner.",
           icon: Clock,
           badge: "Ny",
+        },
+      ],
+    },
+    {
+      title: "Lejio 2.0 - AI Flåde",
+      icon: Truck,
+      color: "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-600",
+      features: [
+        {
+          title: "Auto-Dispatch",
+          description: "AI analyserer søgehistorik og foreslår at flytte biler til lokationer med høj efterspørgsel.",
+          icon: Truck,
+          badge: "2.0",
+        },
+        {
+          title: "Intelligent flådefordeling",
+          description: "Maksimer udnyttelsesgraden med AI-drevne anbefalinger.",
+          icon: Brain,
+          badge: "2.0",
+        },
+        {
+          title: "Efterspørgselsanalyse",
+          description: "Se realtids-data om søgninger pr. lokation og biltype.",
+          icon: BarChart3,
+          badge: "2.0",
+        },
+        {
+          title: "Omsætningsoptimering",
+          description: "Få estimeret indtægtsstigning ved at følge AI-anbefalinger.",
+          icon: TrendingDown,
+          badge: "2.0",
+        },
+      ],
+    },
+    {
+      title: "Lejio 2.0 - Service-Logistik",
+      icon: Wrench,
+      color: "bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-600",
+      features: [
+        {
+          title: "Automatisk service-planlægning",
+          description: "Systemet spærrer automatisk biler ved service-intervaller.",
+          icon: Wrench,
+          badge: "2.0",
+        },
+        {
+          title: "Km-trigger opgaver",
+          description: "Opret opgaver der aktiveres ved et bestemt kilometertal.",
+          icon: Gauge,
+          badge: "2.0",
+        },
+        {
+          title: "Transport-opgaver",
+          description: "Koordiner medarbejdere til at køre biler til værksted.",
+          icon: Truck,
+          badge: "2.0",
+        },
+        {
+          title: "Automatisk booking-blokering",
+          description: "Biler blokeres automatisk under planlagte serviceopgaver.",
+          icon: Calendar,
+          badge: "2.0",
+        },
+      ],
+    },
+    {
+      title: "Lejio 2.0 - Selvrisiko",
+      icon: Shield,
+      color: "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600",
+      features: [
+        {
+          title: "Dynamisk selvrisiko-styring",
+          description: "Differentier selvrisiko baseret på lejerens profil og bilens værdi.",
+          icon: Shield,
+          badge: "2.0",
+        },
+        {
+          title: "Premium selvrisiko-tilkøb",
+          description: "Lad lejere købe 0 kr. selvrisiko for en daglig pris.",
+          icon: ShieldCheck,
+          badge: "2.0",
+        },
+        {
+          title: "Lejer-rating kriterier",
+          description: "Kræv minimum rating eller antal bookinger for bedre vilkår.",
+          icon: Star,
+          badge: "2.0",
+        },
+        {
+          title: "Automatisk profil-matching",
+          description: "Systemet vælger automatisk den bedste profil til lejeren.",
+          icon: BadgeCheck,
+          badge: "2.0",
+        },
+      ],
+    },
+    {
+      title: "Lejio 2.0 - Messenger",
+      icon: MessageSquare,
+      color: "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600",
+      features: [
+        {
+          title: "Automatisk oversættelse",
+          description: "Beskeder oversættes automatisk mellem lejer og udlejer.",
+          icon: Globe,
+          badge: "2.0",
+        },
+        {
+          title: "Sprogdetektion",
+          description: "AI registrerer automatisk hvilket sprog beskeden er skrevet på.",
+          icon: Brain,
+          badge: "2.0",
+        },
+        {
+          title: "Turist-venlig",
+          description: "Perfekt til udenlandske lejere og turister.",
+          icon: Users,
+          badge: "2.0",
+        },
+        {
+          title: "Dokumentation",
+          description: "Al kommunikation gemmes som dokumentation ved tvister.",
+          icon: FileText,
+          badge: "2.0",
+        },
+      ],
+    },
+    {
+      title: "Lejio 2.0 - Tab af Indtægt",
+      icon: TrendingDown,
+      color: "bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-600",
+      features: [
+        {
+          title: "Automatisk tab-beregning",
+          description: "Beregn tabt indtægt baseret på bilens historiske udlejningsrate.",
+          icon: BarChart3,
+          badge: "2.0",
+        },
+        {
+          title: "Udnyttelsesgrad-analyse",
+          description: "Systemet bruger de sidste 90 dages data til præcis beregning.",
+          icon: Gauge,
+          badge: "2.0",
+        },
+        {
+          title: "Krav-indsendelse",
+          description: "Send automatisk krav til forsikring eller lejer.",
+          icon: FileText,
+          badge: "2.0",
+        },
+        {
+          title: "Integreret med skaderapporter",
+          description: "Beregningen tilføjes automatisk til skadeskravet.",
+          icon: Scan,
+          badge: "2.0",
         },
       ],
     },
