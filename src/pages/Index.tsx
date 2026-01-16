@@ -3,10 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import LicensePlateHook from "@/components/LicensePlateHook";
 import HowItWorks from "@/components/HowItWorks";
 import LeaderSection from "@/components/LeaderSection";
-import Pricing from "@/components/Pricing";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
 import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
@@ -42,10 +40,8 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
-        <LicensePlateHook />
         <HowItWorks />
         <LeaderSection />
-        <Pricing />
       </main>
       <Footer />
       <CookieBanner />
