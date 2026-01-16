@@ -68,6 +68,54 @@ export type Database = {
           },
         ]
       }
+      booking_deductible_selections: {
+        Row: {
+          booking_id: string
+          created_at: string | null
+          daily_premium_paid: number | null
+          deductible_amount: number
+          deductible_profile_id: string | null
+          id: string
+          selected_tier: string
+          total_premium_paid: number | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string | null
+          daily_premium_paid?: number | null
+          deductible_amount: number
+          deductible_profile_id?: string | null
+          id?: string
+          selected_tier?: string
+          total_premium_paid?: number | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string | null
+          daily_premium_paid?: number | null
+          deductible_amount?: number
+          deductible_profile_id?: string | null
+          id?: string
+          selected_tier?: string
+          total_premium_paid?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_deductible_selections_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_deductible_selections_deductible_profile_id_fkey"
+            columns: ["deductible_profile_id"]
+            isOneToOne: false
+            referencedRelation: "deductible_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           created_at: string
@@ -1365,6 +1413,57 @@ export type Database = {
           },
         ]
       }
+      deductible_profiles: {
+        Row: {
+          base_deductible: number
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          lessor_id: string
+          max_vehicle_value: number | null
+          min_completed_bookings: number | null
+          min_renter_rating: number | null
+          name: string
+          premium_daily_rate: number | null
+          premium_deductible: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          base_deductible?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          lessor_id: string
+          max_vehicle_value?: number | null
+          min_completed_bookings?: number | null
+          min_renter_rating?: number | null
+          name: string
+          premium_daily_rate?: number | null
+          premium_deductible?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          base_deductible?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          lessor_id?: string
+          max_vehicle_value?: number | null
+          min_completed_bookings?: number | null
+          min_renter_rating?: number | null
+          name?: string
+          premium_daily_rate?: number | null
+          premium_deductible?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       deposit_transactions: {
         Row: {
           amount: number
@@ -1666,6 +1765,86 @@ export type Database = {
           },
           {
             foreignKeyName: "fines_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_dispatch_recommendations: {
+        Row: {
+          acted_at: string | null
+          ai_confidence: number | null
+          created_at: string | null
+          expected_revenue_increase: number | null
+          expires_at: string | null
+          from_location_id: string | null
+          id: string
+          lessor_id: string
+          priority: string
+          reason: string
+          recommendation_type: string
+          status: string
+          to_location_id: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          acted_at?: string | null
+          ai_confidence?: number | null
+          created_at?: string | null
+          expected_revenue_increase?: number | null
+          expires_at?: string | null
+          from_location_id?: string | null
+          id?: string
+          lessor_id: string
+          priority?: string
+          reason: string
+          recommendation_type?: string
+          status?: string
+          to_location_id?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          acted_at?: string | null
+          ai_confidence?: number | null
+          created_at?: string | null
+          expected_revenue_increase?: number | null
+          expires_at?: string | null
+          from_location_id?: string | null
+          id?: string
+          lessor_id?: string
+          priority?: string
+          reason?: string
+          recommendation_type?: string
+          status?: string
+          to_location_id?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_dispatch_recommendations_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_dispatch_recommendations_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_dispatch_recommendations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_dispatch_recommendations_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
@@ -2429,7 +2608,10 @@ export type Database = {
           id: string
           is_from_support: boolean
           is_read: boolean
+          original_language: string | null
           sender_id: string
+          target_language: string | null
+          translated_content: string | null
         }
         Insert: {
           content: string
@@ -2438,7 +2620,10 @@ export type Database = {
           id?: string
           is_from_support?: boolean
           is_read?: boolean
+          original_language?: string | null
           sender_id: string
+          target_language?: string | null
+          translated_content?: string | null
         }
         Update: {
           content?: string
@@ -2447,7 +2632,10 @@ export type Database = {
           id?: string
           is_from_support?: boolean
           is_read?: boolean
+          original_language?: string | null
           sender_id?: string
+          target_language?: string | null
+          translated_content?: string | null
         }
         Relationships: [
           {
@@ -3112,6 +3300,148 @@ export type Database = {
           },
         ]
       }
+      revenue_loss_calculations: {
+        Row: {
+          ai_estimated_bookings: number | null
+          booking_id: string | null
+          calculation_date: string
+          claim_approved_at: string | null
+          claim_submitted_at: string | null
+          created_at: string | null
+          daily_rate_average: number
+          damage_report_id: string | null
+          days_out_of_service: number
+          historical_utilization_rate: number | null
+          id: string
+          lessor_id: string
+          notes: string | null
+          repair_end_date: string | null
+          repair_start_date: string | null
+          status: string
+          total_revenue_loss: number
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          ai_estimated_bookings?: number | null
+          booking_id?: string | null
+          calculation_date?: string
+          claim_approved_at?: string | null
+          claim_submitted_at?: string | null
+          created_at?: string | null
+          daily_rate_average: number
+          damage_report_id?: string | null
+          days_out_of_service: number
+          historical_utilization_rate?: number | null
+          id?: string
+          lessor_id: string
+          notes?: string | null
+          repair_end_date?: string | null
+          repair_start_date?: string | null
+          status?: string
+          total_revenue_loss: number
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          ai_estimated_bookings?: number | null
+          booking_id?: string | null
+          calculation_date?: string
+          claim_approved_at?: string | null
+          claim_submitted_at?: string | null
+          created_at?: string | null
+          daily_rate_average?: number
+          damage_report_id?: string | null
+          days_out_of_service?: number
+          historical_utilization_rate?: number | null
+          id?: string
+          lessor_id?: string
+          notes?: string | null
+          repair_end_date?: string | null
+          repair_start_date?: string | null
+          status?: string
+          total_revenue_loss?: number
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_loss_calculations_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_loss_calculations_damage_report_id_fkey"
+            columns: ["damage_report_id"]
+            isOneToOne: false
+            referencedRelation: "damage_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_loss_calculations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_loss_calculations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_history: {
+        Row: {
+          end_date: string | null
+          id: string
+          ip_hash: string | null
+          location_id: string | null
+          results_count: number | null
+          search_query: string | null
+          searched_at: string | null
+          start_date: string | null
+          user_id: string | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          end_date?: string | null
+          id?: string
+          ip_hash?: string | null
+          location_id?: string | null
+          results_count?: number | null
+          search_query?: string | null
+          searched_at?: string | null
+          start_date?: string | null
+          user_id?: string | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          end_date?: string | null
+          id?: string
+          ip_hash?: string | null
+          location_id?: string | null
+          results_count?: number | null
+          search_query?: string | null
+          searched_at?: string | null
+          start_date?: string | null
+          user_id?: string | null
+          vehicle_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_history_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasonal_pricing: {
         Row: {
           created_at: string
@@ -3289,6 +3619,106 @@ export type Database = {
           },
           {
             foreignKeyName: "service_reminders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_tasks: {
+        Row: {
+          actual_duration_minutes: number | null
+          assigned_to: string | null
+          auto_block_bookings: boolean | null
+          booking_block_end: string | null
+          booking_block_start: string | null
+          completed_at: string | null
+          created_at: string | null
+          date_trigger: string | null
+          description: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          km_trigger: number | null
+          lessor_id: string
+          location_id: string | null
+          notes: string | null
+          priority: string
+          scheduled_date: string | null
+          scheduled_time: string | null
+          status: string
+          task_type: string
+          title: string
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          actual_duration_minutes?: number | null
+          assigned_to?: string | null
+          auto_block_bookings?: boolean | null
+          booking_block_end?: string | null
+          booking_block_start?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          date_trigger?: string | null
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          km_trigger?: number | null
+          lessor_id: string
+          location_id?: string | null
+          notes?: string | null
+          priority?: string
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          status?: string
+          task_type: string
+          title: string
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          actual_duration_minutes?: number | null
+          assigned_to?: string | null
+          auto_block_bookings?: boolean | null
+          booking_block_end?: string | null
+          booking_block_start?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          date_trigger?: string | null
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          km_trigger?: number | null
+          lessor_id?: string
+          location_id?: string | null
+          notes?: string | null
+          priority?: string
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_tasks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tasks_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tasks_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
