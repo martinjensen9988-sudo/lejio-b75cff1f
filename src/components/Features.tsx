@@ -7,51 +7,51 @@ const Features = () => {
 
   const features = [
     {
-      icon: Clock,
-      title: "Book på sekunder",
-      description: "Find og book dit køretøj på under 2 minutter. Ingen ventetid.",
+      icon: Sparkles,
+      title: "AI-drevet platform",
+      description: "Smart prissætning, flådestyring, skadesregistrering og automatiske anbefalinger.",
+      color: "from-mint to-accent",
+      bgColor: "bg-gradient-to-br from-mint/5 to-accent/5",
+      borderColor: "border-mint/20 hover:border-mint/50"
+    },
+    {
+      icon: FileCheck,
+      title: "100+ funktioner",
+      description: "Fra booking til GPS-sporing, bøder til service – alt i én platform.",
       color: "from-primary to-primary/60",
       bgColor: "bg-primary/5",
       borderColor: "border-primary/20 hover:border-primary/50"
     },
     {
-      icon: FileCheck,
-      title: "Automatisk kontrakt",
-      description: "Juridisk bindende kontrakt genereres automatisk ved booking.",
-      color: "from-mint to-mint/60",
-      bgColor: "bg-mint/5",
-      borderColor: "border-mint/20 hover:border-mint/50"
-    },
-    {
       icon: Shield,
-      title: "Tryg handel",
-      description: "Verificerede brugere og fuld gennemsigtighed på alle udlejninger.",
+      title: "Dynamisk selvrisiko",
+      description: "Differentier selvrisiko baseret på lejerens profil og rating.",
       color: "from-accent to-accent/60",
       bgColor: "bg-accent/5",
       borderColor: "border-accent/20 hover:border-accent/50"
     },
     {
-      icon: CreditCard,
-      title: "Nem betaling",
-      description: "Betal sikkert online med kort eller MobilePay. Simple og hurtigt.",
+      icon: Clock,
+      title: "Auto-Dispatch AI",
+      description: "AI analyserer efterspørgsel og foreslår optimal flådefordeling.",
       color: "from-lavender to-lavender/60",
       bgColor: "bg-lavender/5",
       borderColor: "border-lavender/20 hover:border-lavender/50"
     },
     {
       icon: Car,
-      title: "Alle køretøjer",
-      description: "Biler, MC, scootere, campingvogne og trailere – alt samlet ét sted.",
+      title: "Multi-lokation",
+      description: "Administrer flere lokationer med separate åbningstider og priser.",
       color: "from-secondary to-secondary/60",
       bgColor: "bg-secondary/5",
       borderColor: "border-secondary/20 hover:border-secondary/50"
     },
     {
-      icon: Sparkles,
-      title: "AI-drevet platform",
-      description: "Smart prissætning, skadesregistrering og automatisk booking.",
-      color: "from-mint to-accent",
-      bgColor: "bg-gradient-to-br from-mint/5 to-accent/5",
+      icon: CreditCard,
+      title: "Komplet økonomi",
+      description: "Fakturaer, bøder, depositum og platformgebyrer – alt automatiseret.",
+      color: "from-mint to-mint/60",
+      bgColor: "bg-mint/5",
       borderColor: "border-mint/20 hover:border-mint/50"
     }
   ];
@@ -102,6 +102,28 @@ const Features = () => {
           })}
         </div>
 
+        {/* Stats Section */}
+        <div className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-5xl mx-auto mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="animate-scale-in" style={{ animationDelay: '0.5s' }}>
+              <div className="text-4xl font-black text-primary mb-2">100+</div>
+              <div className="text-muted-foreground font-medium">Funktioner</div>
+            </div>
+            <div className="animate-scale-in" style={{ animationDelay: '0.6s' }}>
+              <div className="text-4xl font-black text-accent mb-2">22</div>
+              <div className="text-muted-foreground font-medium">Kategorier</div>
+            </div>
+            <div className="animate-scale-in" style={{ animationDelay: '0.7s' }}>
+              <div className="text-4xl font-black text-mint mb-2">5</div>
+              <div className="text-muted-foreground font-medium">AI-funktioner</div>
+            </div>
+            <div className="animate-scale-in" style={{ animationDelay: '0.8s' }}>
+              <div className="text-4xl font-black text-secondary mb-2">24/7</div>
+              <div className="text-muted-foreground font-medium">Drift</div>
+            </div>
+          </div>
+        </div>
+
         {/* Vehicle types */}
         <div className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-5xl mx-auto">
           <h3 className="font-display text-3xl font-black text-center mb-10">
@@ -120,7 +142,7 @@ const Features = () => {
               <div 
                 key={i}
                 className="text-center p-4 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group animate-scale-in"
-                style={{ animationDelay: `${0.5 + i * 0.1}s` }}
+                style={{ animationDelay: `${0.9 + i * 0.1}s` }}
                 onClick={() => navigate('/search')}
               >
                 <span className="text-4xl block mb-3 group-hover:scale-125 transition-transform">{type.emoji}</span>
@@ -131,13 +153,22 @@ const Features = () => {
           </div>
 
           {/* CTA */}
-          <div className="text-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="xl" 
               className="bg-gradient-to-r from-primary to-primary/80 text-lg font-bold px-12 shadow-lg shadow-primary/20"
               onClick={() => navigate('/search')}
             >
               Udforsk alle køretøjer
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+            <Button 
+              size="xl" 
+              variant="outline"
+              className="text-lg font-bold px-12"
+              onClick={() => navigate('/features')}
+            >
+              Se alle 100+ funktioner
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
