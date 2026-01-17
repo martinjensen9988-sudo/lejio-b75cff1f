@@ -54,6 +54,8 @@ import RateRenterPage from "./pages/dashboard/RateRenter";
 import CreateWarningPage from "./pages/dashboard/CreateWarning";
 import AddGeofencePage from "./pages/gps/AddGeofence";
 import AddGpsDevicePage from "./pages/gps/AddGpsDevice";
+import VehicleDetailPage from "./pages/search/VehicleDetail";
+import SearchCreateBookingPage from "./pages/search/CreateBooking";
 // Admin sub-pages
 import AdminUsersPage from "./pages/admin/Users";
 import AdminStaffPage from "./pages/admin/Staff";
@@ -119,6 +121,8 @@ const App = () => (
             <Route path="/gps/add-geofence" element={<AddGeofencePage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/search/vehicle/:vehicleId" element={<VehicleDetailPage />} />
+            <Route path="/search/booking/:vehicleId" element={<SearchCreateBookingPage />} />
             <Route path="/booking/:vehicleId" element={<Booking />} />
             <Route path="/my-rentals" element={<MyRentals />} />
             <Route path="/admin" element={<AdminLogin />} />
