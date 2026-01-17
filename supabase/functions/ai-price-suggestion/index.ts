@@ -18,20 +18,82 @@ interface Vehicle {
   features: string[];
 }
 
+// Input validation constants
+const MAX_VEHICLES = 50;
+const MAX_STRING_LENGTH = 200;
+const MAX_FEATURES = 30;
+
+function sanitizeString(str: unknown, maxLen: number): string {
+  if (typeof str !== 'string') return '';
+  return str.slice(0, maxLen).replace(/[<>]/g, '');
+}
+
+function validateVehicles(vehicles: unknown): { valid: boolean; error?: string; sanitized?: Vehicle[] } {
+  if (!Array.isArray(vehicles)) {
+    return { valid: false, error: 'Vehicles must be an array' };
+  }
+  
+  if (vehicles.length === 0) {
+    return { valid: false, error: 'No vehicles provided' };
+  }
+  
+  if (vehicles.length > MAX_VEHICLES) {
+    return { valid: false, error: `Maximum ${MAX_VEHICLES} vehicles allowed` };
+  }
+  
+  const sanitized: Vehicle[] = [];
+  
+  for (let i = 0; i < vehicles.length; i++) {
+    const v = vehicles[i];
+    if (!v || typeof v !== 'object') {
+      return { valid: false, error: `Invalid vehicle at index ${i}` };
+    }
+    
+    // Sanitize and validate each vehicle
+    const sanitizedVehicle: Vehicle = {
+      id: sanitizeString(v.id, 100),
+      make: sanitizeString(v.make, MAX_STRING_LENGTH),
+      model: sanitizeString(v.model, MAX_STRING_LENGTH),
+      year: typeof v.year === 'number' && v.year > 1900 && v.year < 2100 ? v.year : null,
+      fuel_type: sanitizeString(v.fuel_type, 50) || null,
+      vehicle_type: sanitizeString(v.vehicle_type, 50) || 'unknown',
+      daily_price: typeof v.daily_price === 'number' && v.daily_price >= 0 ? v.daily_price : null,
+      weekly_price: typeof v.weekly_price === 'number' && v.weekly_price >= 0 ? v.weekly_price : null,
+      monthly_price: typeof v.monthly_price === 'number' && v.monthly_price >= 0 ? v.monthly_price : null,
+      features: Array.isArray(v.features) 
+        ? v.features.slice(0, MAX_FEATURES).map((f: unknown) => sanitizeString(f, 100)).filter(Boolean)
+        : []
+    };
+    
+    if (!sanitizedVehicle.id || !sanitizedVehicle.make || !sanitizedVehicle.model) {
+      return { valid: false, error: `Vehicle at index ${i} missing required fields (id, make, model)` };
+    }
+    
+    sanitized.push(sanitizedVehicle);
+  }
+  
+  return { valid: true, sanitized };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { vehicles } = await req.json() as { vehicles: Vehicle[] };
+    const body = await req.json();
     
-    if (!vehicles || vehicles.length === 0) {
+    // Validate and sanitize vehicles input
+    const validation = validateVehicles(body.vehicles);
+    if (!validation.valid) {
+      console.log('Input validation failed:', validation.error);
       return new Response(
-        JSON.stringify({ error: "No vehicles provided" }),
+        JSON.stringify({ error: validation.error }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    
+    const vehicles = validation.sanitized!;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

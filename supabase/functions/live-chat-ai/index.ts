@@ -31,7 +31,28 @@ function checkRateLimit(ip: string): boolean {
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 2000;
 
-function validateMessages(messages: unknown): { valid: boolean; error?: string } {
+// Sanitize message content to prevent prompt injection attempts
+function sanitizeMessageContent(content: string): string {
+  // Remove potential system prompt injection patterns
+  let sanitized = content
+    // Remove attempts to override system instructions
+    .replace(/\[SYSTEM\]/gi, '[filtered]')
+    .replace(/\[ADMIN\]/gi, '[filtered]')
+    .replace(/\[OVERRIDE\]/gi, '[filtered]')
+    // Remove control characters except newlines and tabs
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    // Limit consecutive whitespace
+    .replace(/\s{10,}/g, '          ');
+  
+  return sanitized.trim();
+}
+
+interface SanitizedMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+function validateMessages(messages: unknown): { valid: boolean; error?: string; sanitized?: SanitizedMessage[] } {
   if (!Array.isArray(messages)) {
     return { valid: false, error: "Messages must be an array" };
   }
@@ -43,6 +64,8 @@ function validateMessages(messages: unknown): { valid: boolean; error?: string }
   if (messages.length > MAX_MESSAGES) {
     return { valid: false, error: `Maximum ${MAX_MESSAGES} messages allowed` };
   }
+  
+  const sanitized: SanitizedMessage[] = [];
   
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
@@ -61,9 +84,15 @@ function validateMessages(messages: unknown): { valid: boolean; error?: string }
     if (typeof msg.role !== 'string' || !['user', 'assistant'].includes(msg.role)) {
       return { valid: false, error: `Invalid role at index ${i}. Must be 'user' or 'assistant'` };
     }
+    
+    // Sanitize content before adding
+    sanitized.push({
+      role: msg.role as 'user' | 'assistant',
+      content: sanitizeMessageContent(msg.content)
+    });
   }
   
-  return { valid: true };
+  return { valid: true, sanitized };
 }
 
 serve(async (req) => {
@@ -88,7 +117,7 @@ serve(async (req) => {
     const body = await req.json();
     const { messages } = body;
     
-    // Validate input messages
+    // Validate and sanitize input messages
     const validation = validateMessages(messages);
     if (!validation.valid) {
       console.log(`Invalid input: ${validation.error}`);
@@ -98,13 +127,16 @@ serve(async (req) => {
       });
     }
     
+    // Use sanitized messages
+    const sanitizedMessages = validation.sanitized!;
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Processing chat request with", messages.length, "messages");
+    console.log("Processing chat request with", sanitizedMessages.length, "messages");
 
     const systemPrompt = `Du er LEJIO's hjælpsomme AI-assistent. LEJIO er en dansk platform for køretøjsudlejning, der forbinder private udlejere og forhandlere med lejere.
 
@@ -139,7 +171,7 @@ Vær venlig, professionel og hjælpsom. Hold svarene korte og præcise.`;
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...sanitizedMessages,
         ],
         stream: true,
       }),
