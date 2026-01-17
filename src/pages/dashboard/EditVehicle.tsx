@@ -584,20 +584,13 @@ const EditVehiclePage = () => {
               <RadioGroup
                 value={formData.payment_schedule}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, payment_schedule: value as PaymentScheduleType }))}
-                className="grid grid-cols-1 md:grid-cols-3 gap-3"
+                className="grid grid-cols-1 md:grid-cols-2 gap-3"
               >
                 <div className={`flex items-center space-x-3 p-4 rounded-xl border cursor-pointer ${formData.payment_schedule === 'upfront' ? 'border-primary bg-primary/5' : 'border-border'}`}>
                   <RadioGroupItem value="upfront" id="upfront" />
                   <div>
                     <Label htmlFor="upfront" className="font-medium cursor-pointer">Forudbetaling</Label>
                     <p className="text-xs text-muted-foreground">Fuld betaling ved booking</p>
-                  </div>
-                </div>
-                <div className={`flex items-center space-x-3 p-4 rounded-xl border cursor-pointer ${formData.payment_schedule === 'weekly' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                  <RadioGroupItem value="weekly" id="weekly" />
-                  <div>
-                    <Label htmlFor="weekly" className="font-medium cursor-pointer">Ugentlig</Label>
-                    <p className="text-xs text-muted-foreground">Betaling hver uge</p>
                   </div>
                 </div>
                 <div className={`flex items-center space-x-3 p-4 rounded-xl border cursor-pointer ${formData.payment_schedule === 'monthly' ? 'border-primary bg-primary/5' : 'border-border'}`}>
@@ -621,7 +614,10 @@ const EditVehiclePage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <TrailerFields formData={formData} setFormData={setFormData} />
+                <TrailerFields 
+                  vehicleDetails={formData as Record<string, unknown>} 
+                  setVehicleDetails={(fn) => setFormData(prev => ({ ...prev, ...fn(prev as Record<string, unknown>) }))} 
+                />
               </CardContent>
             </Card>
           )}
@@ -636,7 +632,10 @@ const EditVehiclePage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CaravanFields formData={formData} setFormData={setFormData} />
+                <CaravanFields 
+                  vehicleDetails={formData as Record<string, unknown>} 
+                  setVehicleDetails={(fn) => setFormData(prev => ({ ...prev, ...fn(prev as Record<string, unknown>) }))} 
+                />
               </CardContent>
             </Card>
           )}
