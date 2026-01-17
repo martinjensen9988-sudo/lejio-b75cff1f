@@ -3395,6 +3395,113 @@ export type Database = {
           },
         ]
       }
+      sales_emails: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          lead_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "sales_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_leads: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_name: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          cvr_number: string | null
+          facebook_url: string | null
+          id: string
+          industry: string | null
+          last_contacted_at: string | null
+          notes: string | null
+          postal_code: string | null
+          source: string
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_name: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          cvr_number?: string | null
+          facebook_url?: string | null
+          id?: string
+          industry?: string | null
+          last_contacted_at?: string | null
+          notes?: string | null
+          postal_code?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_name?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          cvr_number?: string | null
+          facebook_url?: string | null
+          id?: string
+          industry?: string | null
+          last_contacted_at?: string | null
+          notes?: string | null
+          postal_code?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       search_history: {
         Row: {
           end_date: string | null
