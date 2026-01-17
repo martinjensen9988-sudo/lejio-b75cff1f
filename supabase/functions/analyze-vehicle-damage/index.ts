@@ -13,17 +13,62 @@ interface DamageItem {
   confidence: number;
 }
 
+// Input validation constants
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB max for base64 image
+const MAX_VEHICLE_AREA_LENGTH = 50;
+const ALLOWED_VEHICLE_AREAS = [
+  'front-left', 'front-center', 'front-right',
+  'left-side', 'right-side',
+  'rear-left', 'rear-center', 'rear-right',
+  'roof', 'interior-front', 'interior-rear', 'trunk'
+];
+
+function validateInput(image: unknown, vehicleArea: unknown): { valid: boolean; error?: string } {
+  if (!image || typeof image !== 'string') {
+    return { valid: false, error: 'Image is required and must be a string' };
+  }
+  
+  // Check image size (base64 encoded)
+  if (image.length > MAX_IMAGE_SIZE) {
+    return { valid: false, error: 'Image exceeds maximum size limit' };
+  }
+  
+  // Validate image format (should be data URL or valid URL)
+  if (!image.startsWith('data:image/') && !image.startsWith('http://') && !image.startsWith('https://')) {
+    return { valid: false, error: 'Invalid image format' };
+  }
+  
+  // Validate vehicleArea if provided
+  if (vehicleArea !== undefined && vehicleArea !== null) {
+    if (typeof vehicleArea !== 'string') {
+      return { valid: false, error: 'vehicleArea must be a string' };
+    }
+    if (vehicleArea.length > MAX_VEHICLE_AREA_LENGTH) {
+      return { valid: false, error: 'vehicleArea exceeds maximum length' };
+    }
+    if (vehicleArea && !ALLOWED_VEHICLE_AREAS.includes(vehicleArea)) {
+      return { valid: false, error: 'Invalid vehicleArea value' };
+    }
+  }
+  
+  return { valid: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { image, vehicleArea } = await req.json();
+    const body = await req.json();
+    const { image, vehicleArea } = body;
 
-    if (!image) {
+    // Validate input
+    const validation = validateInput(image, vehicleArea);
+    if (!validation.valid) {
+      console.log('Input validation failed:', validation.error);
       return new Response(
-        JSON.stringify({ error: "No image provided" }),
+        JSON.stringify({ error: validation.error }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

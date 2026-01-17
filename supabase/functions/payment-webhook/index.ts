@@ -86,25 +86,42 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const stripeWebhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     
+    // SECURITY: Webhook secret is mandatory - reject if not configured
+    if (!stripeWebhookSecret) {
+      console.error('STRIPE_WEBHOOK_SECRET not configured - rejecting webhook');
+      return new Response(JSON.stringify({ error: 'Webhook configuration error' }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // SECURITY: Signature header is required
+    const stripeSignature = req.headers.get('stripe-signature');
+    if (!stripeSignature) {
+      console.error('Missing stripe-signature header');
+      return new Response(JSON.stringify({ error: 'Missing signature' }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const rawBody = await req.text();
+    
+    // SECURITY: Always verify signature before processing
+    const isValid = await verifyStripeSignature(rawBody, stripeSignature, stripeWebhookSecret);
+    if (!isValid) {
+      console.error('Invalid Stripe signature - rejecting webhook');
+      return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
     const body = JSON.parse(rawBody);
     
-    console.log('Received Stripe webhook:', body.type);
-
-    // Verify Stripe signature if secret is configured
-    const stripeSignature = req.headers.get('stripe-signature');
-    if (stripeWebhookSecret && stripeSignature) {
-      const isValid = await verifyStripeSignature(rawBody, stripeSignature, stripeWebhookSecret);
-      if (!isValid) {
-        console.error('Invalid Stripe signature');
-        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
+    console.log('Received verified Stripe webhook:', body.type);
 
     // Parse the webhook event
     const event = parseStripeWebhook(body);
