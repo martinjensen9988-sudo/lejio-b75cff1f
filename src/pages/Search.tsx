@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SearchFilters from "@/components/search/SearchFilters";
@@ -7,7 +8,6 @@ import VehicleCardSkeleton from "@/components/search/VehicleCardSkeleton";
 import ActiveFilterPills from "@/components/search/ActiveFilterPills";
 import EmptySearchState from "@/components/search/EmptySearchState";
 import SearchMap from "@/components/search/SearchMap";
-import { VehicleDetailModal } from "@/components/search/VehicleDetailModal";
 import { supabase } from "@/integrations/supabase/client";
 import { Car, ArrowUpDown, Search as SearchIcon, X, Truck, Tent, Sparkles, Filter, Grid3X3, List, Map, Bike } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -133,11 +133,11 @@ export interface SearchFiltersState {
 type ViewMode = 'grid' | 'list' | 'map';
 
 const Search = () => {
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<SearchVehicle[]>([]);
   const [filteredVehicles, setFilteredVehicles] = useState<SearchVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
-  const [detailVehicle, setDetailVehicle] = useState<SearchVehicle | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('date_desc');
   const [searchQuery, setSearchQuery] = useState('');
@@ -585,7 +585,13 @@ const Search = () => {
                           isSelected={selectedVehicle === vehicle.id}
                           onSelect={() => {
                             setSelectedVehicle(vehicle.id);
-                            setDetailVehicle(vehicle);
+                            // Navigate to vehicle detail page
+                            const params = new URLSearchParams();
+                            if (filters.startDate) params.set('startDate', filters.startDate.toISOString());
+                            if (filters.endDate) params.set('endDate', filters.endDate.toISOString());
+                            params.set('periodType', filters.periodType);
+                            params.set('periodCount', filters.periodCount.toString());
+                            navigate(`/search/vehicle/${vehicle.id}?${params.toString()}`);
                           }}
                           filters={filters}
                           viewMode={viewMode}
@@ -612,15 +618,6 @@ const Search = () => {
           )}
         </div>
 
-        {/* Vehicle Detail Modal */}
-        <VehicleDetailModal
-          vehicle={detailVehicle}
-          open={detailVehicle !== null}
-          onOpenChange={(open) => {
-            if (!open) setDetailVehicle(null);
-          }}
-          filters={filters}
-        />
       </main>
 
       <Footer />
