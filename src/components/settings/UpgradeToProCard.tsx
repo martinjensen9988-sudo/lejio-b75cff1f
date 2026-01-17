@@ -164,13 +164,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
       return;
     }
 
-    // Check if company is VAT registered
-    if (cvrData && !cvrData.vatRegistered) {
-      toast.error('Virksomheden er ikke momsregistreret', {
-        description: 'Kun momsregistrerede virksomheder kan registreres som Pro.',
-      });
-      return;
-    }
+    // VAT registration check removed - it's up to the user themselves
 
     setLoading(true);
     try {
@@ -396,18 +390,16 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                         </div>
                       )}
 
-                      {/* VAT Registration Status */}
+                      {/* VAT Registration Status - informational only */}
                       <div className="flex items-start gap-2">
                         <Receipt className="w-4 h-4 text-muted-foreground mt-0.5" />
                         <div>
                           {cvrData.vatRegistered ? (
-                            <p className="text-green-600 dark:text-green-400 flex items-center gap-1">
-                              <CheckCircle className="w-3 h-3" />
+                            <p className="text-muted-foreground flex items-center gap-1">
                               Momsregistreret {cvrData.vatNumber && `(${cvrData.vatNumber})`}
                             </p>
                           ) : (
-                            <p className="text-destructive flex items-center gap-1">
-                              <XCircle className="w-3 h-3" />
+                            <p className="text-muted-foreground flex items-center gap-1">
                               Ikke momsregistreret
                             </p>
                           )}
@@ -422,7 +414,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                     </div>
 
                     {/* Save contact info checkbox */}
-                    {(cvrData.address || cvrData.phone) && cvrData.isActive && cvrData.vatRegistered && (
+                    {(cvrData.address || cvrData.phone) && cvrData.isActive && (
                       <div className="flex items-center gap-2 pt-3 mt-3 border-t border-border/50">
                         <Checkbox 
                           id="saveContactInfo" 
