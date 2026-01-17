@@ -4,10 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useVehicles } from '@/hooks/useVehicles';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import AddVehicleDialog from '@/components/dashboard/AddVehicleDialog';
 import VehicleCard from '@/components/dashboard/VehicleCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { Car, Loader2 } from 'lucide-react';
+import { Car, Loader2, Plus } from 'lucide-react';
 
 const VehiclesPage = () => {
   const navigate = useNavigate();
@@ -42,7 +41,10 @@ const VehiclesPage = () => {
             <h2 className="text-2xl font-bold">Mine biler</h2>
             <p className="text-muted-foreground">Administrer dine køretøjer</p>
           </div>
-          <AddVehicleDialog />
+          <Button onClick={() => navigate('/dashboard/vehicles/add')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Tilføj bil
+          </Button>
         </div>
         {vehiclesLoading ? (
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -59,7 +61,10 @@ const VehiclesPage = () => {
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Tilføj din første bil ved at indtaste nummerpladen.
             </p>
-            <AddVehicleDialog />
+            <Button onClick={() => navigate('/dashboard/vehicles/add')}>
+              <Plus className="w-4 h-4 mr-2" />
+              Tilføj bil
+            </Button>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
