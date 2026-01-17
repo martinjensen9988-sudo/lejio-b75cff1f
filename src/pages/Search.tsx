@@ -360,51 +360,51 @@ const Search = () => {
       <Navigation />
       
       <main className="pt-20">
-        {/* Hero Header */}
+        {/* Hero Header - More compact on mobile */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-mint/10" />
           <div className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-primary rounded-full blur-[100px] opacity-10" />
           <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-accent rounded-full blur-[80px] opacity-10" />
           
-          <div className="container mx-auto px-6 py-12 relative z-10">
+          <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-12 relative z-10">
             <div className="max-w-4xl">
-              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black mb-4 animate-slide-up">
+              <h1 className="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-2 sm:mb-4 animate-slide-up">
                 Find dit{" "}
                 <span className="bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent">
                   perfekte køretøj
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                {loading ? 'Henter køretøjer...' : `${filteredVehicles.length} ${getVehicleTypeLabel()} tilgængelige i hele Danmark`}
+              <p className="text-base sm:text-xl text-muted-foreground mb-4 sm:mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                {loading ? 'Henter køretøjer...' : `${filteredVehicles.length} ${getVehicleTypeLabel()} tilgængelige`}
               </p>
 
-              {/* Search Input */}
-              <div className="relative max-w-2xl animate-scale-in" style={{ animationDelay: '0.2s' }}>
-                <div className="bg-card rounded-2xl p-2 shadow-xl border-2 border-primary/20">
+              {/* Search Input - Full width on mobile */}
+              <div className="relative animate-scale-in" style={{ animationDelay: '0.2s' }}>
+                <div className="bg-card rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-xl border-2 border-primary/20">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl bg-background">
-                      <SearchIcon className="w-5 h-5 text-muted-foreground" />
+                    <div className="flex-1 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-background">
+                      <SearchIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
                       <input
                         type="text"
-                        placeholder="Søg efter mærke, model eller type..."
+                        placeholder="Søg mærke, model..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                        className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm sm:text-base min-w-0"
                       />
                       {searchQuery && (
                         <button
                           onClick={() => setSearchQuery('')}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
+                          className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       )}
                     </div>
                     <Button 
-                      size="lg" 
-                      className="bg-gradient-to-r from-primary to-primary/80 font-bold px-6"
+                      size="default" 
+                      className="bg-gradient-to-r from-primary to-primary/80 font-bold px-3 sm:px-6 shrink-0"
                     >
-                      <SearchIcon className="w-5 h-5" />
+                      <SearchIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span className="hidden sm:inline ml-2">Søg</span>
                     </Button>
                   </div>
@@ -416,9 +416,10 @@ const Search = () => {
 
         {/* Sticky Vehicle Type Tabs + Filter Pills */}
         <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-lg border-b border-border">
-          <div className="container mx-auto px-6">
-            <div className="flex items-center justify-between py-4 gap-4">
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 gap-3 sm:gap-4">
+              {/* Vehicle type tabs - scrollable on mobile */}
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                 {vehicleTypeButtons.map((type) => {
                   const Icon = type.icon;
                   const isActive = filters.vehicleType === type.value;
@@ -426,15 +427,15 @@ const Search = () => {
                     <button
                       key={type.value}
                       onClick={() => setFilters(prev => ({ ...prev, vehicleType: type.value }))}
-                      className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all whitespace-nowrap ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-medium transition-all whitespace-nowrap text-sm ${
                         isActive 
                           ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' 
                           : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
-                      <span>{type.label}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      <span className="hidden xs:inline sm:inline">{type.label}</span>
+                      <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
                         isActive ? 'bg-primary-foreground/20' : 'bg-background'
                       }`}>
                         {type.count}
@@ -444,15 +445,19 @@ const Search = () => {
                 })}
               </div>
 
+              {/* Filter button */}
               <div className="flex items-center gap-2 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
-                  className={showFilters ? 'border-primary text-primary' : ''}
+                  className={`flex-1 sm:flex-initial ${showFilters ? 'border-primary text-primary' : ''}`}
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   Filtre
+                  {hasActiveFilters && (
+                    <span className="ml-1 w-2 h-2 rounded-full bg-primary" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -474,21 +479,21 @@ const Search = () => {
         )}
 
         {/* Results Section */}
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
           {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="flex items-center gap-3">
-              <h2 className="font-display text-2xl font-bold">
+              <h2 className="font-display text-lg sm:text-2xl font-bold">
                 {loading ? 'Indlæser...' : `${filteredVehicles.length} ${getVehicleTypeLabel()}`}
               </h2>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {/* Sort */}
               <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                <SelectTrigger className="w-[180px] bg-card">
-                  <ArrowUpDown className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Sorter efter" />
+                <SelectTrigger className="w-full sm:w-[180px] bg-card text-sm">
+                  <ArrowUpDown className="w-4 h-4 mr-2 shrink-0" />
+                  <SelectValue placeholder="Sorter" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="date_desc">Nyeste først</SelectItem>
@@ -499,7 +504,7 @@ const Search = () => {
                 </SelectContent>
               </Select>
 
-              {/* View Mode */}
+              {/* View Mode - Desktop only */}
               <div className="hidden md:flex bg-muted rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -523,13 +528,13 @@ const Search = () => {
             </div>
           </div>
 
-          {/* Mobile View Toggle */}
-          <div className="md:hidden flex gap-2 mb-6">
+          {/* Mobile View Toggle - Improved */}
+          <div className="md:hidden flex gap-2 mb-4">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('grid')}
-              className="flex-1"
+              className="flex-1 h-10"
             >
               <Grid3X3 className="w-4 h-4 mr-2" />
               Grid
@@ -538,7 +543,7 @@ const Search = () => {
               variant={viewMode === 'map' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('map')}
-              className="flex-1"
+              className="flex-1 h-10"
             >
               <Map className="w-4 h-4 mr-2" />
               Kort
