@@ -46,7 +46,14 @@ import AnalyticsPage from "./pages/dashboard/Analytics";
 import AIPricingPage from "./pages/dashboard/AIPricing";
 import FleetAIPage from "./pages/dashboard/FleetAI";
 import DeductiblesPage from "./pages/dashboard/Deductibles";
-
+import EditVehiclePage from "./pages/dashboard/EditVehicle";
+import ContractSignPage from "./pages/dashboard/ContractSign";
+import DamageReportPage from "./pages/dashboard/DamageReport";
+import RateLessorPage from "./pages/dashboard/RateLessor";
+import RateRenterPage from "./pages/dashboard/RateRenter";
+import CreateWarningPage from "./pages/dashboard/CreateWarning";
+import AddGeofencePage from "./pages/gps/AddGeofence";
+import AddGpsDevicePage from "./pages/gps/AddGpsDevice";
 // Admin sub-pages
 import AdminUsersPage from "./pages/admin/Users";
 import AdminStaffPage from "./pages/admin/Staff";
@@ -102,6 +109,14 @@ const App = () => (
             <Route path="/dashboard/ai-pricing" element={<AIPricingPage />} />
             <Route path="/dashboard/fleet-ai" element={<FleetAIPage />} />
             <Route path="/dashboard/deductibles" element={<DeductiblesPage />} />
+            <Route path="/dashboard/vehicles/edit/:id" element={<EditVehiclePage />} />
+            <Route path="/dashboard/contract/sign/:id" element={<ContractSignPage />} />
+            <Route path="/dashboard/damage-report/:bookingId" element={<DamageReportPage />} />
+            <Route path="/dashboard/rate-lessor/:bookingId" element={<RateLessorPage />} />
+            <Route path="/dashboard/rate-renter/:bookingId" element={<RateRenterPage />} />
+            <Route path="/dashboard/warnings/create" element={<CreateWarningPage />} />
+            <Route path="/gps/add-device" element={<AddGpsDevicePage />} />
+            <Route path="/gps/add-geofence" element={<AddGeofencePage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/search" element={<Search />} />
             <Route path="/booking/:vehicleId" element={<Booking />} />
