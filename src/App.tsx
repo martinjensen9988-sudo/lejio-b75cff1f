@@ -65,6 +65,7 @@ import AdminCheckInOutPage from "./pages/admin/CheckInOut";
 import AdminCorporatePage from "./pages/admin/Corporate";
 import AdminFacebookPage from "./pages/admin/Facebook";
 import AdminStatsPage from "./pages/admin/Stats";
+import AdminSalesAIPage from "./pages/admin/SalesAI";
 
 const queryClient = new QueryClient();
 
@@ -121,6 +122,7 @@ const App = () => (
             <Route path="/admin/checkinout" element={<AdminCheckInOutPage />} />
             <Route path="/admin/corporate" element={<AdminCorporatePage />} />
             <Route path="/admin/facebook" element={<AdminFacebookPage />} />
+            <Route path="/admin/sales-ai" element={<AdminSalesAIPage />} />
             <Route path="/admin/stats" element={<AdminStatsPage />} />
             <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
             <Route path="/handelsbetingelser" element={<Terms />} />

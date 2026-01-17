@@ -125,3 +125,6 @@ verify_jwt = true
 
 [functions.post-to-facebook]
 verify_jwt = true
+
+[functions.generate-sales-email]
+verify_jwt = true
