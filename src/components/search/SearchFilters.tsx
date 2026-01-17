@@ -99,9 +99,9 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
   };
 
   return (
-    <div className="py-6 px-6">
+    <div className="py-4 sm:py-6 px-4 sm:px-6">
       <div className="container mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {/* Trailer-specific: Type filter */}
           {filters.vehicleType === 'trailer' && (
             <div className="space-y-2">

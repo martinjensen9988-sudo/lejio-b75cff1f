@@ -5,6 +5,7 @@ import { useDamageReports } from '@/hooks/useDamageReports';
 import { useRenterRatings } from '@/hooks/useRenterRatings';
 import { useAuth } from '@/hooks/useAuth';
 import { useVehicles } from '@/hooks/useVehicles';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,7 @@ import { CheckInOutWizard } from '@/components/checkinout/CheckInOutWizard';
 import { VehicleScanHistory } from '@/components/damage/VehicleScanHistory';
 import VehicleSwapDialog from '@/components/dashboard/VehicleSwapDialog';
 import DriverLicenseStatusBadge from '@/components/dashboard/DriverLicenseStatusBadge';
+import MobileBookingCard from '@/components/dashboard/MobileBookingCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -47,6 +49,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   const { profile } = useAuth();
   const { vehicles } = useVehicles();
   const { refetch: refetchBookings } = useBookings();
+  const isMobile = useIsMobile();
   const { contracts, generateContract, signContract, isLoading: contractsLoading } = useContracts();
   const [generatingContractFor, setGeneratingContractFor] = useState<string | null>(null);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
@@ -179,9 +182,146 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
     );
   }
 
+  // Mobile view - card-based layout
+  if (isMobile) {
+    return (
+      <>
+        <div className="space-y-3">
+          {bookings.map((booking) => {
+            const contract = getContractForBooking(booking.id);
+            const isGenerating = generatingContractFor === booking.id;
+            const currentVehicle = vehicles.find(v => v.id === booking.vehicle_id);
+
+            return (
+              <MobileBookingCard
+                key={booking.id}
+                booking={booking}
+                contract={contract}
+                isGenerating={isGenerating}
+                isConfirming={confirmingBooking === booking.id}
+                hasBeenRated={ratedBookings.has(booking.id)}
+                onConfirm={() => handleConfirmBooking(booking)}
+                onCancel={() => onUpdateStatus(booking.id, 'cancelled')}
+                onStartRental={() => onUpdateStatus(booking.id, 'active')}
+                onCompleteRental={() => onUpdateStatus(booking.id, 'completed')}
+                onViewContract={() => contract && handleViewContract(contract)}
+                onGenerateContract={() => handleGenerateContract(booking)}
+                onCheckIn={() => {
+                  setSelectedBookingForCheckInOut(booking);
+                  setCheckInOutMode('check_in');
+                  setCheckInOutOpen(true);
+                }}
+                onCheckOut={() => {
+                  setSelectedBookingForCheckInOut(booking);
+                  setCheckInOutMode('check_out');
+                  setCheckInOutOpen(true);
+                }}
+                onPickupReport={() => {
+                  setSelectedBookingForDamage(booking);
+                  setDamageReportType('pickup');
+                  setDamageReportOpen(true);
+                }}
+                onReturnReport={() => {
+                  setSelectedBookingForDamage(booking);
+                  setDamageReportType('return');
+                  setDamageReportOpen(true);
+                }}
+                onViewHistory={() => {
+                  setSelectedBookingForHistory(booking);
+                  setScanHistoryOpen(true);
+                }}
+                onRateRenter={() => {
+                  setSelectedBookingForRating(booking);
+                  setRenterRatingOpen(true);
+                }}
+                onSwapVehicle={currentVehicle ? () => {} : undefined}
+              />
+            );
+          })}
+        </div>
+
+        {/* Modals remain the same */}
+        {selectedContract && (
+          <ContractSigningModal
+            contract={selectedContract}
+            open={signingModalOpen}
+            onOpenChange={setSigningModalOpen}
+            onSign={signContract}
+          />
+        )}
+
+        {selectedBookingForDamage && (
+          <DamageReportModal
+            open={damageReportOpen}
+            onOpenChange={setDamageReportOpen}
+            bookingId={selectedBookingForDamage.id}
+            vehicleId={selectedBookingForDamage.vehicle_id}
+            contractId={getContractForBooking(selectedBookingForDamage.id)?.id}
+            reportType={damageReportType}
+          />
+        )}
+
+        {selectedBookingForRating && selectedBookingForRating.renter_email && (
+          <RenterRatingModal
+            isOpen={renterRatingOpen}
+            onClose={() => {
+              setRenterRatingOpen(false);
+              setSelectedBookingForRating(null);
+              if (selectedBookingForRating) {
+                setRatedBookings(prev => new Set([...prev, selectedBookingForRating.id]));
+              }
+            }}
+            bookingId={selectedBookingForRating.id}
+            renterEmail={selectedBookingForRating.renter_email}
+            renterName={selectedBookingForRating.renter_name}
+            renterId={selectedBookingForRating.renter_id}
+          />
+        )}
+
+        {selectedBookingForCheckInOut && (
+          <CheckInOutWizard
+            open={checkInOutOpen}
+            onOpenChange={setCheckInOutOpen}
+            mode={checkInOutMode}
+            booking={{
+              id: selectedBookingForCheckInOut.id,
+              vehicle_id: selectedBookingForCheckInOut.vehicle_id,
+              lessor_id: selectedBookingForCheckInOut.lessor_id,
+              renter_id: selectedBookingForCheckInOut.renter_id,
+              vehicle: selectedBookingForCheckInOut.vehicle ? {
+                registration: selectedBookingForCheckInOut.vehicle.registration,
+                make: selectedBookingForCheckInOut.vehicle.make,
+                model: selectedBookingForCheckInOut.vehicle.model,
+              } : undefined,
+            }}
+            onComplete={() => {
+              setCheckInOutOpen(false);
+              setSelectedBookingForCheckInOut(null);
+            }}
+          />
+        )}
+
+        <Dialog open={scanHistoryOpen} onOpenChange={setScanHistoryOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Skanningshistorik
+              </DialogTitle>
+            </DialogHeader>
+            {selectedBookingForHistory && (
+              <VehicleScanHistory bookingId={selectedBookingForHistory.id} />
+            )}
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  // Desktop view - table layout
   return (
     <>
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
