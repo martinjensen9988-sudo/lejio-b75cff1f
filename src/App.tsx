@@ -80,6 +80,7 @@ import SalesAIImportPage from "./pages/admin/SalesAIImport";
 import SalesAIEmailPage from "./pages/admin/SalesAIEmail";
 import SalesAICarAdPage from "./pages/admin/SalesAICarAd";
 import SalesAICompanySearchPage from "./pages/admin/SalesAICompanySearch";
+import SalesAIOutreachPage from "./pages/admin/SalesAIOutreach";
 
 const queryClient = new QueryClient();
 
@@ -150,6 +151,7 @@ const App = () => (
             <Route path="/admin/sales-ai/add" element={<SalesAIAddLeadPage />} />
             <Route path="/admin/sales-ai/import" element={<SalesAIImportPage />} />
             <Route path="/admin/sales-ai/email/:id" element={<SalesAIEmailPage />} />
+            <Route path="/admin/sales-ai/outreach/:id" element={<SalesAIOutreachPage />} />
             <Route path="/admin/sales-ai/car-ad" element={<SalesAICarAdPage />} />
             <Route path="/admin/sales-ai/company-search" element={<SalesAICompanySearchPage />} />
             <Route path="/admin/stats" element={<AdminStatsPage />} />
