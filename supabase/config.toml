@@ -134,3 +134,6 @@ verify_jwt = false
 
 [functions.cvr-search-industry]
 verify_jwt = false
+
+[functions.web-search-leads]
+verify_jwt = false
