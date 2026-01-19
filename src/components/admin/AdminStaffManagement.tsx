@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,22 +22,10 @@ interface AdminUser {
   created_at: string;
 }
 
-interface UserProfile {
-  id: string;
-  email: string | null;
-  full_name: string | null;
-}
-
 const roleLabels: Record<AppRole, string> = {
   support: 'Support',
   admin: 'Admin',
   super_admin: 'Super Admin',
-};
-
-const roleDescriptions: Record<AppRole, string> = {
-  support: 'Kan se data og hjælpe brugere',
-  admin: 'Kan redigere data og administrere',
-  super_admin: 'Fuld adgang til alt',
 };
 
 const roleIcons: Record<AppRole, React.ReactNode> = {
@@ -55,20 +41,14 @@ const roleBadgeVariants: Record<AppRole, 'default' | 'secondary' | 'destructive'
 };
 
 export const AdminStaffManagement = () => {
+  const navigate = useNavigate();
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
-  const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string>('');
-  const [selectedRole, setSelectedRole] = useState<AppRole>('support');
-  const [isAdding, setIsAdding] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [userSearchQuery, setUserSearchQuery] = useState('');
 
   const fetchAdminUsers = async () => {
     try {
-      // Using type assertion since the function is newly created
       const { data, error } = await (supabase.rpc as any)('get_admin_users');
       
       if (error) {
@@ -85,70 +65,9 @@ export const AdminStaffManagement = () => {
     }
   };
 
-  const fetchAllUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .order('full_name', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching users:', error);
-        return;
-      }
-      
-      setAllUsers(data || []);
-    } catch (err) {
-      console.error('Error:', err);
-    }
-  };
-
   useEffect(() => {
     fetchAdminUsers();
-    fetchAllUsers();
   }, []);
-
-  const handleAssignRole = async () => {
-    if (!selectedUserId || !selectedRole) {
-      toast.error('Vælg en bruger og en rolle');
-      return;
-    }
-    
-    setIsAdding(true);
-    
-    try {
-      // Using type assertion since the function is newly created
-      const { data, error } = await (supabase.rpc as any)('assign_role', {
-        _target_user_id: selectedUserId,
-        _role: selectedRole,
-      });
-      
-      if (error) {
-        console.error('Error assigning role:', error);
-        if (error.message?.includes('super_admin') || error.message?.includes('Only super admins')) {
-          toast.error('Kun Super Admins kan tildele roller. Kontakt en Super Admin.');
-        } else {
-          toast.error('Kunne ikke tildele rolle: ' + error.message);
-        }
-        return;
-      }
-      
-      toast.success(`Rolle "${roleLabels[selectedRole]}" tildelt`);
-      setShowAddDialog(false);
-      setSelectedUserId('');
-      setSelectedRole('support');
-      fetchAdminUsers();
-    } catch (err: any) {
-      console.error('Error:', err);
-      if (err?.message?.includes('super_admin') || err?.message?.includes('Only super admins')) {
-        toast.error('Kun Super Admins kan tildele roller. Kontakt en Super Admin.');
-      } else {
-        toast.error('Kunne ikke tildele rolle: ' + (err?.message || 'Ukendt fejl'));
-      }
-    } finally {
-      setIsAdding(false);
-    }
-  };
 
   const handleRemoveRole = async (userId: string, role: AppRole) => {
     if (role === 'super_admin') {
@@ -159,7 +78,6 @@ export const AdminStaffManagement = () => {
     setIsRemoving(true);
     
     try {
-      // Using type assertion since the function is newly created
       const { error } = await (supabase.rpc as any)('remove_role', {
         _target_user_id: userId,
         _role: role,
@@ -190,16 +108,6 @@ export const AdminStaffManagement = () => {
     );
   });
 
-  const filteredUserOptions = allUsers.filter(user => {
-    const searchLower = userSearchQuery.toLowerCase();
-    // Exclude users who already have admin roles
-    const hasAdminRole = adminUsers.some(au => au.user_id === user.id);
-    return !hasAdminRole && (
-      (user.email?.toLowerCase().includes(searchLower) || false) ||
-      (user.full_name?.toLowerCase().includes(searchLower) || false)
-    );
-  });
-
   const stats = {
     total: adminUsers.length,
     superAdmins: adminUsers.filter(u => u.role === 'super_admin').length,
@@ -214,99 +122,10 @@ export const AdminStaffManagement = () => {
           <h2 className="text-2xl font-bold">Medarbejdere</h2>
           <p className="text-muted-foreground">Administrer roller og adgange for dit team</p>
         </div>
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="w-4 h-4 mr-2" />
-              Tilføj medarbejder
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Tilføj medarbejder</DialogTitle>
-              <DialogDescription>
-                Tildel en bruger en admin-rolle for at give dem adgang til admin-panelet.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Søg bruger</Label>
-                <Input
-                  placeholder="Søg efter navn eller email..."
-                  value={userSearchQuery}
-                  onChange={(e) => setUserSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Vælg bruger</Label>
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Vælg en bruger" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredUserOptions.slice(0, 20).map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.full_name || user.email || 'Unavngivet'}
-                        {user.email && user.full_name && (
-                          <span className="text-muted-foreground ml-2">({user.email})</span>
-                        )}
-                      </SelectItem>
-                    ))}
-                    {filteredUserOptions.length === 0 && (
-                      <div className="p-2 text-sm text-muted-foreground text-center">
-                        Ingen brugere fundet
-                      </div>
-                    )}
-                    {filteredUserOptions.length > 20 && (
-                      <div className="p-2 text-sm text-muted-foreground text-center">
-                        Vis flere ved at søge mere specifikt
-                      </div>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Rolle</Label>
-                <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as AppRole)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="support">
-                      <div className="flex items-center gap-2">
-                        <Eye className="w-4 h-4" />
-                        <div>
-                          <div>Support</div>
-                          <div className="text-xs text-muted-foreground">{roleDescriptions.support}</div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="admin">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        <div>
-                          <div>Admin</div>
-                          <div className="text-xs text-muted-foreground">{roleDescriptions.admin}</div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Super Admin rollen kan kun tildeles direkte i databasen af sikkerhedshensyn.
-                </p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                Annuller
-              </Button>
-              <Button onClick={handleAssignRole} disabled={isAdding || !selectedUserId}>
-                {isAdding ? 'Tilføjer...' : 'Tilføj'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => navigate('/admin/staff/add')}>
+          <UserPlus className="w-4 h-4 mr-2" />
+          Tilføj medarbejder
+        </Button>
       </div>
 
       {/* Stats */}
@@ -467,9 +286,8 @@ export const AdminStaffManagement = () => {
               </div>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Alt fra Support</li>
-                <li>• Redigere bookinger</li>
-                <li>• Administrere brugere</li>
-                <li>• Håndtere bøder</li>
+                <li>• Oprette og redigere data</li>
+                <li>• Håndtere advarsler</li>
               </ul>
             </div>
             <div className="p-4 rounded-lg border">
@@ -479,9 +297,8 @@ export const AdminStaffManagement = () => {
               </div>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Alt fra Admin</li>
-                <li>• Administrere roller</li>
+                <li>• Tildele og fjerne roller</li>
                 <li>• Slette brugere</li>
-                <li>• Systemindstillinger</li>
               </ul>
             </div>
           </div>
@@ -490,3 +307,5 @@ export const AdminStaffManagement = () => {
     </div>
   );
 };
+
+export default AdminStaffManagement;

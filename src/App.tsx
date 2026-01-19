@@ -81,6 +81,10 @@ import SalesAIEmailPage from "./pages/admin/SalesAIEmail";
 import SalesAICarAdPage from "./pages/admin/SalesAICarAd";
 import SalesAICompanySearchPage from "./pages/admin/SalesAICompanySearch";
 import SalesAIOutreachPage from "./pages/admin/SalesAIOutreach";
+import DiscountsAddPage from "./pages/admin/DiscountsAdd";
+import StaffAddPage from "./pages/admin/StaffAdd";
+import CorporateAddPage from "./pages/admin/CorporateAdd";
+import CorporateDetailPage from "./pages/admin/CorporateDetail";
 
 const queryClient = new QueryClient();
 
@@ -137,7 +141,10 @@ const App = () => (
             <Route path="/admin/locations" element={<AdminLocationsPage />} />
             <Route path="/admin/fees" element={<AdminFeesPage />} />
             <Route path="/admin/discounts" element={<AdminDiscountsPage />} />
-            <Route path="/admin/fleet" element={<AdminFleetPage />} />
+            <Route path="/admin/discounts/add" element={<DiscountsAddPage />} />
+            <Route path="/admin/staff/add" element={<StaffAddPage />} />
+            <Route path="/admin/corporate/add" element={<CorporateAddPage />} />
+            <Route path="/admin/corporate/:id" element={<CorporateDetailPage />} />
             <Route path="/admin/warnings" element={<AdminWarningsPage />} />
             <Route path="/admin/reports" element={<AdminReportsPage />} />
             <Route path="/admin/messages" element={<AdminMessagesPage />} />
