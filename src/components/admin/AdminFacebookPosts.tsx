@@ -85,7 +85,8 @@ const AdminFacebookPosts = () => {
   const [generatedPost, setGeneratedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
-  const [postType, setPostType] = useState<'dagens_bil' | 'promotion' | 'custom'>('dagens_bil');
+  const [postType, setPostType] = useState<'dagens_bil' | 'promotion' | 'custom' | 'lejio_promo'>('dagens_bil');
+  const [showPromoDialog, setShowPromoDialog] = useState(false);
   
   // Dagens Bil settings
   const [autoRotate, setAutoRotate] = useState(false);
@@ -145,7 +146,8 @@ const AdminFacebookPosts = () => {
   }, []);
 
   const handleGeneratePost = async () => {
-    if (!selectedVehicle) {
+    // For lejio_promo, we don't need a vehicle
+    if (postType !== 'lejio_promo' && !selectedVehicle) {
       toast.error('Vælg venligst et køretøj først');
       return;
     }
@@ -206,7 +208,15 @@ const AdminFacebookPosts = () => {
   const openPostDialog = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
     setGeneratedPost('');
+    setPostType('dagens_bil');
     setShowPostDialog(true);
+  };
+
+  const openPromoDialog = () => {
+    setSelectedVehicle(null);
+    setGeneratedPost('');
+    setPostType('lejio_promo');
+    setShowPromoDialog(true);
   };
 
   const getVehicleById = (id: string | null) => vehicles.find(v => v.id === id);
@@ -278,58 +288,80 @@ const AdminFacebookPosts = () => {
 
         {/* Create Post Tab */}
         <TabsContent value="create">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Facebook className="w-5 h-5 text-blue-600" />
-                Opret Facebook Opslag med AI
-              </CardTitle>
-              <CardDescription>
-                Vælg et køretøj og lad AI generere et engagerende opslag
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {vehicles.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Car className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>Ingen køretøjer tilgængelige</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {vehicles.slice(0, 12).map((vehicle) => (
-                    <Card 
-                      key={vehicle.id} 
-                      className="cursor-pointer hover:border-primary transition-colors"
-                      onClick={() => openPostDialog(vehicle)}
-                    >
-                      <CardContent className="pt-4">
-                        {vehicle.image_url && (
-                          <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-muted">
-                            <img 
-                              src={vehicle.image_url} 
-                              alt={`${vehicle.make} ${vehicle.model}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div className="space-y-1">
-                          <p className="font-semibold">{vehicle.make} {vehicle.model}</p>
-                          <p className="text-sm text-muted-foreground">{vehicle.year} • {vehicle.registration}</p>
-                          {vehicle.daily_price && (
-                            <Badge variant="secondary">{vehicle.daily_price} kr/dag</Badge>
+          <div className="space-y-6">
+            {/* LEJIO Promo Card */}
+            <Card className="border-primary/50 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  LEJIO Reklame
+                </CardTitle>
+                <CardDescription>
+                  Opret et generelt reklameopslag for LEJIO uden specifikt køretøj
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={openPromoDialog} className="w-full">
+                  <Facebook className="w-4 h-4 mr-2" />
+                  Opret LEJIO reklameopslag
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Vehicle Posts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Facebook className="w-5 h-5 text-blue-600" />
+                  Opret Facebook Opslag med AI
+                </CardTitle>
+                <CardDescription>
+                  Vælg et køretøj og lad AI generere et engagerende opslag
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {vehicles.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Car className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Ingen køretøjer tilgængelige</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {vehicles.slice(0, 12).map((vehicle) => (
+                      <Card 
+                        key={vehicle.id} 
+                        className="cursor-pointer hover:border-primary transition-colors"
+                        onClick={() => openPostDialog(vehicle)}
+                      >
+                        <CardContent className="pt-4">
+                          {vehicle.image_url && (
+                            <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-muted">
+                              <img 
+                                src={vehicle.image_url} 
+                                alt={`${vehicle.make} ${vehicle.model}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
                           )}
-                        </div>
-                        <Button className="w-full mt-3" variant="outline" size="sm">
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Generer opslag
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                          <div className="space-y-1">
+                            <p className="font-semibold">{vehicle.make} {vehicle.model}</p>
+                            <p className="text-sm text-muted-foreground">{vehicle.year} • {vehicle.registration}</p>
+                            {vehicle.daily_price && (
+                              <Badge variant="secondary">{vehicle.daily_price} kr/dag</Badge>
+                            )}
+                          </div>
+                          <Button className="w-full mt-3" variant="outline" size="sm">
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Generer opslag
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Dagens Bil Tab */}
@@ -442,7 +474,7 @@ const AdminFacebookPosts = () => {
                             {format(new Date(post.posted_at), 'dd. MMM yyyy HH:mm', { locale: da })}
                           </TableCell>
                           <TableCell>
-                            {vehicle ? `${vehicle.make} ${vehicle.model}` : 'Ukendt'}
+                            {vehicle ? `${vehicle.make} ${vehicle.model}` : post.vehicle_id ? 'Ukendt' : 'LEJIO Reklame'}
                           </TableCell>
                           <TableCell className="max-w-md truncate">
                             {post.message.substring(0, 100)}...
@@ -450,6 +482,8 @@ const AdminFacebookPosts = () => {
                           <TableCell>
                             {post.is_dagens_bil ? (
                               <Badge className="bg-yellow-500">Dagens Bil</Badge>
+                            ) : !post.vehicle_id ? (
+                              <Badge className="bg-primary">LEJIO Promo</Badge>
                             ) : (
                               <Badge variant="secondary">Standard</Badge>
                             )}
@@ -540,6 +574,76 @@ const AdminFacebookPosts = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPostDialog(false)}>
+              Annuller
+            </Button>
+            <Button 
+              onClick={handlePostToFacebook}
+              disabled={isPosting || !generatedPost.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isPosting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
+            {isPosting ? 'Poster...' : 'Post til Facebook'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* LEJIO Promo Dialog */}
+      <Dialog open={showPromoDialog} onOpenChange={setShowPromoDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              LEJIO Reklameopslag
+            </DialogTitle>
+            <DialogDescription>
+              Opret et generelt reklameopslag for LEJIO platformen
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Opslag tekst</Label>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleGeneratePost}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 mr-2" />
+                  )}
+                  {isGenerating ? 'Genererer...' : 'Generer med AI'}
+                </Button>
+              </div>
+              <Textarea
+                value={generatedPost}
+                onChange={(e) => setGeneratedPost(e.target.value)}
+                placeholder="Klik på 'Generer med AI' eller skriv dit eget opslag..."
+                rows={8}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="p-4 bg-muted rounded-lg text-sm text-muted-foreground">
+              <p className="font-medium mb-1">Tips til LEJIO reklameopslag:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Fremhæv fordelene ved at leje bil via LEJIO</li>
+                <li>Nævn nem booking og digitale kontrakter</li>
+                <li>Inkluder en call-to-action (besøg lejio.dk)</li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPromoDialog(false)}>
               Annuller
             </Button>
             <Button 
