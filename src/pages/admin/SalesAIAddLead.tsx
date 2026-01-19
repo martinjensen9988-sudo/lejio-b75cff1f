@@ -43,11 +43,15 @@ const SalesAIAddLeadPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newLead.company_name) return;
-    
+
     setIsSubmitting(true);
-    await addLead(newLead);
+    const created = await addLead(newLead);
     setIsSubmitting(false);
-    navigate('/admin/sales-ai');
+
+    // Only navigate away if the lead was actually created
+    if (created) {
+      navigate('/admin/sales-ai');
+    }
   };
 
   return (
