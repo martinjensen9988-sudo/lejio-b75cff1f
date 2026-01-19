@@ -10,10 +10,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
 import { useSalesLeads, SalesLead } from '@/hooks/useSalesLeads';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   ArrowLeft, ArrowRight, Phone, Mail, Sparkles, Copy, Send, 
   Loader2, Building2, Check, CheckCircle2, Clock, MessageSquare,
-  RefreshCw, User
+  RefreshCw, User, Lightbulb, AlertTriangle, Target, HelpCircle,
+  Star, Zap, MessageCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -25,6 +27,17 @@ const steps = [
   { id: 4, name: 'Send & Afslut', icon: Send },
 ];
 
+interface LeadAnalysis {
+  companyInsights: string[];
+  keySellingPoints: { point: string; why: string }[];
+  conversationStarters: string[];
+  potentialObjections: { objection: string; response: string }[];
+  questionsToAsk: string[];
+  importantHighlights: { highlight: string; priority: 'high' | 'medium'; reason: string }[];
+  industryContext: string;
+  suggestedApproach: string;
+}
+
 const SalesAIOutreachPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -33,6 +46,10 @@ const SalesAIOutreachPage = () => {
   
   const [lead, setLead] = useState<SalesLead | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // AI Analysis
+  const [analysis, setAnalysis] = useState<LeadAnalysis | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   // Call notes
   const [callCompleted, setCallCompleted] = useState(false);
@@ -55,6 +72,39 @@ const SalesAIOutreachPage = () => {
       setLead(foundLead || null);
     }
   }, [leads, id]);
+
+  // Auto-analyze when lead is loaded
+  useEffect(() => {
+    if (lead && !analysis && !isAnalyzing) {
+      handleAnalyzeLead();
+    }
+  }, [lead]);
+
+  const handleAnalyzeLead = async () => {
+    if (!lead) return;
+    
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-sales-lead', {
+        body: { lead },
+      });
+
+      if (error) throw error;
+      
+      if (data?.analysis) {
+        setAnalysis(data.analysis);
+      }
+    } catch (error) {
+      console.error('Error analyzing lead:', error);
+      toast({
+        title: 'Kunne ikke analysere',
+        description: 'AI-analysen fejlede. Du kan stadig fortsætte.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const handleGenerateEmail = async () => {
     if (!lead) return;
@@ -263,15 +313,187 @@ const SalesAIOutreachPage = () => {
                   </Card>
                 </div>
                 
-                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <p className="font-medium mb-2">💡 Forberedelsestips</p>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• Undersøg virksomhedens hjemmeside inden du ringer</li>
-                    <li>• Identificer hvordan LEJIO kan løse deres specifikke behov</li>
-                    <li>• Hav et klart formål med opkaldet</li>
-                    <li>• Vær klar til at besvare spørgsmål om priser og funktioner</li>
-                  </ul>
-                </div>
+                {/* AI Analysis Section */}
+                {isAnalyzing ? (
+                  <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                        <div>
+                          <p className="font-medium">AI analyserer virksomheden...</p>
+                          <p className="text-sm text-muted-foreground">Finder relevante indsigter og samtaletips</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : analysis ? (
+                  <div className="space-y-4">
+                    {/* Important Highlights */}
+                    {analysis.importantHighlights && analysis.importantHighlights.length > 0 && (
+                      <Card className="border-yellow-300 bg-yellow-50">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base flex items-center gap-2 text-yellow-800">
+                            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                            Vigtige punkter at huske
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="space-y-2">
+                            {analysis.importantHighlights.map((item, i) => (
+                              <div 
+                                key={i} 
+                                className={cn(
+                                  "p-3 rounded-lg",
+                                  item.priority === 'high' ? "bg-yellow-100 border border-yellow-300" : "bg-yellow-50"
+                                )}
+                              >
+                                <div className="flex items-start gap-2">
+                                  {item.priority === 'high' && <Zap className="w-4 h-4 text-yellow-600 mt-0.5" />}
+                                  <div>
+                                    <p className="font-medium text-yellow-900">{item.highlight}</p>
+                                    <p className="text-sm text-yellow-700">{item.reason}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                    
+                    {/* Suggested Approach */}
+                    {analysis.suggestedApproach && (
+                      <Card className="border-primary/30 bg-primary/5">
+                        <CardContent className="pt-4">
+                          <div className="flex items-start gap-3">
+                            <Target className="w-5 h-5 text-primary mt-0.5" />
+                            <div>
+                              <p className="font-medium text-primary">Anbefalet tilgang</p>
+                              <p className="text-sm mt-1">{analysis.suggestedApproach}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Conversation Starters */}
+                      {analysis.conversationStarters && analysis.conversationStarters.length > 0 && (
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <MessageCircle className="w-4 h-4 text-green-500" />
+                              Åbningssætninger
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <ul className="space-y-2">
+                              {analysis.conversationStarters.map((starter, i) => (
+                                <li key={i} className="text-sm p-2 bg-green-50 rounded border-l-2 border-green-400">
+                                  "{starter}"
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Key Selling Points */}
+                      {analysis.keySellingPoints && analysis.keySellingPoints.length > 0 && (
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <Lightbulb className="w-4 h-4 text-blue-500" />
+                              Salgsargumenter for denne kunde
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <ul className="space-y-2">
+                              {analysis.keySellingPoints.map((point, i) => (
+                                <li key={i} className="text-sm">
+                                  <p className="font-medium">{point.point}</p>
+                                  <p className="text-muted-foreground text-xs">{point.why}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Questions to Ask */}
+                      {analysis.questionsToAsk && analysis.questionsToAsk.length > 0 && (
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <HelpCircle className="w-4 h-4 text-purple-500" />
+                              Gode spørgsmål at stille
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <ul className="space-y-1">
+                              {analysis.questionsToAsk.map((q, i) => (
+                                <li key={i} className="text-sm flex items-start gap-2">
+                                  <span className="text-purple-500">•</span>
+                                  {q}
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Potential Objections */}
+                      {analysis.potentialObjections && analysis.potentialObjections.length > 0 && (
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4 text-orange-500" />
+                              Mulige indvendinger & svar
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <ul className="space-y-3">
+                              {analysis.potentialObjections.map((obj, i) => (
+                                <li key={i} className="text-sm">
+                                  <p className="font-medium text-orange-700">"{obj.objection}"</p>
+                                  <p className="text-muted-foreground mt-1">→ {obj.response}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+
+                    {/* Industry Context */}
+                    {analysis.industryContext && (
+                      <div className="p-3 bg-muted rounded-lg text-sm">
+                        <span className="font-medium">Branchekontekst:</span> {analysis.industryContext}
+                      </div>
+                    )}
+
+                    <Button variant="outline" size="sm" onClick={handleAnalyzeLead} disabled={isAnalyzing}>
+                      <RefreshCw className={cn("w-4 h-4 mr-2", isAnalyzing && "animate-spin")} />
+                      Generer nye tips
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <p className="font-medium mb-2">💡 Forberedelsestips</p>
+                    <ul className="text-sm space-y-1 text-muted-foreground">
+                      <li>• Undersøg virksomhedens hjemmeside inden du ringer</li>
+                      <li>• Identificer hvordan LEJIO kan løse deres specifikke behov</li>
+                      <li>• Hav et klart formål med opkaldet</li>
+                      <li>• Vær klar til at besvare spørgsmål om priser og funktioner</li>
+                    </ul>
+                    <Button className="mt-4" onClick={handleAnalyzeLead} disabled={isAnalyzing}>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Få AI-analyse
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
             

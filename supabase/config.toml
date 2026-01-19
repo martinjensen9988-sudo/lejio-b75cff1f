@@ -137,3 +137,6 @@ verify_jwt = false
 
 [functions.web-search-leads]
 verify_jwt = false
+
+[functions.analyze-sales-lead]
+verify_jwt = true
