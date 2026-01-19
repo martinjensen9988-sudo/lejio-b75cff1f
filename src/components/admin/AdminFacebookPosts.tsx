@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -75,6 +76,16 @@ interface DagensBilSetting {
   last_posted_at: string | null;
 }
 
+const TARGET_AUDIENCE_OPTIONS = [
+  { value: 'private', label: '🏠 Private lejere', description: 'Privatpersoner der har brug for bil' },
+  { value: 'business', label: '🏢 Erhverv/Firma', description: 'Virksomheder og erhvervskunder' },
+  { value: 'weekend', label: '🎉 Weekend/Ferie', description: 'Folk der skal på tur eller ferie' },
+  { value: 'young', label: '👨‍🎓 Unge lejere', description: 'Studerende og unge voksne' },
+  { value: 'family', label: '👨‍👩‍👧‍👦 Familier', description: 'Familier med børn' },
+  { value: 'luxury', label: '✨ Luksus/Special', description: 'Kunder der søger premium oplevelser' },
+  { value: 'custom', label: '✏️ Fri tekst', description: 'Skriv din egen målgruppe' },
+];
+
 const AdminFacebookPosts = () => {
   const isMountedRef = useRef(true);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -87,6 +98,10 @@ const AdminFacebookPosts = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [postType, setPostType] = useState<'dagens_bil' | 'promotion' | 'custom' | 'lejio_promo'>('dagens_bil');
   const [showPromoDialog, setShowPromoDialog] = useState(false);
+  
+  // Target audience
+  const [targetAudience, setTargetAudience] = useState<string>('private');
+  const [customTargetAudience, setCustomTargetAudience] = useState<string>('');
   
   // Dagens Bil settings
   const [autoRotate, setAutoRotate] = useState(false);
@@ -155,8 +170,17 @@ const AdminFacebookPosts = () => {
     setIsGenerating(true);
 
     try {
+      // Determine the target audience text to send
+      const audienceText = targetAudience === 'custom' 
+        ? customTargetAudience 
+        : TARGET_AUDIENCE_OPTIONS.find(o => o.value === targetAudience)?.label || '';
+      
       const { data, error } = await supabase.functions.invoke('generate-facebook-post', {
-        body: { vehicle: selectedVehicle, postType },
+        body: { 
+          vehicle: selectedVehicle, 
+          postType,
+          targetAudience: audienceText,
+        },
       });
 
       if (error) throw error;
@@ -209,6 +233,8 @@ const AdminFacebookPosts = () => {
     setSelectedVehicle(vehicle);
     setGeneratedPost('');
     setPostType('dagens_bil');
+    setTargetAudience('private');
+    setCustomTargetAudience('');
     setShowPostDialog(true);
   };
 
@@ -216,6 +242,8 @@ const AdminFacebookPosts = () => {
     setSelectedVehicle(null);
     setGeneratedPost('');
     setPostType('lejio_promo');
+    setTargetAudience('private');
+    setCustomTargetAudience('');
     setShowPromoDialog(true);
   };
 
@@ -513,9 +541,9 @@ const AdminFacebookPosts = () => {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="flex gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {selectedVehicle?.image_url && (
-                <div className="w-32 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                <div className="w-full h-32 rounded-lg overflow-hidden bg-muted">
                   <img 
                     src={selectedVehicle.image_url} 
                     alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
@@ -523,19 +551,51 @@ const AdminFacebookPosts = () => {
                   />
                 </div>
               )}
-              <div className="flex-1 space-y-2">
-                <Label>Opslag type</Label>
-                <Select value={postType} onValueChange={(v: any) => setPostType(v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dagens_bil">⭐ Dagens Bil</SelectItem>
-                    <SelectItem value="promotion">📢 Promotion</SelectItem>
-                    <SelectItem value="custom">✏️ Brugerdefineret</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label>Opslag type</Label>
+                  <Select value={postType} onValueChange={(v: any) => setPostType(v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dagens_bil">⭐ Dagens Bil</SelectItem>
+                      <SelectItem value="promotion">📢 Promotion</SelectItem>
+                      <SelectItem value="custom">✏️ Brugerdefineret</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+            </div>
+
+            {/* Target Audience Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Målgruppe</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {TARGET_AUDIENCE_OPTIONS.map((option) => (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    variant={targetAudience === option.value ? "default" : "outline"}
+                    className="h-auto py-2 px-3 flex flex-col items-start text-left"
+                    onClick={() => setTargetAudience(option.value)}
+                  >
+                    <span className="text-sm font-medium">{option.label}</span>
+                    <span className="text-xs text-muted-foreground opacity-80">{option.description}</span>
+                  </Button>
+                ))}
+              </div>
+              
+              {targetAudience === 'custom' && (
+                <div className="space-y-2">
+                  <Label>Beskriv din målgruppe</Label>
+                  <Input
+                    value={customTargetAudience}
+                    onChange={(e) => setCustomTargetAudience(e.target.value)}
+                    placeholder="F.eks. 'Nybagte forældre der skal bruge stationcar' eller 'Håndværkere med behov for varevogn'"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -606,6 +666,36 @@ const AdminFacebookPosts = () => {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Target Audience Selection for promo */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Målgruppe</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {TARGET_AUDIENCE_OPTIONS.map((option) => (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    variant={targetAudience === option.value ? "default" : "outline"}
+                    className="h-auto py-2 px-3 flex flex-col items-start text-left"
+                    onClick={() => setTargetAudience(option.value)}
+                  >
+                    <span className="text-sm font-medium">{option.label}</span>
+                    <span className="text-xs text-muted-foreground opacity-80">{option.description}</span>
+                  </Button>
+                ))}
+              </div>
+              
+              {targetAudience === 'custom' && (
+                <div className="space-y-2">
+                  <Label>Beskriv din målgruppe</Label>
+                  <Input
+                    value={customTargetAudience}
+                    onChange={(e) => setCustomTargetAudience(e.target.value)}
+                    placeholder="F.eks. 'Nybagte forældre der skal bruge stationcar'"
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Opslag tekst</Label>

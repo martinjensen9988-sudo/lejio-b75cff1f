@@ -25,19 +25,28 @@ serve(async (req) => {
   }
 
   try {
-    const { vehicle, postType } = await req.json() as { vehicle: VehicleData | null; postType: 'dagens_bil' | 'promotion' | 'custom' | 'lejio_promo' };
+    const { vehicle, postType, targetAudience } = await req.json() as { 
+      vehicle: VehicleData | null; 
+      postType: 'dagens_bil' | 'promotion' | 'custom' | 'lejio_promo';
+      targetAudience?: string;
+    };
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Build target audience context
+    const audienceContext = targetAudience 
+      ? `\n\nMÅLGRUPPE: Opslaget skal målrettes til: ${targetAudience}. Tilpas sproget, tonaliteten og argumenterne til denne specifikke målgruppe.`
+      : '';
+
     const systemPrompt = `Du er en professionel markedsføringsekspert for en biludlejningsplatform kaldet LEJIO. 
     Du skriver engagerende Facebook-opslag på dansk der får folk til at leje biler eller bruge LEJIO platformen.
     Brug emojis passende og gør teksten fængende.
     Hold opslaget under 300 ord.
     Inkluder altid en call-to-action.
-    LEJIO er "Hotels.com for biludlejning" - en platform der gør det nemt at leje bil fra private og professionelle udlejere.`;
+    LEJIO er "Hotels.com for biludlejning" - en platform der gør det nemt at leje bil fra private og professionelle udlejere.${audienceContext}`;
 
     let userPrompt = '';
     
@@ -53,7 +62,7 @@ serve(async (req) => {
       - Tryghed og sikkerhed
       
       Call-to-action: Besøg lejio.dk
-      
+      ${targetAudience ? `\nHusk at målrette til: ${targetAudience}` : ''}
       Gør opslaget engagerende og få folk til at ville prøve LEJIO til deres næste biludlejning.`;
     } else if (postType === 'dagens_bil' && vehicle) {
       userPrompt = `Skriv et Facebook-opslag om "Dagens Bil" for følgende køretøj:
@@ -68,6 +77,7 @@ serve(async (req) => {
       Brændstof: ${vehicle.fuel_type || 'Ikke angivet'}
       Transmission: ${vehicle.transmission || 'Ikke angivet'}
       Antal sæder: ${vehicle.seats || 'Ikke angivet'}
+      ${targetAudience ? `\nMålgruppe: ${targetAudience}` : ''}
       
       Gør opslaget spændende og fremhæv at det er dagens særlige tilbud på LEJIO.`;
     } else if (postType === 'promotion' && vehicle) {
@@ -78,6 +88,7 @@ serve(async (req) => {
       Årgang: ${vehicle.year || 'Ikke angivet'}
       Dagspris: ${vehicle.daily_price ? `${vehicle.daily_price} kr` : 'Kontakt os'}
       Beskrivelse: ${vehicle.description || 'Ingen beskrivelse'}
+      ${targetAudience ? `\nMålgruppe: ${targetAudience}` : ''}
       
       Fokuser på bilens fordele og hvorfor den er perfekt til udlejning via LEJIO.`;
     } else if (vehicle) {
@@ -85,10 +96,11 @@ serve(async (req) => {
       
       ${vehicle.make} ${vehicle.model} (${vehicle.year})
       Pris fra ${vehicle.daily_price} kr/dag
+      ${targetAudience ? `\nMålgruppe: ${targetAudience}` : ''}
       
       Gør det kort og fængende.`;
     } else {
-      userPrompt = `Skriv et kort og fængende reklameopslag for LEJIO - Danmarks smarteste biludlejningsplatform. Inkluder en call-to-action til lejio.dk.`;
+      userPrompt = `Skriv et kort og fængende reklameopslag for LEJIO - Danmarks smarteste biludlejningsplatform. Inkluder en call-to-action til lejio.dk.${targetAudience ? ` Målret til: ${targetAudience}` : ''}`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
