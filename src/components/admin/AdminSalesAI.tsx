@@ -221,12 +221,20 @@ export default function AdminSalesAI() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => navigate(`/admin/sales-ai/outreach/${lead.id}`)}
+                        >
+                          <Phone className="w-4 h-4 mr-1" />
+                          Start outreach
+                        </Button>
+                        <Button
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/admin/sales-ai/email/${lead.id}`)}
                         >
                           <Sparkles className="w-4 h-4 mr-1" />
-                          Generer email
+                          Kun email
                         </Button>
                         <Button
                           variant="ghost"
