@@ -131,3 +131,6 @@ verify_jwt = true
 
 [functions.analyze-car-ad]
 verify_jwt = false
+
+[functions.cvr-search-industry]
+verify_jwt = false
