@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,8 @@ import {
   Check,
   MessageSquare,
   Sparkles,
-  DollarSign
+  DollarSign,
+  Clipboard
 } from 'lucide-react';
 
 interface CarAdAnalysis {
@@ -35,11 +36,43 @@ interface CarAdAnalysis {
 const SalesAICarAdPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLButtonElement>(null);
   
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<CarAdAnalysis | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Handle paste from clipboard
+  const handlePaste = useCallback(async (e: ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          // Show preview
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setPreviewImage(e.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+          
+          // Analyze
+          await analyzeImage(file);
+        }
+        break;
+      }
+    }
+  }, []);
+
+  // Add global paste listener
+  useEffect(() => {
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [handlePaste]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -156,16 +189,21 @@ const SalesAICarAdPage = () => {
 
               {!previewImage ? (
                 <button
+                  ref={dropZoneRef}
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-64 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-4 hover:border-primary hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="w-full h-64 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-4 hover:border-primary hover:bg-muted/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   disabled={isAnalyzing}
                 >
                   <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                    <Upload className="w-8 h-8 text-muted-foreground" />
+                    <Clipboard className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium">Klik for at uploade</p>
-                    <p className="text-sm text-muted-foreground">eller træk og slip et billede</p>
+                    <p className="font-medium">Indsæt billede (Ctrl+V)</p>
+                    <p className="text-sm text-muted-foreground">eller klik for at uploade</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Upload className="w-3 h-3" />
+                    <span>Understøtter PNG, JPG, WEBP</span>
                   </div>
                 </button>
               ) : (
