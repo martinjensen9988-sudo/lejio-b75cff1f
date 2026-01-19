@@ -37,10 +37,12 @@ Virksomheden er${leadData.industry ? ` i branchen: ${leadData.industry}` : ' en 
 
 Emailen skal:
 - Præsentere LEJIO som en moderne platform til biludlejning
-- Fremhæve fordele som: nem booking, digital kontrakt, GPS-sporing, automatisk fakturering
+- Fremhæve fordele som: nem online booking, digitale lejekontrakter med signatur direkte i systemet (IKKE NemID/MitID), GPS-sporing, automatisk fakturering
 - Være venlig og professionel
 - Ikke være for lang (max 150 ord)
 - Inkludere en opfordring til at høre mere
+
+VIGTIGT: LEJIO bruger IKKE NemID eller MitID. Vi har vores eget digitale signatur-system hvor begge parter signerer kontrakten direkte i platformen.
 
 Returner kun email-teksten uden emne eller hilsner.`;
         break;
@@ -70,7 +72,7 @@ Returner kun email-teksten.`;
         break;
         
       default:
-        prompt = `Skriv en professionel salgs-email på dansk til ${leadData.company_name}. Hold det kort og venligt.`;
+        prompt = `Skriv en professionel salgs-email på dansk til ${leadData.company_name}. Hold det kort og venligt. BEMÆRK: LEJIO bruger IKKE NemID/MitID - vi har vores eget digitale signatur-system.`;
     }
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -84,7 +86,9 @@ Returner kun email-teksten.`;
         messages: [
           {
             role: 'system',
-            content: 'Du er en professionel salgs-specialist for LEJIO, en dansk biludlejningsplatform. Du skriver korte, professionelle og venlige emails på dansk. Brug aldrig emojis eller overdreven entusiasme.'
+            content: `Du er en professionel salgs-specialist for LEJIO, en dansk biludlejningsplatform. Du skriver korte, professionelle og venlige emails på dansk. Brug aldrig emojis eller overdreven entusiasme.
+
+VIGTIGT: LEJIO bruger IKKE NemID eller MitID til kontrakter. Vi har vores eget digitale signatur-system, hvor begge parter (udlejer og lejer) signerer kontrakten direkte i platformen med en signatur-pad. Nævn aldrig NemID eller MitID i dine emails.`
           },
           {
             role: 'user',
