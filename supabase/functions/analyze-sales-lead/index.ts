@@ -47,6 +47,112 @@ VIRKSOMHEDSDATA:
 - Adresse: ${leadData.address || 'Ikke angivet'}
 - Tidligere noter: ${leadData.notes || 'Ingen'}
 
+=== KOMPLET LEJIO VIDEN (brug aktivt i dine tips) ===
+
+**HVAD ER LEJIO?**
+LEJIO er Danmarks førende platform for biludlejning - tænk det som "Hotels.com for biludlejning". Vi forbinder udlejere (lessors) med lejere (renters) og håndterer alt det administrative.
+
+**MÅLGRUPPER:**
+1. Private bilejere der vil tjene penge på deres bil
+2. Små udlejningsfirmaer (1-15 biler)
+3. Mellemstore flåder (15-50 biler)
+4. Store bilforhandlere og leasingselskaber
+5. Erhvervskunder der har brug for flådestyring
+
+**PRISER & ABONNEMENTER:**
+- Gratis for private udlejere (CPR) - kun 5% platformgebyr per booking
+- Pro abonnement for erhverv (CVR):
+  * 299 kr/md for 1-5 køretøjer
+  * 499 kr/md for 6-15 køretøjer  
+  * 799 kr/md for 16+ køretøjer
+- INGEN booking-gebyrer for Pro-brugere
+- 14 dages gratis prøveperiode
+
+**LEJIO FLEET (Varetager-ordning):**
+- "LEJIO Varetager" (15% kommission): Platform + kundeservice
+- "LEJIO Varetager Pro" (10% kommission): Alt inkl. afhentning, aflevering, rengøring, genulejning
+- Ideel for bilejere der vil have passiv indkomst
+
+**KERNEFUNKTIONER:**
+
+1. DIGITALT KONTRAKTSYSTEM
+   - Eget signatur-system (IKKE NemID/MitID!)
+   - Juridisk bindende kontrakter
+   - Automatisk generering
+   - Skadesregistrering integreret
+
+2. LEJIO VISION AI
+   - Automatisk nummerplade-scanning
+   - Dashboard-aflæsning (km-stand, brændstof)
+   - Skadesregistrering med AI-analyse
+   - Check-in/Check-out dokumentation
+
+3. GPS & GEOFENCING
+   - Live tracking af køretøjer
+   - Geofence-advarsler
+   - Kørselshistorik
+   - Tyveri-beskyttelse
+
+4. BETALING & FORSIKRING
+   - Integreret betalingsløsning
+   - Selvrisiko-profiler (standard/premium)
+   - Automatisk fakturering
+   - Depositum-håndtering
+
+5. FLÅDESTYRING
+   - Multi-lokations support
+   - Service-påmindelser
+   - Synsadvarsler
+   - Dækskifte-tracking
+   - Brændstof-opgørelser
+
+6. BOOKING-SYSTEM
+   - Online booking-kalender
+   - Automatiske bekræftelser
+   - Sæsonpriser
+   - Rabatkoder
+
+7. KUNDE-HÅNDTERING
+   - Kørekortsverifikation
+   - Kunde-segmentering
+   - Rating-system
+   - Advarsels-system for problematiske lejere
+
+8. ERHVERVS-MODULER
+   - Firmakonto-styring
+   - Afdelings-allokering
+   - EAN-fakturering
+   - Månedlige samleafregninger
+
+**UNIKKE FORDELE:**
+- Alt-i-én løsning (ingen behov for flere systemer)
+- Dansk platform med dansk support
+- GDPR-compliant
+- Skalerbart fra 1 bil til 1000+ biler
+- Ingen bindingsperiode
+- Gratis onboarding og support
+
+**TYPISKE INDVENDINGER OG SVAR:**
+
+"Vi har allerede et system"
+→ "Hvad savner I ved jeres nuværende løsning? LEJIO integrerer ofte funktioner I betaler ekstra for andre steder."
+
+"Det lyder dyrt"
+→ "Med 299 kr/md for op til 5 biler og ingen booking-gebyrer, tjener de fleste det hjem på første booking."
+
+"Vi har ikke tid til omstilling"
+→ "Vores onboarding tager typisk under en time, og vi hjælper med at importere eksisterende data."
+
+"Vi foretrækker personlig kontakt"
+→ "LEJIO automatiserer det kedelige, så I får mere tid til personlig kundekontakt."
+
+**KONTAKTINFO:**
+- Website: lejio.dk
+- Support: kontakt@lejio.dk
+- Rasmus Damsgaard, Medstifter & Partner
+
+=== SLUT PÅ LEJIO VIDEN ===
+
 Giv dit svar i følgende JSON-format (og KUN JSON, ingen tekst før eller efter):
 {
   "companyInsights": [
@@ -56,7 +162,7 @@ Giv dit svar i følgende JSON-format (og KUN JSON, ingen tekst før eller efter)
   ],
   "keySellingPoints": [
     {
-      "point": "Specifikt salgsargument relevant for denne kunde",
+      "point": "Specifikt salgsargument relevant for denne kunde (brug LEJIO-viden)",
       "why": "Hvorfor dette er vigtigt for dem"
     }
   ],
@@ -67,7 +173,7 @@ Giv dit svar i følgende JSON-format (og KUN JSON, ingen tekst før eller efter)
   "potentialObjections": [
     {
       "objection": "Mulig indvending kunden kan have",
-      "response": "Hvordan du kan håndtere den"
+      "response": "Hvordan du kan håndtere den (brug LEJIO-svar)"
     }
   ],
   "questionsToAsk": [
@@ -76,24 +182,23 @@ Giv dit svar i følgende JSON-format (og KUN JSON, ingen tekst før eller efter)
   ],
   "importantHighlights": [
     {
-      "highlight": "Vigtigt punkt at huske",
+      "highlight": "Vigtigt punkt at huske om LEJIO",
       "priority": "high" | "medium",
-      "reason": "Hvorfor dette er vigtigt"
+      "reason": "Hvorfor dette er vigtigt for denne kunde"
     }
   ],
+  "relevantFeatures": [
+    {
+      "feature": "Relevant LEJIO-funktion for denne kunde",
+      "benefit": "Konkret fordel for kunden"
+    }
+  ],
+  "pricingToMention": "Hvilken prismodel er mest relevant for denne kunde og hvorfor",
   "industryContext": "Kort beskrivelse af hvordan biludlejning typisk bruges i denne branche",
   "suggestedApproach": "Anbefalet samtalestrategi for denne specifikke kunde"
 }
 
-Vær specifik og konkret. Brug virksomhedens navn og branche til at gøre tipsene relevante. Hvis branche ikke er angivet, gæt baseret på virksomhedsnavnet.
-
-LEJIO's hovedfordele at fremhæve:
-- Nem online booking
-- Digitalt kontraktsystem (eget signatur-system, IKKE NemID/MitID)
-- GPS-sporing af køretøjer
-- Automatisk fakturering
-- Flådestyring og analytics
-- Skalerbart fra få biler til stor flåde`;
+Vær specifik og konkret. Brug virksomhedens navn og branche til at gøre tipsene relevante. Hvis branche ikke er angivet, gæt baseret på virksomhedsnavnet. Inkluder altid mindst 3 relevante LEJIO-funktioner baseret på kundetypen.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
