@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Trash2, MapPin, Navigation, Gauge, Clock, Plus, Settings } from 'lucide-react';
 import { useGpsDevices, GpsDeviceWithLatest } from '@/hooks/useGpsDevices';
-import { AddGpsDeviceDialog } from './AddGpsDeviceDialog';
 import { formatDistanceToNow } from 'date-fns';
 import { da } from 'date-fns/locale';
 
@@ -16,8 +15,8 @@ interface GpsDeviceListProps {
 }
 
 export const GpsDeviceList = ({ onSelectDevice, selectedDeviceId, showAddButton = true }: GpsDeviceListProps) => {
+  const navigate = useNavigate();
   const { devices, isLoading, updateDevice, deleteDevice } = useGpsDevices();
-  const [showAddDialog, setShowAddDialog] = useState(false);
 
   const getProviderLabel = (provider: string) => {
     const labels: Record<string, string> = {
@@ -50,7 +49,7 @@ export const GpsDeviceList = ({ onSelectDevice, selectedDeviceId, showAddButton 
             GPS-enheder
           </CardTitle>
           {showAddButton && (
-            <Button onClick={() => setShowAddDialog(true)} size="sm">
+            <Button onClick={() => navigate('/gps/add-device')} size="sm">
               <Plus className="w-4 h-4 mr-2" />
               Tilføj enhed
             </Button>
@@ -148,8 +147,6 @@ export const GpsDeviceList = ({ onSelectDevice, selectedDeviceId, showAddButton 
           )}
         </CardContent>
       </Card>
-
-      <AddGpsDeviceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
     </>
   );
 };

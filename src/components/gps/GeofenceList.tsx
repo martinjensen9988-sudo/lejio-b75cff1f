@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Trash2, Plus, MapPin, Shield, CircleDot } from 'lucide-react';
 import { useGeofences, Geofence } from '@/hooks/useGeofences';
-import { AddGeofenceDialog } from './AddGeofenceDialog';
 
 interface GeofenceListProps {
   onSelectGeofence?: (geofence: Geofence) => void;
@@ -13,8 +12,8 @@ interface GeofenceListProps {
 }
 
 export const GeofenceList = ({ onSelectGeofence, selectedGeofenceId }: GeofenceListProps) => {
+  const navigate = useNavigate();
   const { geofences, isLoading, updateGeofence, deleteGeofence } = useGeofences();
-  const [showAddDialog, setShowAddDialog] = useState(false);
 
   if (isLoading) {
     return (
@@ -36,7 +35,7 @@ export const GeofenceList = ({ onSelectGeofence, selectedGeofenceId }: GeofenceL
             <Shield className="w-5 h-5" />
             Geofences
           </CardTitle>
-          <Button onClick={() => setShowAddDialog(true)} size="sm">
+          <Button onClick={() => navigate('/gps/add-geofence')} size="sm">
             <Plus className="w-4 h-4 mr-2" />
             Ny geofence
           </Button>
@@ -110,8 +109,6 @@ export const GeofenceList = ({ onSelectGeofence, selectedGeofenceId }: GeofenceL
           )}
         </CardContent>
       </Card>
-
-      <AddGeofenceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
     </>
   );
 };

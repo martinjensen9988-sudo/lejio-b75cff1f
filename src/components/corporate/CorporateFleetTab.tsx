@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Car, MapPin, Gauge, Fuel, Calendar, Plus } from 'lucide-react';
 import { CorporateFleetVehicle, CorporateDepartment } from '@/hooks/useCorporateFleet';
-import AddFleetVehicleDialog from './AddFleetVehicleDialog';
 
 interface CorporateFleetTabProps {
   vehicles: CorporateFleetVehicle[];
@@ -21,7 +20,7 @@ const CorporateFleetTab = ({
   corporateAccountId,
   onRefresh 
 }: CorporateFleetTabProps) => {
-  const [showAddDialog, setShowAddDialog] = useState(false);
+  const navigate = useNavigate();
 
   const getDepartmentName = (departmentId: string | null) => {
     if (!departmentId) return 'Ikke tildelt';
@@ -39,7 +38,7 @@ const CorporateFleetTab = ({
           </p>
         </div>
         {isAdmin && corporateAccountId && (
-          <Button onClick={() => setShowAddDialog(true)}>
+          <Button onClick={() => navigate(`/corporate/add-vehicle?corporateAccountId=${corporateAccountId}`)}>
             <Plus className="w-4 h-4 mr-2" />
             Tilføj køretøj
           </Button>
@@ -58,7 +57,7 @@ const CorporateFleetTab = ({
               {isAdmin && ' Klik på "Tilføj køretøj" for at tilføje et.'}
             </p>
             {isAdmin && corporateAccountId && (
-              <Button className="mt-4" onClick={() => setShowAddDialog(true)}>
+              <Button className="mt-4" onClick={() => navigate(`/corporate/add-vehicle?corporateAccountId=${corporateAccountId}`)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Tilføj første køretøj
               </Button>
@@ -111,20 +110,6 @@ const CorporateFleetTab = ({
             </Card>
           ))}
         </div>
-      )}
-
-      {/* Add Fleet Vehicle Dialog */}
-      {corporateAccountId && (
-        <AddFleetVehicleDialog
-          open={showAddDialog}
-          onOpenChange={setShowAddDialog}
-          corporateAccountId={corporateAccountId}
-          departments={departments}
-          onSuccess={() => {
-            setShowAddDialog(false);
-            onRefresh?.();
-          }}
-        />
       )}
     </div>
   );
