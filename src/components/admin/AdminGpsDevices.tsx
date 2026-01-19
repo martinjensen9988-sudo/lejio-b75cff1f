@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapPin, Plus, Trash2, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -35,45 +33,11 @@ interface GpsDevice {
   };
 }
 
-interface Vehicle {
-  id: string;
-  make: string;
-  model: string;
-  registration: string;
-  owner_id: string;
-}
-
-interface Profile {
-  id: string;
-  email: string;
-  company_name: string | null;
-  full_name: string | null;
-}
-
-const GPS_PROVIDERS = [
-  { value: 'generic', label: 'Generic GPS' },
-  { value: 'teltonika', label: 'Teltonika' },
-  { value: 'queclink', label: 'Queclink' },
-  { value: 'ruptela', label: 'Ruptela' },
-  { value: 'other', label: 'Anden' },
-];
-
 const AdminGpsDevices = () => {
+  const navigate = useNavigate();
   const [devices, setDevices] = useState<GpsDevice[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const [formData, setFormData] = useState({
-    vehicle_id: '',
-    device_id: '',
-    device_name: '',
-    provider: 'generic',
-    webhook_secret: '',
-  });
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -82,128 +46,45 @@ const AdminGpsDevices = () => {
   const fetchData = async () => {
     setLoading(true);
 
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout: data kunne ikke hentes. Prøv igen.')), 12000)
-    );
-
     try {
-      await Promise.race([
-        (async () => {
-          const { data: devicesData, error: devicesError } = await supabase
-            .from('gps_devices')
-            .select(`
-              *,
-              vehicle:vehicles(make, model, registration, owner_id)
-            `)
-            .order('created_at', { ascending: false });
+      const { data: devicesData, error: devicesError } = await supabase
+        .from('gps_devices')
+        .select(`
+          *,
+          vehicle:vehicles(make, model, registration, owner_id)
+        `)
+        .order('created_at', { ascending: false });
 
-          if (devicesError) {
-            console.error('Error fetching devices:', devicesError);
-            toast.error('Kunne ikke hente GPS enheder');
-            setDevices([]);
-          } else if (devicesData) {
-            const ownerIds = [...new Set(devicesData.map(d => d.vehicle?.owner_id).filter(Boolean))] as string[];
+      if (devicesError) {
+        console.error('Error fetching devices:', devicesError);
+        toast.error('Kunne ikke hente GPS enheder');
+        setDevices([]);
+      } else if (devicesData) {
+        const ownerIds = [...new Set(devicesData.map(d => d.vehicle?.owner_id).filter(Boolean))] as string[];
 
-            if (ownerIds.length > 0) {
-              const { data: profilesData, error: profilesError } = await supabase
-                .from('profiles')
-                .select('id, email, company_name, full_name')
-                .in('id', ownerIds);
-
-              if (profilesError) {
-                console.error('Error fetching owner profiles:', profilesError);
-              }
-
-              const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-              const devicesWithOwners = devicesData.map(device => ({
-                ...device,
-                owner: device.vehicle?.owner_id ? profileMap.get(device.vehicle.owner_id) : undefined,
-              }));
-
-              setDevices(devicesWithOwners);
-            } else {
-              setDevices(devicesData);
-            }
-          }
-
-          const { data: allProfiles, error: allProfilesError } = await supabase
+        if (ownerIds.length > 0) {
+          const { data: profilesData } = await supabase
             .from('profiles')
             .select('id, email, company_name, full_name')
-            .order('email');
+            .in('id', ownerIds);
 
-          if (allProfilesError) {
-            console.error('Error fetching profiles:', allProfilesError);
-          } else {
-            setProfiles(allProfiles || []);
-          }
-        })(),
-        timeout,
-      ]);
+          const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+          const devicesWithOwners = devicesData.map(device => ({
+            ...device,
+            owner: device.vehicle?.owner_id ? profileMap.get(device.vehicle.owner_id) : undefined,
+          }));
+
+          setDevices(devicesWithOwners);
+        } else {
+          setDevices(devicesData);
+        }
+      }
     } catch (err: any) {
       console.error('AdminGpsDevices fetchData failed:', err);
       toast.error(err?.message || 'Kunne ikke hente GPS data');
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchUserVehicles = async (userId: string) => {
-    const { data } = await supabase
-      .from('vehicles')
-      .select('id, make, model, registration, owner_id')
-      .eq('owner_id', userId)
-      .order('make');
-
-    setVehicles(data || []);
-  };
-
-  const handleUserChange = (userId: string) => {
-    setSelectedUserId(userId);
-    setFormData(prev => ({ ...prev, vehicle_id: '' }));
-    fetchUserVehicles(userId);
-  };
-
-  const generateWebhookSecret = () => {
-    // Use cryptographically secure random generation
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    const secret = Array.from(array, byte => 
-      byte.toString(16).padStart(2, '0')
-    ).join('');
-    setFormData(prev => ({ ...prev, webhook_secret: secret }));
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.vehicle_id || !formData.device_id) {
-      toast.error('Vælg køretøj og indtast device ID');
-      return;
-    }
-
-    setSaving(true);
-
-    const { error } = await supabase
-      .from('gps_devices')
-      .insert({
-        vehicle_id: formData.vehicle_id,
-        device_id: formData.device_id,
-        device_name: formData.device_name || null,
-        provider: formData.provider,
-        webhook_secret: formData.webhook_secret || null,
-      });
-
-    if (error) {
-      console.error('Error adding device:', error);
-      toast.error('Kunne ikke tilføje GPS-enhed');
-    } else {
-      toast.success('GPS-enhed tilføjet!');
-      setDialogOpen(false);
-      setFormData({ vehicle_id: '', device_id: '', device_name: '', provider: 'generic', webhook_secret: '' });
-      setSelectedUserId('');
-      setVehicles([]);
-      fetchData();
-    }
-
-    setSaving(false);
   };
 
   const handleDelete = async (deviceId: string) => {
@@ -251,120 +132,10 @@ const AdminGpsDevices = () => {
             </CardTitle>
             <CardDescription>Administrer GPS-trackere for udlejere</CardDescription>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Tilføj GPS-enhed
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Tilføj GPS-enhed</DialogTitle>
-                <DialogDescription>
-                  Tilføj en ny GPS-tracker til en udlejers køretøj
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Vælg udlejer</Label>
-                  <Select value={selectedUserId} onValueChange={handleUserChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Vælg udlejer..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {profiles.map(profile => (
-                        <SelectItem key={profile.id} value={profile.id}>
-                          {profile.company_name || profile.full_name || profile.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {selectedUserId && (
-                  <div className="space-y-2">
-                    <Label>Vælg køretøj</Label>
-                    <Select 
-                      value={formData.vehicle_id} 
-                      onValueChange={(v) => setFormData(prev => ({ ...prev, vehicle_id: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Vælg køretøj..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vehicles.map(vehicle => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
-                            {vehicle.make} {vehicle.model} ({vehicle.registration})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label>GPS-udbyder</Label>
-                  <Select 
-                    value={formData.provider} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, provider: v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GPS_PROVIDERS.map(p => (
-                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Device ID</Label>
-                  <Input
-                    value={formData.device_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, device_id: e.target.value }))}
-                    placeholder="Unikt device ID fra trackeren"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Enhedsnavn (valgfrit)</Label>
-                  <Input
-                    value={formData.device_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, device_name: e.target.value }))}
-                    placeholder="F.eks. 'Tracker 1'"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Webhook Secret (valgfrit)</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={formData.webhook_secret}
-                      onChange={(e) => setFormData(prev => ({ ...prev, webhook_secret: e.target.value }))}
-                      placeholder="Til sikker webhook-validering"
-                    />
-                    <Button type="button" variant="outline" onClick={generateWebhookSecret}>
-                      Generer
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                  Annuller
-                </Button>
-                <Button onClick={handleSubmit} disabled={saving}>
-                  {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Tilføj
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => navigate('/admin/gps/add')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Tilføj GPS-enhed
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -384,6 +155,10 @@ const AdminGpsDevices = () => {
           <div className="text-center py-12 text-muted-foreground">
             <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>Ingen GPS-enheder fundet</p>
+            <Button className="mt-4" onClick={() => navigate('/admin/gps/add')}>
+              <Plus className="w-4 h-4 mr-2" />
+              Tilføj GPS-enhed
+            </Button>
           </div>
         ) : (
           <Table>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -78,6 +79,7 @@ const ACCOUNT_STATUS_LABELS: Record<string, string> = {
 };
 
 const AdminUserManagement = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -469,7 +471,7 @@ const AdminUserManagement = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleOpenEdit(user)}>
+                        <DropdownMenuItem onClick={() => navigate(`/admin/users/edit/${user.id}`)}>
                           <Edit className="w-4 h-4 mr-2" />
                           Rediger bruger
                         </DropdownMenuItem>
