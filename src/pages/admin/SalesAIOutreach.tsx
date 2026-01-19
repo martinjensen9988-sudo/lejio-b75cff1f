@@ -60,18 +60,16 @@ const SalesAIOutreachPage = () => {
     if (!lead) return;
     
     setIsGenerating(true);
-    const result = await generateEmail(lead, emailType);
+    
+    // Pass call context to AI for personalized email
+    const callContext = callOutcome && callNotes ? {
+      outcome: callOutcome,
+      notes: callNotes
+    } : undefined;
+    
+    const result = await generateEmail(lead, emailType, callContext);
     if (result) {
-      // Append call notes context to the email if available
-      if (callNotes && callOutcome) {
-        const callContext = `\n\n---\nOpkaldsnoter: ${callOutcome}${callNotes ? ` - ${callNotes}` : ''}`;
-        setGeneratedEmail({
-          ...result,
-          body: result.body
-        });
-      } else {
-        setGeneratedEmail(result);
-      }
+      setGeneratedEmail(result);
     }
     setIsGenerating(false);
   };

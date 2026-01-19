@@ -277,10 +277,14 @@ export const useSalesLeads = () => {
     }
   }, [toast]);
 
-  const generateEmail = useCallback(async (lead: SalesLead, emailType: string) => {
+  const generateEmail = useCallback(async (
+    lead: SalesLead, 
+    emailType: string, 
+    callContext?: { outcome: string; notes: string }
+  ) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-sales-email', {
-        body: { lead, emailType },
+        body: { lead, emailType, callContext },
       });
 
       if (error) throw error;
