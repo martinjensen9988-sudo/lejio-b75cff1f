@@ -81,6 +81,10 @@ export default function AdminSalesAI() {
         </div>
         
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/admin/sales-ai/car-ad')}>
+            <Sparkles className="w-4 h-4 mr-2" />
+            Bilannonce AI
+          </Button>
           <Button variant="outline" onClick={() => navigate('/admin/sales-ai/import')}>
             <Upload className="w-4 h-4 mr-2" />
             Import
