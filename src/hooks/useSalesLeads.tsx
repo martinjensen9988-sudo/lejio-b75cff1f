@@ -67,9 +67,9 @@ export const useSalesLeads = () => {
       if (!lead.company_name) {
         throw new Error('Firmanavn er påkrævet');
       }
-      
+
       const { data: userData } = await supabase.auth.getUser();
-      
+
       const insertData = {
         company_name: lead.company_name,
         cvr_number: lead.cvr_number || null,
@@ -87,7 +87,7 @@ export const useSalesLeads = () => {
         facebook_url: lead.facebook_url || null,
         created_by: userData.user?.id || null,
       };
-      
+
       const { data, error } = await supabase
         .from('sales_leads')
         .insert(insertData)
@@ -95,19 +95,19 @@ export const useSalesLeads = () => {
         .single();
 
       if (error) throw error;
-      
-      setLeads(prev => [data as SalesLead, ...prev]);
+
+      setLeads((prev) => [data as SalesLead, ...prev]);
       toast({
         title: 'Lead tilføjet',
         description: `${lead.company_name} er tilføjet`,
       });
-      
+
       return data as SalesLead;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding lead:', error);
       toast({
         title: 'Fejl',
-        description: 'Kunne ikke tilføje lead',
+        description: error?.message || 'Kunne ikke tilføje lead',
         variant: 'destructive',
       });
       return null;
