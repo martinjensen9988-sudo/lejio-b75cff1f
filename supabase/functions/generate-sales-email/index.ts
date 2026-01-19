@@ -90,7 +90,16 @@ Returner kun email-teksten.`;
 
 VIGTIGT: 
 - LEJIO bruger IKKE NemID eller MitID til kontrakter. Vi har vores eget digitale signatur-system, hvor begge parter (udlejer og lejer) signerer kontrakten direkte i platformen med en signatur-pad. Nævn aldrig NemID eller MitID i dine emails.
-- Alle emails skal ALTID afsluttes med "Med venlig hilsen\n\nRasmus\nLEJIO"`
+- Alle emails skal ALTID afsluttes med denne signatur:
+
+Med venlig hilsen
+
+Rasmus Damsgaard
+Medstifter & Partner
+LEJIO
+Tlf: +45 XX XX XX XX
+Email: rasmus@lejio.dk
+www.lejio.dk`
           },
           {
             role: 'user',
