@@ -64,6 +64,8 @@ import AddGeofencePage from "./pages/gps/AddGeofence";
 import AddGpsDevicePage from "./pages/gps/AddGpsDevice";
 import VehicleDetailPage from "./pages/search/VehicleDetail";
 import SearchCreateBookingPage from "./pages/search/CreateBooking";
+import CorporateAddFleetVehiclePage from "./pages/corporate/AddFleetVehicle";
+import CorporateCreateBookingPage from "./pages/corporate/CreateBooking";
 // Admin sub-pages
 import AdminUsersPage from "./pages/admin/Users";
 import AdminStaffPage from "./pages/admin/Staff";
@@ -188,6 +190,8 @@ const App = () => (
             <Route path="/gps" element={<GpsTracking />} />
             <Route path="/funktioner" element={<Features />} />
             <Route path="/corporate" element={<CorporateDashboard />} />
+            <Route path="/corporate/add-vehicle" element={<CorporateAddFleetVehiclePage />} />
+            <Route path="/corporate/booking" element={<CorporateCreateBookingPage />} />
             <Route path="/privat-fleet" element={<PrivateFleet />} />
             <Route path="/om-os" element={<About />} />
             <Route path="/hvad-er-lejio" element={<WhatIsLejio />} />

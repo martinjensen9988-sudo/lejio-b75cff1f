@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +16,6 @@ import { Calendar, Search, MapPin, Car, User, Clock, Plus } from 'lucide-react';
 import { CorporateBooking, CorporateEmployee, CorporateFleetVehicle } from '@/hooks/useCorporateFleet';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import CorporateBookingDialog from './CorporateBookingDialog';
 
 interface CorporateBookingsTabProps {
   bookings: CorporateBooking[];
@@ -36,8 +36,8 @@ const CorporateBookingsTab = ({
   currentDepartmentId,
   onRefresh 
 }: CorporateBookingsTabProps) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showBookingDialog, setShowBookingDialog] = useState(false);
 
   const getEmployeeName = (employeeId: string) => {
     const emp = employees.find(e => e.id === employeeId);
@@ -63,7 +63,7 @@ const CorporateBookingsTab = ({
           </p>
         </div>
         {corporateAccountId && currentEmployeeId && vehicles.length > 0 && (
-          <Button onClick={() => setShowBookingDialog(true)}>
+          <Button onClick={() => navigate(`/corporate/booking?corporateAccountId=${corporateAccountId}&employeeId=${currentEmployeeId}&departmentId=${currentDepartmentId || ''}&fleetVehicles=${encodeURIComponent(JSON.stringify(vehicles))}`)}>
             <Plus className="w-4 h-4 mr-2" />
             Ny booking
           </Button>
@@ -158,22 +158,6 @@ const CorporateBookingsTab = ({
           )}
         </CardContent>
       </Card>
-
-      {/* Booking Dialog */}
-      {corporateAccountId && currentEmployeeId && (
-        <CorporateBookingDialog
-          open={showBookingDialog}
-          onOpenChange={setShowBookingDialog}
-          fleetVehicles={vehicles}
-          corporateAccountId={corporateAccountId}
-          currentEmployeeId={currentEmployeeId}
-          departmentId={currentDepartmentId || null}
-          onSuccess={() => {
-            setShowBookingDialog(false);
-            onRefresh?.();
-          }}
-        />
-      )}
     </div>
   );
 };
