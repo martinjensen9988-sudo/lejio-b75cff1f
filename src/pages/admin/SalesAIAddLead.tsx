@@ -23,9 +23,11 @@ const SalesAIAddLeadPage = () => {
     if (!cvrSearch) return;
     
     const result = await lookupCVR(cvrSearch);
+    // For sales leads, we accept both active and inactive companies
+    // The result might have data even if there's an error (inactive company)
     if (result) {
       setNewLead({
-        company_name: result.companyName,
+        company_name: result.companyName || '',
         cvr_number: result.cvr,
         address: result.address,
         city: result.city,
