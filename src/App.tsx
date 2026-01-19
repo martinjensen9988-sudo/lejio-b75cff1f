@@ -43,6 +43,8 @@ import ServicePage from "./pages/dashboard/Service";
 import TiresPage from "./pages/dashboard/Tires";
 import InspectionsPage from "./pages/dashboard/Inspections";
 import AnalyticsPage from "./pages/dashboard/Analytics";
+import FinesAddPage from "./pages/dashboard/FinesAdd";
+import ServiceTaskAddPage from "./pages/dashboard/ServiceTaskAdd";
 import AIPricingPage from "./pages/dashboard/AIPricing";
 import FleetAIPage from "./pages/dashboard/FleetAI";
 import DeductiblesPage from "./pages/dashboard/Deductibles";
@@ -85,6 +87,9 @@ import DiscountsAddPage from "./pages/admin/DiscountsAdd";
 import StaffAddPage from "./pages/admin/StaffAdd";
 import CorporateAddPage from "./pages/admin/CorporateAdd";
 import CorporateDetailPage from "./pages/admin/CorporateDetail";
+import GpsAddPage from "./pages/admin/GpsAdd";
+import BookingsAddPage from "./pages/admin/BookingsAdd";
+import UserEditPage from "./pages/admin/UserEdit";
 
 const queryClient = new QueryClient();
 
@@ -107,11 +112,13 @@ const App = () => (
             <Route path="/dashboard/bookings/create" element={<CreateBookingPage />} />
             <Route path="/dashboard/invoices" element={<InvoicesPage />} />
             <Route path="/dashboard/fines" element={<FinesPage />} />
+            <Route path="/dashboard/fines/add" element={<FinesAddPage />} />
             <Route path="/dashboard/revenue-loss" element={<RevenueLossPage />} />
             <Route path="/dashboard/customers" element={<CustomersPage />} />
             <Route path="/dashboard/favorites" element={<FavoritesPage />} />
             <Route path="/dashboard/recurring" element={<RecurringPage />} />
             <Route path="/dashboard/service" element={<ServicePage />} />
+            <Route path="/dashboard/service/add" element={<ServiceTaskAddPage />} />
             <Route path="/dashboard/tires" element={<TiresPage />} />
             <Route path="/dashboard/inspections" element={<InspectionsPage />} />
             <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
@@ -138,10 +145,12 @@ const App = () => (
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/staff" element={<AdminStaffPage />} />
             <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+            <Route path="/admin/bookings/add" element={<BookingsAddPage />} />
             <Route path="/admin/locations" element={<AdminLocationsPage />} />
             <Route path="/admin/fees" element={<AdminFeesPage />} />
             <Route path="/admin/discounts" element={<AdminDiscountsPage />} />
             <Route path="/admin/discounts/add" element={<DiscountsAddPage />} />
+            <Route path="/admin/fleet" element={<AdminFleetPage />} />
             <Route path="/admin/staff/add" element={<StaffAddPage />} />
             <Route path="/admin/corporate/add" element={<CorporateAddPage />} />
             <Route path="/admin/corporate/:id" element={<CorporateDetailPage />} />
@@ -151,6 +160,8 @@ const App = () => (
             <Route path="/admin/live-chat" element={<AdminLiveChatPage />} />
             <Route path="/admin/vehicle-values" element={<AdminVehicleValuesPage />} />
             <Route path="/admin/gps" element={<AdminGpsPage />} />
+            <Route path="/admin/gps/add" element={<GpsAddPage />} />
+            <Route path="/admin/users/edit/:id" element={<UserEditPage />} />
             <Route path="/admin/checkinout" element={<AdminCheckInOutPage />} />
             <Route path="/admin/corporate" element={<AdminCorporatePage />} />
             <Route path="/admin/facebook" element={<AdminFacebookPage />} />
