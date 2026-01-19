@@ -58,8 +58,9 @@ export const useCVRLookup = (): UseCVRLookupReturn => {
       // Check for error in response (including inactive company)
       if (responseData?.error) {
         setError(responseData.error);
-        // Still set data if we have company info (for display purposes)
-        if (responseData.companyName) {
+        // Still set and return data if we have company info (for display purposes)
+        // This is important for sales leads where we want the data even for inactive companies
+        if (responseData.cvr) {
           const cvrData = responseData as CVRData;
           setData(cvrData);
           return cvrData;
