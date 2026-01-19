@@ -1,0 +1,433 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Search, Building2, Mail, Phone, MapPin, Loader2, Plus, Send, Sparkles } from 'lucide-react';
+import { useCVRSearch, CompanySearchResult } from '@/hooks/useCVRSearch';
+import { useSalesLeads } from '@/hooks/useSalesLeads';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const SalesAICompanySearchPage = () => {
+  const navigate = useNavigate();
+  const { results, isLoading, error, total, searchByIndustry, searchByName, reset } = useCVRSearch();
+  const { addLead, generateEmail } = useSalesLeads();
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [searchType, setSearchType] = useState<'industry' | 'name'>('industry');
+  const [hasSearched, setHasSearched] = useState(false);
+  
+  // Email generation state
+  const [selectedCompany, setSelectedCompany] = useState<CompanySearchResult | null>(null);
+  const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
+  const [generatedEmail, setGeneratedEmail] = useState<{ subject: string; body: string } | null>(null);
+  const [emailType, setEmailType] = useState('introduction');
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+
+  const handleSearch = async () => {
+    setHasSearched(true);
+    if (searchType === 'industry') {
+      await searchByIndustry(searchQuery || 'biludlejning', postalCode || undefined);
+    } else {
+      if (!searchQuery.trim()) {
+        toast.error('Indtast venligst et søgeord');
+        return;
+      }
+      await searchByName(searchQuery, postalCode || undefined);
+    }
+  };
+
+  const handleAddAsLead = async (company: CompanySearchResult) => {
+    try {
+      await addLead({
+        company_name: company.companyName,
+        cvr_number: company.cvr,
+        contact_email: company.email || '',
+        contact_phone: company.phone || '',
+        city: company.city || '',
+        industry: company.industry || 'Biludlejning',
+        status: 'new',
+        source: 'cvr_search',
+      });
+      toast.success(`${company.companyName} tilføjet som lead`);
+    } catch (err) {
+      toast.error('Kunne ikke tilføje lead');
+    }
+  };
+
+  const handleGenerateEmail = async (company: CompanySearchResult) => {
+    setSelectedCompany(company);
+    setGeneratedEmail(null);
+    setShowEmailDialog(true);
+  };
+
+  const generateEmailForCompany = async () => {
+    if (!selectedCompany) return;
+    
+    setIsGeneratingEmail(true);
+    try {
+      const leadData = {
+        id: 'temp',
+        company_name: selectedCompany.companyName,
+        cvr_number: selectedCompany.cvr,
+        contact_email: selectedCompany.email || '',
+        contact_phone: selectedCompany.phone || '',
+        city: selectedCompany.city || '',
+        industry: selectedCompany.industry || 'Biludlejning',
+        status: 'new' as const,
+        source: 'cvr_search',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
+      const result = await generateEmail(leadData, emailType);
+      if (result) {
+        setGeneratedEmail(result);
+      }
+    } catch (err) {
+      toast.error('Kunne ikke generere email');
+    } finally {
+      setIsGeneratingEmail(false);
+    }
+  };
+
+  const handleCopyEmail = () => {
+    if (generatedEmail) {
+      const fullEmail = `Emne: ${generatedEmail.subject}\n\n${generatedEmail.body}`;
+      navigator.clipboard.writeText(fullEmail);
+      toast.success('Email kopieret til udklipsholder');
+    }
+  };
+
+  const handleAddLeadAndClose = async () => {
+    if (selectedCompany) {
+      await handleAddAsLead(selectedCompany);
+      setShowEmailDialog(false);
+      setSelectedCompany(null);
+      setGeneratedEmail(null);
+    }
+  };
+
+  return (
+    <AdminDashboardLayout activeTab="sales-ai">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/sales-ai')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Søg efter biludlejningsfirmaer</h1>
+            <p className="text-muted-foreground">Find potentielle kunder i CVR-registeret</p>
+          </div>
+        </div>
+
+        {/* Search Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              CVR Søgning
+            </CardTitle>
+            <CardDescription>
+              Søg efter biludlejningsfirmaer baseret på branche eller firmanavn
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Søgetype</Label>
+                <Select value={searchType} onValueChange={(v) => setSearchType(v as 'industry' | 'name')}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="industry">Branche (biludlejning)</SelectItem>
+                    <SelectItem value="name">Firmanavn</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Søgeord</Label>
+                <Input
+                  placeholder={searchType === 'industry' ? 'biludlejning, leasing...' : 'Firmanavn...'}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Postnummer (valgfrit)</Label>
+                <Input
+                  placeholder="F.eks. 2100"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
+              
+              <div className="flex items-end">
+                <Button onClick={handleSearch} disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Søger...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-4 w-4" />
+                      Søg
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Quick search buttons */}
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm text-muted-foreground">Hurtig søgning:</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => { setSearchQuery('biludlejning'); setSearchType('industry'); }}
+              >
+                Biludlejning
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => { setSearchQuery('billeasing'); setSearchType('industry'); }}
+              >
+                Billeasing
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => { setSearchQuery('autoudlejning'); setSearchType('industry'); }}
+              >
+                Autoudlejning
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Error */}
+        {error && (
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <p className="text-destructive">{error}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Results */}
+        {hasSearched && !isLoading && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Resultater
+                </span>
+                <Badge variant="secondary">{total} fundet</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {results.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Building2 className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                  <p>Ingen virksomheder fundet. Prøv en anden søgning.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {results.map((company, index) => (
+                    <div 
+                      key={`${company.cvr}-${index}`}
+                      className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{company.companyName}</h3>
+                            <Badge variant="outline" className="text-xs">CVR: {company.cvr}</Badge>
+                          </div>
+                          
+                          {company.industry && (
+                            <p className="text-sm text-muted-foreground">{company.industry}</p>
+                          )}
+                          
+                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                            {(company.address || company.city) && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {[company.address, company.postalCode, company.city].filter(Boolean).join(', ')}
+                              </span>
+                            )}
+                            {company.phone && (
+                              <span className="flex items-center gap-1">
+                                <Phone className="h-3 w-3" />
+                                {company.phone}
+                              </span>
+                            )}
+                            {company.email && (
+                              <span className="flex items-center gap-1">
+                                <Mail className="h-3 w-3" />
+                                {company.email}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddAsLead(company)}
+                          >
+                            <Plus className="mr-1 h-4 w-4" />
+                            Tilføj lead
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleGenerateEmail(company)}
+                          >
+                            <Sparkles className="mr-1 h-4 w-4" />
+                            Generer email
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Email Generation Dialog */}
+        <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Generer salgsmail
+              </DialogTitle>
+              <DialogDescription>
+                {selectedCompany?.companyName}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {/* Company Info */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{selectedCompany?.companyName}</span>
+                </div>
+                {selectedCompany?.email && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Mail className="h-3 w-3 text-muted-foreground" />
+                    <span>{selectedCompany.email}</span>
+                  </div>
+                )}
+                {selectedCompany?.industry && (
+                  <p className="text-sm text-muted-foreground">{selectedCompany.industry}</p>
+                )}
+              </div>
+
+              {/* Email Type Selection */}
+              <div className="space-y-2">
+                <Label>Email type</Label>
+                <Select value={emailType} onValueChange={setEmailType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="introduction">Introduktion</SelectItem>
+                    <SelectItem value="partnership">Partnerskab</SelectItem>
+                    <SelectItem value="fleet_offer">Fleet tilbud</SelectItem>
+                    <SelectItem value="follow_up">Opfølgning</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button 
+                onClick={generateEmailForCompany} 
+                disabled={isGeneratingEmail}
+                className="w-full"
+              >
+                {isGeneratingEmail ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Genererer email...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generer email
+                  </>
+                )}
+              </Button>
+
+              {/* Generated Email */}
+              {generatedEmail && (
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="space-y-2">
+                    <Label>Emne</Label>
+                    <Input 
+                      value={generatedEmail.subject}
+                      onChange={(e) => setGeneratedEmail({ ...generatedEmail, subject: e.target.value })}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Indhold</Label>
+                    <Textarea 
+                      value={generatedEmail.body}
+                      onChange={(e) => setGeneratedEmail({ ...generatedEmail, body: e.target.value })}
+                      className="min-h-[200px]"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={handleCopyEmail} className="flex-1">
+                      <Send className="mr-2 h-4 w-4" />
+                      Kopiér email
+                    </Button>
+                    <Button onClick={handleAddLeadAndClose} className="flex-1">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Gem som lead
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AdminDashboardLayout>
+  );
+};
+
+export default SalesAICompanySearchPage;

@@ -40,6 +40,7 @@ const statusLabels: Record<string, string> = {
 const sourceLabels: Record<string, string> = {
   manual: 'Manuel',
   cvr: 'CVR-opslag',
+  cvr_search: 'CVR-søgning',
   facebook: 'Facebook',
   csv: 'CSV-import',
 };
@@ -81,6 +82,10 @@ export default function AdminSalesAI() {
         </div>
         
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/admin/sales-ai/company-search')}>
+            <Search className="w-4 h-4 mr-2" />
+            Find firmaer
+          </Button>
           <Button variant="outline" onClick={() => navigate('/admin/sales-ai/car-ad')}>
             <Sparkles className="w-4 h-4 mr-2" />
             Bilannonce AI
