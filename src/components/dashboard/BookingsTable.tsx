@@ -29,7 +29,7 @@ import MobileBookingCard from '@/components/dashboard/MobileBookingCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star, ScanLine, History, ArrowRightLeft } from 'lucide-react';
+import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star, ScanLine, History, ArrowRightLeft, Banknote, CreditCard, Smartphone, Building2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BookingsTableProps {
@@ -45,10 +45,17 @@ const statusConfig: Record<Booking['status'], { label: string; variant: 'default
   cancelled: { label: 'Annulleret', variant: 'destructive' },
 };
 
+const paymentMethodLabels: Record<string, { label: string; icon: React.ReactNode }> = {
+  cash: { label: 'Kontant', icon: <Banknote className="w-4 h-4" /> },
+  bank_transfer: { label: 'Bankoverførsel', icon: <Building2 className="w-4 h-4" /> },
+  mobilepay: { label: 'MobilePay', icon: <Smartphone className="w-4 h-4" /> },
+  card: { label: 'Kort', icon: <CreditCard className="w-4 h-4" /> },
+};
+
 const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   const { profile } = useAuth();
   const { vehicles } = useVehicles();
-  const { refetch: refetchBookings } = useBookings();
+  const { refetch: refetchBookings, markPaymentReceived } = useBookings();
   const isMobile = useIsMobile();
   const { contracts, generateContract, signContract, isLoading: contractsLoading } = useContracts();
   const [generatingContractFor, setGeneratingContractFor] = useState<string | null>(null);
@@ -235,6 +242,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                   setRenterRatingOpen(true);
                 }}
                 onSwapVehicle={currentVehicle ? () => {} : undefined}
+                onMarkPaymentReceived={() => markPaymentReceived(booking.id)}
               />
             );
           })}
@@ -329,6 +337,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
               <TableHead>Lejer</TableHead>
               <TableHead>Periode</TableHead>
               <TableHead>Pris</TableHead>
+              <TableHead>Betaling</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Kontrakt</TableHead>
               <TableHead className="text-right">Handlinger</TableHead>
@@ -338,6 +347,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
             {bookings.map((booking) => {
               const contract = getContractForBooking(booking.id);
               const isGenerating = generatingContractFor === booking.id;
+              const paymentMethod = booking.payment_method ? paymentMethodLabels[booking.payment_method] : null;
 
               return (
                 <TableRow key={booking.id}>
@@ -384,6 +394,33 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                   </TableCell>
                   <TableCell>
                     <span className="font-semibold text-foreground">{booking.total_price} kr</span>
+                  </TableCell>
+                  <TableCell>
+                    {paymentMethod ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          {paymentMethod.icon}
+                          <span>{paymentMethod.label}</span>
+                        </div>
+                        {booking.payment_received ? (
+                          <Badge variant="default" className="bg-mint text-white">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            Modtaget
+                          </Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 text-xs"
+                            onClick={() => markPaymentReceived(booking.id)}
+                          >
+                            Marker modtaget
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={statusConfig[booking.status].variant}>

@@ -133,6 +133,8 @@ export type Database = {
           lessor_id: string
           notes: string | null
           payment_method: string | null
+          payment_received: boolean | null
+          payment_received_at: string | null
           pickup_location_id: string | null
           renter_address: string | null
           renter_birth_date: string | null
@@ -169,6 +171,8 @@ export type Database = {
           lessor_id: string
           notes?: string | null
           payment_method?: string | null
+          payment_received?: boolean | null
+          payment_received_at?: string | null
           pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
@@ -205,6 +209,8 @@ export type Database = {
           lessor_id?: string
           notes?: string | null
           payment_method?: string | null
+          payment_received?: boolean | null
+          payment_received_at?: string | null
           pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null

@@ -10,7 +10,7 @@ import { da } from 'date-fns/locale';
 import { 
   Car, Calendar, FileText, FileCheck, Check, X, Loader2, 
   ScanLine, Camera, ClipboardCheck, History, ChevronRight,
-  MoreHorizontal, Star
+  MoreHorizontal, Star, Banknote, CreditCard, Smartphone, Building2, CheckCircle2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -38,6 +38,7 @@ interface MobileBookingCardProps {
   onViewHistory: () => void;
   onRateRenter: () => void;
   onSwapVehicle?: () => void;
+  onMarkPaymentReceived?: () => void;
 }
 
 const statusConfig: Record<Booking['status'], { label: string; color: string }> = {
@@ -46,6 +47,13 @@ const statusConfig: Record<Booking['status'], { label: string; color: string }> 
   active: { label: 'Aktiv', color: 'bg-green-500/10 text-green-600 border-green-500/30' },
   completed: { label: 'Afsluttet', color: 'bg-muted text-muted-foreground border-border' },
   cancelled: { label: 'Annulleret', color: 'bg-destructive/10 text-destructive border-destructive/30' },
+};
+
+const paymentMethodLabels: Record<string, { label: string; icon: React.ReactNode }> = {
+  cash: { label: 'Kontant', icon: <Banknote className="w-4 h-4" /> },
+  bank_transfer: { label: 'Bankoverførsel', icon: <Building2 className="w-4 h-4" /> },
+  mobilepay: { label: 'MobilePay', icon: <Smartphone className="w-4 h-4" /> },
+  card: { label: 'Kort', icon: <CreditCard className="w-4 h-4" /> },
 };
 
 export const MobileBookingCard = ({
@@ -67,8 +75,10 @@ export const MobileBookingCard = ({
   onViewHistory,
   onRateRenter,
   onSwapVehicle,
+  onMarkPaymentReceived,
 }: MobileBookingCardProps) => {
   const status = statusConfig[booking.status];
+  const paymentMethod = booking.payment_method ? paymentMethodLabels[booking.payment_method] : null;
 
   return (
     <Card className="overflow-hidden border-2 border-border/50 hover:border-border transition-colors">
@@ -139,6 +149,33 @@ export const MobileBookingCard = ({
             <p className="text-xs text-muted-foreground">Total pris</p>
           </div>
         </div>
+
+        {/* Payment method and status */}
+        {paymentMethod && (
+          <div className="px-4 pb-3">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border">
+              <div className="flex items-center gap-2">
+                {paymentMethod.icon}
+                <span className="text-sm">{paymentMethod.label}</span>
+              </div>
+              {booking.payment_received ? (
+                <Badge variant="default" className="bg-mint text-white">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  Modtaget
+                </Badge>
+              ) : onMarkPaymentReceived ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  onClick={onMarkPaymentReceived}
+                >
+                  Marker modtaget
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        )}
 
         {/* Contract status */}
         <div className="px-4 pb-3">
