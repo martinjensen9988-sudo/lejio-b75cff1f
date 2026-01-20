@@ -515,7 +515,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   onClick={handleUpgrade} 
                   className="w-full" 
                   size="lg"
-                  disabled={loading || cvrLoading || (cvrData && !cvrData.isActive) || (cvrData && !cvrData.vatRegistered)}
+                  disabled={loading || cvrLoading}
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
