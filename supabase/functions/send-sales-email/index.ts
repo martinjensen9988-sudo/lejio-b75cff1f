@@ -1,9 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-
-// Dynamic import for Resend
-const Resend = (await import("https://esm.sh/resend@2.0.0")).Resend;
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,33 +40,64 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Get SMTP settings
+    const smtpHost = Deno.env.get("SMTP_HOST");
+    const smtpUser = Deno.env.get("SMTP_USER");
+    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
+
+    if (!smtpHost || !smtpUser || !smtpPassword) {
+      console.error("Missing SMTP configuration");
+      return new Response(
+        JSON.stringify({ error: "SMTP er ikke konfigureret" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Convert plain text body to HTML (preserve line breaks)
     const htmlBody = body
       .split('\n')
       .map(line => line.trim() === '' ? '<br>' : `<p style="margin: 0 0 12px 0;">${line}</p>`)
       .join('');
 
-    // Send email via Resend
-    const emailResponse = await resend.emails.send({
-      from: "LEJIO Sales <salg@lejio.dk>",
-      to: [recipientEmail],
-      subject: subject,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          ${htmlBody}
-        </body>
-        </html>
-      `,
-      reply_to: "hej@lejio.dk",
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        ${htmlBody}
+      </body>
+      </html>
+    `;
+
+    // Create SMTP client
+    const client = new SMTPClient({
+      connection: {
+        hostname: smtpHost,
+        port: 587,
+        tls: true,
+        auth: {
+          username: smtpUser,
+          password: smtpPassword,
+        },
+      },
     });
 
-    console.log("Sales email sent successfully:", emailResponse);
+    // Send email
+    await client.send({
+      from: "LEJIO Forhandler <forhandler@lejio.dk>",
+      to: recipientEmail,
+      subject: subject,
+      content: body,
+      html: emailHtml,
+      replyTo: "hej@lejio.dk",
+    });
+
+    await client.close();
+
+    console.log("Sales email sent successfully via SMTP to:", recipientEmail);
 
     // Update the sales_emails table if leadId is provided
     if (leadId) {
@@ -113,7 +141,6 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ 
         success: true, 
         message: "Email sendt succesfuldt",
-        emailId: emailResponse.data?.id 
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
