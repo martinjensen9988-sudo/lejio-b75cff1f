@@ -336,6 +336,44 @@ export const useSalesLeads = () => {
     }
   }, [toast]);
 
+  const sendEmail = useCallback(async (
+    leadId: string, 
+    recipientEmail: string, 
+    subject: string, 
+    body: string,
+    recipientName?: string
+  ) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-sales-email', {
+        body: { leadId, recipientEmail, recipientName, subject, body },
+      });
+
+      if (error) throw error;
+      
+      // Update local state
+      setLeads(prev => prev.map(l => 
+        l.id === leadId 
+          ? { ...l, status: 'contacted', last_contacted_at: new Date().toISOString() }
+          : l
+      ));
+      
+      toast({
+        title: 'Email sendt',
+        description: `Email er sendt til ${recipientEmail}`,
+      });
+      
+      return data;
+    } catch (error: any) {
+      console.error('Error sending email:', error);
+      toast({
+        title: 'Fejl',
+        description: error?.message || 'Kunne ikke sende email',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  }, [toast]);
+
   return {
     leads,
     isLoading,
@@ -346,5 +384,6 @@ export const useSalesLeads = () => {
     importFromCSV,
     generateEmail,
     saveEmail,
+    sendEmail,
   };
 };

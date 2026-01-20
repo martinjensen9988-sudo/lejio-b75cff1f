@@ -15,13 +15,14 @@ const SalesAIEmailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { leads, fetchLeads, generateEmail, saveEmail, updateLead } = useSalesLeads();
+  const { leads, fetchLeads, generateEmail, saveEmail, sendEmail, updateLead } = useSalesLeads();
   
   const [lead, setLead] = useState<SalesLead | null>(null);
   const [emailType, setEmailType] = useState('introduction');
   const [generatedEmail, setGeneratedEmail] = useState<{ subject: string; body: string } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     fetchLeads();
@@ -67,6 +68,33 @@ const SalesAIEmailPage = () => {
     });
     setIsSaving(false);
     navigate('/admin/sales-ai');
+  };
+
+  const handleSendEmail = async () => {
+    if (!lead || !generatedEmail) return;
+    
+    if (!lead.contact_email) {
+      toast({
+        title: 'Mangler email',
+        description: 'Lead har ingen kontakt-email registreret',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setIsSending(true);
+    const result = await sendEmail(
+      lead.id,
+      lead.contact_email,
+      generatedEmail.subject,
+      generatedEmail.body,
+      lead.contact_name
+    );
+    setIsSending(false);
+    
+    if (result) {
+      navigate('/admin/sales-ai');
+    }
   };
 
   if (!lead) {
@@ -222,18 +250,30 @@ const SalesAIEmailPage = () => {
                 />
               </div>
               
-              <div className="flex gap-4 pt-4 border-t">
+              <div className="flex flex-wrap gap-4 pt-4 border-t">
                 <Button variant="outline" onClick={handleCopyEmail}>
                   <Copy className="w-4 h-4 mr-2" />
                   Kopier til udklipsholder
                 </Button>
-                <Button onClick={handleSaveAndMarkContacted} disabled={isSaving}>
+                <Button variant="outline" onClick={handleSaveAndMarkContacted} disabled={isSaving}>
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
                     <Send className="w-4 h-4 mr-2" />
                   )}
-                  Gem & marker som kontaktet
+                  Gem som kladde
+                </Button>
+                <Button 
+                  onClick={handleSendEmail} 
+                  disabled={isSending || !lead?.contact_email}
+                  variant="default"
+                >
+                  {isSending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
+                  Send email til {lead?.contact_email || 'mangler email'}
                 </Button>
               </div>
             </CardContent>
