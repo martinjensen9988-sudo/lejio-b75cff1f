@@ -2,15 +2,16 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { differenceInDays, format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin, Bike, ArrowLeft } from 'lucide-react';
+import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin, Bike, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import VehicleLocationMap from '@/components/search/VehicleLocationMap';
 import { MCLicenseCheck } from '@/components/search/MCLicenseCheck';
 import { MCCategory } from '@/lib/mcLicenseValidation';
@@ -22,12 +23,15 @@ const CreateBookingPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signUp } = useAuth();
 
   const [vehicle, setVehicle] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState<'details' | 'success'>('details');
+  const [step, setStep] = useState<'details' | 'account' | 'success'>('details');
   const [licenseValid, setLicenseValid] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [pendingBookingData, setPendingBookingData] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,6 +39,9 @@ const CreateBookingPage = () => {
     phone: '',
     notes: '',
     acceptTerms: false,
+    // Account creation fields
+    password: '',
+    confirmPassword: '',
   });
 
   // Parse dates from URL params
@@ -110,7 +117,8 @@ const CreateBookingPage = () => {
     return { unitPrice, unitLabel, totalPrice, periodCount, periodType, days };
   }, [vehicle, startDate, endDate, periodType, periodCount]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle proceeding to account step
+  const handleProceedToAccount = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.phone) {
@@ -133,6 +141,24 @@ const CreateBookingPage = () => {
       return;
     }
 
+    // If user is already logged in, create booking directly
+    if (user) {
+      await createBookingAndFinish();
+      return;
+    }
+
+    // Store pending booking data and proceed to account creation
+    setPendingBookingData({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      notes: formData.notes,
+    });
+    setStep('account');
+  };
+
+  // Create booking (called after account creation or if already logged in)
+  const createBookingAndFinish = async (userId?: string) => {
     setIsSubmitting(true);
 
     try {
@@ -145,32 +171,126 @@ const CreateBookingPage = () => {
 
       if (vehicleError || !vehicleData) throw new Error('Kunne ikke finde køretøj');
 
+      const bookingData = pendingBookingData || formData;
+
       // Create booking
-      const { error: bookingError } = await supabase
+      const { data: createdBooking, error: bookingError } = await supabase
         .from('bookings')
         .insert({
           vehicle_id: vehicleId,
           lessor_id: vehicleData.owner_id,
-          start_date: format(startDate, 'yyyy-MM-dd'),
-          end_date: format(endDate, 'yyyy-MM-dd'),
+          renter_id: userId || user?.id || null,
+          start_date: format(startDate!, 'yyyy-MM-dd'),
+          end_date: format(endDate!, 'yyyy-MM-dd'),
           total_price: pricing.totalPrice,
           status: 'pending',
-          renter_name: formData.name,
-          renter_email: formData.email,
-          renter_phone: formData.phone,
-          notes: formData.notes || null,
+          renter_name: bookingData.name,
+          renter_email: bookingData.email || formData.email,
+          renter_phone: bookingData.phone,
+          notes: bookingData.notes || null,
           pickup_location_id: vehicleData.current_location_id || null,
           dropoff_location_id: vehicleData.current_location_id || null,
-        });
+        })
+        .select('id')
+        .single();
 
       if (bookingError) throw new Error('Kunne ikke oprette booking');
 
+      // Send notification to lessor
+      try {
+        const { data: ownerProfile } = await supabase
+          .from('profiles')
+          .select('email, full_name')
+          .eq('id', vehicleData.owner_id)
+          .single();
+
+        if (ownerProfile) {
+          await supabase.functions.invoke('send-booking-notification', {
+            body: {
+              lessorEmail: ownerProfile.email,
+              lessorName: ownerProfile.full_name || 'Udlejer',
+              renterName: bookingData.name,
+              renterEmail: bookingData.email || formData.email,
+              renterPhone: bookingData.phone,
+              vehicleMake: vehicle.make,
+              vehicleModel: vehicle.model,
+              startDate: format(startDate!, 'dd. MMMM yyyy', { locale: da }),
+              endDate: format(endDate!, 'dd. MMMM yyyy', { locale: da }),
+              totalPrice: pricing.totalPrice,
+              notes: bookingData.notes,
+            },
+          });
+        }
+      } catch (notifyError) {
+        console.error('Notification error:', notifyError);
+        // Don't fail the booking if notification fails
+      }
+
       setStep('success');
-      toast({ title: 'Booking sendt!', description: 'Udlejeren vil kontakte dig snarest' });
+      toast({ title: 'Booking sendt!', description: 'Du vil modtage en bekræftelse på email' });
     } catch (error) {
       console.error('Booking error:', error);
       toast({ title: 'Fejl', description: error instanceof Error ? error.message : 'Der opstod en fejl', variant: 'destructive' });
     } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle account creation and then booking
+  const handleCreateAccountAndBook = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.password || formData.password.length < 6) {
+      toast({ title: 'Adgangskode påkrævet', description: 'Adgangskoden skal være mindst 6 tegn', variant: 'destructive' });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({ title: 'Adgangskoder matcher ikke', description: 'Bekræft at begge adgangskoder er ens', variant: 'destructive' });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create account
+      const { error: signUpError } = await signUp(
+        formData.email,
+        formData.password,
+        pendingBookingData?.name || formData.name,
+        'privat' // Default to private user
+      );
+
+      if (signUpError) {
+        if (signUpError.message.includes('already registered')) {
+          toast({ 
+            title: 'Email allerede registreret', 
+            description: 'Log ind eller brug en anden email',
+            variant: 'destructive' 
+          });
+        } else {
+          throw signUpError;
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Wait for auth state to update
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Get the newly created user
+      const { data: { user: newUser } } = await supabase.auth.getUser();
+
+      // Create booking with the new user ID
+      await createBookingAndFinish(newUser?.id);
+
+    } catch (error) {
+      console.error('Account creation error:', error);
+      toast({ 
+        title: 'Fejl ved oprettelse', 
+        description: error instanceof Error ? error.message : 'Der opstod en fejl',
+        variant: 'destructive' 
+      });
       setIsSubmitting(false);
     }
   };
@@ -209,7 +329,7 @@ const CreateBookingPage = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Header */}
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="icon" onClick={() => step === 'account' ? setStep('details') : navigate(-1)}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
@@ -217,9 +337,26 @@ const CreateBookingPage = () => {
                 {isMCOrScooter ? <Bike className="w-6 h-6 text-primary" /> : <Car className="w-6 h-6 text-primary" />}
                 Book {vehicle.make} {vehicle.model}
               </h1>
-              <p className="text-muted-foreground">Udfyld dine oplysninger for at sende en bookingforespørgsel</p>
+              <p className="text-muted-foreground">
+                {step === 'details' && 'Udfyld dine oplysninger'}
+                {step === 'account' && 'Opret konto for at modtage lejekontrakt'}
+                {step === 'success' && 'Booking gennemført'}
+              </p>
             </div>
           </div>
+
+          {/* Progress steps */}
+          {step !== 'success' && (
+            <div className="flex items-center justify-center gap-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step === 'details' ? 'bg-primary text-primary-foreground' : 'bg-mint text-white'}`}>
+                {step === 'account' ? <Check className="w-4 h-4" /> : '1'}
+              </div>
+              <div className={`w-12 h-1 rounded ${step === 'account' ? 'bg-primary' : 'bg-muted'}`} />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step === 'account' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                2
+              </div>
+            </div>
+          )}
 
           {step === 'success' ? (
             <Card>
@@ -228,12 +365,126 @@ const CreateBookingPage = () => {
                   <Check className="w-8 h-8 text-mint" />
                 </div>
                 <h2 className="text-xl font-bold mb-2">Booking sendt!</h2>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-muted-foreground mb-2">
                   Din forespørgsel er sendt til udlejeren. Du vil modtage en bekræftelse på email.
                 </p>
-                <Button onClick={() => navigate('/search')}>Tilbage til søgning</Button>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Din konto er oprettet og du kan nu logge ind for at se dine bookinger og lejekontrakter.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="outline" onClick={() => navigate('/search')}>Tilbage til søgning</Button>
+                  <Button onClick={() => navigate('/my-rentals')}>Se mine bookinger</Button>
+                </div>
               </CardContent>
             </Card>
+          ) : step === 'account' ? (
+            <>
+              {/* Account Creation Step */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lock className="w-5 h-5" />
+                    Opret din konto
+                  </CardTitle>
+                  <CardDescription>
+                    For at modtage din lejekontrakt og kunne administrere din booking, skal du oprette en konto.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleCreateAccountAndBook} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email-display">Email</Label>
+                      <Input
+                        id="email-display"
+                        type="email"
+                        value={formData.email}
+                        disabled
+                        className="bg-muted"
+                      />
+                      <p className="text-xs text-muted-foreground">Din email bruges som login</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Adgangskode *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={formData.password}
+                          onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                          placeholder="Mindst 6 tegn"
+                          className="pl-10 pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Bekræft adgangskode *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="confirmPassword"
+                          type={showPassword ? 'text' : 'password'}
+                          value={formData.confirmPassword}
+                          onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                          placeholder="Gentag adgangskode"
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <Button type="button" variant="outline" onClick={() => setStep('details')} className="flex-1">
+                        Tilbage
+                      </Button>
+                      <Button type="submit" disabled={isSubmitting} className="flex-1">
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            Opretter...
+                          </>
+                        ) : (
+                          'Opret konto & book'
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Summary in account step */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Booking oversigt</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Køretøj:</span>
+                    <span className="font-medium">{vehicle.make} {vehicle.model}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Periode:</span>
+                    <span className="font-medium">
+                      {startDate && endDate && `${format(startDate, 'dd. MMM', { locale: da })} - ${format(endDate, 'dd. MMM yyyy', { locale: da })}`}
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t flex justify-between">
+                    <span className="font-semibold">Total:</span>
+                    <span className="font-bold text-primary">{pricing.totalPrice.toLocaleString('da-DK')} kr</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
           ) : (
             <>
               {/* Location */}
@@ -298,7 +549,7 @@ const CreateBookingPage = () => {
                   <CardTitle>Dine oplysninger</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleProceedToAccount} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Fulde navn *</Label>
                       <div className="relative">
@@ -374,8 +625,10 @@ const CreateBookingPage = () => {
                             <Loader2 className="w-4 h-4 animate-spin mr-2" />
                             Sender...
                           </>
-                        ) : (
+                        ) : user ? (
                           'Send booking'
+                        ) : (
+                          'Fortsæt til oprettelse'
                         )}
                       </Button>
                     </div>
