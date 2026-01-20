@@ -132,6 +132,7 @@ export type Database = {
           id: string
           lessor_id: string
           notes: string | null
+          payment_method: string | null
           pickup_location_id: string | null
           renter_address: string | null
           renter_birth_date: string | null
@@ -167,6 +168,7 @@ export type Database = {
           id?: string
           lessor_id: string
           notes?: string | null
+          payment_method?: string | null
           pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
@@ -202,6 +204,7 @@ export type Database = {
           id?: string
           lessor_id?: string
           notes?: string | null
+          payment_method?: string | null
           pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
