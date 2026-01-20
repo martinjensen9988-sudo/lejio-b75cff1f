@@ -156,13 +156,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
       return;
     }
 
-    // Check if company is active
-    if (cvrData && !cvrData.isActive) {
-      toast.error('Virksomheden er ikke aktiv', {
-        description: 'Kun aktive virksomheder kan registreres på platformen.',
-      });
-      return;
-    }
+    // Company active check removed - users handle their own compliance
 
     // VAT registration check removed - it's up to the user themselves
 
