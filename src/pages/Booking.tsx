@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 import DeductibleInsuranceOption from "@/components/booking/DeductibleInsuranceOption";
 import ReferralCreditOption from "@/components/booking/ReferralCreditOption";
 import { useReferral } from "@/hooks/useReferral";
+import { PaymentMethodSelector, PaymentMethod } from "@/components/booking/PaymentMethodSelector";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
@@ -77,6 +78,13 @@ const Booking = () => {
   const [submitting, setSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
+  const [lessorPaymentSettings, setLessorPaymentSettings] = useState<{
+    accepted_payment_methods: PaymentMethod[];
+    mobilepay_number: string | null;
+    bank_reg_number: string | null;
+    bank_account_number: string | null;
+  } | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
 
   // Step 1: Booking details
   const [periodType, setPeriodType] = useState<PeriodType>("daily");
@@ -150,6 +158,31 @@ const Booking = () => {
       }
 
       setVehicle(data);
+
+      // Fetch lessor payment methods (for the payment step)
+      try {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("accepted_payment_methods, mobilepay_number, bank_reg_number, bank_account_number")
+          .eq("id", data.owner_id)
+          .single();
+
+        if (profileData) {
+          const accepted = (profileData.accepted_payment_methods as PaymentMethod[]) || ["cash"];
+          setLessorPaymentSettings({
+            accepted_payment_methods: accepted,
+            mobilepay_number: profileData.mobilepay_number,
+            bank_reg_number: profileData.bank_reg_number,
+            bank_account_number: profileData.bank_account_number,
+          });
+
+          // Default selection (first available)
+          if (accepted.length > 0) setSelectedPaymentMethod(accepted[0]);
+        }
+      } catch {
+        // Non-blocking: payment step can still show fallback
+      }
+
       setLoading(false);
     };
 
@@ -428,7 +461,48 @@ const Booking = () => {
       });
       return;
     }
-    
+
+    // Require a payment method selection when configured
+    if (lessorPaymentSettings?.accepted_payment_methods?.length && !selectedPaymentMethod) {
+      toast({
+        title: "Vælg betalingsmetode",
+        description: "Du skal vælge en betalingsmetode før du fortsætter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Persist selected method on the booking before proceeding
+    if (selectedPaymentMethod) {
+      const { error: updateError } = await supabase
+        .from("bookings")
+        .update({ payment_method: selectedPaymentMethod })
+        .eq("id", createdBookingId);
+
+      if (updateError) {
+        toast({
+          title: "Fejl",
+          description: "Kunne ikke gemme betalingsmetode",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Non-card methods do not redirect to card checkout
+    if (selectedPaymentMethod && selectedPaymentMethod !== "card") {
+      const msg =
+        selectedPaymentMethod === "cash"
+          ? "Du betaler kontant ved afhentning."
+          : selectedPaymentMethod === "mobilepay"
+            ? `Du betaler via MobilePay${lessorPaymentSettings?.mobilepay_number ? ` til ${lessorPaymentSettings.mobilepay_number}` : ""}.`
+            : `Du betaler via bankoverførsel${lessorPaymentSettings?.bank_reg_number && lessorPaymentSettings?.bank_account_number ? ` til reg ${lessorPaymentSettings.bank_reg_number} konto ${lessorPaymentSettings.bank_account_number}` : ""}.`;
+
+      toast({ title: "Betalingsmetode valgt", description: msg });
+      navigate("/my-rentals");
+      return;
+    }
+
     await redirectToPayment(createdBookingId);
   };
 
@@ -1038,6 +1112,20 @@ const Booking = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Payment method selection */}
+                    {lessorPaymentSettings?.accepted_payment_methods?.length ? (
+                      <PaymentMethodSelector
+                        acceptedMethods={lessorPaymentSettings.accepted_payment_methods}
+                        selectedMethod={selectedPaymentMethod}
+                        onMethodChange={setSelectedPaymentMethod}
+                        lessorPaymentDetails={{
+                          mobilepay_number: lessorPaymentSettings.mobilepay_number,
+                          bank_reg_number: lessorPaymentSettings.bank_reg_number,
+                          bank_account_number: lessorPaymentSettings.bank_account_number,
+                        }}
+                      />
+                    ) : null}
 
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Button
