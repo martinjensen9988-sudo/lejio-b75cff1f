@@ -22,21 +22,26 @@ interface ContractSigningModalProps {
 }
 
 const ContractSigningModal = ({ contract, open, onOpenChange, onSign }: ContractSigningModalProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [signature, setSignature] = useState<string | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedVanvidskorsel, setAcceptedVanvidskorsel] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
 
   const isLessor = user?.id === contract.lessor_id;
-  const isRenter = user?.id === contract.renter_id || !contract.renter_id;
+  // Check if user is renter by ID or by matching email
+  const isRenter = user?.id === contract.renter_id || 
+    (!contract.renter_id && profile?.email === contract.renter_email) ||
+    profile?.email === contract.renter_email;
   
   const role: 'lessor' | 'renter' = isLessor ? 'lessor' : 'renter';
   
+  // Check if this party has already signed
   const alreadySigned = role === 'lessor' ? !!contract.lessor_signature : !!contract.renter_signature;
-  const canSign = role === 'renter' 
-    ? contract.status === 'pending_renter_signature' || contract.status === 'pending_lessor_signature'
-    : contract.status === 'pending_lessor_signature' || contract.status === 'pending_renter_signature';
+  
+  // Lessor can sign if they haven't signed yet, regardless of contract status (unless cancelled or fully signed)
+  // Renter can sign if they haven't signed yet, regardless of contract status (unless cancelled or fully signed)
+  const canSign = !alreadySigned && contract.status !== 'signed' && contract.status !== 'cancelled';
 
   const handleSign = async () => {
     if (!signature) return;
