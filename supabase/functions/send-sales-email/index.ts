@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,11 +7,108 @@ const corsHeaders = {
 };
 
 interface SendEmailRequest {
-  leadId: string;
+  leadId?: string;
   recipientEmail: string;
   recipientName?: string;
   subject: string;
   body: string;
+}
+
+// Base64 encode for SMTP auth
+function base64Encode(str: string): string {
+  return btoa(str);
+}
+
+// Simple SMTP client using raw TCP
+async function sendSmtpEmail(
+  host: string,
+  user: string,
+  password: string,
+  from: string,
+  to: string,
+  subject: string,
+  textBody: string,
+  htmlBody: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const conn = await Deno.connectTls({
+      hostname: host,
+      port: 465,
+    });
+
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    const readResponse = async (): Promise<string> => {
+      const buffer = new Uint8Array(1024);
+      const n = await conn.read(buffer);
+      if (n === null) return "";
+      return decoder.decode(buffer.subarray(0, n));
+    };
+
+    const sendCommand = async (command: string): Promise<string> => {
+      await conn.write(encoder.encode(command + "\r\n"));
+      return await readResponse();
+    };
+
+    // Read greeting
+    await readResponse();
+
+    // EHLO
+    await sendCommand(`EHLO ${host}`);
+
+    // AUTH LOGIN
+    await sendCommand("AUTH LOGIN");
+    await sendCommand(base64Encode(user));
+    await sendCommand(base64Encode(password));
+
+    // MAIL FROM
+    await sendCommand(`MAIL FROM:<${from}>`);
+
+    // RCPT TO
+    await sendCommand(`RCPT TO:<${to}>`);
+
+    // DATA
+    await sendCommand("DATA");
+
+    // Email content with MIME
+    const boundary = `----=_Part_${Date.now()}`;
+    const messageId = `<${Date.now()}.${Math.random().toString(36).substring(2)}@lejio.dk>`;
+    
+    const emailContent = [
+      `From: "LEJIO Forhandler" <${from}>`,
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `Message-ID: ${messageId}`,
+      `MIME-Version: 1.0`,
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      `Reply-To: hej@lejio.dk`,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/plain; charset=UTF-8`,
+      ``,
+      textBody,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/html; charset=UTF-8`,
+      ``,
+      htmlBody,
+      ``,
+      `--${boundary}--`,
+      `.`,
+    ].join("\r\n");
+
+    await sendCommand(emailContent);
+
+    // QUIT
+    await sendCommand("QUIT");
+    conn.close();
+
+    return { success: true, messageId };
+  } catch (error: any) {
+    console.error("SMTP error:", error);
+    return { success: false, error: error.message };
+  }
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -59,45 +155,34 @@ const handler = async (req: Request): Promise<Response> => {
       .map(line => line.trim() === '' ? '<br>' : `<p style="margin: 0 0 12px 0;">${line}</p>`)
       .join('');
 
-    const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-        ${htmlBody}
-      </body>
-      </html>
-    `;
+    const emailHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  ${htmlBody}
+</body>
+</html>`;
 
-    // Create SMTP client
-    const client = new SMTPClient({
-      connection: {
-        hostname: smtpHost,
-        port: 587,
-        tls: true,
-        auth: {
-          username: smtpUser,
-          password: smtpPassword,
-        },
-      },
-    });
+    // Send email via SMTP
+    const result = await sendSmtpEmail(
+      smtpHost,
+      smtpUser,
+      smtpPassword,
+      "forhandler@lejio.dk",
+      recipientEmail,
+      subject,
+      body,
+      emailHtml
+    );
 
-    // Send email
-    await client.send({
-      from: "LEJIO Forhandler <forhandler@lejio.dk>",
-      to: recipientEmail,
-      subject: subject,
-      content: body,
-      html: emailHtml,
-      replyTo: "hej@lejio.dk",
-    });
+    if (!result.success) {
+      throw new Error(result.error || "SMTP fejl");
+    }
 
-    await client.close();
-
-    console.log("Sales email sent successfully via SMTP to:", recipientEmail);
+    console.log("Sales email sent successfully:", result.messageId);
 
     // Update the sales_emails table if leadId is provided
     if (leadId) {
@@ -141,6 +226,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ 
         success: true, 
         message: "Email sendt succesfuldt",
+        messageId: result.messageId,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
