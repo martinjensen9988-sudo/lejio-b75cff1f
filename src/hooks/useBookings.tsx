@@ -16,6 +16,9 @@ export interface Booking {
   renter_email: string | null;
   renter_phone: string | null;
   notes: string | null;
+  payment_method: string | null;
+  payment_received: boolean;
+  payment_received_at: string | null;
   created_at: string;
   updated_at: string;
   vehicle?: {
@@ -84,6 +87,32 @@ export const useBookings = () => {
     } catch (err) {
       console.error('Error updating booking:', err);
       toast.error('Kunne ikke opdatere booking');
+    return false;
+    }
+  };
+
+  const markPaymentReceived = async (id: string): Promise<boolean> => {
+    try {
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ 
+          payment_received: true,
+          payment_received_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+
+      setBookings(prev => prev.map(b => 
+        b.id === id 
+          ? { ...b, payment_received: true, payment_received_at: new Date().toISOString() } 
+          : b
+      ));
+      toast.success('Betaling markeret som modtaget');
+      return true;
+    } catch (err) {
+      console.error('Error marking payment received:', err);
+      toast.error('Kunne ikke opdatere betalingsstatus');
       return false;
     }
   };
@@ -97,6 +126,7 @@ export const useBookings = () => {
     isLoading,
     error,
     updateBookingStatus,
+    markPaymentReceived,
     refetch: fetchBookings,
   };
 };
