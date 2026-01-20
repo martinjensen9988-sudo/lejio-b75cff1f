@@ -40,11 +40,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Use the same SMTP settings as other email functions
-    const smtpHost = Deno.env.get("SMTP_HOST");
-    const smtpUser = Deno.env.get("SMTP_USER");
-    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
-    const smtpFromEmail = Deno.env.get("SMTP_FROM_EMAIL") || "noreply@lejio.dk";
+    // Use sales-specific SMTP settings
+    const smtpHost = Deno.env.get("SALES_SMTP_HOST");
+    const smtpUser = Deno.env.get("SALES_SMTP_USER");
+    const smtpPassword = Deno.env.get("SALES_SMTP_PASSWORD");
 
     if (!smtpHost || !smtpUser || !smtpPassword) {
       console.error("Missing SMTP configuration");
@@ -87,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     await client.send({
-      from: `LEJIO <${smtpFromEmail}>`,
+      from: "LEJIO <forhandler@lejio.dk>",
       to: recipientEmail,
       subject: subject,
       content: body,
