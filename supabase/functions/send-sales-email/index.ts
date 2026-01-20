@@ -40,15 +40,15 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Get SMTP settings
-    const smtpHost = Deno.env.get("SMTP_HOST");
-    const smtpUser = Deno.env.get("SMTP_USER");
-    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
+    // Get SMTP settings for sales emails
+    const smtpHost = Deno.env.get("SALES_SMTP_HOST");
+    const smtpUser = Deno.env.get("SALES_SMTP_USER");
+    const smtpPassword = Deno.env.get("SALES_SMTP_PASSWORD");
 
     if (!smtpHost || !smtpUser || !smtpPassword) {
-      console.error("Missing SMTP configuration");
+      console.error("Missing SALES SMTP configuration");
       return new Response(
-        JSON.stringify({ error: "SMTP er ikke konfigureret" }),
+        JSON.stringify({ error: "Salgs-SMTP er ikke konfigureret" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
