@@ -17,6 +17,7 @@ import { MCLicenseCheck } from '@/components/search/MCLicenseCheck';
 import { MCCategory } from '@/lib/mcLicenseValidation';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { PaymentMethodSelector, PaymentMethod } from '@/components/booking/PaymentMethodSelector';
 
 const CreateBookingPage = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
@@ -32,6 +33,13 @@ const CreateBookingPage = () => {
   const [licenseValid, setLicenseValid] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [pendingBookingData, setPendingBookingData] = useState<any>(null);
+  const [lessorPaymentSettings, setLessorPaymentSettings] = useState<{
+    accepted_payment_methods: PaymentMethod[];
+    mobilepay_number: string | null;
+    bank_reg_number: string | null;
+    bank_account_number: string | null;
+  } | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -50,20 +58,43 @@ const CreateBookingPage = () => {
   const periodType = (searchParams.get('periodType') as 'daily' | 'weekly' | 'monthly') || 'daily';
   const periodCount = parseInt(searchParams.get('periodCount') || '1');
 
-  // Fetch vehicle data
+  // Fetch vehicle data and lessor payment settings
   useEffect(() => {
-    const fetchVehicle = async () => {
+    const fetchVehicleAndPaymentSettings = async () => {
       if (!vehicleId) return;
 
       try {
-        const { data, error } = await supabase
+        const { data: vehicleData, error: vehicleError } = await supabase
           .from('vehicles_public')
           .select('*')
           .eq('id', vehicleId)
           .single();
 
-        if (error) throw error;
-        setVehicle(data);
+        if (vehicleError) throw vehicleError;
+        setVehicle(vehicleData);
+
+        // Fetch lessor's payment settings
+        if (vehicleData?.owner_id) {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('accepted_payment_methods, mobilepay_number, bank_reg_number, bank_account_number')
+            .eq('id', vehicleData.owner_id)
+            .single();
+
+          if (!profileError && profileData) {
+            const acceptedMethods = (profileData.accepted_payment_methods as PaymentMethod[]) || ['cash'];
+            setLessorPaymentSettings({
+              accepted_payment_methods: acceptedMethods,
+              mobilepay_number: profileData.mobilepay_number,
+              bank_reg_number: profileData.bank_reg_number,
+              bank_account_number: profileData.bank_account_number,
+            });
+            // Auto-select first available method
+            if (acceptedMethods.length > 0) {
+              setSelectedPaymentMethod(acceptedMethods[0]);
+            }
+          }
+        }
       } catch (err) {
         console.error('Error fetching vehicle:', err);
         toast({
@@ -76,7 +107,7 @@ const CreateBookingPage = () => {
       }
     };
 
-    fetchVehicle();
+    fetchVehicleAndPaymentSettings();
   }, [vehicleId]);
 
   // Determine vehicle type
@@ -141,6 +172,12 @@ const CreateBookingPage = () => {
       return;
     }
 
+    // Validate payment method selection if lessor has configured payment methods
+    if (lessorPaymentSettings && lessorPaymentSettings.accepted_payment_methods.length > 0 && !selectedPaymentMethod) {
+      toast({ title: 'Vælg betalingsmetode', description: 'Du skal vælge en betalingsmetode', variant: 'destructive' });
+      return;
+    }
+
     // If user is already logged in, create booking directly
     if (user) {
       await createBookingAndFinish();
@@ -190,6 +227,7 @@ const CreateBookingPage = () => {
           notes: bookingData.notes || null,
           pickup_location_id: vehicleData.current_location_id || null,
           dropoff_location_id: vehicleData.current_location_id || null,
+          payment_method: selectedPaymentMethod,
         })
         .select('id')
         .single();
@@ -537,6 +575,20 @@ const CreateBookingPage = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Payment Method Selection */}
+              {lessorPaymentSettings && lessorPaymentSettings.accepted_payment_methods.length > 0 && (
+                <PaymentMethodSelector
+                  acceptedMethods={lessorPaymentSettings.accepted_payment_methods}
+                  selectedMethod={selectedPaymentMethod}
+                  onMethodChange={setSelectedPaymentMethod}
+                  lessorPaymentDetails={{
+                    mobilepay_number: lessorPaymentSettings.mobilepay_number,
+                    bank_reg_number: lessorPaymentSettings.bank_reg_number,
+                    bank_account_number: lessorPaymentSettings.bank_account_number,
+                  }}
+                />
+              )}
 
               {/* MC License Check */}
               {isMCOrScooter && mcCategory && (
