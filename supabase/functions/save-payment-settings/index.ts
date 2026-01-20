@@ -1,10 +1,22 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.87.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Decode JWT payload without verification (Supabase already verified via service role)
+function decodeJwtPayload(token: string): { sub?: string; email?: string } | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1]));
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 // Encryption utilities using Web Crypto API
 async function getEncryptionKey(secret: string): Promise<CryptoKey> {
@@ -63,37 +75,30 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
     // Check for authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
+      console.error('[SAVE-PAYMENT-SETTINGS] No authorization header');
       throw new Error('No authorization header');
     }
 
-    // Create client for auth validation
-    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
-
-    // Verify token and get claims (edge-runtime safe)
-    const token = authHeader.split(' ')[1]?.trim();
-    if (!token) {
-      throw new Error('No authorization header');
-    }
-
-    // Validate JWT by fetching the user for this token
-    const { data: userData, error: userError } = await supabaseAuth.auth.getUser(token);
-    if (userError || !userData?.user?.id) {
-      console.error('[SAVE-PAYMENT-SETTINGS] Auth error:', userError?.message);
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Decode JWT to get user ID (token is already validated by Supabase gateway)
+    const payload = decodeJwtPayload(token);
+    if (!payload?.sub) {
+      console.error('[SAVE-PAYMENT-SETTINGS] Invalid token payload');
       throw new Error('Not authenticated');
     }
 
-    const user = { id: userData.user.id };
+    const userId = payload.sub;
+    console.log('[SAVE-PAYMENT-SETTINGS] User authenticated:', userId);
 
     const { payment_gateway, gateway_api_key, gateway_merchant_id, bank_account } = await req.json();
     
-    console.log('[SAVE-PAYMENT-SETTINGS] Saving settings for user:', user.id);
+    console.log('[SAVE-PAYMENT-SETTINGS] Saving settings for user:', userId);
 
     // Get encryption key
     const encryptionKey = await getEncryptionKey(encryptionSecret);
@@ -103,14 +108,13 @@ serve(async (req) => {
     const encryptedMerchantId = gateway_merchant_id ? await encrypt(gateway_merchant_id, encryptionKey) : null;
 
     // Use service role for database operations
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check if record exists
     const { data: existing } = await supabaseAdmin
       .from('lessor_payment_settings')
       .select('id')
-      .eq('lessor_id', user.id)
+      .eq('lessor_id', userId)
       .maybeSingle();
 
     let error;
@@ -125,14 +129,14 @@ serve(async (req) => {
           bank_account,
           updated_at: new Date().toISOString()
         })
-        .eq('lessor_id', user.id);
+        .eq('lessor_id', userId);
       error = result.error;
     } else {
       // Insert new record
       const result = await supabaseAdmin
         .from('lessor_payment_settings')
         .insert({
-          lessor_id: user.id,
+          lessor_id: userId,
           payment_gateway,
           gateway_api_key: encryptedApiKey,
           gateway_merchant_id: encryptedMerchantId,

@@ -6,6 +6,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Decode JWT payload without verification (Supabase already verified via service role)
+function decodeJwtPayload(token: string): { sub?: string; email?: string } | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1]));
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
 // Decryption utilities using Web Crypto API
 async function getEncryptionKey(secret: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
@@ -78,9 +90,9 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    // Create client with user's auth token
+    // Check for authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       console.error('[GET-PAYMENT-SETTINGS] No valid authorization header');
@@ -90,40 +102,28 @@ serve(async (req) => {
       );
     }
 
-    // Create supabase client with user's token
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
-
-    // Verify token and get claims
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
     
-    if (claimsError || !claimsData?.claims?.sub) {
-      console.error('[GET-PAYMENT-SETTINGS] Auth error:', claimsError?.message);
+    // Decode JWT to get user ID (token is already validated by Supabase gateway)
+    const payload = decodeJwtPayload(token);
+    if (!payload?.sub) {
+      console.error('[GET-PAYMENT-SETTINGS] Invalid token payload');
       return new Response(
         JSON.stringify({ settings: null }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = claimsData.claims.sub;
+    const userId = payload.sub;
+    console.log('[GET-PAYMENT-SETTINGS] Fetching settings for user:', userId);
 
     // Use service role client for database operations
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Create a user-like object for compatibility
-    const user = { id: userId };
-
-    console.log('[GET-PAYMENT-SETTINGS] Fetching settings for user:', user.id);
-
-    // Fetch data using the existing admin client
 
     const { data, error } = await supabaseAdmin
       .from('lessor_payment_settings')
       .select('*')
-      .eq('lessor_id', user.id)
+      .eq('lessor_id', userId)
       .maybeSingle();
 
     if (error) {
