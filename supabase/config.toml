@@ -140,3 +140,6 @@ verify_jwt = false
 
 [functions.analyze-sales-lead]
 verify_jwt = true
+
+[functions.send-sales-email]
+verify_jwt = true
