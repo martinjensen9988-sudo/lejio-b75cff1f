@@ -65,21 +65,27 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     
-    // Create client with user's auth token
+    // Check for authorization header
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       throw new Error('No authorization header');
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    // Create client for auth validation
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    // Verify token and get user claims
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims?.sub) {
+      console.error('[SAVE-PAYMENT-SETTINGS] Auth error:', claimsError?.message);
       throw new Error('Not authenticated');
     }
+
+    const user = { id: claimsData.claims.sub };
 
     const { payment_gateway, gateway_api_key, gateway_merchant_id, bank_account } = await req.json();
     
