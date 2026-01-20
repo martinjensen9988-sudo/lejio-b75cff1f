@@ -62,9 +62,9 @@ const ContractSigningModal = ({ contract, open, onOpenChange, onSign }: Contract
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl flex items-center gap-2">
+          <DialogTitle className="font-display text-2xl flex items-center gap-2 text-foreground">
             <FileCheck className="w-6 h-6 text-primary" />
             {alreadySigned ? 'Kontrakt allerede underskrevet' : 'Underskriv kontrakt'}
           </DialogTitle>
@@ -72,7 +72,9 @@ const ContractSigningModal = ({ contract, open, onOpenChange, onSign }: Contract
 
         <div className="space-y-6">
           {/* Contract Preview */}
-          <ContractPreview contract={contract} />
+          <div className="border border-border rounded-xl overflow-hidden">
+            <ContractPreview contract={contract} />
+          </div>
 
           {/* Signing Section */}
           {!alreadySigned && canSign && (
