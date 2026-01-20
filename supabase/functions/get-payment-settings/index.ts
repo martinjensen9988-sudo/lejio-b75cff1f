@@ -82,23 +82,39 @@ serve(async (req) => {
     
     // Create client with user's auth token
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.error('[GET-PAYMENT-SETTINGS] No valid authorization header');
+      return new Response(
+        JSON.stringify({ settings: null }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Extract the token from the header
-    const token = authHeader.replace('Bearer ', '');
+    // Create supabase client with user's token
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
-    // Use service role client to verify the token and get user
+    // Verify token and get claims
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims?.sub) {
+      console.error('[GET-PAYMENT-SETTINGS] Auth error:', claimsError?.message);
+      return new Response(
+        JSON.stringify({ settings: null }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // Use service role client for database operations
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get authenticated user by verifying the JWT token
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    if (authError || !user) {
-      console.error('[GET-PAYMENT-SETTINGS] Auth error:', authError?.message);
-      throw new Error('Not authenticated');
-    }
+    
+    // Create a user-like object for compatibility
+    const user = { id: userId };
 
     console.log('[GET-PAYMENT-SETTINGS] Fetching settings for user:', user.id);
 
