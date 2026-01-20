@@ -76,16 +76,18 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Verify token and get user claims
+    // Verify token and get user
+    // NOTE: In the edge runtime, relying on session-based auth will fail.
+    // We must validate via the JWT passed from the browser.
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
-    
-    if (claimsError || !claimsData?.claims?.sub) {
-      console.error('[SAVE-PAYMENT-SETTINGS] Auth error:', claimsError?.message);
+    const { data: userData, error: userError } = await supabaseAuth.auth.getUser(token);
+
+    if (userError || !userData?.user?.id) {
+      console.error('[SAVE-PAYMENT-SETTINGS] Auth error:', userError?.message);
       throw new Error('Not authenticated');
     }
 
-    const user = { id: claimsData.claims.sub };
+    const user = { id: userData.user.id };
 
     const { payment_gateway, gateway_api_key, gateway_merchant_id, bank_account } = await req.json();
     
