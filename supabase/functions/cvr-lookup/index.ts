@@ -203,16 +203,8 @@ serve(async (req) => {
 
     console.log('Returning CVR data:', JSON.stringify(cvrData));
 
-    // If company is not active, return error with data
-    if (!isActive) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Virksomheden er ikke aktiv. Kun aktive virksomheder kan registreres.',
-          ...cvrData 
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Note: We no longer block inactive companies here - the frontend handles the validation
+    // This allows showing informational data even for inactive companies
 
     return new Response(
       JSON.stringify(cvrData),

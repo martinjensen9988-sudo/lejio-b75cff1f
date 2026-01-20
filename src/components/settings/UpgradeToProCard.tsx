@@ -531,11 +531,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   {loading ? 'Opgraderer...' : 'Bekræft og opgrader'}
                 </Button>
 
-                {cvrData && !cvrData.vatRegistered && cvrData.isActive && (
-                  <p className="text-xs text-destructive text-center mt-2">
-                    Kun momsregistrerede virksomheder kan registreres som Pro-udlejer.
-                  </p>
-                )}
+                {/* VAT registration info removed - users handle their own tax compliance */}
               </div>
             </DialogContent>
           </Dialog>
