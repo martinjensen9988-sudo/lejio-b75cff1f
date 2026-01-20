@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.87.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -76,12 +76,14 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Verify token and get user
-    // NOTE: In the edge runtime, relying on session-based auth will fail.
-    // We must validate via the JWT passed from the browser.
-    const token = authHeader.replace('Bearer ', '');
-    const { data: userData, error: userError } = await supabaseAuth.auth.getUser(token);
+    // Verify token and get claims (edge-runtime safe)
+    const token = authHeader.split(' ')[1]?.trim();
+    if (!token) {
+      throw new Error('No authorization header');
+    }
 
+    // Validate JWT by fetching the user for this token
+    const { data: userData, error: userError } = await supabaseAuth.auth.getUser(token);
     if (userError || !userData?.user?.id) {
       console.error('[SAVE-PAYMENT-SETTINGS] Auth error:', userError?.message);
       throw new Error('Not authenticated');
