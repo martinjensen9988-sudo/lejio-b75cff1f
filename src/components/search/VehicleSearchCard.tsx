@@ -25,12 +25,14 @@ const VehicleSearchCard = ({
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Generate multiple image URLs (simulating carousel with same image + variations)
+  // Use images array if available, otherwise fall back to single image_url
   const images = useMemo(() => {
+    if (vehicle.images && vehicle.images.length > 0) {
+      return vehicle.images;
+    }
     if (!vehicle.image_url) return [];
-    // For now, use the single image - in production you'd have vehicle.images array
     return [vehicle.image_url];
-  }, [vehicle.image_url]);
+  }, [vehicle.images, vehicle.image_url]);
 
   const nextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
