@@ -42,6 +42,8 @@ interface CheckInOutWizardProps {
       extra_km_price?: number;
       latitude?: number;
       longitude?: number;
+      exterior_cleaning_fee?: number;
+      interior_cleaning_fee?: number;
     };
   };
   checkInData?: {
@@ -81,6 +83,8 @@ export const CheckInOutWizard = ({
   const [showDamageScanner, setShowDamageScanner] = useState(false);
   const [damageResults, setDamageResults] = useState<any[]>([]);
   const [scanSessionId, setScanSessionId] = useState<string | null>(null);
+  const [exteriorClean, setExteriorClean] = useState(true);
+  const [interiorClean, setInteriorClean] = useState(true);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -248,6 +252,10 @@ export const CheckInOutWizard = ({
       fuelFee = (fuelMissingLiters * pricePerLiter) + missingFee;
     }
 
+    // Cleaning fees
+    const exteriorCleaningFee = !exteriorClean ? (booking.vehicle?.exterior_cleaning_fee || 350) : 0;
+    const interiorCleaningFee = !interiorClean ? (booking.vehicle?.interior_cleaning_fee || 500) : 0;
+
     return {
       kmDriven,
       kmOverage,
@@ -255,7 +263,11 @@ export const CheckInOutWizard = ({
       fuelDiff,
       fuelMissingLiters,
       fuelFee,
-      total: kmOverageFee + fuelFee
+      exteriorClean,
+      interiorClean,
+      exteriorCleaningFee,
+      interiorCleaningFee,
+      total: kmOverageFee + fuelFee + exteriorCleaningFee + interiorCleaningFee
     };
   };
 
@@ -563,6 +575,39 @@ export const CheckInOutWizard = ({
                   </CardContent>
                 </Card>
 
+                {/* Cleaning status - only for check-out */}
+                {mode === 'check_out' && (
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <h4 className="font-medium text-sm">Rengøringsstatus</h4>
+                      <div 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
+                        onClick={() => setExteriorClean(!exteriorClean)}
+                      >
+                        <span className="text-sm">Udvendig ren</span>
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center ${exteriorClean ? 'bg-primary border-primary' : 'border-muted-foreground'}`}>
+                          {exteriorClean && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
+                        </div>
+                      </div>
+                      <div 
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
+                        onClick={() => setInteriorClean(!interiorClean)}
+                      >
+                        <span className="text-sm">Indvendig ren</span>
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center ${interiorClean ? 'bg-primary border-primary' : 'border-muted-foreground'}`}>
+                          {interiorClean && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
+                        </div>
+                      </div>
+                      {(!exteriorClean || !interiorClean) && (
+                        <div className="text-xs text-muted-foreground pt-2 border-t">
+                          {!exteriorClean && <p>Udvendig rengøring: {booking.vehicle?.exterior_cleaning_fee || 350} kr</p>}
+                          {!interiorClean && <p>Indvendig rengøring: {booking.vehicle?.interior_cleaning_fee || 500} kr</p>}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
                 {wasManuallyAdjusted && (
                   <div className="flex items-center gap-2 text-amber-600">
                     <AlertTriangle className="h-4 w-4" />
@@ -640,10 +685,31 @@ export const CheckInOutWizard = ({
                   </div>
                 </div>
 
+                {/* Cleaning fees section */}
+                {(settlement.exteriorCleaningFee > 0 || settlement.interiorCleaningFee > 0) && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Rengøring</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      {settlement.exteriorCleaningFee > 0 && (
+                        <>
+                          <span className="text-destructive">Udvendig rengøring:</span>
+                          <span className="text-destructive font-bold">{settlement.exteriorCleaningFee.toFixed(2)} kr</span>
+                        </>
+                      )}
+                      {settlement.interiorCleaningFee > 0 && (
+                        <>
+                          <span className="text-destructive">Indvendig rengøring:</span>
+                          <span className="text-destructive font-bold">{settlement.interiorCleaningFee.toFixed(2)} kr</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total ekstra opkrævning:</span>
-                    <span className={settlement.total > 0 ? 'text-destructive' : 'text-green-600'}>
+                    <span className={settlement.total > 0 ? 'text-destructive' : 'text-primary'}>
                       {settlement.total.toFixed(2)} kr
                     </span>
                   </div>

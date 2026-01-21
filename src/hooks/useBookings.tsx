@@ -29,6 +29,8 @@ export interface Booking {
     registration: string;
     make: string;
     model: string;
+    exterior_cleaning_fee?: number;
+    interior_cleaning_fee?: number;
   };
 }
 
@@ -56,7 +58,7 @@ export const useBookings = () => {
         .from('bookings')
         .select(`
           *,
-          vehicle:vehicles(registration, make, model)
+          vehicle:vehicles(registration, make, model, exterior_cleaning_fee, interior_cleaning_fee)
         `)
         .eq('lessor_id', user.id)
         .order('start_date', { ascending: false });

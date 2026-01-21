@@ -123,6 +123,9 @@ export interface Vehicle {
   mc_daily_km_limit: number | null;
   winter_deactivated: boolean;
   rain_guarantee_enabled: boolean;
+  // Cleaning fees
+  exterior_cleaning_fee: number | null;
+  interior_cleaning_fee: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -224,6 +227,9 @@ export interface VehicleInsert {
   mc_daily_km_limit?: number;
   winter_deactivated?: boolean;
   rain_guarantee_enabled?: boolean;
+  // Cleaning fees
+  exterior_cleaning_fee?: number;
+  interior_cleaning_fee?: number;
 }
 
 export const useVehicles = () => {
