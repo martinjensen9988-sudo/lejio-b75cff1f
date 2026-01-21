@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { MapPin, Mail, Heart, ArrowRight } from "lucide-react";
+import { MapPin, Mail, Heart, ArrowRight, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -81,6 +81,12 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
 
             <div>
               <h4 className="font-display font-bold text-background text-lg mb-6">Kontakt</h4>
+              <div className="flex items-center gap-3 text-background/70 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-background/10 flex items-center justify-center">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <a href="tel:+4591998929" className="hover:text-primary transition-colors">91 99 89 29</a>
+              </div>
               <div className="flex items-center gap-3 text-background/70 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-background/10 flex items-center justify-center">
                   <Mail className="w-5 h-5" />

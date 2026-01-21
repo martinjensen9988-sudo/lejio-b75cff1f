@@ -57,6 +57,7 @@ const PrivacyPolicy = () => {
                     LEJIO er dataansvarlig for behandlingen af dine personoplysninger. Du kan kontakte os på:
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>Telefon: 91 99 89 29</li>
                     <li>E-mail: hej@lejio.dk</li>
                     <li>Adresse: Danmark</li>
                   </ul>

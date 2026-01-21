@@ -240,8 +240,8 @@ Udlejere kan sætte individuelle priser for:
 ## KONTAKT
 Ved komplekse spørgsmål kan du kontakte:
 - Rasmus Damsgaard, Medstifter & Partner
+- Telefon: 91 99 89 29
 - E-mail: rasmus@lejio.dk
-- Telefon: Kontakt via platformen
 
 ## INSTRUKTIONER
 - Svar altid på dansk

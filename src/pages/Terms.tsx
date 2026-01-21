@@ -60,6 +60,7 @@ const Terms = () => {
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
                     <li>LEJIO</li>
+                    <li>Telefon: 91 99 89 29</li>
                     <li>E-mail: hej@lejio.dk</li>
                     <li>Web: lejio.dk</li>
                   </ul>
@@ -287,6 +288,7 @@ const Terms = () => {
                     Har du spørgsmål til disse handelsbetingelser, er du velkommen til at kontakte os:
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>Telefon: 91 99 89 29</li>
                     <li>E-mail: hej@lejio.dk</li>
                   </ul>
                 </section>
