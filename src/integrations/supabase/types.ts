@@ -118,7 +118,12 @@ export type Database = {
       }
       bookings: {
         Row: {
+          base_price: number | null
           created_at: string
+          daily_price: number | null
+          deductible_insurance_price: number | null
+          deductible_insurance_selected: boolean | null
+          deposit_amount: number | null
           dropoff_location_id: string | null
           end_date: string
           extra_driver_birth_date: string | null
@@ -127,14 +132,20 @@ export type Database = {
           extra_driver_license_country: string | null
           extra_driver_license_issue_date: string | null
           extra_driver_license_number: string | null
+          extra_km_price: number | null
           fuel_fee: number | null
           has_extra_driver: boolean | null
           id: string
+          included_km: number | null
           lessor_id: string
+          monthly_price: number | null
           notes: string | null
+          original_deductible: number | null
           payment_method: string | null
           payment_received: boolean | null
           payment_received_at: string | null
+          period_count: number | null
+          period_type: string | null
           pickup_location_id: string | null
           renter_address: string | null
           renter_birth_date: string | null
@@ -152,11 +163,18 @@ export type Database = {
           start_date: string
           status: string
           total_price: number
+          unlimited_km: boolean | null
           updated_at: string
           vehicle_id: string
+          weekly_price: number | null
         }
         Insert: {
+          base_price?: number | null
           created_at?: string
+          daily_price?: number | null
+          deductible_insurance_price?: number | null
+          deductible_insurance_selected?: boolean | null
+          deposit_amount?: number | null
           dropoff_location_id?: string | null
           end_date: string
           extra_driver_birth_date?: string | null
@@ -165,14 +183,20 @@ export type Database = {
           extra_driver_license_country?: string | null
           extra_driver_license_issue_date?: string | null
           extra_driver_license_number?: string | null
+          extra_km_price?: number | null
           fuel_fee?: number | null
           has_extra_driver?: boolean | null
           id?: string
+          included_km?: number | null
           lessor_id: string
+          monthly_price?: number | null
           notes?: string | null
+          original_deductible?: number | null
           payment_method?: string | null
           payment_received?: boolean | null
           payment_received_at?: string | null
+          period_count?: number | null
+          period_type?: string | null
           pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
@@ -190,11 +214,18 @@ export type Database = {
           start_date: string
           status?: string
           total_price: number
+          unlimited_km?: boolean | null
           updated_at?: string
           vehicle_id: string
+          weekly_price?: number | null
         }
         Update: {
+          base_price?: number | null
           created_at?: string
+          daily_price?: number | null
+          deductible_insurance_price?: number | null
+          deductible_insurance_selected?: boolean | null
+          deposit_amount?: number | null
           dropoff_location_id?: string | null
           end_date?: string
           extra_driver_birth_date?: string | null
@@ -203,14 +234,20 @@ export type Database = {
           extra_driver_license_country?: string | null
           extra_driver_license_issue_date?: string | null
           extra_driver_license_number?: string | null
+          extra_km_price?: number | null
           fuel_fee?: number | null
           has_extra_driver?: boolean | null
           id?: string
+          included_km?: number | null
           lessor_id?: string
+          monthly_price?: number | null
           notes?: string | null
+          original_deductible?: number | null
           payment_method?: string | null
           payment_received?: boolean | null
           payment_received_at?: string | null
+          period_count?: number | null
+          period_type?: string | null
           pickup_location_id?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
@@ -228,8 +265,10 @@ export type Database = {
           start_date?: string
           status?: string
           total_price?: number
+          unlimited_km?: boolean | null
           updated_at?: string
           vehicle_id?: string
+          weekly_price?: number | null
         }
         Relationships: [
           {

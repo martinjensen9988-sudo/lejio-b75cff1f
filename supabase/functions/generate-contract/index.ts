@@ -116,6 +116,20 @@ serve(async (req) => {
     const vehicle = booking.vehicle;
     const calculatedVehicleValue = vehicleValue || 150000; // Default value if not provided
 
+    // Determine pricing based on booking period type
+    let displayPrice = booking.base_price || vehicle.daily_price || 499;
+    let includedKm = booking.included_km || vehicle.included_km || 100;
+    let extraKmPrice = booking.extra_km_price || vehicle.extra_km_price || 2.50;
+
+    // If booking has unlimited km, set included_km to 0 and extra_km_price to 0 (will show as "unlimited" in contract)
+    if (booking.unlimited_km) {
+      includedKm = 0;
+      extraKmPrice = 0;
+    }
+
+    // Calculate deductible: if renter selected 0-deductible insurance, set to 0
+    const deductibleAmount = booking.deductible_insurance_selected ? 0 : (booking.original_deductible || 5000);
+
     // Create contract record
     const contractData = {
       booking_id: bookingId,
@@ -133,14 +147,14 @@ serve(async (req) => {
       vehicle_vin: vehicle.vin,
       vehicle_value: calculatedVehicleValue,
       
-      // Rental terms
+      // Rental terms - use booking data, fallback to vehicle data
       start_date: booking.start_date,
       end_date: booking.end_date,
-      daily_price: vehicle.daily_price || 499,
-      included_km: vehicle.included_km || 100,
-      extra_km_price: vehicle.extra_km_price || 2.50,
+      daily_price: displayPrice,
+      included_km: includedKm,
+      extra_km_price: extraKmPrice,
       total_price: booking.total_price,
-      deposit_amount: depositAmount || 2500,
+      deposit_amount: depositAmount || booking.deposit_amount || 2500,
       
       // Lessor details
       lessor_name: lessorProfile?.full_name || user.email,
@@ -166,7 +180,7 @@ serve(async (req) => {
       // Insurance
       insurance_company: lessorProfile?.insurance_company,
       insurance_policy_number: lessorProfile?.insurance_policy_number,
-      deductible_amount: 5000,
+      deductible_amount: deductibleAmount,
       
       // Vanvidskørsel
       vanvidskørsel_accepted: false,

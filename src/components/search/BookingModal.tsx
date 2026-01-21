@@ -173,6 +173,17 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
           notes: formData.notes || null,
           pickup_location_id: vehicleData.current_location_id || null,
           dropoff_location_id: vehicleData.current_location_id || null,
+          // Pricing details for contract
+          period_type: pricing.periodType,
+          period_count: pricing.periodCount,
+          daily_price: vehicle.daily_price || null,
+          weekly_price: vehicle.weekly_price || null,
+          monthly_price: vehicle.monthly_price || null,
+          base_price: pricing.unitPrice,
+          included_km: vehicle.included_km || null,
+          extra_km_price: vehicle.extra_km_price || null,
+          unlimited_km: vehicle.unlimited_km || false,
+          original_deductible: 5000,
         });
 
       if (bookingError) {

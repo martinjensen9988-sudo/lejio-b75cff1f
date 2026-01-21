@@ -343,6 +343,21 @@ const Booking = () => {
         renter_email: formData.email,
         renter_phone: formData.phone,
         notes: formData.notes || null,
+        // Pricing details for contract
+        period_type: periodType,
+        period_count: periodCount,
+        daily_price: vehicle.daily_price || null,
+        weekly_price: vehicle.weekly_price || null,
+        monthly_price: vehicle.monthly_price || null,
+        base_price: pricing.unitPrice,
+        included_km: vehicle.included_km || null,
+        extra_km_price: vehicle.extra_km_price || null,
+        unlimited_km: vehicle.unlimited_km || false,
+        deposit_amount: pricing.deposit || null,
+        // Deductible insurance
+        deductible_insurance_selected: hasDeductibleInsurance,
+        deductible_insurance_price: hasDeductibleInsurance ? deductibleInsurancePrice : 0,
+        original_deductible: 5000,
         // New driver info fields
         renter_first_name: formData.firstName,
         renter_last_name: formData.lastName,
