@@ -3,14 +3,48 @@ import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import AdminCreateBooking from '@/components/admin/AdminCreateBooking';
 import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, Pencil, XCircle, MoreHorizontal, Trash2, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 
 interface AdminBooking {
   id: string;
@@ -21,15 +55,65 @@ interface AdminBooking {
   total_price: number;
   renter_name: string | null;
   renter_email: string | null;
+  renter_phone: string | null;
   created_at: string;
+  vehicle?: {
+    registration: string;
+    make: string;
+    model: string;
+  };
+  lessor?: {
+    full_name: string | null;
+    email: string;
+  };
+}
+
+interface AdminVehicle {
+  id: string;
+  registration: string;
+  make: string;
+  model: string;
+  year: number | null;
+  daily_price: number | null;
+  is_available: boolean;
+  owner_id: string;
+  owner?: {
+    full_name: string | null;
+    email: string;
+    company_name: string | null;
+  };
 }
 
 const AdminBookingsPage = () => {
   const navigate = useNavigate();
   const { user, hasAccess, isLoading } = useAdminAuth();
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [vehicles, setVehicles] = useState<AdminVehicle[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
+  
+  // Edit booking state
+  const [showEditBooking, setShowEditBooking] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<AdminBooking | null>(null);
+  const [editForm, setEditForm] = useState({
+    start_date: '',
+    end_date: '',
+    renter_name: '',
+    renter_email: '',
+    renter_phone: '',
+    total_price: '',
+    status: '',
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Cancel booking state
+  const [showCancelBooking, setShowCancelBooking] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState<AdminBooking | null>(null);
+  
+  // Delete vehicle state
+  const [showDeleteVehicle, setShowDeleteVehicle] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<AdminVehicle | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!isLoading && (!user || !hasAccess)) {
@@ -40,6 +124,7 @@ const AdminBookingsPage = () => {
   useEffect(() => {
     if (hasAccess) {
       fetchBookings();
+      fetchVehicles();
     }
   }, [hasAccess]);
 
@@ -47,14 +132,170 @@ const AdminBookingsPage = () => {
     setLoadingData(true);
     const { data, error } = await supabase
       .from('bookings')
-      .select('id, vehicle_id, start_date, end_date, status, total_price, renter_name, renter_email, created_at')
+      .select(`
+        id, vehicle_id, start_date, end_date, status, total_price, 
+        renter_name, renter_email, renter_phone, created_at, lessor_id,
+        vehicle:vehicles(registration, make, model),
+        lessor:profiles!bookings_lessor_id_fkey(full_name, email)
+      `)
       .order('created_at', { ascending: false })
       .limit(100);
 
     if (!error) {
-      setBookings(data || []);
+      setBookings((data || []).map(b => ({
+        ...b,
+        vehicle: b.vehicle as any,
+        lessor: b.lessor as any,
+      })));
     }
     setLoadingData(false);
+  };
+
+  const fetchVehicles = async () => {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select(`
+        id, registration, make, model, year, daily_price, is_available, owner_id,
+        owner:profiles!vehicles_owner_id_fkey(full_name, email, company_name)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (!error) {
+      setVehicles((data || []).map(v => ({
+        ...v,
+        owner: v.owner as any,
+      })));
+    }
+  };
+
+  const openEditBooking = (booking: AdminBooking) => {
+    setSelectedBooking(booking);
+    setEditForm({
+      start_date: booking.start_date,
+      end_date: booking.end_date,
+      renter_name: booking.renter_name || '',
+      renter_email: booking.renter_email || '',
+      renter_phone: booking.renter_phone || '',
+      total_price: booking.total_price.toString(),
+      status: booking.status,
+    });
+    setShowEditBooking(true);
+  };
+
+  const handleUpdateBooking = async () => {
+    if (!selectedBooking) return;
+    setIsUpdating(true);
+
+    const { error } = await supabase
+      .from('bookings')
+      .update({
+        start_date: editForm.start_date,
+        end_date: editForm.end_date,
+        renter_name: editForm.renter_name || null,
+        renter_email: editForm.renter_email || null,
+        renter_phone: editForm.renter_phone || null,
+        total_price: parseFloat(editForm.total_price) || 0,
+        status: editForm.status,
+      })
+      .eq('id', selectedBooking.id);
+
+    if (error) {
+      console.error('Error updating booking:', error);
+      toast.error('Kunne ikke opdatere booking: ' + error.message);
+    } else {
+      toast.success('Booking opdateret');
+      setShowEditBooking(false);
+      setSelectedBooking(null);
+      fetchBookings();
+    }
+
+    setIsUpdating(false);
+  };
+
+  const openCancelBooking = (booking: AdminBooking) => {
+    setBookingToCancel(booking);
+    setShowCancelBooking(true);
+  };
+
+  const handleCancelBooking = async () => {
+    if (!bookingToCancel) return;
+    setIsUpdating(true);
+
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: 'cancelled' })
+      .eq('id', bookingToCancel.id);
+
+    if (error) {
+      console.error('Error cancelling booking:', error);
+      toast.error('Kunne ikke annullere booking');
+    } else {
+      toast.success('Booking annulleret');
+      setShowCancelBooking(false);
+      setBookingToCancel(null);
+      fetchBookings();
+    }
+
+    setIsUpdating(false);
+  };
+
+  const openDeleteVehicle = (vehicle: AdminVehicle) => {
+    setVehicleToDelete(vehicle);
+    setShowDeleteVehicle(true);
+  };
+
+  const handleDeleteVehicle = async () => {
+    if (!vehicleToDelete) return;
+    setIsDeleting(true);
+
+    // First delete all bookings for this vehicle
+    const { error: bookingsError } = await supabase
+      .from('bookings')
+      .delete()
+      .eq('vehicle_id', vehicleToDelete.id);
+
+    if (bookingsError) {
+      console.error('Error deleting vehicle bookings:', bookingsError);
+      toast.error('Kunne ikke slette køretøjets bookinger');
+      setIsDeleting(false);
+      return;
+    }
+
+    // Then delete the vehicle
+    const { error } = await supabase
+      .from('vehicles')
+      .delete()
+      .eq('id', vehicleToDelete.id);
+
+    if (error) {
+      console.error('Error deleting vehicle:', error);
+      toast.error('Kunne ikke slette køretøj: ' + error.message);
+    } else {
+      toast.success('Køretøj og tilhørende bookinger slettet');
+      setShowDeleteVehicle(false);
+      setVehicleToDelete(null);
+      fetchVehicles();
+      fetchBookings();
+    }
+
+    setIsDeleting(false);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      confirmed: 'default',
+      pending: 'secondary',
+      cancelled: 'destructive',
+      completed: 'outline',
+    };
+    const labels: Record<string, string> = {
+      confirmed: 'Bekræftet',
+      pending: 'Afventer',
+      cancelled: 'Annulleret',
+      completed: 'Afsluttet',
+    };
+    return <Badge variant={variants[status] || 'secondary'}>{labels[status] || status}</Badge>;
   };
 
   if (isLoading) {
@@ -70,8 +311,8 @@ const AdminBookingsPage = () => {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Bookinger</h2>
-            <p className="text-muted-foreground">Se og opret bookinger</p>
+            <h2 className="text-2xl font-bold mb-2">Bookinger & Køretøjer</h2>
+            <p className="text-muted-foreground">Administrer alle bookinger og køretøjer på platformen</p>
           </div>
           <Button onClick={() => setShowCreateBooking(true)}>
             <Plus className="w-4 h-4 mr-2" />
@@ -79,56 +320,165 @@ const AdminBookingsPage = () => {
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Alle bookinger</CardTitle>
-            <CardDescription>De seneste 100 bookinger</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loadingData ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Lejer</TableHead>
-                    <TableHead>Periode</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Pris</TableHead>
-                    <TableHead>Oprettet</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-sm">{booking.renter_name || 'Ukendt'}</p>
-                          <p className="text-xs text-muted-foreground">{booking.renter_email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {format(new Date(booking.start_date), 'd. MMM', { locale: da })} - {format(new Date(booking.end_date), 'd. MMM', { locale: da })}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
-                          {booking.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{booking.total_price.toLocaleString('da-DK')} kr</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {format(new Date(booking.created_at), 'd. MMM yyyy', { locale: da })}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="bookings" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="bookings">Bookinger</TabsTrigger>
+            <TabsTrigger value="vehicles">Alle køretøjer</TabsTrigger>
+          </TabsList>
 
+          <TabsContent value="bookings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Alle bookinger</CardTitle>
+                <CardDescription>De seneste 100 bookinger - rediger eller annuller på vegne af udlejere</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingData ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Køretøj</TableHead>
+                        <TableHead>Udlejer</TableHead>
+                        <TableHead>Lejer</TableHead>
+                        <TableHead>Periode</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Pris</TableHead>
+                        <TableHead className="w-[80px]">Handlinger</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {bookings.map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium text-sm">
+                                {booking.vehicle?.make} {booking.vehicle?.model}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{booking.vehicle?.registration}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="text-sm">{booking.lessor?.full_name || 'Ukendt'}</p>
+                              <p className="text-xs text-muted-foreground">{booking.lessor?.email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium text-sm">{booking.renter_name || 'Ukendt'}</p>
+                              <p className="text-xs text-muted-foreground">{booking.renter_email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {format(new Date(booking.start_date), 'd. MMM', { locale: da })} - {format(new Date(booking.end_date), 'd. MMM', { locale: da })}
+                          </TableCell>
+                          <TableCell>
+                            {getStatusBadge(booking.status)}
+                          </TableCell>
+                          <TableCell>{booking.total_price.toLocaleString('da-DK')} kr</TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openEditBooking(booking)}>
+                                  <Pencil className="w-4 h-4 mr-2" />
+                                  Rediger booking
+                                </DropdownMenuItem>
+                                {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      onClick={() => openCancelBooking(booking)}
+                                      className="text-destructive"
+                                    >
+                                      <XCircle className="w-4 h-4 mr-2" />
+                                      Annuller booking
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="vehicles">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Car className="w-5 h-5" />
+                  Alle køretøjer
+                </CardTitle>
+                <CardDescription>Alle køretøjer på platformen - slet på vegne af udlejere</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Køretøj</TableHead>
+                      <TableHead>Ejer</TableHead>
+                      <TableHead>Dagspris</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-[80px]">Handlinger</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {vehicles.map((vehicle) => (
+                      <TableRow key={vehicle.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-sm">{vehicle.make} {vehicle.model}</p>
+                            <p className="text-xs text-muted-foreground">{vehicle.registration} • {vehicle.year}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="text-sm">{vehicle.owner?.full_name || vehicle.owner?.company_name || 'Ukendt'}</p>
+                            <p className="text-xs text-muted-foreground">{vehicle.owner?.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {vehicle.daily_price ? `${vehicle.daily_price.toLocaleString('da-DK')} kr` : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={vehicle.is_available ? 'default' : 'secondary'}>
+                            {vehicle.is_available ? 'Tilgængelig' : 'Ikke tilgængelig'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => openDeleteVehicle(vehicle)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Create Booking Dialog */}
         <AdminCreateBooking 
           open={showCreateBooking} 
           onClose={() => setShowCreateBooking(false)}
@@ -137,6 +487,137 @@ const AdminBookingsPage = () => {
             fetchBookings();
           }}
         />
+
+        {/* Edit Booking Dialog */}
+        <Dialog open={showEditBooking} onOpenChange={setShowEditBooking}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Rediger booking</DialogTitle>
+              <DialogDescription>
+                Rediger bookingdetaljer på vegne af udlejeren
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Startdato</Label>
+                  <Input
+                    type="date"
+                    value={editForm.start_date}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, start_date: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Slutdato</Label>
+                  <Input
+                    type="date"
+                    value={editForm.end_date}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, end_date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Lejerens navn</Label>
+                <Input
+                  value={editForm.renter_name}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, renter_name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lejerens email</Label>
+                <Input
+                  type="email"
+                  value={editForm.renter_email}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, renter_email: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lejerens telefon</Label>
+                <Input
+                  type="tel"
+                  value={editForm.renter_phone}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, renter_phone: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Total pris (DKK)</Label>
+                <Input
+                  type="number"
+                  value={editForm.total_price}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, total_price: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={editForm.status}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                >
+                  <option value="pending">Afventer</option>
+                  <option value="confirmed">Bekræftet</option>
+                  <option value="cancelled">Annulleret</option>
+                  <option value="completed">Afsluttet</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditBooking(false)}>
+                Annuller
+              </Button>
+              <Button onClick={handleUpdateBooking} disabled={isUpdating}>
+                {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Gem ændringer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cancel Booking Dialog */}
+        <AlertDialog open={showCancelBooking} onOpenChange={setShowCancelBooking}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Annuller booking?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Er du sikker på at du vil annullere denne booking for {bookingToCancel?.renter_name}? 
+                Denne handling kan ikke fortrydes.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Fortryd</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleCancelBooking}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Annuller booking
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Vehicle Dialog */}
+        <AlertDialog open={showDeleteVehicle} onOpenChange={setShowDeleteVehicle}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Slet køretøj?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Er du sikker på at du vil slette {vehicleToDelete?.make} {vehicleToDelete?.model} ({vehicleToDelete?.registration})? 
+                Dette vil også slette alle bookinger for dette køretøj. Denne handling kan ikke fortrydes.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Fortryd</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteVehicle}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Slet køretøj
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminDashboardLayout>
   );
