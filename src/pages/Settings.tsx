@@ -190,25 +190,32 @@ const Settings = () => {
 
     setUploadingLogo(true);
     try {
+      // Read file as base64 (data URL)
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error('Kunne ikke læse filen'));
+        reader.readAsDataURL(file);
+      });
+
       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const fileName = `${user.id}/company-logo.${fileExt}`;
 
-      // Upload to avatars bucket with explicit content type
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { 
-          upsert: true,
+      // Upload via backend function (bypasses storage RLS safely)
+      const { data, error } = await supabase.functions.invoke('upload-company-logo', {
+        body: {
+          imageBase64: dataUrl,
           contentType: file.type,
-        });
+          fileExt,
+        },
+      });
 
-      if (uploadError) {
-        console.error('Upload error details:', uploadError);
-        throw uploadError;
+      if (error) {
+        console.error('Upload company logo function error:', error);
+        throw error;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
+      const publicUrl = (data as any)?.publicUrl as string | undefined;
+      if (!publicUrl) throw new Error('Upload lykkedes ikke (mangler URL)');
 
       // Add cache-busting timestamp
       const urlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
