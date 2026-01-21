@@ -81,6 +81,7 @@ export const DashboardSidebar = ({
       'customers': '/dashboard/customers',
       'favorites': '/dashboard/favorites',
       'recurring': '/dashboard/recurring',
+      'warnings': '/dashboard/warnings',
       'service': '/dashboard/service',
       'tires': '/dashboard/tires',
       'inspections': '/dashboard/inspections',
@@ -126,6 +127,7 @@ export const DashboardSidebar = ({
         { label: "Kundesegmenter", icon: Users, value: "customers" },
         { label: "Favoritter", icon: Heart, value: "favorites" },
         { label: "Abonnementer", icon: Repeat, value: "recurring" },
+        { label: "Advarselsregister", icon: AlertCircle, value: "warnings" },
       ],
     },
     {

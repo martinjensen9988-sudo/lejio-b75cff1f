@@ -30,7 +30,7 @@ import RentalSettlementDialog from '@/components/dashboard/RentalSettlementDialo
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star, ScanLine, History, ArrowRightLeft, Banknote, CreditCard, Smartphone, Building2, CheckCircle2 } from 'lucide-react';
+import { Check, X, Car, Calendar, FileText, Loader2, FileCheck, Camera, ClipboardCheck, Star, ScanLine, History, ArrowRightLeft, Banknote, CreditCard, Smartphone, Building2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BookingsTableProps {
@@ -618,6 +618,24 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                             Vurder
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-accent hover:text-accent hover:bg-accent/10"
+                          onClick={() => {
+                            const params = new URLSearchParams({
+                              renterEmail: booking.renter_email || '',
+                              renterName: booking.renter_name || '',
+                              renterPhone: booking.renter_phone || '',
+                              renterLicenseNumber: booking.renter_license_number || '',
+                              bookingId: booking.id,
+                            });
+                            navigate(`/dashboard/warnings/create?${params.toString()}`);
+                          }}
+                          title="Opret advarsel om lejeren"
+                        >
+                          <AlertCircle className="w-4 h-4" />
+                        </Button>
                       </div>
                     )}
                   </TableCell>
