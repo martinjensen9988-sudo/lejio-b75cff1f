@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Booking, useBookings } from '@/hooks/useBookings';
 import { Contract, useContracts } from '@/hooks/useContracts';
 import { useDamageReports } from '@/hooks/useDamageReports';
@@ -17,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import ContractSigningModal from '@/components/contracts/ContractSigningModal';
 import DamageReportModal from '@/components/damage/DamageReportModal';
 import { RenterRatingModal } from '@/components/ratings/RenterRatingModal';
 import { RenterRatingBadge } from '@/components/ratings/RenterRatingBadge';
@@ -54,14 +54,13 @@ const paymentMethodLabels: Record<string, { label: string; icon: React.ReactNode
 };
 
 const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const { vehicles } = useVehicles();
   const { refetch: refetchBookings, markPaymentReceived } = useBookings();
   const isMobile = useIsMobile();
   const { contracts, generateContract, signContract, isLoading: contractsLoading } = useContracts();
   const [generatingContractFor, setGeneratingContractFor] = useState<string | null>(null);
-  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-  const [signingModalOpen, setSigningModalOpen] = useState(false);
   const [confirmingBooking, setConfirmingBooking] = useState<string | null>(null);
   
   // Damage report state
@@ -176,8 +175,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   };
 
   const handleViewContract = (contract: Contract) => {
-    setSelectedContract(contract);
-    setSigningModalOpen(true);
+    navigate(`/dashboard/contract/sign/${contract.id}`);
   };
 
   if (bookings.length === 0) {
@@ -257,14 +255,6 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
         </div>
 
         {/* Modals remain the same */}
-        {selectedContract && (
-          <ContractSigningModal
-            contract={selectedContract}
-            open={signingModalOpen}
-            onOpenChange={setSigningModalOpen}
-            onSign={signContract}
-          />
-        )}
 
         {selectedBookingForDamage && (
           <DamageReportModal
@@ -638,15 +628,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
         </Table>
       </div>
 
-      {/* Contract Signing Modal */}
-      {selectedContract && (
-        <ContractSigningModal
-          contract={selectedContract}
-          open={signingModalOpen}
-          onOpenChange={setSigningModalOpen}
-          onSign={signContract}
-        />
-      )}
+      {/* Damage Report Modal */}
 
       {/* Damage Report Modal */}
       {selectedBookingForDamage && (

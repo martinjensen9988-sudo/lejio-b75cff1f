@@ -12,7 +12,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Contract, useContracts } from "@/hooks/useContracts";
 import { usePayments } from "@/hooks/usePayments";
-import ContractSigningModal from "@/components/contracts/ContractSigningModal";
 import {
   Car,
   Calendar,
@@ -100,13 +99,11 @@ const MyRentals = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, profile, loading: authLoading } = useAuth();
-  const { contracts, signContract, downloadContractPdf, refetch: refetchContracts } = useContracts();
+  const { contracts, downloadContractPdf, refetch: refetchContracts } = useContracts();
   const { redirectToPayment, isProcessing: isPaymentProcessing } = usePayments();
   const [bookings, setBookings] = useState<RentalBooking[]>([]);
   const [invoices, setInvoices] = useState<RenterInvoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-  const [signingModalOpen, setSigningModalOpen] = useState(false);
 
   // Check for contractId in URL params (from email link)
   const contractIdFromUrl = searchParams.get("contractId");
@@ -181,24 +178,22 @@ const MyRentals = () => {
     fetchInvoices();
   }, [user, bookings]);
 
-  // Open contract from URL param
+  // Navigate to contract page from URL param
   useEffect(() => {
     if (contractIdFromUrl && contracts.length > 0) {
       const contract = contracts.find(c => c.id === contractIdFromUrl);
       if (contract) {
-        setSelectedContract(contract);
-        setSigningModalOpen(true);
+        navigate(`/dashboard/contract/sign/${contract.id}`, { replace: true });
       }
     }
-  }, [contractIdFromUrl, contracts]);
+  }, [contractIdFromUrl, contracts, navigate]);
 
   const getContractForBooking = (bookingId: string) => {
     return contracts.find(c => c.booking_id === bookingId);
   };
 
   const handleViewContract = (contract: Contract) => {
-    setSelectedContract(contract);
-    setSigningModalOpen(true);
+    navigate(`/dashboard/contract/sign/${contract.id}`);
   };
 
   const handleRebook = (booking: RentalBooking) => {
@@ -758,27 +753,6 @@ const MyRentals = () => {
 
       <Footer />
 
-      {/* Contract Signing Modal */}
-      {selectedContract && (
-        <ContractSigningModal
-          contract={selectedContract}
-          open={signingModalOpen}
-          onOpenChange={(open) => {
-            setSigningModalOpen(open);
-            if (!open) {
-              // Clear URL param when closing
-              navigate("/my-rentals", { replace: true });
-            }
-          }}
-          onSign={async (contractId, signature, acceptVanvidskorsel, role) => {
-            const result = await signContract(contractId, signature, acceptVanvidskorsel, role);
-            if (result) {
-              await refetchContracts();
-            }
-            return result;
-          }}
-        />
-      )}
     </div>
   );
 };
