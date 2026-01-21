@@ -1,0 +1,163 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+export interface VehicleImage {
+  id: string;
+  vehicle_id: string;
+  image_url: string;
+  display_order: number;
+  created_at: string;
+}
+
+export const useVehicleImages = (vehicleId?: string) => {
+  const [images, setImages] = useState<VehicleImage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchImages = useCallback(async () => {
+    if (!vehicleId) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('vehicle_images')
+        .select('*')
+        .eq('vehicle_id', vehicleId)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setImages((data || []) as VehicleImage[]);
+    } catch (error) {
+      console.error('Error fetching vehicle images:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [vehicleId]);
+
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!vehicleId) return null;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Kun billedfiler er tilladt');
+      return null;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Billedet må max være 5MB');
+      return null;
+    }
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${vehicleId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('vehicle-images')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('vehicle-images')
+        .getPublicUrl(fileName);
+
+      // Get max display_order
+      const maxOrder = images.length > 0 
+        ? Math.max(...images.map(img => img.display_order)) 
+        : -1;
+
+      // Insert into database
+      const { data, error } = await supabase
+        .from('vehicle_images')
+        .insert({
+          vehicle_id: vehicleId,
+          image_url: publicUrl,
+          display_order: maxOrder + 1,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setImages(prev => [...prev, data as VehicleImage]);
+      toast.success('Billede uploadet!');
+      return publicUrl;
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Kunne ikke uploade billede');
+      return null;
+    }
+  };
+
+  const deleteImage = async (imageId: string) => {
+    try {
+      const image = images.find(img => img.id === imageId);
+      if (!image) return false;
+
+      // Extract filename from URL
+      const urlParts = image.image_url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+
+      // Delete from storage
+      await supabase.storage
+        .from('vehicle-images')
+        .remove([fileName]);
+
+      // Delete from database
+      const { error } = await supabase
+        .from('vehicle_images')
+        .delete()
+        .eq('id', imageId);
+
+      if (error) throw error;
+
+      setImages(prev => prev.filter(img => img.id !== imageId));
+      toast.success('Billede slettet');
+      return true;
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Kunne ikke slette billede');
+      return false;
+    }
+  };
+
+  const reorderImages = async (newOrder: { id: string; display_order: number }[]) => {
+    try {
+      for (const item of newOrder) {
+        await supabase
+          .from('vehicle_images')
+          .update({ display_order: item.display_order })
+          .eq('id', item.id);
+      }
+
+      // Update local state
+      setImages(prev => {
+        const updated = [...prev];
+        for (const item of newOrder) {
+          const img = updated.find(i => i.id === item.id);
+          if (img) img.display_order = item.display_order;
+        }
+        return updated.sort((a, b) => a.display_order - b.display_order);
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Reorder error:', error);
+      toast.error('Kunne ikke omarrangere billeder');
+      return false;
+    }
+  };
+
+  return {
+    images,
+    isLoading,
+    uploadImage,
+    deleteImage,
+    reorderImages,
+    refetch: fetchImages,
+  };
+};

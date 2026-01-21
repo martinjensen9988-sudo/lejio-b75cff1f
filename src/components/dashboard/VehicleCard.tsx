@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import { Vehicle } from '@/hooks/useVehicles';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Car, Calendar, Fuel, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import EditVehicleDialog from './EditVehicleDialog';
+import ImageCarousel from '@/components/shared/ImageCarousel';
+import { supabase } from '@/integrations/supabase/client';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -12,20 +15,43 @@ interface VehicleCardProps {
 }
 
 const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: VehicleCardProps) => {
+  const [images, setImages] = useState<string[]>([]);
+
+  // Fetch vehicle images from the new table
+  useEffect(() => {
+    const fetchImages = async () => {
+      const { data } = await supabase
+        .from('vehicle_images')
+        .select('image_url')
+        .eq('vehicle_id', vehicle.id)
+        .order('display_order', { ascending: true });
+      
+      const imageUrls = (data || []).map((img: { image_url: string }) => img.image_url);
+      
+      // Combine legacy image with new images
+      const allImages = [
+        ...(vehicle.image_url ? [vehicle.image_url] : []),
+        ...imageUrls.filter(url => url !== vehicle.image_url),
+      ];
+      
+      setImages(allImages);
+    };
+
+    fetchImages();
+  }, [vehicle.id, vehicle.image_url]);
+
   return (
     <div className="bg-card rounded-2xl shadow-soft border border-border hover:shadow-lg transition-shadow overflow-hidden">
-      {/* Vehicle Image */}
-      <div className="h-32 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-        {vehicle.image_url ? (
-          <img 
-            src={vehicle.image_url} 
-            alt={`${vehicle.make} ${vehicle.model}`}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <Car className="w-12 h-12 text-primary/30" />
-        )}
-      </div>
+      {/* Vehicle Image Carousel */}
+      <ImageCarousel 
+        images={images}
+        alt={`${vehicle.make} ${vehicle.model}`}
+        className="h-32"
+        aspectRatio="auto"
+        showIndicators={images.length > 1}
+        showArrows={images.length > 1}
+        fallbackIcon={<Car className="w-12 h-12 text-primary/30" />}
+      />
 
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
@@ -63,7 +89,7 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
             {vehicle.features.slice(0, 4).map(feature => (
               <span 
                 key={feature} 
-                className="text-xs px-2 py-0.5 rounded-full bg-mint/10 text-mint"
+                className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent"
               >
                 {feature === 'aircon' && 'AC'}
                 {feature === 'gps' && 'GPS'}
@@ -115,7 +141,7 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
         {/* Km info */}
         <div className="text-xs text-center mb-4 text-muted-foreground">
           {vehicle.unlimited_km ? (
-            <span className="text-mint font-medium">✓ Fri km inkluderet</span>
+            <span className="text-accent font-medium">✓ Fri km inkluderet</span>
           ) : (
             <span>
               {vehicle.included_km || 100} km/dag inkl. • {vehicle.extra_km_price || 2.5} kr/ekstra km
@@ -132,7 +158,7 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
           >
             {vehicle.is_available ? (
               <>
-                <ToggleRight className="w-4 h-4 mr-1 text-mint" />
+                <ToggleRight className="w-4 h-4 mr-1 text-accent" />
                 Deaktiver
               </>
             ) : (

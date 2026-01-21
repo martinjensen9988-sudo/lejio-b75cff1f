@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,10 +13,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin, AlertTriangle, Truck, Tent, Clock } from 'lucide-react';
+import { Edit, Loader2, CreditCard, CalendarClock, MapPin, AlertTriangle, Truck, Tent, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { TrailerFields } from './TrailerFields';
 import { CaravanFields } from './CaravanFields';
+import VehicleImageGallery from './VehicleImageGallery';
 
 const VEHICLE_FEATURES = [
   { id: 'aircon', label: 'Aircondition' },
@@ -45,8 +46,7 @@ interface EditVehicleDialogProps {
 const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   
   const [formData, setFormData] = useState({
     daily_price: vehicle.daily_price || undefined,
@@ -198,45 +198,6 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Kun billedfiler er tilladt');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Billedet må max være 5MB');
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${vehicle.id}-${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('vehicle-images')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('vehicle-images')
-        .getPublicUrl(fileName);
-
-      setFormData(prev => ({ ...prev, image_url: publicUrl }));
-      toast.success('Billede uploadet!');
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Kunne ikke uploade billede');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleFeatureToggle = (featureId: string) => {
     setFormData(prev => ({
       ...prev,
@@ -305,55 +266,14 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Vehicle Image */}
+          {/* Vehicle Images Gallery */}
           <div className="space-y-3">
-            <Label className="text-base font-semibold">Billede</Label>
-            <div className="flex items-center gap-4">
-              <div className="w-24 h-24 rounded-xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
-                {formData.image_url ? (
-                  <img 
-                    src={formData.image_url} 
-                    alt={`${vehicle.make} ${vehicle.model}`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Car className="w-10 h-10 text-muted-foreground" />
-                )}
-              </div>
-              <div className="flex-1 space-y-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                >
-                  {isUploading ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : (
-                    <Upload className="w-4 h-4 mr-2" />
-                  )}
-                  Upload billede
-                </Button>
-                {formData.image_url && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive"
-                    onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    Fjern
-                  </Button>
-                )}
-              </div>
-            </div>
+            <Label className="text-base font-semibold">Billeder</Label>
+            <VehicleImageGallery 
+              vehicleId={vehicle.id}
+              legacyImageUrl={formData.image_url}
+              onLegacyImageClear={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+            />
           </div>
 
           {/* Prices */}

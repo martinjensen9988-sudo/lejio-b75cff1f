@@ -34,6 +34,7 @@ export interface SearchVehicle {
   weekly_price: number | null;
   monthly_price: number | null;
   image_url: string | null;
+  images?: string[]; // Multiple images from vehicle_images table
   fuel_type: string | null;
   color: string | null;
   included_km: number | null;
@@ -195,6 +196,8 @@ const Search = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true);
+      
+      // Fetch vehicles
       const { data, error } = await supabase
         .from("vehicles_public")
         .select("*");
@@ -204,6 +207,23 @@ const Search = () => {
         setLoading(false);
         return;
       }
+
+      // Fetch all vehicle images
+      const vehicleIds = (data || []).map(v => v.id);
+      const { data: imagesData } = await supabase
+        .from('vehicle_images')
+        .select('vehicle_id, image_url')
+        .in('vehicle_id', vehicleIds)
+        .order('display_order', { ascending: true });
+
+      // Group images by vehicle_id
+      const imagesByVehicle: Record<string, string[]> = {};
+      (imagesData || []).forEach((img: { vehicle_id: string; image_url: string }) => {
+        if (!imagesByVehicle[img.vehicle_id]) {
+          imagesByVehicle[img.vehicle_id] = [];
+        }
+        imagesByVehicle[img.vehicle_id].push(img.image_url);
+      });
 
       const vehiclesWithLocations = (data || []).map((vehicle) => {
         let lat = vehicle.latitude || 55.6761;
@@ -245,8 +265,17 @@ const Search = () => {
         }
         
         const v = vehicle as any;
+        
+        // Combine legacy image with new images
+        const vehicleImages = imagesByVehicle[vehicle.id] || [];
+        const allImages = [
+          ...(vehicle.image_url ? [vehicle.image_url] : []),
+          ...vehicleImages.filter((url: string) => url !== vehicle.image_url),
+        ];
+        
         return {
           ...vehicle,
+          images: allImages,
           vehicle_type: vehicle.vehicle_type || 'bil',
           total_weight: vehicle.total_weight || null,
           requires_b_license: vehicle.requires_b_license ?? true,
