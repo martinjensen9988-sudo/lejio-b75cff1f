@@ -15,6 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { usePayments } from "@/hooks/usePayments";
+import { useDriverLicense } from "@/hooks/useDriverLicense";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Car,
   Calendar as CalendarIcon,
@@ -35,12 +37,16 @@ import {
   Globe,
   CheckCircle,
   Wallet,
+  ShieldCheck,
+  Clock,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import DeductibleInsuranceOption from "@/components/booking/DeductibleInsuranceOption";
 import ReferralCreditOption from "@/components/booking/ReferralCreditOption";
 import { useReferral } from "@/hooks/useReferral";
 import { PaymentMethodSelector, PaymentMethod } from "@/components/booking/PaymentMethodSelector";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
@@ -75,6 +81,17 @@ const Booking = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { redirectToPayment, isProcessing: isPaymentProcessing } = usePayments();
+  const { user } = useAuth();
+  const { 
+    license: existingLicense, 
+    isLoading: licenseLoading, 
+    isUploading: licenseUploading, 
+    submitLicense, 
+    isVerified: licenseVerified, 
+    isPending: licensePending,
+    isRejected: licenseRejected,
+    refetch: refetchLicense,
+  } = useDriverLicense();
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,7 +140,9 @@ const Booking = () => {
 
   // Step 2: Document uploads
   const [driverLicense, setDriverLicense] = useState<File | null>(null);
+  const [driverLicenseBack, setDriverLicenseBack] = useState<File | null>(null);
   const [healthCard, setHealthCard] = useState<File | null>(null);
+  const [aiVerificationStarted, setAiVerificationStarted] = useState(false);
 
   // Step 3: Confirmation
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -290,6 +309,10 @@ const Booking = () => {
         }
         return true;
       case 2:
+        // Skip driver license check if user has verified license
+        if (user && licenseVerified) {
+          return true;
+        }
         if (!driverLicense) {
           toast({ title: "Upload dit kørekort", variant: "destructive" });
           return false;
@@ -953,49 +976,182 @@ const Booking = () => {
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold mb-4">Upload dokumenter</h2>
 
+                    {/* Show existing verified license */}
+                    {user && licenseVerified && existingLicense && (
+                      <Alert className="bg-accent/10 border-accent/30">
+                        <ShieldCheck className="w-4 h-4 text-accent" />
+                        <AlertTitle className="text-accent">
+                          Kørekort allerede verificeret
+                        </AlertTitle>
+                        <AlertDescription className="text-accent/80">
+                          Dit kørekort ({existingLicense.license_number}) er allerede verificeret via AI.
+                          Du behøver ikke uploade det igen.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    {/* Show pending verification status */}
+                    {user && licensePending && existingLicense && (
+                      <Alert className="bg-warning/10 border-warning/30">
+                        <Clock className="w-4 h-4 text-warning" />
+                        <AlertTitle className="text-warning">
+                          Kørekort afventer verificering
+                        </AlertTitle>
+                        <AlertDescription className="text-warning/80">
+                          Dit kørekort er indsendt og bliver verificeret af vores AI. Dette tager normalt under 1 minut.
+                          <Button variant="ghost" size="sm" className="ml-2" onClick={refetchLicense}>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Opdater status
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    {/* Show rejected status */}
+                    {user && licenseRejected && existingLicense && (
+                      <Alert className="bg-destructive/10 border-destructive/30">
+                        <XCircle className="w-4 h-4 text-destructive" />
+                        <AlertTitle className="text-destructive">
+                          Kørekort afvist
+                        </AlertTitle>
+                        <AlertDescription className="text-destructive/80">
+                          {existingLicense.rejection_reason || 'Dit kørekort kunne ikke verificeres. Upload venligst et nyt billede.'}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     <div className="space-y-4">
-                      {/* Driver License */}
-                      <div className="space-y-2">
-                        <Label>Kørekort *</Label>
-                        <div
-                          className={cn(
-                            "border-2 border-dashed rounded-xl p-6 text-center transition-colors",
-                            driverLicense
-                              ? "border-accent bg-accent/10"
-                              : "border-border hover:border-primary/50"
-                          )}
-                        >
-                          {driverLicense ? (
-                            <div className="flex items-center justify-center gap-2">
-                              <FileCheck className="w-6 h-6 text-accent" />
-                              <span className="font-medium">{driverLicense.name}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setDriverLicense(null)}
-                              >
-                                Fjern
-                              </Button>
+                      {/* Driver License Front - Only show if not verified or rejected */}
+                      {(!user || !licenseVerified) && (
+                        <>
+                          <div className="space-y-2">
+                            <Label>Kørekort forside *</Label>
+                            <div
+                              className={cn(
+                                "border-2 border-dashed rounded-xl p-6 text-center transition-colors",
+                                driverLicense
+                                  ? "border-accent bg-accent/10"
+                                  : "border-border hover:border-primary/50"
+                              )}
+                            >
+                              {driverLicense ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <FileCheck className="w-6 h-6 text-accent" />
+                                  <span className="font-medium">{driverLicense.name}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDriverLicense(null)}
+                                  >
+                                    Fjern
+                                  </Button>
+                                </div>
+                              ) : (
+                                <label className="cursor-pointer">
+                                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                                  <p className="text-sm text-muted-foreground">
+                                    Klik for at uploade kørekort (forside)
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    PNG, JPG eller PDF (maks 10 MB)
+                                  </p>
+                                  <input
+                                    type="file"
+                                    accept="image/*,.pdf"
+                                    className="hidden"
+                                    onChange={(e) => handleFileUpload(e, setDriverLicense)}
+                                  />
+                                </label>
+                              )}
                             </div>
-                          ) : (
-                            <label className="cursor-pointer">
-                              <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                              <p className="text-sm text-muted-foreground">
-                                Klik for at uploade kørekort
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                PNG, JPG eller PDF (maks 10 MB)
-                              </p>
-                              <input
-                                type="file"
-                                accept="image/*,.pdf"
-                                className="hidden"
-                                onChange={(e) => handleFileUpload(e, setDriverLicense)}
-                              />
-                            </label>
+                          </div>
+
+                          {/* Driver License Back */}
+                          <div className="space-y-2">
+                            <Label>Kørekort bagside (valgfri)</Label>
+                            <div
+                              className={cn(
+                                "border-2 border-dashed rounded-xl p-6 text-center transition-colors",
+                                driverLicenseBack
+                                  ? "border-accent bg-accent/10"
+                                  : "border-border hover:border-primary/50"
+                              )}
+                            >
+                              {driverLicenseBack ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <FileCheck className="w-6 h-6 text-accent" />
+                                  <span className="font-medium">{driverLicenseBack.name}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDriverLicenseBack(null)}
+                                  >
+                                    Fjern
+                                  </Button>
+                                </div>
+                              ) : (
+                                <label className="cursor-pointer">
+                                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                                  <p className="text-sm text-muted-foreground">
+                                    Klik for at uploade kørekort (bagside)
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    PNG, JPG eller PDF (maks 10 MB)
+                                  </p>
+                                  <input
+                                    type="file"
+                                    accept="image/*,.pdf"
+                                    className="hidden"
+                                    onChange={(e) => handleFileUpload(e, setDriverLicenseBack)}
+                                  />
+                                </label>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* AI Verification Button */}
+                          {user && driverLicense && formData.licenseNumber && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full"
+                              disabled={licenseUploading || aiVerificationStarted}
+                              onClick={async () => {
+                                setAiVerificationStarted(true);
+                                await submitLicense(
+                                  driverLicense,
+                                  driverLicenseBack,
+                                  formData.licenseNumber,
+                                  formData.licenseCountry
+                                );
+                              }}
+                            >
+                              {licenseUploading ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Verificerer med AI...
+                                </>
+                              ) : aiVerificationStarted ? (
+                                <>
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  Afventer AI-verificering
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheck className="w-4 h-4 mr-2" />
+                                  Verificer kørekort med AI
+                                </>
+                              )}
+                            </Button>
                           )}
-                        </div>
-                      </div>
+
+                          {!user && driverLicense && (
+                            <p className="text-sm text-muted-foreground text-center">
+                              <AlertCircle className="w-4 h-4 inline mr-1" />
+                              Log ind for at få dit kørekort AI-verificeret og gemt til fremtidige bookinger
+                            </p>
+                          )}
+                        </>
+                      )}
 
                       {/* Health Card */}
                       <div className="space-y-2">
