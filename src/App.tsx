@@ -1,75 +1,120 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+
+// Critical path - loaded immediately for homepage
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Settings from "./pages/Settings";
-import Search from "./pages/Search";
-import Booking from "./pages/Booking";
-import MyRentals from "./pages/MyRentals";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Terms from "./pages/Terms";
-import FAQ from "./pages/FAQ";
-import Messages from "./pages/Messages";
-import Install from "./pages/Install";
-import GpsTracking from "./pages/GpsTracking";
-import Features from "./pages/Features";
-import CorporateDashboard from "./pages/CorporateDashboard";
-import PrivateFleet from "./pages/PrivateFleet";
-import About from "./pages/About";
-import WhatIsLejio from "./pages/WhatIsLejio";
-import BecomeLessor from "./pages/BecomeLessor";
 import NotFound from "./pages/NotFound";
 
-// Dashboard sub-pages
-import VehiclesPage from "./pages/dashboard/Vehicles";
-import CalendarPage from "./pages/dashboard/Calendar";
-import BookingsPage from "./pages/dashboard/Bookings";
-import CreateBookingPage from "./pages/dashboard/CreateBooking";
-import AddVehiclePage from "./pages/dashboard/AddVehicle";
-import InvoicesPage from "./pages/dashboard/Invoices";
-import FinesPage from "./pages/dashboard/Fines";
-import RevenueLossPage from "./pages/dashboard/RevenueLoss";
-import CustomersPage from "./pages/dashboard/Customers";
-import FavoritesPage from "./pages/dashboard/Favorites";
-import RecurringPage from "./pages/dashboard/Recurring";
-import ServicePage from "./pages/dashboard/Service";
-import TiresPage from "./pages/dashboard/Tires";
-import InspectionsPage from "./pages/dashboard/Inspections";
-import AnalyticsPage from "./pages/dashboard/Analytics";
-import FinesAddPage from "./pages/dashboard/FinesAdd";
-import ServiceTaskAddPage from "./pages/dashboard/ServiceTaskAdd";
-import AIPricingPage from "./pages/dashboard/AIPricing";
-import FleetAIPage from "./pages/dashboard/FleetAI";
-import DeductiblesPage from "./pages/dashboard/Deductibles";
-import DeductiblesAddPage from "./pages/dashboard/DeductiblesAdd";
-import EditVehiclePage from "./pages/dashboard/EditVehicle";
-import ContractSignPage from "./pages/dashboard/ContractSign";
-import DamageReportPage from "./pages/dashboard/DamageReport";
-import RateLessorPage from "./pages/dashboard/RateLessor";
-import RateRenterPage from "./pages/dashboard/RateRenter";
-import CreateWarningPage from "./pages/dashboard/CreateWarning";
-import WarningsPage from "./pages/dashboard/Warnings";
-import ServiceBookingPage from "./pages/dashboard/ServiceBooking";
-import MCMaintenancePage from "./pages/dashboard/MCMaintenance";
-import RevenueLossCalculatePage from "./pages/dashboard/RevenueLossCalculate";
-import VehicleSwapPage from "./pages/dashboard/VehicleSwap";
-import ServiceRemindersAddPage from "./pages/dashboard/ServiceRemindersAdd";
-import LocationsPage from "./pages/dashboard/Locations";
-import LocationAddPage from "./pages/dashboard/LocationAdd";
-import LocationEditPage from "./pages/dashboard/LocationEdit";
-import SettlementPage from "./pages/dashboard/Settlement";
-import CheckInOutPage from "./pages/dashboard/CheckInOut";
-import ScanHistoryPage from "./pages/dashboard/ScanHistory";
-import AddGeofencePage from "./pages/gps/AddGeofence";
-import AddGpsDevicePage from "./pages/gps/AddGpsDevice";
-import VehicleDetailPage from "./pages/search/VehicleDetail";
+// Lazy loaded pages - only loaded when needed
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Search = lazy(() => import("./pages/Search"));
+const Booking = lazy(() => import("./pages/Booking"));
+const MyRentals = lazy(() => import("./pages/MyRentals"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Install = lazy(() => import("./pages/Install"));
+const GpsTracking = lazy(() => import("./pages/GpsTracking"));
+const Features = lazy(() => import("./pages/Features"));
+const CorporateDashboard = lazy(() => import("./pages/CorporateDashboard"));
+const PrivateFleet = lazy(() => import("./pages/PrivateFleet"));
+const About = lazy(() => import("./pages/About"));
+const WhatIsLejio = lazy(() => import("./pages/WhatIsLejio"));
+const BecomeLessor = lazy(() => import("./pages/BecomeLessor"));
+
+// Dashboard sub-pages - lazy loaded
+const VehiclesPage = lazy(() => import("./pages/dashboard/Vehicles"));
+const CalendarPage = lazy(() => import("./pages/dashboard/Calendar"));
+const BookingsPage = lazy(() => import("./pages/dashboard/Bookings"));
+const CreateBookingPage = lazy(() => import("./pages/dashboard/CreateBooking"));
+const AddVehiclePage = lazy(() => import("./pages/dashboard/AddVehicle"));
+const InvoicesPage = lazy(() => import("./pages/dashboard/Invoices"));
+const FinesPage = lazy(() => import("./pages/dashboard/Fines"));
+const RevenueLossPage = lazy(() => import("./pages/dashboard/RevenueLoss"));
+const CustomersPage = lazy(() => import("./pages/dashboard/Customers"));
+const FavoritesPage = lazy(() => import("./pages/dashboard/Favorites"));
+const RecurringPage = lazy(() => import("./pages/dashboard/Recurring"));
+const ServicePage = lazy(() => import("./pages/dashboard/Service"));
+const TiresPage = lazy(() => import("./pages/dashboard/Tires"));
+const InspectionsPage = lazy(() => import("./pages/dashboard/Inspections"));
+const AnalyticsPage = lazy(() => import("./pages/dashboard/Analytics"));
+const FinesAddPage = lazy(() => import("./pages/dashboard/FinesAdd"));
+const ServiceTaskAddPage = lazy(() => import("./pages/dashboard/ServiceTaskAdd"));
+const AIPricingPage = lazy(() => import("./pages/dashboard/AIPricing"));
+const FleetAIPage = lazy(() => import("./pages/dashboard/FleetAI"));
+const DeductiblesPage = lazy(() => import("./pages/dashboard/Deductibles"));
+const DeductiblesAddPage = lazy(() => import("./pages/dashboard/DeductiblesAdd"));
+const EditVehiclePage = lazy(() => import("./pages/dashboard/EditVehicle"));
+const ContractSignPage = lazy(() => import("./pages/dashboard/ContractSign"));
+const DamageReportPage = lazy(() => import("./pages/dashboard/DamageReport"));
+const RateLessorPage = lazy(() => import("./pages/dashboard/RateLessor"));
+const RateRenterPage = lazy(() => import("./pages/dashboard/RateRenter"));
+const CreateWarningPage = lazy(() => import("./pages/dashboard/CreateWarning"));
+const WarningsPage = lazy(() => import("./pages/dashboard/Warnings"));
+const ServiceBookingPage = lazy(() => import("./pages/dashboard/ServiceBooking"));
+const MCMaintenancePage = lazy(() => import("./pages/dashboard/MCMaintenance"));
+const RevenueLossCalculatePage = lazy(() => import("./pages/dashboard/RevenueLossCalculate"));
+const VehicleSwapPage = lazy(() => import("./pages/dashboard/VehicleSwap"));
+const ServiceRemindersAddPage = lazy(() => import("./pages/dashboard/ServiceRemindersAdd"));
+const LocationsPage = lazy(() => import("./pages/dashboard/Locations"));
+const LocationAddPage = lazy(() => import("./pages/dashboard/LocationAdd"));
+const LocationEditPage = lazy(() => import("./pages/dashboard/LocationEdit"));
+const SettlementPage = lazy(() => import("./pages/dashboard/Settlement"));
+const CheckInOutPage = lazy(() => import("./pages/dashboard/CheckInOut"));
+const ScanHistoryPage = lazy(() => import("./pages/dashboard/ScanHistory"));
+const AddGeofencePage = lazy(() => import("./pages/gps/AddGeofence"));
+const AddGpsDevicePage = lazy(() => import("./pages/gps/AddGpsDevice"));
+const VehicleDetailPage = lazy(() => import("./pages/search/VehicleDetail"));
+
+// Corporate pages - lazy loaded
+const CorporateAddFleetVehiclePage = lazy(() => import("./pages/corporate/AddFleetVehicle"));
+const CorporateCreateBookingPage = lazy(() => import("./pages/corporate/CreateBooking"));
+
+// Admin sub-pages - lazy loaded
+const AdminUsersPage = lazy(() => import("./pages/admin/Users"));
+const AdminStaffPage = lazy(() => import("./pages/admin/Staff"));
+const AdminBookingsPage = lazy(() => import("./pages/admin/Bookings"));
+const AdminLocationsPage = lazy(() => import("./pages/admin/Locations"));
+const AdminFeesPage = lazy(() => import("./pages/admin/Fees"));
+const AdminDiscountsPage = lazy(() => import("./pages/admin/Discounts"));
+const AdminFleetPage = lazy(() => import("./pages/admin/Fleet"));
+const AdminWarningsPage = lazy(() => import("./pages/admin/Warnings"));
+const AdminReportsPage = lazy(() => import("./pages/admin/Reports"));
+const AdminMessagesPage = lazy(() => import("./pages/admin/Messages"));
+const AdminLiveChatPage = lazy(() => import("./pages/admin/LiveChat"));
+const AdminVehicleValuesPage = lazy(() => import("./pages/admin/VehicleValues"));
+const AdminGpsPage = lazy(() => import("./pages/admin/Gps"));
+const AdminCheckInOutPage = lazy(() => import("./pages/admin/CheckInOut"));
+const AdminCorporatePage = lazy(() => import("./pages/admin/Corporate"));
+const AdminFacebookPage = lazy(() => import("./pages/admin/Facebook"));
+const AdminStatsPage = lazy(() => import("./pages/admin/Stats"));
+const AdminSalesAIPage = lazy(() => import("./pages/admin/SalesAI"));
+const SalesAIAddLeadPage = lazy(() => import("./pages/admin/SalesAIAddLead"));
+const SalesAIImportPage = lazy(() => import("./pages/admin/SalesAIImport"));
+const SalesAIEmailPage = lazy(() => import("./pages/admin/SalesAIEmail"));
+const SalesAICarAdPage = lazy(() => import("./pages/admin/SalesAICarAd"));
+const SalesAICompanySearchPage = lazy(() => import("./pages/admin/SalesAICompanySearch"));
+const SalesAIOutreachPage = lazy(() => import("./pages/admin/SalesAIOutreach"));
+const DiscountsAddPage = lazy(() => import("./pages/admin/DiscountsAdd"));
+const StaffAddPage = lazy(() => import("./pages/admin/StaffAdd"));
+const CorporateAddPage = lazy(() => import("./pages/admin/CorporateAdd"));
+const CorporateDetailPage = lazy(() => import("./pages/admin/CorporateDetail"));
+const GpsAddPage = lazy(() => import("./pages/admin/GpsAdd"));
+const BookingsAddPage = lazy(() => import("./pages/admin/BookingsAdd"));
+const UserEditPage = lazy(() => import("./pages/admin/UserEdit"));
+const FleetVehicleEditPage = lazy(() => import("./pages/admin/FleetVehicleEdit"));
+const DriverLicenseReviewPage = lazy(() => import("./pages/admin/DriverLicenseReview"));
+
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
   const { vehicleId } = useParams();
@@ -77,44 +122,15 @@ const SearchBookingRedirect = () => {
   const queryString = searchParams.toString();
   return <Navigate to={`/booking/${vehicleId}${queryString ? `?${queryString}` : ''}`} replace />;
 };
-import CorporateAddFleetVehiclePage from "./pages/corporate/AddFleetVehicle";
-import CorporateCreateBookingPage from "./pages/corporate/CreateBooking";
-// Admin sub-pages
-import AdminUsersPage from "./pages/admin/Users";
-import AdminStaffPage from "./pages/admin/Staff";
-import AdminBookingsPage from "./pages/admin/Bookings";
-import AdminLocationsPage from "./pages/admin/Locations";
-import AdminFeesPage from "./pages/admin/Fees";
-import AdminDiscountsPage from "./pages/admin/Discounts";
-import AdminFleetPage from "./pages/admin/Fleet";
-import AdminWarningsPage from "./pages/admin/Warnings";
-import AdminReportsPage from "./pages/admin/Reports";
-import AdminMessagesPage from "./pages/admin/Messages";
-import AdminLiveChatPage from "./pages/admin/LiveChat";
-import AdminVehicleValuesPage from "./pages/admin/VehicleValues";
-import AdminGpsPage from "./pages/admin/Gps";
-import AdminCheckInOutPage from "./pages/admin/CheckInOut";
-import AdminCorporatePage from "./pages/admin/Corporate";
-import AdminFacebookPage from "./pages/admin/Facebook";
-import AdminStatsPage from "./pages/admin/Stats";
-import AdminSalesAIPage from "./pages/admin/SalesAI";
-import SalesAIAddLeadPage from "./pages/admin/SalesAIAddLead";
-import SalesAIImportPage from "./pages/admin/SalesAIImport";
-import SalesAIEmailPage from "./pages/admin/SalesAIEmail";
-import SalesAICarAdPage from "./pages/admin/SalesAICarAd";
-import SalesAICompanySearchPage from "./pages/admin/SalesAICompanySearch";
-import SalesAIOutreachPage from "./pages/admin/SalesAIOutreach";
-import DiscountsAddPage from "./pages/admin/DiscountsAdd";
-import StaffAddPage from "./pages/admin/StaffAdd";
-import CorporateAddPage from "./pages/admin/CorporateAdd";
-import CorporateDetailPage from "./pages/admin/CorporateDetail";
-import GpsAddPage from "./pages/admin/GpsAdd";
-import BookingsAddPage from "./pages/admin/BookingsAdd";
-import UserEditPage from "./pages/admin/UserEdit";
-import FleetVehicleEditPage from "./pages/admin/FleetVehicleEdit";
-import DriverLicenseReviewPage from "./pages/admin/DriverLicenseReview";
 
 const queryClient = new QueryClient();
+
+// Minimal loading fallback
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -123,107 +139,109 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            {/* Dashboard sub-routes */}
-            <Route path="/dashboard/vehicles" element={<VehiclesPage />} />
-            <Route path="/dashboard/vehicles/add" element={<AddVehiclePage />} />
-            <Route path="/dashboard/calendar" element={<CalendarPage />} />
-            <Route path="/dashboard/bookings" element={<BookingsPage />} />
-            <Route path="/dashboard/bookings/create" element={<CreateBookingPage />} />
-            <Route path="/dashboard/locations" element={<LocationsPage />} />
-            <Route path="/dashboard/locations/add" element={<LocationAddPage />} />
-            <Route path="/dashboard/locations/edit/:id" element={<LocationEditPage />} />
-            <Route path="/dashboard/invoices" element={<InvoicesPage />} />
-            <Route path="/dashboard/fines" element={<FinesPage />} />
-            <Route path="/dashboard/fines/add" element={<FinesAddPage />} />
-            <Route path="/dashboard/revenue-loss" element={<RevenueLossPage />} />
-            <Route path="/dashboard/customers" element={<CustomersPage />} />
-            <Route path="/dashboard/favorites" element={<FavoritesPage />} />
-            <Route path="/dashboard/recurring" element={<RecurringPage />} />
-            <Route path="/dashboard/service" element={<ServicePage />} />
-            <Route path="/dashboard/service/add" element={<ServiceTaskAddPage />} />
-            <Route path="/dashboard/tires" element={<TiresPage />} />
-            <Route path="/dashboard/inspections" element={<InspectionsPage />} />
-            <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-            <Route path="/dashboard/ai-pricing" element={<AIPricingPage />} />
-            <Route path="/dashboard/fleet-ai" element={<FleetAIPage />} />
-            <Route path="/dashboard/deductibles" element={<DeductiblesPage />} />
-            <Route path="/dashboard/vehicles/edit/:id" element={<EditVehiclePage />} />
-            <Route path="/dashboard/contract/sign/:id" element={<ContractSignPage />} />
-            <Route path="/dashboard/damage-report/:bookingId" element={<DamageReportPage />} />
-            <Route path="/dashboard/rate-lessor/:bookingId" element={<RateLessorPage />} />
-            <Route path="/dashboard/rate-renter/:bookingId" element={<RateRenterPage />} />
-            <Route path="/dashboard/settlement/:bookingId" element={<SettlementPage />} />
-            <Route path="/dashboard/checkinout/:bookingId" element={<CheckInOutPage />} />
-            <Route path="/dashboard/scan-history/:bookingId" element={<ScanHistoryPage />} />
-            <Route path="/dashboard/vehicle-swap/:bookingId" element={<VehicleSwapPage />} />
-            <Route path="/dashboard/warnings" element={<WarningsPage />} />
-            <Route path="/dashboard/warnings/create" element={<CreateWarningPage />} />
-            <Route path="/gps/add-device" element={<AddGpsDevicePage />} />
-            <Route path="/gps/add-geofence" element={<AddGeofencePage />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/search/vehicle/:vehicleId" element={<VehicleDetailPage />} />
-            <Route path="/search/booking/:vehicleId" element={<SearchBookingRedirect />} />
-            <Route path="/booking/:vehicleId" element={<Booking />} />
-            <Route path="/my-rentals" element={<MyRentals />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            {/* Admin sub-routes */}
-            <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route path="/admin/staff" element={<AdminStaffPage />} />
-            <Route path="/admin/bookings" element={<AdminBookingsPage />} />
-            <Route path="/admin/bookings/add" element={<BookingsAddPage />} />
-            <Route path="/admin/locations" element={<AdminLocationsPage />} />
-            <Route path="/admin/fees" element={<AdminFeesPage />} />
-            <Route path="/admin/discounts" element={<AdminDiscountsPage />} />
-            <Route path="/admin/discounts/add" element={<DiscountsAddPage />} />
-            <Route path="/admin/fleet" element={<AdminFleetPage />} />
-            <Route path="/admin/fleet/edit/:id" element={<FleetVehicleEditPage />} />
-            <Route path="/admin/staff/add" element={<StaffAddPage />} />
-            <Route path="/admin/corporate/add" element={<CorporateAddPage />} />
-            <Route path="/admin/corporate/:id" element={<CorporateDetailPage />} />
-            <Route path="/admin/warnings" element={<AdminWarningsPage />} />
-            <Route path="/admin/reports" element={<AdminReportsPage />} />
-            <Route path="/admin/messages" element={<AdminMessagesPage />} />
-            <Route path="/admin/live-chat" element={<AdminLiveChatPage />} />
-            <Route path="/admin/vehicle-values" element={<AdminVehicleValuesPage />} />
-            <Route path="/admin/gps" element={<AdminGpsPage />} />
-            <Route path="/admin/gps/add" element={<GpsAddPage />} />
-            <Route path="/admin/users/edit/:id" element={<UserEditPage />} />
-            <Route path="/admin/checkinout" element={<AdminCheckInOutPage />} />
-            <Route path="/admin/corporate" element={<AdminCorporatePage />} />
-            <Route path="/admin/facebook" element={<AdminFacebookPage />} />
-            <Route path="/admin/sales-ai" element={<AdminSalesAIPage />} />
-            <Route path="/admin/sales-ai/add" element={<SalesAIAddLeadPage />} />
-            <Route path="/admin/sales-ai/import" element={<SalesAIImportPage />} />
-            <Route path="/admin/sales-ai/email/:id" element={<SalesAIEmailPage />} />
-            <Route path="/admin/sales-ai/outreach/:id" element={<SalesAIOutreachPage />} />
-            <Route path="/admin/sales-ai/car-ad" element={<SalesAICarAdPage />} />
-            <Route path="/admin/sales-ai/company-search" element={<SalesAICompanySearchPage />} />
-            <Route path="/admin/stats" element={<AdminStatsPage />} />
-            <Route path="/admin/driver-licenses" element={<DriverLicenseReviewPage />} />
-            <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
-            <Route path="/handelsbetingelser" element={<Terms />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/beskeder" element={<Messages />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/install" element={<Install />} />
-            <Route path="/gps" element={<GpsTracking />} />
-            <Route path="/funktioner" element={<Features />} />
-            <Route path="/corporate" element={<CorporateDashboard />} />
-            <Route path="/corporate/add-vehicle" element={<CorporateAddFleetVehiclePage />} />
-            <Route path="/corporate/booking" element={<CorporateCreateBookingPage />} />
-            <Route path="/privat-fleet" element={<PrivateFleet />} />
-            <Route path="/om-os" element={<About />} />
-            <Route path="/hvad-er-lejio" element={<WhatIsLejio />} />
-            <Route path="/bliv-udlejer" element={<BecomeLessor />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              {/* Dashboard sub-routes */}
+              <Route path="/dashboard/vehicles" element={<VehiclesPage />} />
+              <Route path="/dashboard/vehicles/add" element={<AddVehiclePage />} />
+              <Route path="/dashboard/calendar" element={<CalendarPage />} />
+              <Route path="/dashboard/bookings" element={<BookingsPage />} />
+              <Route path="/dashboard/bookings/create" element={<CreateBookingPage />} />
+              <Route path="/dashboard/locations" element={<LocationsPage />} />
+              <Route path="/dashboard/locations/add" element={<LocationAddPage />} />
+              <Route path="/dashboard/locations/edit/:id" element={<LocationEditPage />} />
+              <Route path="/dashboard/invoices" element={<InvoicesPage />} />
+              <Route path="/dashboard/fines" element={<FinesPage />} />
+              <Route path="/dashboard/fines/add" element={<FinesAddPage />} />
+              <Route path="/dashboard/revenue-loss" element={<RevenueLossPage />} />
+              <Route path="/dashboard/customers" element={<CustomersPage />} />
+              <Route path="/dashboard/favorites" element={<FavoritesPage />} />
+              <Route path="/dashboard/recurring" element={<RecurringPage />} />
+              <Route path="/dashboard/service" element={<ServicePage />} />
+              <Route path="/dashboard/service/add" element={<ServiceTaskAddPage />} />
+              <Route path="/dashboard/tires" element={<TiresPage />} />
+              <Route path="/dashboard/inspections" element={<InspectionsPage />} />
+              <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+              <Route path="/dashboard/ai-pricing" element={<AIPricingPage />} />
+              <Route path="/dashboard/fleet-ai" element={<FleetAIPage />} />
+              <Route path="/dashboard/deductibles" element={<DeductiblesPage />} />
+              <Route path="/dashboard/vehicles/edit/:id" element={<EditVehiclePage />} />
+              <Route path="/dashboard/contract/sign/:id" element={<ContractSignPage />} />
+              <Route path="/dashboard/damage-report/:bookingId" element={<DamageReportPage />} />
+              <Route path="/dashboard/rate-lessor/:bookingId" element={<RateLessorPage />} />
+              <Route path="/dashboard/rate-renter/:bookingId" element={<RateRenterPage />} />
+              <Route path="/dashboard/settlement/:bookingId" element={<SettlementPage />} />
+              <Route path="/dashboard/checkinout/:bookingId" element={<CheckInOutPage />} />
+              <Route path="/dashboard/scan-history/:bookingId" element={<ScanHistoryPage />} />
+              <Route path="/dashboard/vehicle-swap/:bookingId" element={<VehicleSwapPage />} />
+              <Route path="/dashboard/warnings" element={<WarningsPage />} />
+              <Route path="/dashboard/warnings/create" element={<CreateWarningPage />} />
+              <Route path="/gps/add-device" element={<AddGpsDevicePage />} />
+              <Route path="/gps/add-geofence" element={<AddGeofencePage />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/search/vehicle/:vehicleId" element={<VehicleDetailPage />} />
+              <Route path="/search/booking/:vehicleId" element={<SearchBookingRedirect />} />
+              <Route path="/booking/:vehicleId" element={<Booking />} />
+              <Route path="/my-rentals" element={<MyRentals />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              {/* Admin sub-routes */}
+              <Route path="/admin/users" element={<AdminUsersPage />} />
+              <Route path="/admin/staff" element={<AdminStaffPage />} />
+              <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+              <Route path="/admin/bookings/add" element={<BookingsAddPage />} />
+              <Route path="/admin/locations" element={<AdminLocationsPage />} />
+              <Route path="/admin/fees" element={<AdminFeesPage />} />
+              <Route path="/admin/discounts" element={<AdminDiscountsPage />} />
+              <Route path="/admin/discounts/add" element={<DiscountsAddPage />} />
+              <Route path="/admin/fleet" element={<AdminFleetPage />} />
+              <Route path="/admin/fleet/edit/:id" element={<FleetVehicleEditPage />} />
+              <Route path="/admin/staff/add" element={<StaffAddPage />} />
+              <Route path="/admin/corporate/add" element={<CorporateAddPage />} />
+              <Route path="/admin/corporate/:id" element={<CorporateDetailPage />} />
+              <Route path="/admin/warnings" element={<AdminWarningsPage />} />
+              <Route path="/admin/reports" element={<AdminReportsPage />} />
+              <Route path="/admin/messages" element={<AdminMessagesPage />} />
+              <Route path="/admin/live-chat" element={<AdminLiveChatPage />} />
+              <Route path="/admin/vehicle-values" element={<AdminVehicleValuesPage />} />
+              <Route path="/admin/gps" element={<AdminGpsPage />} />
+              <Route path="/admin/gps/add" element={<GpsAddPage />} />
+              <Route path="/admin/users/edit/:id" element={<UserEditPage />} />
+              <Route path="/admin/checkinout" element={<AdminCheckInOutPage />} />
+              <Route path="/admin/corporate" element={<AdminCorporatePage />} />
+              <Route path="/admin/facebook" element={<AdminFacebookPage />} />
+              <Route path="/admin/sales-ai" element={<AdminSalesAIPage />} />
+              <Route path="/admin/sales-ai/add" element={<SalesAIAddLeadPage />} />
+              <Route path="/admin/sales-ai/import" element={<SalesAIImportPage />} />
+              <Route path="/admin/sales-ai/email/:id" element={<SalesAIEmailPage />} />
+              <Route path="/admin/sales-ai/outreach/:id" element={<SalesAIOutreachPage />} />
+              <Route path="/admin/sales-ai/car-ad" element={<SalesAICarAdPage />} />
+              <Route path="/admin/sales-ai/company-search" element={<SalesAICompanySearchPage />} />
+              <Route path="/admin/stats" element={<AdminStatsPage />} />
+              <Route path="/admin/driver-licenses" element={<DriverLicenseReviewPage />} />
+              <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
+              <Route path="/handelsbetingelser" element={<Terms />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/beskeder" element={<Messages />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/install" element={<Install />} />
+              <Route path="/gps" element={<GpsTracking />} />
+              <Route path="/funktioner" element={<Features />} />
+              <Route path="/corporate" element={<CorporateDashboard />} />
+              <Route path="/corporate/add-vehicle" element={<CorporateAddFleetVehiclePage />} />
+              <Route path="/corporate/booking" element={<CorporateCreateBookingPage />} />
+              <Route path="/privat-fleet" element={<PrivateFleet />} />
+              <Route path="/om-os" element={<About />} />
+              <Route path="/hvad-er-lejio" element={<WhatIsLejio />} />
+              <Route path="/bliv-udlejer" element={<BecomeLessor />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
