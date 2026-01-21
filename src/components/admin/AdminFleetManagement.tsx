@@ -247,6 +247,8 @@ const AdminFleetManagement = () => {
 
                 if (bookingsError) {
                   console.error('Error fetching fleet bookings:', bookingsError);
+                  toast.error('Kunne ikke hente fleet bookinger: ' + bookingsError.message);
+                  setBookings([]);
                 } else {
                   const formattedBookings = (bookingsData || []).map(b => ({
                     ...b,
