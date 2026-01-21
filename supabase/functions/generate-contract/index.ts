@@ -82,12 +82,21 @@ serve(async (req) => {
       pickupLocation = locationData;
     }
 
-    // Verify user is the lessor
+    // Verify user is the lessor OR has an admin role
     if (booking.lessor_id !== user.id) {
-      return new Response(JSON.stringify({ error: 'Not authorized' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      const { data: roleRows, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .in('role', ['support', 'admin', 'super_admin']);
+
+      const isAdmin = !roleError && (roleRows?.length || 0) > 0;
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: 'Not authorized' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Fetch lessor profile
