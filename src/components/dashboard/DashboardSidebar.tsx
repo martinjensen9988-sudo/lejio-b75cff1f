@@ -75,6 +75,7 @@ export const DashboardSidebar = ({
       'vehicles': '/dashboard/vehicles',
       'calendar': '/dashboard/calendar',
       'bookings': '/dashboard/bookings',
+      'locations': '/dashboard/locations',
       'invoices': '/dashboard/invoices',
       'fines': '/dashboard/fines',
       'revenue-loss': '/dashboard/revenue-loss',
@@ -107,6 +108,7 @@ export const DashboardSidebar = ({
         { label: "Mine biler", icon: Car, value: "vehicles" },
         { label: "Kalender", icon: CalendarDays, value: "calendar" },
         { label: "Bookinger", icon: Calendar, value: "bookings", badge: pendingBookings },
+        { label: "Lokationer", icon: MapPin, value: "locations" },
       ],
     },
     {
