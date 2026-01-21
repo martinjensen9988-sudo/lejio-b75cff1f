@@ -14,6 +14,14 @@ export const useVehicleImages = (vehicleId?: string) => {
   const [images, setImages] = useState<VehicleImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const getStoragePathFromPublicUrl = (publicUrl: string) => {
+    // Expected: https://.../storage/v1/object/public/vehicle-images/<path>
+    const marker = '/storage/v1/object/public/vehicle-images/';
+    const idx = publicUrl.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(publicUrl.slice(idx + marker.length));
+  };
+
   const fetchImages = useCallback(async () => {
     if (!vehicleId) return;
     
@@ -53,7 +61,8 @@ export const useVehicleImages = (vehicleId?: string) => {
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${vehicleId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      // Store images under vehicleId/ so Storage RLS can validate ownership
+      const fileName = `${vehicleId}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('vehicle-images')
@@ -98,14 +107,17 @@ export const useVehicleImages = (vehicleId?: string) => {
       const image = images.find(img => img.id === imageId);
       if (!image) return false;
 
-      // Extract filename from URL
-      const urlParts = image.image_url.split('/');
-      const fileName = urlParts[urlParts.length - 1];
+      // Extract storage path from URL
+      const filePath = getStoragePathFromPublicUrl(image.image_url);
+      if (!filePath) {
+        toast.error('Kunne ikke finde filstien for billedet');
+        return false;
+      }
 
       // Delete from storage
       await supabase.storage
         .from('vehicle-images')
-        .remove([fileName]);
+        .remove([filePath]);
 
       // Delete from database
       const { error } = await supabase
