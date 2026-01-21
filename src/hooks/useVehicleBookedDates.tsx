@@ -25,7 +25,7 @@ export const useVehicleBookedDates = (vehicleId: string | null | undefined) => {
         .from('bookings')
         .select('start_date, end_date')
         .eq('vehicle_id', vehicleId)
-        .not('status', 'in', '("cancelled","completed")');
+        .in('status', ['pending', 'confirmed', 'active']);
 
       if (error) throw error;
 
