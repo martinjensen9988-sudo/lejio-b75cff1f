@@ -126,6 +126,7 @@ export type Database = {
           deductible_insurance_selected: boolean | null
           deposit_amount: number | null
           dropoff_location_id: string | null
+          dropoff_time: string | null
           end_date: string
           extra_driver_birth_date: string | null
           extra_driver_first_name: string | null
@@ -149,6 +150,7 @@ export type Database = {
           period_count: number | null
           period_type: string | null
           pickup_location_id: string | null
+          pickup_time: string | null
           renter_address: string | null
           renter_birth_date: string | null
           renter_city: string | null
@@ -179,6 +181,7 @@ export type Database = {
           deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
           dropoff_location_id?: string | null
+          dropoff_time?: string | null
           end_date: string
           extra_driver_birth_date?: string | null
           extra_driver_first_name?: string | null
@@ -202,6 +205,7 @@ export type Database = {
           period_count?: number | null
           period_type?: string | null
           pickup_location_id?: string | null
+          pickup_time?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
           renter_city?: string | null
@@ -232,6 +236,7 @@ export type Database = {
           deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
           dropoff_location_id?: string | null
+          dropoff_time?: string | null
           end_date?: string
           extra_driver_birth_date?: string | null
           extra_driver_first_name?: string | null
@@ -255,6 +260,7 @@ export type Database = {
           period_count?: number | null
           period_type?: string | null
           pickup_location_id?: string | null
+          pickup_time?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
           renter_city?: string | null
@@ -520,6 +526,7 @@ export type Database = {
           deductible_insurance_price: number | null
           deductible_insurance_selected: boolean | null
           deposit_amount: number | null
+          dropoff_time: string | null
           end_date: string
           exterior_cleaning_fee: number | null
           extra_km_price: number
@@ -531,6 +538,7 @@ export type Database = {
           insurance_company: string | null
           insurance_policy_number: string | null
           interior_cleaning_fee: number | null
+          late_return_fee_enabled: boolean | null
           lessor_address: string | null
           lessor_company_name: string | null
           lessor_cvr: string | null
@@ -545,6 +553,7 @@ export type Database = {
           pickup_location_address: string | null
           pickup_location_name: string | null
           pickup_location_phone: string | null
+          pickup_time: string | null
           renter_address: string | null
           renter_birth_date: string | null
           renter_city: string | null
@@ -585,6 +594,7 @@ export type Database = {
           deductible_insurance_price?: number | null
           deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
+          dropoff_time?: string | null
           end_date: string
           exterior_cleaning_fee?: number | null
           extra_km_price?: number
@@ -596,6 +606,7 @@ export type Database = {
           insurance_company?: string | null
           insurance_policy_number?: string | null
           interior_cleaning_fee?: number | null
+          late_return_fee_enabled?: boolean | null
           lessor_address?: string | null
           lessor_company_name?: string | null
           lessor_cvr?: string | null
@@ -610,6 +621,7 @@ export type Database = {
           pickup_location_address?: string | null
           pickup_location_name?: string | null
           pickup_location_phone?: string | null
+          pickup_time?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
           renter_city?: string | null
@@ -650,6 +662,7 @@ export type Database = {
           deductible_insurance_price?: number | null
           deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
+          dropoff_time?: string | null
           end_date?: string
           exterior_cleaning_fee?: number | null
           extra_km_price?: number
@@ -661,6 +674,7 @@ export type Database = {
           insurance_company?: string | null
           insurance_policy_number?: string | null
           interior_cleaning_fee?: number | null
+          late_return_fee_enabled?: boolean | null
           lessor_address?: string | null
           lessor_company_name?: string | null
           lessor_cvr?: string | null
@@ -675,6 +689,7 @@ export type Database = {
           pickup_location_address?: string | null
           pickup_location_name?: string | null
           pickup_location_phone?: string | null
+          pickup_time?: string | null
           renter_address?: string | null
           renter_birth_date?: string | null
           renter_city?: string | null
@@ -4544,6 +4559,8 @@ export type Database = {
           current_location_id: string | null
           current_odometer: number | null
           daily_price: number | null
+          default_dropoff_time: string | null
+          default_pickup_time: string | null
           deposit_amount: number | null
           deposit_required: boolean
           description: string | null
@@ -4600,6 +4617,7 @@ export type Database = {
           is_available: boolean | null
           last_service_date: string | null
           last_service_odometer: number | null
+          late_return_charge_enabled: boolean | null
           latitude: number | null
           layout_type: string | null
           location_address: string | null
@@ -4669,6 +4687,8 @@ export type Database = {
           current_location_id?: string | null
           current_odometer?: number | null
           daily_price?: number | null
+          default_dropoff_time?: string | null
+          default_pickup_time?: string | null
           deposit_amount?: number | null
           deposit_required?: boolean
           description?: string | null
@@ -4725,6 +4745,7 @@ export type Database = {
           is_available?: boolean | null
           last_service_date?: string | null
           last_service_odometer?: number | null
+          late_return_charge_enabled?: boolean | null
           latitude?: number | null
           layout_type?: string | null
           location_address?: string | null
@@ -4794,6 +4815,8 @@ export type Database = {
           current_location_id?: string | null
           current_odometer?: number | null
           daily_price?: number | null
+          default_dropoff_time?: string | null
+          default_pickup_time?: string | null
           deposit_amount?: number | null
           deposit_required?: boolean
           description?: string | null
@@ -4850,6 +4873,7 @@ export type Database = {
           is_available?: boolean | null
           last_service_date?: string | null
           last_service_odometer?: number | null
+          late_return_charge_enabled?: boolean | null
           latitude?: number | null
           layout_type?: string | null
           location_address?: string | null
