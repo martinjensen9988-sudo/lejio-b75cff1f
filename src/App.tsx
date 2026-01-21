@@ -111,6 +111,7 @@ import CorporateDetailPage from "./pages/admin/CorporateDetail";
 import GpsAddPage from "./pages/admin/GpsAdd";
 import BookingsAddPage from "./pages/admin/BookingsAdd";
 import UserEditPage from "./pages/admin/UserEdit";
+import FleetVehicleEditPage from "./pages/admin/FleetVehicleEdit";
 
 const queryClient = new QueryClient();
 
@@ -180,6 +181,7 @@ const App = () => (
             <Route path="/admin/discounts" element={<AdminDiscountsPage />} />
             <Route path="/admin/discounts/add" element={<DiscountsAddPage />} />
             <Route path="/admin/fleet" element={<AdminFleetPage />} />
+            <Route path="/admin/fleet/edit/:id" element={<FleetVehicleEditPage />} />
             <Route path="/admin/staff/add" element={<StaffAddPage />} />
             <Route path="/admin/corporate/add" element={<CorporateAddPage />} />
             <Route path="/admin/corporate/:id" element={<CorporateDetailPage />} />
