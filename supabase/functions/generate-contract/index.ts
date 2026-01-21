@@ -166,10 +166,25 @@ serve(async (req) => {
       lessor_cvr: lessorProfile?.cvr_number,
       
       // Renter details
-      renter_name: booking.renter_name || 'Afventer lejer',
+      renter_name: booking.renter_first_name && booking.renter_last_name 
+        ? `${booking.renter_first_name} ${booking.renter_last_name}` 
+        : (booking.renter_name || 'Afventer lejer'),
       renter_email: booking.renter_email || '',
       renter_phone: booking.renter_phone,
-      renter_license_number: renterLicenseNumber,
+      renter_license_number: booking.renter_license_number || renterLicenseNumber,
+      renter_license_country: booking.renter_license_country || null,
+      renter_license_issue_date: booking.renter_license_issue_date || null,
+      renter_birth_date: booking.renter_birth_date || null,
+      renter_street_address: booking.renter_address || null,
+      renter_postal_code: booking.renter_postal_code || null,
+      renter_city: booking.renter_city || null,
+      renter_address: booking.renter_address && booking.renter_postal_code && booking.renter_city
+        ? `${booking.renter_address}, ${booking.renter_postal_code} ${booking.renter_city}`
+        : null,
+      
+      // Deductible insurance info
+      deductible_insurance_selected: booking.deductible_insurance_selected || false,
+      deductible_insurance_price: booking.deductible_insurance_price || 0,
       
       // Pickup location details
       pickup_location_name: pickupLocation?.name || null,

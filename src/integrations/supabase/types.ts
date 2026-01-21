@@ -499,6 +499,8 @@ export type Database = {
           created_at: string
           daily_price: number
           deductible_amount: number | null
+          deductible_insurance_price: number | null
+          deductible_insurance_selected: boolean | null
           deposit_amount: number | null
           end_date: string
           extra_km_price: number
@@ -524,13 +526,19 @@ export type Database = {
           pickup_location_name: string | null
           pickup_location_phone: string | null
           renter_address: string | null
+          renter_birth_date: string | null
+          renter_city: string | null
           renter_email: string
           renter_id: string | null
+          renter_license_country: string | null
+          renter_license_issue_date: string | null
           renter_license_number: string | null
           renter_name: string
           renter_phone: string | null
+          renter_postal_code: string | null
           renter_signature: string | null
           renter_signed_at: string | null
+          renter_street_address: string | null
           roadside_assistance_phone: string | null
           roadside_assistance_provider: string | null
           start_date: string
@@ -554,6 +562,8 @@ export type Database = {
           created_at?: string
           daily_price: number
           deductible_amount?: number | null
+          deductible_insurance_price?: number | null
+          deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
           end_date: string
           extra_km_price?: number
@@ -579,13 +589,19 @@ export type Database = {
           pickup_location_name?: string | null
           pickup_location_phone?: string | null
           renter_address?: string | null
+          renter_birth_date?: string | null
+          renter_city?: string | null
           renter_email: string
           renter_id?: string | null
+          renter_license_country?: string | null
+          renter_license_issue_date?: string | null
           renter_license_number?: string | null
           renter_name: string
           renter_phone?: string | null
+          renter_postal_code?: string | null
           renter_signature?: string | null
           renter_signed_at?: string | null
+          renter_street_address?: string | null
           roadside_assistance_phone?: string | null
           roadside_assistance_provider?: string | null
           start_date: string
@@ -609,6 +625,8 @@ export type Database = {
           created_at?: string
           daily_price?: number
           deductible_amount?: number | null
+          deductible_insurance_price?: number | null
+          deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
           end_date?: string
           extra_km_price?: number
@@ -634,13 +652,19 @@ export type Database = {
           pickup_location_name?: string | null
           pickup_location_phone?: string | null
           renter_address?: string | null
+          renter_birth_date?: string | null
+          renter_city?: string | null
           renter_email?: string
           renter_id?: string | null
+          renter_license_country?: string | null
+          renter_license_issue_date?: string | null
           renter_license_number?: string | null
           renter_name?: string
           renter_phone?: string | null
+          renter_postal_code?: string | null
           renter_signature?: string | null
           renter_signed_at?: string | null
+          renter_street_address?: string | null
           roadside_assistance_phone?: string | null
           roadside_assistance_provider?: string | null
           start_date?: string
