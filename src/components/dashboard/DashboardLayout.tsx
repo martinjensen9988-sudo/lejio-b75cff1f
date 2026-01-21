@@ -91,10 +91,10 @@ export const DashboardLayout = ({ children, activeTab }: DashboardLayoutProps) =
         <div className="p-4 sm:p-6 lg:p-8 pt-20 lg:pt-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-            <StatCard icon={Car} label="Dine biler" value={vehicles.length} loading={vehiclesLoading} gradient="from-primary to-primary/60" />
-            <StatCard icon={Calendar} label="Afventende" value={pendingBookings} loading={bookingsLoading} highlight={pendingBookings > 0} gradient="from-accent to-accent/60" />
-            <StatCard icon={Calendar} label="Aktive" value={activeBookings} loading={bookingsLoading} gradient="from-mint to-mint/60" />
-            <StatCard icon={Calendar} label="Total" value={bookings.length} loading={bookingsLoading} gradient="from-lavender to-lavender/60" />
+            <StatCard icon={Car} label="Dine biler" value={vehicles.length} loading={vehiclesLoading} gradient="from-primary to-primary/60" onClick={() => navigate('/dashboard/vehicles')} />
+            <StatCard icon={Calendar} label="Afventende" value={pendingBookings} loading={bookingsLoading} highlight={pendingBookings > 0} gradient="from-accent to-accent/60" onClick={() => navigate('/dashboard/bookings')} />
+            <StatCard icon={Calendar} label="Aktive" value={activeBookings} loading={bookingsLoading} gradient="from-mint to-mint/60" onClick={() => navigate('/dashboard/bookings')} />
+            <StatCard icon={Calendar} label="Total" value={bookings.length} loading={bookingsLoading} gradient="from-lavender to-lavender/60" onClick={() => navigate('/dashboard/bookings')} />
           </div>
 
           <div className="space-y-4 mb-6">
@@ -116,10 +116,17 @@ interface StatCardProps {
   loading?: boolean;
   highlight?: boolean;
   gradient?: string;
+  onClick?: () => void;
 }
 
-const StatCard = ({ icon: Icon, label, value, loading, highlight, gradient = "from-primary to-primary/60" }: StatCardProps) => (
-  <div className={`bg-card/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-5 border-2 transition-all hover:shadow-lg ${highlight ? 'border-accent shadow-lg shadow-accent/10' : 'border-border/50 hover:border-border'}`}>
+const StatCard = ({ icon: Icon, label, value, loading, highlight, gradient = "from-primary to-primary/60", onClick }: StatCardProps) => (
+  <div 
+    className={`bg-card/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-5 border-2 transition-all hover:shadow-lg ${highlight ? 'border-accent shadow-lg shadow-accent/10' : 'border-border/50 hover:border-border'} ${onClick ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
+    onClick={onClick}
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+  >
     <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
       <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
         <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
