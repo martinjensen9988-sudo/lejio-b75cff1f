@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { VehicleDamageMap } from './VehicleDamageMap';
 import { DamageReport } from '@/hooks/useDamageReports';
-import { Car, User, Calendar, CreditCard, Shield, Fuel, Phone, FileText, PenLine, AlertTriangle } from 'lucide-react';
+import { Car, User, Calendar, CreditCard, Shield, Fuel, Phone, FileText, PenLine, AlertTriangle, Clock } from 'lucide-react';
 
 interface ContractPreviewProps {
   contract: Contract;
@@ -173,11 +173,17 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
                 <div className="flex-1 bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
                   <p className="text-xs text-gray-500 uppercase tracking-wider">Fra</p>
                   <p className="text-lg font-semibold mt-1">{formatDate(contract.start_date)}</p>
+                  {(contract as any).pickup_time && (
+                    <p className="text-sm text-primary font-medium mt-1">kl. {(contract as any).pickup_time}</p>
+                  )}
                 </div>
                 <div className="text-gray-400">→</div>
                 <div className="flex-1 bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
                   <p className="text-xs text-gray-500 uppercase tracking-wider">Til</p>
                   <p className="text-lg font-semibold mt-1">{formatDate(contract.end_date)}</p>
+                  {(contract as any).dropoff_time && (
+                    <p className="text-sm text-destructive font-medium mt-1">senest kl. {(contract as any).dropoff_time}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -379,6 +385,28 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
                     <p className="text-xs text-gray-400">Maks. 1.500 kr</p>
                   </div>
                 )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Late Return Fee */}
+        {(contract as any).late_return_fee_enabled !== false && (contract as any).dropoff_time && (
+          <section className="border-t border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-orange-600" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Sen aflevering</h2>
+            </div>
+            <div className="bg-orange-50 rounded-xl p-5 border border-orange-200">
+              <p className="text-sm text-gray-700 mb-3">
+                Køretøjet skal afleveres senest <strong>kl. {(contract as any).dropoff_time}</strong> på slutdagen.
+              </p>
+              <div className="bg-white rounded-lg p-4 border border-orange-200">
+                <p className="text-xs text-gray-500 mb-1">Gebyr ved sen aflevering</p>
+                <p className="text-xl font-bold text-orange-600">1 ekstra lejedag ({formatCurrency(contract.daily_price)})</p>
+                <p className="text-xs text-gray-500 mt-1">Opkræves hvis køretøjet afleveres efter det aftalte tidspunkt</p>
               </div>
             </div>
           </section>
