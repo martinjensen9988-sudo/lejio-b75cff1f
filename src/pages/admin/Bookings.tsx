@@ -141,7 +141,11 @@ const AdminBookingsPage = () => {
       .order('created_at', { ascending: false })
       .limit(100);
 
-    if (!error) {
+    if (error) {
+      console.error('Error fetching admin bookings:', error);
+      toast.error('Kunne ikke hente bookinger: ' + error.message);
+      setBookings([]);
+    } else {
       setBookings((data || []).map(b => ({
         ...b,
         vehicle: b.vehicle as any,
@@ -161,7 +165,11 @@ const AdminBookingsPage = () => {
       .order('created_at', { ascending: false })
       .limit(200);
 
-    if (!error) {
+    if (error) {
+      console.error('Error fetching admin vehicles:', error);
+      toast.error('Kunne ikke hente køretøjer: ' + error.message);
+      setVehicles([]);
+    } else {
       setVehicles((data || []).map(v => ({
         ...v,
         owner: v.owner as any,
