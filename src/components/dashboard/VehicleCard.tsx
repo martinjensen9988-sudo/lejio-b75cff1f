@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Vehicle } from '@/hooks/useVehicles';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Car, Calendar, Fuel, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
-import EditVehicleDialog from './EditVehicleDialog';
+import { Car, Calendar, Fuel, Trash2, ToggleLeft, ToggleRight, Pencil } from 'lucide-react';
 import ImageCarousel from '@/components/shared/ImageCarousel';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,6 +15,7 @@ interface VehicleCardProps {
 }
 
 const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: VehicleCardProps) => {
+  const navigate = useNavigate();
   const [images, setImages] = useState<string[]>([]);
 
   // Fetch vehicle images from the new table
@@ -168,8 +169,15 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
               </>
             )}
           </Button>
-          <EditVehicleDialog vehicle={vehicle} onUpdate={onUpdate} />
           <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs"
+            onClick={() => navigate(`/dashboard/vehicles/edit/${vehicle.id}`)}
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+          <Button
             variant="ghost" 
             size="sm" 
             className="text-destructive text-xs" 
