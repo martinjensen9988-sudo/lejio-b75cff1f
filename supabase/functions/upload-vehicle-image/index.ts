@@ -6,6 +6,45 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 20;
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function getClientIP(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+         req.headers.get('x-real-ip') ||
+         req.headers.get('cf-connecting-ip') ||
+         'unknown';
+}
+
+function checkRateLimit(clientIP: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(clientIP);
+
+  if (record && now > record.resetTime) {
+    rateLimitStore.delete(clientIP);
+  }
+
+  const currentRecord = rateLimitStore.get(clientIP);
+
+  if (!currentRecord) {
+    rateLimitStore.set(clientIP, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true };
+  }
+
+  if (currentRecord.count >= MAX_REQUESTS_PER_WINDOW) {
+    return { allowed: false, retryAfter: Math.ceil((currentRecord.resetTime - now) / 1000) };
+  }
+
+  currentRecord.count++;
+  return { allowed: true };
+}
+
+// Input validation
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB max
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
 function decodeBase64ToUint8Array(base64: string): Uint8Array {
   const cleaned = base64.includes(",") ? base64.split(",")[1] : base64;
   const binary = atob(cleaned);
@@ -17,6 +56,23 @@ function decodeBase64ToUint8Array(base64: string): Uint8Array {
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limiting
+  const clientIP = getClientIP(req);
+  const rateLimitResult = checkRateLimit(clientIP);
+  if (!rateLimitResult.allowed) {
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please try again later." }),
+      { 
+        status: 429, 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Retry-After": String(rateLimitResult.retryAfter || 60)
+        } 
+      }
+    );
   }
 
   try {
@@ -45,9 +101,37 @@ serve(async (req) => {
     }
 
     const { vehicleId, imageBase64, contentType, fileExt } = await req.json();
+    
+    // Input validation
     if (!vehicleId || !imageBase64) {
       return new Response(
         JSON.stringify({ error: "Missing vehicleId or image" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Validate vehicleId format (UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(vehicleId)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid vehicleId format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Validate image size
+    if (imageBase64.length > MAX_IMAGE_SIZE) {
+      return new Response(
+        JSON.stringify({ error: "Image exceeds maximum size limit (10MB)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Validate file extension
+    const ext = typeof fileExt === "string" && fileExt.trim() ? fileExt.trim().toLowerCase() : "jpg";
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid file extension. Allowed: jpg, jpeg, png, gif, webp" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -77,7 +161,6 @@ serve(async (req) => {
     }
 
     const bytes = decodeBase64ToUint8Array(imageBase64);
-    const ext = typeof fileExt === "string" && fileExt.trim() ? fileExt.trim() : "jpg";
     const safeContentType = typeof contentType === "string" && contentType.startsWith("image/")
       ? contentType
       : "image/jpeg";
