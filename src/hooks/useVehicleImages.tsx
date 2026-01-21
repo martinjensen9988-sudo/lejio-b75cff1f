@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { createClient } from '@supabase/supabase-js';
 
 export interface VehicleImage {
   id: string;
@@ -15,15 +14,12 @@ export const useVehicleImages = (vehicleId?: string) => {
   const [images, setImages] = useState<VehicleImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getAuthedStorageClient = (accessToken: string) => {
-    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-    const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-    if (!url || !key) return null;
-
-    // Force Authorization header for Storage calls (avoids cases where upload is sent as anon)
-    return createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false },
-      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
     });
   };
 
@@ -66,13 +62,6 @@ export const useVehicleImages = (vehicleId?: string) => {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       toast.error('Du skal være logget ind for at uploade billeder');
-      return null;
-    }
-
-    const accessToken = sessionData.session.access_token;
-    const authed = getAuthedStorageClient(accessToken);
-    if (!authed) {
-      toast.error('Mangler konfiguration for upload');
       return null;
     }
 
@@ -130,42 +119,20 @@ export const useVehicleImages = (vehicleId?: string) => {
         console.log('[vehicle-images] can_manage_vehicle_image_path preflight failed', e);
       }
 
-      const { error: uploadError } = await supabase.storage
-        .from('vehicle-images')
-        .upload(fileName, file, { upsert: true, contentType: file.type });
+      // Upload via backend function (service upload + ownership check)
+      const imageBase64 = await fileToBase64(file);
+      const { data: uploadData, error: uploadFnError } = await supabase.functions.invoke('upload-vehicle-image', {
+        body: {
+          vehicleId,
+          imageBase64,
+          contentType: file.type,
+          fileExt: fileExt || 'jpg',
+        },
+      });
 
-      if (!uploadError) {
-        console.log('[vehicle-images] storage upload ok (default client)', { fileName });
-      } else {
-        console.warn('[vehicle-images] storage upload failed (default client)', {
-          fileName,
-          message: (uploadError as any)?.message,
-          error: uploadError,
-        });
-      }
-
-      // If the default client somehow uploads as anon, retry with forced Authorization
-      if (uploadError) {
-        const { error: retryError } = await authed.storage
-          .from('vehicle-images')
-          .upload(fileName, file, { upsert: true, contentType: file.type });
-
-        if (!retryError) {
-          console.log('[vehicle-images] storage upload ok (forced auth retry)', { fileName });
-        } else {
-          console.warn('[vehicle-images] storage upload failed (forced auth retry)', {
-            fileName,
-            message: (retryError as any)?.message,
-            error: retryError,
-          });
-        }
-
-        if (retryError) throw retryError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('vehicle-images')
-        .getPublicUrl(fileName);
+      if (uploadFnError) throw uploadFnError;
+      const publicUrl = (uploadData as any)?.publicUrl as string | undefined;
+      if (!publicUrl) throw new Error('Missing publicUrl from upload function');
 
       // Get max display_order
       const maxOrder = images.length > 0 
