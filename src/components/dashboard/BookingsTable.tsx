@@ -26,6 +26,7 @@ import { VehicleScanHistory } from '@/components/damage/VehicleScanHistory';
 import VehicleSwapDialog from '@/components/dashboard/VehicleSwapDialog';
 import DriverLicenseStatusBadge from '@/components/dashboard/DriverLicenseStatusBadge';
 import MobileBookingCard from '@/components/dashboard/MobileBookingCard';
+import RentalSettlementDialog from '@/components/dashboard/RentalSettlementDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -82,6 +83,10 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
   const [ratedBookings, setRatedBookings] = useState<Set<string>>(new Set());
   const { hasRatedBooking } = useRenterRatings();
   const [damageReportType, setDamageReportType] = useState<'pickup' | 'return'>('pickup');
+
+  // Settlement dialog state
+  const [settlementOpen, setSettlementOpen] = useState(false);
+  const [selectedBookingForSettlement, setSelectedBookingForSettlement] = useState<Booking | null>(null);
 
   // Check which completed bookings have been rated
   useEffect(() => {
@@ -210,7 +215,10 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                 onConfirm={() => handleConfirmBooking(booking)}
                 onCancel={() => onUpdateStatus(booking.id, 'cancelled')}
                 onStartRental={() => onUpdateStatus(booking.id, 'active')}
-                onCompleteRental={() => onUpdateStatus(booking.id, 'completed')}
+                onCompleteRental={() => {
+                  setSelectedBookingForSettlement(booking);
+                  setSettlementOpen(true);
+                }}
                 onViewContract={() => contract && handleViewContract(contract)}
                 onGenerateContract={() => handleGenerateContract(booking)}
                 onCheckIn={() => {
@@ -590,7 +598,10 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => onUpdateStatus(booking.id, 'completed')}
+                          onClick={() => {
+                            setSelectedBookingForSettlement(booking);
+                            setSettlementOpen(true);
+                          }}
                         >
                           Afslut
                         </Button>
@@ -705,6 +716,20 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Settlement Dialog */}
+      {selectedBookingForSettlement && (
+        <RentalSettlementDialog
+          open={settlementOpen}
+          onOpenChange={setSettlementOpen}
+          booking={selectedBookingForSettlement}
+          onComplete={async () => {
+            await onUpdateStatus(selectedBookingForSettlement.id, 'completed');
+            setSelectedBookingForSettlement(null);
+            refetchBookings();
+          }}
+        />
+      )}
     </>
   );
 };

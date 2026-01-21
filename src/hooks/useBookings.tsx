@@ -20,6 +20,9 @@ export interface Booking {
   payment_method: string | null;
   payment_received: boolean;
   payment_received_at: string | null;
+  deposit_amount: number | null;
+  included_km: number | null;
+  extra_km_price: number | null;
   created_at: string;
   updated_at: string;
   vehicle?: {
