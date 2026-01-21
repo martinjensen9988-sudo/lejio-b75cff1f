@@ -2,17 +2,18 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDriverLicenseStatus } from '@/hooks/useDriverLicenseStatus';
-import { CheckCircle, Clock, XCircle, HelpCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, HelpCircle, Loader2, FileCheck } from 'lucide-react';
 
 interface DriverLicenseStatusBadgeProps {
   renterEmail?: string | null;
   renterId?: string | null;
+  renterLicenseNumber?: string | null;
   size?: 'sm' | 'md';
 }
 
-const DriverLicenseStatusBadge = ({ renterEmail, renterId, size = 'sm' }: DriverLicenseStatusBadgeProps) => {
+const DriverLicenseStatusBadge = ({ renterEmail, renterId, renterLicenseNumber, size = 'sm' }: DriverLicenseStatusBadgeProps) => {
   const { getLicenseStatusByEmail, getLicenseStatusByUserId, isLoading } = useDriverLicenseStatus();
-  const [status, setStatus] = useState<'none' | 'pending' | 'verified' | 'rejected' | null>(null);
+  const [status, setStatus] = useState<'none' | 'pending' | 'verified' | 'rejected' | 'from_booking' | null>(null);
   const [licenseNumber, setLicenseNumber] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,14 +26,21 @@ const DriverLicenseStatusBadge = ({ renterEmail, renterId, size = 'sm' }: Driver
         result = await getLicenseStatusByEmail(renterEmail);
       }
       
-      if (result) {
+      if (result && result.status !== 'none') {
         setStatus(result.status);
         setLicenseNumber(result.licenseNumber);
+      } else if (renterLicenseNumber) {
+        // Fallback: if no driver_licenses record but booking has license number
+        setStatus('from_booking');
+        setLicenseNumber(renterLicenseNumber);
+      } else {
+        setStatus('none');
+        setLicenseNumber(null);
       }
     };
 
     fetchStatus();
-  }, [renterEmail, renterId, getLicenseStatusByEmail, getLicenseStatusByUserId]);
+  }, [renterEmail, renterId, renterLicenseNumber, getLicenseStatusByEmail, getLicenseStatusByUserId]);
 
   if (isLoading) {
     return <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />;
@@ -50,6 +58,26 @@ const DriverLicenseStatusBadge = ({ renterEmail, renterId, size = 'sm' }: Driver
           </TooltipTrigger>
           <TooltipContent>
             <p>Lejeren har ikke indsendt kørekort</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  // License number from booking data (not verified through driver_licenses table)
+  if (status === 'from_booking') {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Badge className={`gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 ${size === 'sm' ? 'text-xs' : ''}`}>
+              <FileCheck className="w-3 h-3" />
+              Kørekort oplyst
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Kørekortnummer oplyst ved booking</p>
+            {licenseNumber && <p className="text-xs mt-1 font-mono">Nr: {licenseNumber}</p>}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

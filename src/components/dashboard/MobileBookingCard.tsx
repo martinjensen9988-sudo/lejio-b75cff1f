@@ -122,7 +122,8 @@ export const MobileBookingCard = ({
               )}
               <DriverLicenseStatusBadge 
                 renterEmail={booking.renter_email} 
-                renterId={booking.renter_id} 
+                renterId={booking.renter_id}
+                renterLicenseNumber={booking.renter_license_number}
                 size="sm" 
               />
             </div>
