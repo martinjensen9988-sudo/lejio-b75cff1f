@@ -40,6 +40,8 @@ interface RentalBooking {
   lessor_id: string;
   start_date: string;
   end_date: string;
+  pickup_time: string | null;
+  dropoff_time: string | null;
   total_price: number;
   status: string;
   renter_name: string | null;
@@ -401,6 +403,14 @@ const MyRentals = () => {
                               <div className="font-semibold text-primary">
                                 {booking.total_price.toLocaleString("da-DK")} kr
                               </div>
+                              {(booking.pickup_time || booking.dropoff_time) && (
+                                <div className="flex items-center gap-2 col-span-2 text-muted-foreground">
+                                  <Clock className="w-4 h-4" />
+                                  <span>
+                                    Afhentning kl. {booking.pickup_time || '10:00'} · Aflevering senest kl. {booking.dropoff_time || '08:00'}
+                                  </span>
+                                </div>
+                              )}
                             </div>
 
                             {/* Contract Actions */}
@@ -544,6 +554,14 @@ const MyRentals = () => {
                               <div className="font-semibold">
                                 {booking.total_price.toLocaleString("da-DK")} kr
                               </div>
+                              {(booking.pickup_time || booking.dropoff_time) && (
+                                <div className="flex items-center gap-2 col-span-2 text-muted-foreground">
+                                  <Clock className="w-4 h-4" />
+                                  <span>
+                                    Afhentning kl. {booking.pickup_time || '10:00'} · Aflevering senest kl. {booking.dropoff_time || '08:00'}
+                                  </span>
+                                </div>
+                              )}
                             </div>
 
                             {/* Actions */}
