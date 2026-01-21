@@ -70,7 +70,9 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
   const calculatePrice = () => {
     if (!formData.start_date || !formData.end_date || !selectedVehicle) return 0;
     
-    const days = differenceInDays(formData.end_date, formData.start_date) + 1;
+    // differenceInDays gives us the number of rental days (nights)
+    // Jan 22 to Jan 24 = 2 days (pickup on 22, return on 24)
+    const days = Math.max(1, differenceInDays(formData.end_date, formData.start_date));
     
     // Use monthly price if >= 30 days
     if (days >= 30 && selectedVehicle.monthly_price) {
@@ -94,7 +96,7 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
 
   const totalPrice = calculatePrice();
   const days = formData.start_date && formData.end_date 
-    ? differenceInDays(formData.end_date, formData.start_date) + 1 
+    ? Math.max(1, differenceInDays(formData.end_date, formData.start_date))
     : 0;
 
   const resetForm = () => {
