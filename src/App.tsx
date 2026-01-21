@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -63,7 +63,13 @@ import ServiceRemindersAddPage from "./pages/dashboard/ServiceRemindersAdd";
 import AddGeofencePage from "./pages/gps/AddGeofence";
 import AddGpsDevicePage from "./pages/gps/AddGpsDevice";
 import VehicleDetailPage from "./pages/search/VehicleDetail";
-import SearchCreateBookingPage from "./pages/search/CreateBooking";
+// Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
+const SearchBookingRedirect = () => {
+  const { vehicleId } = useParams();
+  const [searchParams] = useSearchParams();
+  const queryString = searchParams.toString();
+  return <Navigate to={`/booking/${vehicleId}${queryString ? `?${queryString}` : ''}`} replace />;
+};
 import CorporateAddFleetVehiclePage from "./pages/corporate/AddFleetVehicle";
 import CorporateCreateBookingPage from "./pages/corporate/CreateBooking";
 // Admin sub-pages
@@ -144,7 +150,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/search" element={<Search />} />
             <Route path="/search/vehicle/:vehicleId" element={<VehicleDetailPage />} />
-            <Route path="/search/booking/:vehicleId" element={<SearchCreateBookingPage />} />
+            <Route path="/search/booking/:vehicleId" element={<SearchBookingRedirect />} />
             <Route path="/booking/:vehicleId" element={<Booking />} />
             <Route path="/my-rentals" element={<MyRentals />} />
             <Route path="/admin" element={<AdminLogin />} />
