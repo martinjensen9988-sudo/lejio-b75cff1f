@@ -64,6 +64,9 @@ interface Vehicle {
   deposit_amount: number | null;
   prepaid_rent_enabled: boolean;
   prepaid_rent_months: number | null;
+  default_pickup_time: string | null;
+  default_dropoff_time: string | null;
+  late_return_charge_enabled: boolean | null;
 }
 
 const Booking = () => {
@@ -103,6 +106,8 @@ const Booking = () => {
     licenseIssueDate: "",
     licenseCountry: "Danmark",
     notes: "",
+    pickupTime: "10:00",
+    dropoffTime: "08:00",
   });
 
   // Extra driver
@@ -158,6 +163,13 @@ const Booking = () => {
       }
 
       setVehicle(data);
+      
+      // Set default pickup/dropoff times from vehicle settings
+      setFormData(prev => ({
+        ...prev,
+        pickupTime: data.default_pickup_time || '10:00',
+        dropoffTime: data.default_dropoff_time || '08:00',
+      }));
 
       // Fetch lessor payment methods (for the payment step)
       try {
@@ -368,6 +380,9 @@ const Booking = () => {
         renter_license_number: formData.licenseNumber,
         renter_license_issue_date: formData.licenseIssueDate || null,
         renter_license_country: formData.licenseCountry,
+        // Pickup/Dropoff times
+        pickup_time: formData.pickupTime,
+        dropoff_time: formData.dropoffTime,
         // Extra driver
         has_extra_driver: hasExtraDriver,
         extra_driver_first_name: hasExtraDriver ? extraDriver.firstName : null,
@@ -645,9 +660,41 @@ const Booking = () => {
                     </div>
 
                     {startDate && endDate && (
-                      <div className="bg-muted/50 rounded-xl p-4">
-                        <p className="text-sm text-muted-foreground">Slutdato:</p>
-                        <p className="font-medium">{format(endDate, "PPP", { locale: da })}</p>
+                      <div className="bg-muted/50 rounded-xl p-4 space-y-3">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Slutdato:</p>
+                          <p className="font-medium">{format(endDate, "PPP", { locale: da })}</p>
+                        </div>
+                        
+                        {/* Pickup & Dropoff Times */}
+                        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border">
+                          <div className="space-y-2">
+                            <Label htmlFor="pickupTime" className="text-sm">Afhentning kl.</Label>
+                            <Input
+                              id="pickupTime"
+                              type="time"
+                              value={formData.pickupTime}
+                              onChange={(e) => setFormData(p => ({ ...p, pickupTime: e.target.value }))}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="dropoffTime" className="text-sm">Aflevering kl.</Label>
+                            <Input
+                              id="dropoffTime"
+                              type="time"
+                              value={formData.dropoffTime}
+                              onChange={(e) => setFormData(p => ({ ...p, dropoffTime: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        
+                        {vehicle?.late_return_charge_enabled !== false && (
+                          <div className="bg-destructive/10 rounded-lg p-3 text-sm border border-destructive/20">
+                            <p className="text-destructive">
+                              <strong>Sen aflevering:</strong> Afleveres bilen efter kl. {formData.dropoffTime}, opkræves gebyr svarende til 1 ekstra lejedag.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
 
