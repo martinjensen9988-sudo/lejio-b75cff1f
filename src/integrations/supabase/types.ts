@@ -5344,6 +5344,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      can_manage_vehicle_image: {
+        Args: { object_name: string }
+        Returns: boolean
+      }
       can_view_vehicle_sensitive_data: {
         Args: { vehicle_id: string }
         Returns: boolean
