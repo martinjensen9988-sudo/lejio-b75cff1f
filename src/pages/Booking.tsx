@@ -1536,6 +1536,13 @@ const Booking = () => {
                       <span>{pricing.unitPrice.toLocaleString("da-DK")} kr</span>
                     </div>
 
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Leje ({pricing.periodCount} {pricing.periodType === "monthly" ? (pricing.periodCount === 1 ? "måned" : "måneder") : pricing.periodType === "weekly" ? (pricing.periodCount === 1 ? "uge" : "uger") : (pricing.periodCount === 1 ? "dag" : "dage")})
+                      </span>
+                      <span>{pricing.rentalTotal.toLocaleString("da-DK")} kr</span>
+                    </div>
+
                     {pricing.deposit > 0 && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Depositum</span>
