@@ -62,6 +62,11 @@ interface AdminBooking {
     make: string;
     model: string;
   };
+  contract?: {
+    id: string;
+    contract_number: string;
+    status: string;
+  };
   lessor?: {
     full_name: string | null;
     email: string;
@@ -164,6 +169,25 @@ const AdminBookingsPage = () => {
         }
       }
 
+      // Fetch contracts for the bookings (so admins can open / generate contract)
+      const bookingIds = Array.from(new Set((data || []).map((b: any) => b.id).filter(Boolean)));
+      const contractMap = new Map<string, { id: string; contract_number: string; status: string }>();
+
+      if (bookingIds.length > 0) {
+        const { data: contractsData, error: contractsError } = await supabase
+          .from('contracts')
+          .select('id, booking_id, contract_number, status')
+          .in('booking_id', bookingIds);
+
+        if (contractsError) {
+          console.error('Error fetching booking contracts:', contractsError);
+        } else {
+          (contractsData || []).forEach((c: any) => {
+            contractMap.set(c.booking_id, { id: c.id, contract_number: c.contract_number, status: c.status });
+          });
+        }
+      }
+
       // Fetch lessor profiles separately to avoid reliance on schema relationship cache
       const lessorIds = Array.from(new Set((data || []).map((b: any) => b.lessor_id).filter(Boolean)));
       const lessorMap = new Map<string, { full_name: string | null; email: string }>();
@@ -186,10 +210,57 @@ const AdminBookingsPage = () => {
       setBookings((data || []).map((b: any) => ({
         ...b,
         vehicle: b.vehicle_id ? (vehicleMap.get(b.vehicle_id) as any) : undefined,
+        contract: contractMap.get(b.id) as any,
         lessor: b.lessor_id ? (lessorMap.get(b.lessor_id) as any) : undefined,
       })));
     }
     setLoadingData(false);
+  };
+
+  const updateBookingStatus = async (bookingId: string, status: string) => {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status })
+      .eq('id', bookingId);
+
+    if (error) {
+      console.error('Error updating booking status:', error);
+      toast.error('Kunne ikke opdatere status: ' + error.message);
+      return false;
+    }
+
+    toast.success('Status opdateret');
+    await fetchBookings();
+    return true;
+  };
+
+  const ensureContractForBooking = async (booking: AdminBooking) => {
+    if (booking.contract?.id) return booking.contract;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-contract', {
+        body: {
+          bookingId: booking.id,
+          vehicleValue: 150000,
+          depositAmount: 2500,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      await fetchBookings();
+      return (data as any)?.contract as AdminBooking['contract'];
+    } catch (err) {
+      console.error('Error generating contract (admin):', err);
+      toast.error('Kunne ikke oprette lejekontrakt');
+      return null;
+    }
+  };
+
+  const openContract = async (booking: AdminBooking) => {
+    const contract = await ensureContractForBooking(booking);
+    if (!contract?.id) return;
+    navigate(`/dashboard/contract/sign/${contract.id}`);
   };
 
   const fetchVehicles = async () => {
@@ -461,6 +532,33 @@ const AdminBookingsPage = () => {
                                   <DropdownMenuItem onClick={() => openEditBooking(booking)}>
                                     <Pencil className="w-4 h-4 mr-2" />
                                     Rediger booking
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuSeparator />
+
+                                  {booking.status === 'pending' && (
+                                    <DropdownMenuItem
+                                      onClick={async () => {
+                                        const contract = await ensureContractForBooking(booking);
+                                        if (!contract?.id) return;
+                                        await updateBookingStatus(booking.id, 'confirmed');
+                                      }}
+                                    >
+                                      <Car className="w-4 h-4 mr-2" />
+                                      Godkend leje (opret kontrakt)
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  {booking.status === 'confirmed' && (
+                                    <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'active')}>
+                                      <Car className="w-4 h-4 mr-2" />
+                                      Udlever bil (marker aktiv)
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  <DropdownMenuItem onClick={() => openContract(booking)}>
+                                    <Pencil className="w-4 h-4 mr-2" />
+                                    {booking.contract?.id ? 'Se lejekontrakt' : 'Opret og se lejekontrakt'}
                                   </DropdownMenuItem>
                                   {booking.status !== 'cancelled' && booking.status !== 'completed' && (
                                     <>
