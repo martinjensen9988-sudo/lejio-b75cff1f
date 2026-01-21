@@ -91,16 +91,15 @@ export const useDriverLicense = () => {
     setIsUploading(true);
 
     try {
-      // Upload images
-      const frontUrl = await uploadImage(frontImage, 'front');
+      // Upload images in parallel for speed
+      const [frontUrl, backUrl] = await Promise.all([
+        uploadImage(frontImage, 'front'),
+        backImage ? uploadImage(backImage, 'back') : Promise.resolve(null),
+      ]);
+
       if (!frontUrl) throw new Error('Kunne ikke uploade forside');
 
-      let backUrl = null;
-      if (backImage) {
-        backUrl = await uploadImage(backImage, 'back');
-      }
-
-      // Create license record
+      // Create license record with "processing" status
       const { data: newLicense, error } = await supabase
         .from('driver_licenses')
         .insert({
@@ -109,27 +108,58 @@ export const useDriverLicense = () => {
           license_country: licenseCountry,
           front_image_url: frontUrl,
           back_image_url: backUrl,
-          verification_status: 'pending',
+          verification_status: 'processing',
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Trigger AI verification
-      await supabase.functions.invoke('verify-driver-license', {
+      // Set license immediately so UI updates
+      setLicense(newLicense);
+      toast.success('Kørekort indsendt - verificering i gang');
+
+      // Trigger AI verification in background (non-blocking)
+      supabase.functions.invoke('verify-driver-license', {
         body: {
           licenseId: newLicense.id,
           frontImageUrl: frontUrl,
           backImageUrl: backUrl,
         }
+      }).then(() => {
+        console.log('Verification triggered');
+      }).catch((err) => {
+        console.error('Verification trigger error:', err);
       });
 
-      setLicense(newLicense);
-      toast.success('Kørekort indsendt til verificering');
+      // Poll for status updates
+      const pollForUpdate = async (attempts = 0) => {
+        if (attempts >= 12) return; // Max 1 minute polling
+        
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        const { data: updated } = await supabase
+          .from('driver_licenses')
+          .select('*')
+          .eq('id', newLicense.id)
+          .single();
+        
+        if (updated && updated.verification_status !== 'processing') {
+          setLicense(updated);
+          
+          if (updated.verification_status === 'verified') {
+            toast.success('Kørekort verificeret!');
+          } else if (updated.verification_status === 'pending_admin_review') {
+            toast.info('Kørekort sendt til manuel gennemgang');
+          } else if (updated.verification_status === 'rejected') {
+            toast.error('Kørekort kunne ikke verificeres');
+          }
+        } else if (updated?.verification_status === 'processing') {
+          pollForUpdate(attempts + 1);
+        }
+      };
       
-      // Refetch to get updated status
-      setTimeout(fetchLicense, 5000);
+      pollForUpdate();
       
       return newLicense;
     } catch (error: any) {
@@ -142,12 +172,16 @@ export const useDriverLicense = () => {
   };
 
   const isVerified = license?.verification_status === 'verified';
-  const isPending = license?.verification_status === 'pending' || license?.verification_status === 'pending_review' || license?.verification_status === 'pending_admin_review';
+  const isProcessing = license?.verification_status === 'processing';
+  const isPending = license?.verification_status === 'pending' || 
+                    license?.verification_status === 'pending_review' || 
+                    license?.verification_status === 'pending_admin_review' ||
+                    isProcessing;
   const isRejected = license?.verification_status === 'rejected';
   const isPendingAdminReview = license?.verification_status === 'pending_admin_review';
 
-  // Allow booking to proceed if license is verified, pending, or pending admin review
-  const canProceedWithBooking = isVerified || isPending || isPendingAdminReview;
+  // Allow booking to proceed if license exists (optimistic - don't block on verification)
+  const canProceedWithBooking = !!license && !isRejected;
 
   return {
     license,
@@ -155,6 +189,7 @@ export const useDriverLicense = () => {
     isUploading,
     submitLicense,
     isVerified,
+    isProcessing,
     isPending,
     isRejected,
     isPendingAdminReview,

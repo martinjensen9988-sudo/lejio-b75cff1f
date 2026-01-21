@@ -1,23 +1,43 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
+// Declare EdgeRuntime for TypeScript
+declare const EdgeRuntime: {
+  waitUntil: (promise: Promise<any>) => void;
+} | undefined;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// 30 second timeout for AI verification
-const AI_TIMEOUT_MS = 30000;
+// Reduced timeout - faster model means quicker response
+const AI_TIMEOUT_MS = 15000;
+
+interface VerificationResult {
+  full_name?: string;
+  license_number?: string;
+  issue_date?: string;
+  expiry_date?: string;
+  country?: string;
+  categories?: string[];
+  is_valid: boolean;
+  concerns: string[];
+  confidence_score: number;
+  error?: string;
+}
 
 async function verifyWithAI(
   frontImageUrl: string, 
   backImageUrl: string | null, 
   lovableApiKey: string
-): Promise<{ result: any; timedOut: boolean }> {
+): Promise<{ result: VerificationResult; timedOut: boolean }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
   try {
+    console.log("[LICENSE] Starting AI verification...");
+    
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -26,35 +46,25 @@ async function verifyWithAI(
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        // Use faster model for quicker verification
+        model: "google/gemini-2.5-flash-lite",
         messages: [
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: `Analyze this driver's license image and extract the following information:
-1. Full name on the license
+                text: `Analyze this driver's license image quickly. Extract:
+1. Full name
 2. License number
-3. Issue date
-4. Expiry date
-5. Country of issue
-6. License categories/classes
-7. Is this a valid driver's license? (true/false)
-8. Any concerns or issues with the license (expired, damaged, suspected forgery, etc.)
+3. Expiry date (YYYY-MM-DD)
+4. Is this a valid, unexpired license? (true/false)
+5. Any concerns (expired, damaged, fake)
 
-Return the response as a JSON object with these fields:
-{
-  "full_name": string,
-  "license_number": string,
-  "issue_date": string (YYYY-MM-DD format),
-  "expiry_date": string (YYYY-MM-DD format),
-  "country": string,
-  "categories": string[],
-  "is_valid": boolean,
-  "concerns": string[],
-  "confidence_score": number (0-100)
-}`
+Return ONLY valid JSON:
+{"full_name":"","license_number":"","expiry_date":"","is_valid":true,"concerns":[],"confidence_score":85}
+
+Be fast and concise. If unclear, set confidence_score lower.`
               },
               {
                 type: "image_url",
@@ -67,35 +77,43 @@ Return the response as a JSON object with these fields:
             ]
           }
         ],
-        max_tokens: 1000,
+        max_tokens: 500, // Reduced for faster response
+        temperature: 0.1, // Lower temp for more consistent output
       }),
     });
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[LICENSE] AI request failed:", response.status, errorText);
       throw new Error(`AI request failed: ${response.statusText}`);
     }
 
     const aiData = await response.json();
     const content = aiData.choices?.[0]?.message?.content || "";
     
-    console.log("[LICENSE] AI response:", content);
+    console.log("[LICENSE] AI response received, length:", content.length);
 
     // Parse the AI response
-    let verificationResult;
+    let verificationResult: VerificationResult;
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         verificationResult = JSON.parse(jsonMatch[0]);
+        // Ensure required fields exist
+        verificationResult.is_valid = verificationResult.is_valid ?? false;
+        verificationResult.concerns = verificationResult.concerns || [];
+        verificationResult.confidence_score = verificationResult.confidence_score || 0;
       } else {
         throw new Error("No JSON found in response");
       }
     } catch (parseError) {
       console.error("[LICENSE] Failed to parse AI response:", parseError);
+      console.log("[LICENSE] Raw content:", content.substring(0, 200));
       verificationResult = {
         is_valid: false,
-        concerns: ["Could not automatically verify license"],
+        concerns: ["Could not automatically verify license - sent to admin"],
         confidence_score: 0,
       };
     }
@@ -105,7 +123,7 @@ Return the response as a JSON object with these fields:
     clearTimeout(timeoutId);
     
     if (error.name === 'AbortError') {
-      console.log("[LICENSE] AI verification timed out after 30 seconds");
+      console.log("[LICENSE] AI verification timed out after", AI_TIMEOUT_MS, "ms");
       return { 
         result: {
           is_valid: false,
@@ -116,7 +134,90 @@ Return the response as a JSON object with these fields:
       };
     }
     
+    console.error("[LICENSE] AI error:", error.message);
     throw error;
+  }
+}
+
+async function processVerification(
+  supabase: any,
+  licenseId: string,
+  frontImageUrl: string,
+  backImageUrl: string | null,
+  lovableApiKey: string
+) {
+  try {
+    console.log(`[LICENSE] Processing verification for: ${licenseId}`);
+    
+    // Call AI with timeout
+    const { result: verificationResult, timedOut } = await verifyWithAI(
+      frontImageUrl,
+      backImageUrl,
+      lovableApiKey
+    );
+
+    let status: string;
+    
+    if (timedOut) {
+      status = "pending_admin_review";
+      console.log("[LICENSE] Timeout, escalating to admin");
+    } else {
+      // Determine verification status based on AI result
+      if (verificationResult.is_valid && verificationResult.confidence_score >= 70) {
+        status = "verified";
+      } else if (verificationResult.confidence_score >= 50) {
+        status = "pending_review";
+      } else if (verificationResult.confidence_score >= 30) {
+        status = "pending_admin_review";
+      } else {
+        status = "rejected";
+      }
+    }
+
+    console.log(`[LICENSE] Final status: ${status}, confidence: ${verificationResult.confidence_score}`);
+
+    // Update the license record
+    const { error: updateError } = await supabase
+      .from("driver_licenses")
+      .update({
+        verification_status: status,
+        ai_verification_result: verificationResult,
+        license_number: verificationResult.license_number || null,
+        expiry_date: verificationResult.expiry_date || null,
+        issue_date: verificationResult.issue_date || null,
+        verified_at: status === "verified" ? new Date().toISOString() : null,
+      })
+      .eq("id", licenseId);
+
+    if (updateError) {
+      console.error("[LICENSE] Update error:", updateError);
+    } else {
+      console.log("[LICENSE] Database updated successfully");
+    }
+
+    return { status, result: verificationResult, timedOut };
+  } catch (error: any) {
+    console.error("[LICENSE] Error in processing:", error);
+    
+    // On error, set to pending_admin_review
+    await supabase
+      .from("driver_licenses")
+      .update({
+        verification_status: "pending_admin_review",
+        ai_verification_result: { 
+          error: error.message, 
+          concerns: ["AI verification failed - sent to admin"],
+          is_valid: false,
+          confidence_score: 0,
+        },
+      })
+      .eq("id", licenseId);
+
+    return { 
+      status: "pending_admin_review", 
+      result: { error: error.message }, 
+      timedOut: true 
+    };
   }
 }
 
@@ -131,93 +232,62 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!lovableApiKey) {
+      console.error("[LICENSE] LOVABLE_API_KEY not configured");
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { licenseId, frontImageUrl, backImageUrl } = await req.json();
 
-    console.log(`[LICENSE] Starting verification for license: ${licenseId}`);
+    if (!licenseId || !frontImageUrl) {
+      throw new Error("Missing required fields: licenseId, frontImageUrl");
+    }
 
-    // Immediately return response, continue processing in background
-    const responsePromise = new Promise<Response>(async (resolve) => {
-      try {
-        // Call AI with timeout
-        const { result: verificationResult, timedOut } = await verifyWithAI(
-          frontImageUrl,
-          backImageUrl,
-          lovableApiKey
-        );
+    console.log(`[LICENSE] Received verification request for: ${licenseId}`);
 
-        let status: string;
-        
-        if (timedOut) {
-          // Timeout - send to admin for manual review
-          status = "pending_admin_review";
-          console.log("[LICENSE] Verification timed out, escalating to admin");
-        } else {
-          // Determine verification status based on AI result
-          status = verificationResult.is_valid && 
-                     verificationResult.confidence_score >= 70 &&
-                     verificationResult.concerns.length === 0
-            ? "verified"
-            : verificationResult.confidence_score >= 50
-              ? "pending_review"
-              : "rejected";
-        }
+    // IMMEDIATELY update status to show processing has started
+    await supabase
+      .from("driver_licenses")
+      .update({ verification_status: "processing" })
+      .eq("id", licenseId);
 
-        // Update the license record
-        const { error: updateError } = await supabase
-          .from("driver_licenses")
-          .update({
-            verification_status: status,
-            ai_verification_result: verificationResult,
-            license_number: verificationResult.license_number || null,
-            expiry_date: verificationResult.expiry_date || null,
-            issue_date: verificationResult.issue_date || null,
-            verified_at: status === "verified" ? new Date().toISOString() : null,
-          })
-          .eq("id", licenseId);
+    // Use EdgeRuntime.waitUntil for background processing if available
+    // This allows us to return immediately while processing continues
+    const processingPromise = processVerification(
+      supabase,
+      licenseId,
+      frontImageUrl,
+      backImageUrl,
+      lovableApiKey
+    );
 
-        if (updateError) {
-          console.error("[LICENSE] Update error:", updateError);
-        }
-
-        console.log(`[LICENSE] Verification complete: ${status}`);
-
-        resolve(new Response(
-          JSON.stringify({ 
-            success: true, 
-            status,
-            result: verificationResult,
-            timedOut,
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        ));
-      } catch (error: any) {
-        console.error("[LICENSE] Error in background task:", error);
-        
-        // On error, set to pending_admin_review so booking can still proceed
-        await supabase
-          .from("driver_licenses")
-          .update({
-            verification_status: "pending_admin_review",
-            ai_verification_result: { error: error.message, concerns: ["AI verification failed - sent to admin"] },
-          })
-          .eq("id", licenseId);
-
-        resolve(new Response(
-          JSON.stringify({ 
-            success: true, 
-            status: "pending_admin_review",
-            timedOut: true,
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        ));
-      }
-    });
-
-    return await responsePromise;
+    // Check if EdgeRuntime is available (Supabase Edge Functions)
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      // Return immediately, process in background
+      EdgeRuntime.waitUntil(processingPromise);
+      
+      console.log("[LICENSE] Started background processing");
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          status: "processing",
+          message: "Verification started in background",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    } else {
+      // Fallback: wait for processing (still faster with new model)
+      const result = await processingPromise;
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          ...result,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
   } catch (error: any) {
     console.error("[LICENSE] Error:", error);
     return new Response(
