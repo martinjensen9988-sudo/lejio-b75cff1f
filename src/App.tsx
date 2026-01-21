@@ -55,6 +55,7 @@ import DamageReportPage from "./pages/dashboard/DamageReport";
 import RateLessorPage from "./pages/dashboard/RateLessor";
 import RateRenterPage from "./pages/dashboard/RateRenter";
 import CreateWarningPage from "./pages/dashboard/CreateWarning";
+import WarningsPage from "./pages/dashboard/Warnings";
 import ServiceBookingPage from "./pages/dashboard/ServiceBooking";
 import MCMaintenancePage from "./pages/dashboard/MCMaintenance";
 import RevenueLossCalculatePage from "./pages/dashboard/RevenueLossCalculate";
@@ -144,6 +145,7 @@ const App = () => (
             <Route path="/dashboard/damage-report/:bookingId" element={<DamageReportPage />} />
             <Route path="/dashboard/rate-lessor/:bookingId" element={<RateLessorPage />} />
             <Route path="/dashboard/rate-renter/:bookingId" element={<RateRenterPage />} />
+            <Route path="/dashboard/warnings" element={<WarningsPage />} />
             <Route path="/dashboard/warnings/create" element={<CreateWarningPage />} />
             <Route path="/gps/add-device" element={<AddGpsDevicePage />} />
             <Route path="/gps/add-geofence" element={<AddGeofencePage />} />
