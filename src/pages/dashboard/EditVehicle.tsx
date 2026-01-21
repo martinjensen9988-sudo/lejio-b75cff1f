@@ -42,6 +42,14 @@ const EditVehiclePage = () => {
   const [isFleetVehicle, setIsFleetVehicle] = useState(false);
   const [checkingFleet, setCheckingFleet] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
   
   const vehicle = vehicles.find(v => v.id === id);
 
@@ -221,24 +229,34 @@ const EditVehiclePage = () => {
 
     setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${vehicle.id}-${Date.now()}.${fileExt}`;
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const imageBase64 = await fileToBase64(file);
 
-      const { error: uploadError } = await supabase.storage
-        .from('vehicle-images')
-        .upload(fileName, file, { upsert: true });
+      // Upload via backend function (service role handles storage + DB insert)
+      const { data: uploadData, error: uploadFnError } = await supabase.functions.invoke('upload-vehicle-image', {
+        body: {
+          vehicleId: vehicle.id,
+          imageBase64,
+          contentType: file.type,
+          fileExt,
+        },
+      });
 
-      if (uploadError) throw uploadError;
+      if (uploadFnError) throw uploadFnError;
+      const result = uploadData as { publicUrl?: string } | null;
+      if (!result?.publicUrl) throw new Error('Missing publicUrl from upload function');
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('vehicle-images')
-        .getPublicUrl(fileName);
-
-      setFormData(prev => ({ ...prev, image_url: publicUrl }));
+      // Keep legacy image_url in sync for preview (gallery uses vehicle_images)
+      setFormData(prev => ({ ...prev, image_url: result.publicUrl! }));
       toast.success('Billede uploadet!');
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Kunne ikke uploade billede');
+      const msg = typeof (error as any)?.message === 'string' ? (error as any).message : '';
+      if (msg.toLowerCase().includes('forbidden')) {
+        toast.error('Du har ikke rettighed til at uploade billeder til dette køretøj');
+      } else {
+        toast.error('Kunne ikke uploade billede');
+      }
     } finally {
       setIsUploading(false);
     }
