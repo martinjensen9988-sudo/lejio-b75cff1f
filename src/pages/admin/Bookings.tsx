@@ -135,7 +135,7 @@ const AdminBookingsPage = () => {
       .select(`
         id, vehicle_id, start_date, end_date, status, total_price, 
         renter_name, renter_email, renter_phone, created_at, lessor_id,
-        vehicle:vehicles(registration, make, model)
+        vehicle_id
       `)
       .order('created_at', { ascending: false })
       .limit(100);
@@ -145,6 +145,25 @@ const AdminBookingsPage = () => {
       toast.error('Kunne ikke hente bookinger: ' + error.message);
       setBookings([]);
     } else {
+      // Fetch vehicles separately to avoid any relationship-cache dependencies
+      const vehicleIds = Array.from(new Set((data || []).map((b: any) => b.vehicle_id).filter(Boolean)));
+      const vehicleMap = new Map<string, { registration: string; make: string; model: string }>();
+
+      if (vehicleIds.length > 0) {
+        const { data: vehiclesData, error: vehiclesError } = await supabase
+          .from('vehicles')
+          .select('id, registration, make, model')
+          .in('id', vehicleIds);
+
+        if (vehiclesError) {
+          console.error('Error fetching booking vehicles:', vehiclesError);
+        } else {
+          (vehiclesData || []).forEach((v: any) => {
+            vehicleMap.set(v.id, { registration: v.registration, make: v.make, model: v.model });
+          });
+        }
+      }
+
       // Fetch lessor profiles separately to avoid reliance on schema relationship cache
       const lessorIds = Array.from(new Set((data || []).map((b: any) => b.lessor_id).filter(Boolean)));
       const lessorMap = new Map<string, { full_name: string | null; email: string }>();
@@ -166,7 +185,7 @@ const AdminBookingsPage = () => {
 
       setBookings((data || []).map((b: any) => ({
         ...b,
-        vehicle: b.vehicle as any,
+        vehicle: b.vehicle_id ? (vehicleMap.get(b.vehicle_id) as any) : undefined,
         lessor: b.lessor_id ? (lessorMap.get(b.lessor_id) as any) : undefined,
       })));
     }
@@ -177,8 +196,7 @@ const AdminBookingsPage = () => {
     const { data, error } = await supabase
       .from('vehicles')
       .select(`
-        id, registration, make, model, year, daily_price, is_available, owner_id,
-        owner_id
+        id, registration, make, model, year, daily_price, is_available, owner_id
       `)
       .order('created_at', { ascending: false })
       .limit(200);
