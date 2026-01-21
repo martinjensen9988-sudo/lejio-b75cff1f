@@ -39,7 +39,6 @@ interface FleetBooking {
     registration: string;
     make: string;
     model: string;
-    fuel_tank_size: number | null;
     included_km: number | null;
     extra_km_price: number | null;
     latitude: number | null;
@@ -104,7 +103,6 @@ export const AdminFleetCheckInOut = () => {
             registration,
             make,
             model,
-            fuel_tank_size,
             included_km,
             extra_km_price,
             latitude,
@@ -401,7 +399,6 @@ export const AdminFleetCheckInOut = () => {
               registration: selectedBooking.vehicle.registration,
               make: selectedBooking.vehicle.make,
               model: selectedBooking.vehicle.model,
-              fuel_tank_size: selectedBooking.vehicle.fuel_tank_size || undefined,
               included_km: selectedBooking.vehicle.included_km || undefined,
               extra_km_price: selectedBooking.vehicle.extra_km_price || undefined,
               latitude: selectedBooking.vehicle.latitude || undefined,
