@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInvoices } from '@/hooks/useInvoices';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +15,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   FileText, 
   Download, 
@@ -20,23 +36,119 @@ import {
   XCircle, 
   Clock,
   AlertTriangle,
-  ExternalLink
+  Plus,
+  Car
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { toast } from 'sonner';
 
+interface BookingForInvoice {
+  id: string;
+  start_date: string;
+  end_date: string;
+  total_price: number;
+  renter_email: string;
+  renter_name: string | null;
+  status: string;
+  vehicles: {
+    make: string;
+    model: string;
+    registration: string;
+  } | null;
+}
+
 const InvoicesTab = () => {
+  const { user } = useAuth();
   const { 
     invoices, 
     isLoading, 
     markAsPaid, 
     cancelInvoice,
+    generateInvoice,
     getUnpaidInvoices,
     getPaidInvoices,
     getOverdueInvoices
   } = useInvoices();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [bookingsWithoutInvoice, setBookingsWithoutInvoice] = useState<BookingForInvoice[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string>('');
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+
+  // Fetch bookings that don't have invoices yet
+  useEffect(() => {
+    const fetchBookingsWithoutInvoice = async () => {
+      if (!user) return;
+      
+      try {
+        // Get all booking IDs that already have invoices
+        const { data: existingInvoices } = await supabase
+          .from('invoices')
+          .select('booking_id')
+          .eq('lessor_id', user.id);
+        
+        const invoicedBookingIds = existingInvoices?.map(i => i.booking_id).filter(Boolean) || [];
+        
+        // Get completed/confirmed bookings without invoices
+        let query = supabase
+          .from('bookings')
+          .select(`
+            id,
+            start_date,
+            end_date,
+            total_price,
+            renter_email,
+            renter_name,
+            status,
+            vehicles:vehicle_id (
+              make,
+              model,
+              registration
+            )
+          `)
+          .eq('lessor_id', user.id)
+          .in('status', ['completed', 'confirmed'])
+          .order('end_date', { ascending: false });
+        
+        if (invoicedBookingIds.length > 0) {
+          query = query.not('id', 'in', `(${invoicedBookingIds.join(',')})`);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error) throw error;
+        setBookingsWithoutInvoice(data as BookingForInvoice[] || []);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+      } finally {
+        setLoadingBookings(false);
+      }
+    };
+
+    fetchBookingsWithoutInvoice();
+  }, [user, invoices]);
+
+  const handleCreateInvoice = async () => {
+    if (!selectedBookingId) {
+      toast.error('Vælg en booking');
+      return;
+    }
+    
+    setCreatingInvoice(true);
+    try {
+      const result = await generateInvoice(selectedBookingId, true);
+      if (result) {
+        setCreateDialogOpen(false);
+        setSelectedBookingId('');
+        // Remove from available bookings
+        setBookingsWithoutInvoice(prev => prev.filter(b => b.id !== selectedBookingId));
+      }
+    } finally {
+      setCreatingInvoice(false);
+    }
+  };
 
   const handleMarkAsPaid = async (id: string) => {
     setActionLoading(id);
@@ -169,6 +281,113 @@ const InvoicesTab = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header with Create Button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Dine fakturaer</h3>
+          <p className="text-sm text-muted-foreground">
+            Opret og administrer fakturaer for dine bookinger
+          </p>
+        </div>
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button disabled={bookingsWithoutInvoice.length === 0}>
+              <Plus className="w-4 h-4 mr-2" />
+              Opret faktura
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Opret faktura fra booking</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              {loadingBookings ? (
+                <Skeleton className="h-10 w-full" />
+              ) : bookingsWithoutInvoice.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Ingen bookinger uden faktura
+                </p>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Vælg booking</label>
+                    <Select value={selectedBookingId} onValueChange={setSelectedBookingId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Vælg en booking..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bookingsWithoutInvoice.map((booking) => (
+                          <SelectItem key={booking.id} value={booking.id}>
+                            <div className="flex items-center gap-2">
+                              <Car className="w-4 h-4" />
+                              <span>
+                                {booking.vehicles?.make} {booking.vehicles?.model} - {booking.renter_name || booking.renter_email}
+                              </span>
+                              <span className="text-muted-foreground">
+                                ({booking.total_price.toLocaleString('da-DK')} kr)
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {selectedBookingId && (
+                    <Card className="bg-muted/50">
+                      <CardContent className="pt-4">
+                        {(() => {
+                          const booking = bookingsWithoutInvoice.find(b => b.id === selectedBookingId);
+                          if (!booking) return null;
+                          return (
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Køretøj:</span>
+                                <span>{booking.vehicles?.make} {booking.vehicles?.model} ({booking.vehicles?.registration})</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Periode:</span>
+                                <span>
+                                  {format(new Date(booking.start_date), 'dd. MMM', { locale: da })} - {format(new Date(booking.end_date), 'dd. MMM yyyy', { locale: da })}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Lejer:</span>
+                                <span>{booking.renter_name || booking.renter_email}</span>
+                              </div>
+                              <div className="flex justify-between font-semibold pt-2 border-t">
+                                <span>Beløb (ekskl. moms):</span>
+                                <span>{booking.total_price.toLocaleString('da-DK')} kr</span>
+                              </div>
+                              <div className="flex justify-between font-semibold">
+                                <span>Moms (25%):</span>
+                                <span>{(booking.total_price * 0.25).toLocaleString('da-DK')} kr</span>
+                              </div>
+                              <div className="flex justify-between font-bold text-lg">
+                                <span>Total:</span>
+                                <span>{(booking.total_price * 1.25).toLocaleString('da-DK')} kr</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  <Button 
+                    className="w-full" 
+                    onClick={handleCreateInvoice}
+                    disabled={!selectedBookingId || creatingInvoice}
+                  >
+                    {creatingInvoice ? 'Opretter...' : 'Opret faktura'}
+                  </Button>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
@@ -188,8 +407,8 @@ const InvoicesTab = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-yellow-600" />
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-amber-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{unpaidInvoices.length}</p>
@@ -202,8 +421,8 @@ const InvoicesTab = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{paidInvoices.length}</p>
@@ -216,8 +435,8 @@ const InvoicesTab = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+              <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{overdueInvoices.length}</p>
@@ -235,7 +454,7 @@ const InvoicesTab = () => {
           <TabsTrigger value="unpaid">Afventer ({unpaidInvoices.length})</TabsTrigger>
           <TabsTrigger value="paid">Betalt ({paidInvoices.length})</TabsTrigger>
           {overdueInvoices.length > 0 && (
-            <TabsTrigger value="overdue" className="text-red-600">
+            <TabsTrigger value="overdue" className="text-destructive">
               Forfaldne ({overdueInvoices.length})
             </TabsTrigger>
           )}
