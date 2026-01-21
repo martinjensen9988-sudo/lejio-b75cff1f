@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import SignaturePad from 'signature_pad';
 import { Button } from '@/components/ui/button';
 import { Eraser, Check } from 'lucide-react';
@@ -10,41 +10,79 @@ interface SignaturePadComponentProps {
 
 const SignaturePadComponent = ({ onSave, disabled }: SignaturePadComponentProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
-  useEffect(() => {
-    if (canvasRef.current) {
-      signaturePadRef.current = new SignaturePad(canvasRef.current, {
-        backgroundColor: 'rgb(255, 255, 255)',
-        penColor: 'rgb(0, 0, 0)',
-      });
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-      signaturePadRef.current.addEventListener('endStroke', () => {
-        setIsEmpty(signaturePadRef.current?.isEmpty() ?? true);
-      });
+    // Get the actual display size
+    const rect = container.getBoundingClientRect();
+    const displayWidth = rect.width;
+    const displayHeight = 160; // Fixed height
 
-      // Resize canvas
-      const resizeCanvas = () => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const ratio = Math.max(window.devicePixelRatio || 1, 1);
-          canvas.width = canvas.offsetWidth * ratio;
-          canvas.height = canvas.offsetHeight * ratio;
-          canvas.getContext('2d')?.scale(ratio, ratio);
-          signaturePadRef.current?.clear();
-        }
-      };
+    // Get device pixel ratio for retina displays
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
+    // Set canvas size in CSS pixels
+    canvas.style.width = `${displayWidth}px`;
+    canvas.style.height = `${displayHeight}px`;
 
-      return () => {
-        window.removeEventListener('resize', resizeCanvas);
-        signaturePadRef.current?.off();
-      };
+    // Set canvas buffer size for retina
+    canvas.width = displayWidth * ratio;
+    canvas.height = displayHeight * ratio;
+
+    // Scale context for retina
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(ratio, ratio);
+    }
+
+    // Clear and reinitialize if signature pad exists
+    if (signaturePadRef.current) {
+      signaturePadRef.current.clear();
+      setIsEmpty(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    // Initialize signature pad with Safari-friendly options
+    signaturePadRef.current = new SignaturePad(canvasRef.current, {
+      backgroundColor: 'rgb(255, 255, 255)',
+      penColor: 'rgb(0, 0, 0)',
+      minWidth: 0.5,
+      maxWidth: 2.5,
+      throttle: 16, // Improve touch responsiveness on Safari
+      velocityFilterWeight: 0.7,
+    });
+
+    signaturePadRef.current.addEventListener('endStroke', () => {
+      setIsEmpty(signaturePadRef.current?.isEmpty() ?? true);
+    });
+
+    // Initial resize
+    resizeCanvas();
+
+    // Handle window resize
+    const handleResize = () => {
+      // Debounce resize for better performance
+      setTimeout(resizeCanvas, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      signaturePadRef.current?.off();
+    };
+  }, [resizeCanvas]);
 
   const handleClear = () => {
     signaturePadRef.current?.clear();
@@ -60,11 +98,23 @@ const SignaturePadComponent = ({ onSave, disabled }: SignaturePadComponentProps)
 
   return (
     <div className="space-y-3">
-      <div className="border-2 border-dashed border-border rounded-xl overflow-hidden bg-card">
+      <div 
+        ref={containerRef}
+        className="border-2 border-dashed border-border rounded-xl overflow-hidden bg-white"
+        style={{ 
+          touchAction: 'none', // Prevent scrolling while drawing on Safari
+          WebkitTouchCallout: 'none', // Disable callout on iOS
+          WebkitUserSelect: 'none', // Disable selection on iOS
+          userSelect: 'none',
+        }}
+      >
         <canvas
           ref={canvasRef}
-          className="w-full h-40 touch-none"
-          style={{ display: 'block' }}
+          className="touch-none block"
+          style={{ 
+            touchAction: 'none',
+            WebkitTapHighlightColor: 'transparent',
+          }}
         />
       </div>
       <div className="flex gap-2">
