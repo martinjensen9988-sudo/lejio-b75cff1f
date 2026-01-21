@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { format, addDays, addWeeks, addMonths, isAfter, startOfDay } from "date-fns";
+import { format, addDays, addWeeks, addMonths, isAfter, startOfDay, differenceInDays } from "date-fns";
 import { da } from "date-fns/locale";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -268,12 +268,23 @@ const Booking = () => {
     return isRangeOverlapping(startDate, endDate);
   }, [startDate, endDate, isRangeOverlapping]);
 
-  // Calculate pricing
+  // Calculate pricing - IMPORTANT: Use actual days from dates, not periodCount
   const pricing = useMemo(() => {
     if (!vehicle) return null;
 
     let unitPrice = 0;
     let unitLabel = "";
+    let actualPeriodCount = periodCount;
+
+    // For daily rentals, calculate actual days from the date range
+    // This ensures the price matches the displayed dates
+    if (periodType === "daily" && startDate && endDate) {
+      // From Jan 22 to Jan 24: pickup on 22nd morning, return on 24th morning
+      // = 2 rental days (nights: 22→23, 23→24)
+      // differenceInDays gives us the number of days between dates
+      const daysDiff = differenceInDays(endDate, startDate);
+      actualPeriodCount = Math.max(1, daysDiff);
+    }
 
     switch (periodType) {
       case "monthly":
@@ -289,7 +300,7 @@ const Booking = () => {
         unitLabel = "pr. dag";
     }
 
-    const rentalTotal = unitPrice * periodCount;
+    const rentalTotal = unitPrice * actualPeriodCount;
     const deposit = vehicle.deposit_required ? (vehicle.deposit_amount || 0) : 0;
     const prepaidRent = vehicle.prepaid_rent_enabled && periodType === "monthly"
       ? unitPrice * (vehicle.prepaid_rent_months || 1)
@@ -304,10 +315,10 @@ const Booking = () => {
       deductibleInsurance: deductibleInsurancePrice,
       referralDiscount: referralCredit,
       grandTotal: Math.max(0, rentalTotal + deposit + prepaidRent + deductibleInsurancePrice - referralCredit),
-      periodCount,
+      periodCount: actualPeriodCount,
       periodType,
     };
-  }, [vehicle, periodType, periodCount, deductibleInsurancePrice, referralCredit]);
+  }, [vehicle, periodType, periodCount, startDate, endDate, deductibleInsurancePrice, referralCredit]);
 
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
