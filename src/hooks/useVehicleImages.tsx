@@ -56,6 +56,29 @@ export const useVehicleImages = (vehicleId?: string) => {
       return null;
     }
 
+    // Helpful diagnostics for ownership/RLS issues
+    try {
+      const [{ data: userData }, { data: vehicleRow }] = await Promise.all([
+        supabase.auth.getUser(),
+        supabase.from('vehicles').select('owner_id').eq('id', vehicleId).maybeSingle(),
+      ]);
+
+      const currentUserId = userData?.user?.id;
+      const ownerId = (vehicleRow as any)?.owner_id as string | undefined;
+
+      if (currentUserId && ownerId && currentUserId !== ownerId) {
+        console.warn('[vehicle-images] Upload blocked: not owner', {
+          vehicleId,
+          currentUserId,
+          ownerId,
+        });
+        toast.error('Du er logget ind med en anden konto end ejeren af bilen');
+        return null;
+      }
+    } catch (e) {
+      // Ignore diagnostics errors
+    }
+
     if (!file.type.startsWith('image/')) {
       toast.error('Kun billedfiler er tilladt');
       return null;
