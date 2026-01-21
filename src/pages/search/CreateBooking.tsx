@@ -130,8 +130,11 @@ const CreateBookingPage = () => {
     let totalPrice = 0;
     let days = 1;
 
+    // Calculate actual days from dates - this is the source of truth
     if (startDate && endDate) {
-      days = differenceInDays(endDate, startDate) + 1;
+      // For daily rentals: Jan 22 to Jan 24 means pickup on 22, return on 24 = 2 rental days
+      // differenceInDays gives us the number of nights, which equals rental days
+      days = Math.max(1, differenceInDays(endDate, startDate));
     }
 
     // If subscription is selected, use subscription pricing
@@ -143,6 +146,7 @@ const CreateBookingPage = () => {
     }
 
     // Standard pricing based on period type
+    // Use the calculated days for daily pricing to ensure consistency with displayed dates
     switch (periodType) {
       case 'monthly':
         unitPrice = vehicle.monthly_price || (vehicle.daily_price || 0) * 30;
@@ -155,12 +159,13 @@ const CreateBookingPage = () => {
         totalPrice = unitPrice * periodCount;
         break;
       default:
+        // For daily rentals, use actual days calculated from dates
         unitPrice = vehicle.daily_price || 0;
         unitLabel = 'pr. dag';
-        totalPrice = unitPrice * periodCount;
+        totalPrice = unitPrice * days;
     }
 
-    return { unitPrice, unitLabel, totalPrice, periodCount, periodType, days, isSubscription: false };
+    return { unitPrice, unitLabel, totalPrice, periodCount: days, periodType, days, isSubscription: false };
   }, [vehicle, startDate, endDate, periodType, periodCount, selectedPaymentPlan, subscriptionAvailable, subscriptionMonthlyPrice]);
 
   // Handle proceeding to account step

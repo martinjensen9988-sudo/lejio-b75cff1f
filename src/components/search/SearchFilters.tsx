@@ -50,7 +50,8 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
             endDate = addMonths(prev.startDate, count);
             break;
           default:
-            endDate = addDays(prev.startDate, count - 1);
+            // For daily: 2 days from Jan 22 = return on Jan 24 (pickup Jan 22, return Jan 24)
+            endDate = addDays(prev.startDate, count);
         }
         newFilters.endDate = endDate;
       }
@@ -73,7 +74,8 @@ const SearchFilters = ({ filters, setFilters }: SearchFiltersProps) => {
             endDate = addMonths(date, prev.periodCount);
             break;
           default:
-            endDate = addDays(date, prev.periodCount - 1);
+            // For daily: 2 days from Jan 22 = return on Jan 24 (pickup Jan 22, return Jan 24)
+            endDate = addDays(date, prev.periodCount);
         }
         newFilters.endDate = endDate;
       }
