@@ -105,7 +105,7 @@ serve(async (req) => {
     const currentSeason = getSeasonFromMonth(new Date().getMonth());
 
     const vehicleDescriptions = vehicles.map(v => 
-      `- ${v.make} ${v.model} (${v.year || 'ukendt år'}), ${v.fuel_type || 'ukendt brændstof'}, type: ${v.vehicle_type}, nuværende dagspris: ${v.daily_price || 'ikke sat'} kr, ugepris: ${v.weekly_price || 'ikke sat'} kr, månedspris: ${v.monthly_price || 'ikke sat'} kr, features: ${v.features?.join(', ') || 'ingen'}`
+      `- ID: "${v.id}", ${v.make} ${v.model} (${v.year || 'ukendt år'}), ${v.fuel_type || 'ukendt brændstof'}, type: ${v.vehicle_type}, nuværende dagspris: ${v.daily_price || 'ikke sat'} kr, ugepris: ${v.weekly_price || 'ikke sat'} kr, månedspris: ${v.monthly_price || 'ikke sat'} kr, features: ${v.features?.join(', ') || 'ingen'}`
     ).join('\n');
 
     const systemPrompt = `Du er en ekspert i biludlejning i Danmark. Analyser køretøjerne og giv prisforslag baseret på:
@@ -114,8 +114,10 @@ serve(async (req) => {
 - Køretøjstype og kvalitet
 - Aktuelle priser hvis de er sat
 
+VIGTIGT: Brug det præcise ID som angivet for hvert køretøj (starter med UUID format).
+
 Svar ALTID med et JSON-array med objekter der har disse felter:
-- vehicleId: køretøjets ID
+- vehicleId: det PRÆCISE ID fra inputtet (IKKE bilens navn, men den UUID der er angivet)
 - suggestedDailyPrice: foreslået dagspris i kr
 - suggestedWeeklyPrice: foreslået ugepris i kr (typisk 6x dagspris)
 - suggestedMonthlyPrice: foreslået månedspris i kr (typisk 20x dagspris)
