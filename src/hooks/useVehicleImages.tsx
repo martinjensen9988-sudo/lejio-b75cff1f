@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { createClient } from '@supabase/supabase-js';
 
 export interface VehicleImage {
   id: string;
@@ -13,6 +14,18 @@ export interface VehicleImage {
 export const useVehicleImages = (vehicleId?: string) => {
   const [images, setImages] = useState<VehicleImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const getAuthedStorageClient = (accessToken: string) => {
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+    const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+    if (!url || !key) return null;
+
+    // Force Authorization header for Storage calls (avoids cases where upload is sent as anon)
+    return createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    });
+  };
 
   const getStoragePathFromPublicUrl = (publicUrl: string) => {
     // Expected: https://.../storage/v1/object/public/vehicle-images/<path>
@@ -53,6 +66,13 @@ export const useVehicleImages = (vehicleId?: string) => {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       toast.error('Du skal være logget ind for at uploade billeder');
+      return null;
+    }
+
+    const accessToken = sessionData.session.access_token;
+    const authed = getAuthedStorageClient(accessToken);
+    if (!authed) {
+      toast.error('Mangler konfiguration for upload');
       return null;
     }
 
@@ -112,9 +132,16 @@ export const useVehicleImages = (vehicleId?: string) => {
 
       const { error: uploadError } = await supabase.storage
         .from('vehicle-images')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { upsert: true, contentType: file.type });
 
-      if (uploadError) throw uploadError;
+      // If the default client somehow uploads as anon, retry with forced Authorization
+      if (uploadError) {
+        const { error: retryError } = await authed.storage
+          .from('vehicle-images')
+          .upload(fileName, file, { upsert: true, contentType: file.type });
+
+        if (retryError) throw retryError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('vehicle-images')
