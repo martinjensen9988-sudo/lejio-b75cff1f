@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Receipt, Fuel, Car, AlertTriangle, CheckCircle2, Wallet, FileText } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Receipt, Fuel, Car, AlertTriangle, CheckCircle2, Wallet, FileText, Edit2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Booking } from '@/hooks/useBookings';
@@ -16,6 +17,11 @@ interface RentalSettlementDialogProps {
   onOpenChange: (open: boolean) => void;
   booking: Booking;
   onComplete: () => void;
+}
+
+interface CheckInData {
+  confirmed_odometer: number | null;
+  confirmed_fuel_percent: number | null;
 }
 
 interface CheckOutData {
@@ -51,12 +57,34 @@ interface SettlementSummary {
   amountDueFromRenter: number;
 }
 
+interface ManualInput {
+  startOdometer: number;
+  endOdometer: number;
+  startFuelPercent: number;
+  endFuelPercent: number;
+}
+
 const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: RentalSettlementDialogProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [checkInData, setCheckInData] = useState<CheckInData | null>(null);
   const [checkOutData, setCheckOutData] = useState<CheckOutData | null>(null);
   const [fines, setFines] = useState<Fine[]>([]);
   const [settlement, setSettlement] = useState<SettlementSummary | null>(null);
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualInput, setManualInput] = useState<ManualInput>({
+    startOdometer: 0,
+    endOdometer: 0,
+    startFuelPercent: 100,
+    endFuelPercent: 100,
+  });
+
+  // Get vehicle settings for calculations
+  const includedKm = booking.included_km || 0;
+  const extraKmRate = booking.extra_km_price || 2; // Default 2 kr per km
+  const fuelTankSize = 50; // Default tank size in liters
+  const fuelPricePerLiter = 15; // Default fuel price
+  const fuelMissingFee = 150; // Service fee for fuel
 
   useEffect(() => {
     if (open && booking) {
@@ -64,9 +92,30 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
     }
   }, [open, booking]);
 
+  useEffect(() => {
+    // Recalculate settlement when manual input changes
+    if (isManualMode) {
+      calculateManualSettlement();
+    }
+  }, [manualInput, isManualMode, fines]);
+
   const fetchSettlementData = async () => {
     setIsLoading(true);
     try {
+      // Fetch check-in record for this booking
+      const { data: checkInRecord, error: checkInError } = await supabase
+        .from('check_in_out_records')
+        .select('confirmed_odometer, confirmed_fuel_percent')
+        .eq('booking_id', booking.id)
+        .eq('record_type', 'check_in')
+        .maybeSingle();
+
+      if (checkInError && checkInError.code !== 'PGRST116') {
+        console.error('Error fetching check-in data:', checkInError);
+      }
+
+      setCheckInData(checkInRecord);
+
       // Fetch check-out record for this booking
       const { data: checkOutRecord, error: checkOutError } = await supabase
         .from('check_in_out_records')
@@ -94,34 +143,85 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
 
       setFines(bookingFines || []);
 
-      // Calculate settlement
-      const kmOverageFee = checkOutRecord?.km_overage_fee || 0;
-      const fuelFee = checkOutRecord?.fuel_fee || 0;
-      const finesTotal = (bookingFines || []).reduce((sum, fine) => sum + (fine.total_amount || 0), 0);
-      const totalCharges = kmOverageFee + fuelFee + finesTotal;
-      const depositAmount = booking.deposit_amount || 0;
-
-      // Calculate how much of deposit is used and what's left
-      const depositUsed = Math.min(depositAmount, totalCharges);
-      const depositRefund = Math.max(0, depositAmount - totalCharges);
-      const amountDueFromRenter = Math.max(0, totalCharges - depositAmount);
-
-      setSettlement({
-        rentalPrice: booking.total_price,
-        kmOverageFee,
-        fuelFee,
-        finesTotal,
-        totalCharges,
-        depositAmount,
-        depositRefund,
-        amountDueFromRenter,
-      });
+      // If no check-out data exists, enable manual mode
+      if (!checkOutRecord) {
+        setIsManualMode(true);
+        // Pre-fill with check-in data if available
+        if (checkInRecord) {
+          setManualInput(prev => ({
+            ...prev,
+            startOdometer: checkInRecord.confirmed_odometer || 0,
+            startFuelPercent: checkInRecord.confirmed_fuel_percent || 100,
+          }));
+        }
+        calculateManualSettlement();
+      } else {
+        // Calculate settlement from check-out data
+        calculateSettlementFromCheckOut(checkOutRecord, bookingFines || []);
+      }
     } catch (err) {
       console.error('Error fetching settlement data:', err);
       toast.error('Kunne ikke hente afregningsdata');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const calculateSettlementFromCheckOut = (checkOut: CheckOutData, bookingFines: Fine[]) => {
+    const kmOverageFee = checkOut?.km_overage_fee || 0;
+    const fuelFee = checkOut?.fuel_fee || 0;
+    const finesTotal = bookingFines.reduce((sum, fine) => sum + (fine.total_amount || 0), 0);
+    const totalCharges = kmOverageFee + fuelFee + finesTotal;
+    const depositAmount = booking.deposit_amount || 0;
+
+    const depositRefund = Math.max(0, depositAmount - totalCharges);
+    const amountDueFromRenter = Math.max(0, totalCharges - depositAmount);
+
+    setSettlement({
+      rentalPrice: booking.total_price,
+      kmOverageFee,
+      fuelFee,
+      finesTotal,
+      totalCharges,
+      depositAmount,
+      depositRefund,
+      amountDueFromRenter,
+    });
+  };
+
+  const calculateManualSettlement = () => {
+    // Calculate km overage
+    const kmDriven = Math.max(0, manualInput.endOdometer - manualInput.startOdometer);
+    const kmOverage = Math.max(0, kmDriven - includedKm);
+    const kmOverageFee = kmOverage * extraKmRate;
+
+    // Calculate fuel fee (with 5% tolerance)
+    const fuelDiff = manualInput.startFuelPercent - manualInput.endFuelPercent;
+    const fuelTolerance = 5;
+    let fuelFee = 0;
+
+    if (fuelDiff > fuelTolerance) {
+      const fuelMissingLiters = (fuelDiff / 100) * fuelTankSize;
+      fuelFee = (fuelMissingLiters * fuelPricePerLiter) + fuelMissingFee;
+    }
+
+    const finesTotal = fines.reduce((sum, fine) => sum + (fine.total_amount || 0), 0);
+    const totalCharges = kmOverageFee + fuelFee + finesTotal;
+    const depositAmount = booking.deposit_amount || 0;
+
+    const depositRefund = Math.max(0, depositAmount - totalCharges);
+    const amountDueFromRenter = Math.max(0, totalCharges - depositAmount);
+
+    setSettlement({
+      rentalPrice: booking.total_price,
+      kmOverageFee,
+      fuelFee,
+      finesTotal,
+      totalCharges,
+      depositAmount,
+      depositRefund,
+      amountDueFromRenter,
+    });
   };
 
   const handleCompleteRental = async () => {
@@ -246,8 +346,82 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
                   {format(new Date(booking.start_date), 'd. MMM', { locale: da })} - {format(new Date(booking.end_date), 'd. MMM yyyy', { locale: da })}
                 </p>
                 <p>Lejer: {booking.renter_name || 'Ukendt'}</p>
+                {includedKm > 0 && (
+                  <p className="text-muted-foreground">Inkluderet km: {includedKm} km</p>
+                )}
               </CardContent>
             </Card>
+
+            {/* Manual input section - shows when no check-out data exists */}
+            {isManualMode && (
+              <Card className="border-warning/50 bg-warning/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Edit2 className="w-4 h-4 text-warning" />
+                    Indtast km-stand og brændstof
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    Der er ikke registreret check-in/check-out data. Indtast venligst km-stand og brændstofniveau manuelt.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="startOdometer" className="text-xs">Km-stand ved start</Label>
+                      <Input
+                        id="startOdometer"
+                        type="number"
+                        value={manualInput.startOdometer}
+                        onChange={(e) => setManualInput(prev => ({ ...prev, startOdometer: Number(e.target.value) }))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="endOdometer" className="text-xs">Km-stand ved slut</Label>
+                      <Input
+                        id="endOdometer"
+                        type="number"
+                        value={manualInput.endOdometer}
+                        onChange={(e) => setManualInput(prev => ({ ...prev, endOdometer: Number(e.target.value) }))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="startFuel" className="text-xs">Brændstof ved start (%)</Label>
+                      <Input
+                        id="startFuel"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={manualInput.startFuelPercent}
+                        onChange={(e) => setManualInput(prev => ({ ...prev, startFuelPercent: Number(e.target.value) }))}
+                        placeholder="100"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="endFuel" className="text-xs">Brændstof ved slut (%)</Label>
+                      <Input
+                        id="endFuel"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={manualInput.endFuelPercent}
+                        onChange={(e) => setManualInput(prev => ({ ...prev, endFuelPercent: Number(e.target.value) }))}
+                        placeholder="100"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quick calculation summary */}
+                  <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
+                    <p>Kørte km: <span className="font-medium">{Math.max(0, manualInput.endOdometer - manualInput.startOdometer)} km</span></p>
+                    <p>Ekstra km: <span className="font-medium">{Math.max(0, manualInput.endOdometer - manualInput.startOdometer - includedKm)} km</span> à {extraKmRate} kr/km</p>
+                    <p>Brændstof-difference: <span className="font-medium">{Math.max(0, manualInput.startFuelPercent - manualInput.endFuelPercent)}%</span> (5% tolerance)</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Extra charges */}
             <Card>
@@ -260,11 +434,15 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
                   <div className="flex items-center gap-2">
                     <Car className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">Km-overskridelse</span>
-                    {checkOutData?.km_driven && (
+                    {isManualMode ? (
+                      <span className="text-xs text-muted-foreground">
+                        ({Math.max(0, manualInput.endOdometer - manualInput.startOdometer - includedKm)} km ekstra)
+                      </span>
+                    ) : checkOutData?.km_driven ? (
                       <span className="text-xs text-muted-foreground">
                         ({checkOutData.km_overage || 0} km ekstra)
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <span className={`text-sm font-medium ${settlement.kmOverageFee > 0 ? 'text-destructive' : ''}`}>
                     {settlement.kmOverageFee > 0 ? `${settlement.kmOverageFee.toFixed(2)} kr` : '0 kr'}
@@ -276,11 +454,15 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
                   <div className="flex items-center gap-2">
                     <Fuel className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">Brændstofgebyr</span>
-                    {checkOutData?.fuel_start_percent != null && checkOutData?.confirmed_fuel_percent != null && (
+                    {isManualMode ? (
+                      <span className="text-xs text-muted-foreground">
+                        ({manualInput.startFuelPercent}% → {manualInput.endFuelPercent}%)
+                      </span>
+                    ) : checkOutData?.fuel_start_percent != null && checkOutData?.confirmed_fuel_percent != null ? (
                       <span className="text-xs text-muted-foreground">
                         ({checkOutData.fuel_start_percent}% → {checkOutData.confirmed_fuel_percent}%)
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <span className={`text-sm font-medium ${settlement.fuelFee > 0 ? 'text-destructive' : ''}`}>
                     {settlement.fuelFee > 0 ? `${settlement.fuelFee.toFixed(2)} kr` : '0 kr'}
@@ -293,7 +475,7 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
                     <Separator />
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm font-medium">
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        <AlertTriangle className="w-4 h-4 text-warning" />
                         Bøder ({fines.length})
                       </div>
                       {fines.map(fine => (
@@ -312,7 +494,7 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
                 )}
 
                 {settlement.totalCharges === 0 && fines.length === 0 && (
-                  <div className="flex items-center gap-2 text-green-600 text-sm">
+                  <div className="flex items-center gap-2 text-primary text-sm">
                     <CheckCircle2 className="w-4 h-4" />
                     Ingen ekstra opkrævninger
                   </div>
@@ -342,7 +524,7 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Refunderes til lejer</span>
-                  <span className="text-green-600">{settlement.depositRefund.toFixed(2)} kr</span>
+                  <span className="text-primary">{settlement.depositRefund.toFixed(2)} kr</span>
                 </div>
                 {settlement.amountDueFromRenter > 0 && (
                   <div className="flex justify-between text-destructive font-semibold pt-2">
