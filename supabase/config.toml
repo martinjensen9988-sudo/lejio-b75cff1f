@@ -143,3 +143,12 @@ verify_jwt = true
 
 [functions.send-sales-email]
 verify_jwt = true
+
+[functions.generate-invoice]
+verify_jwt = true
+
+[functions.generate-settlement-invoice]
+verify_jwt = true
+
+[functions.send-settlement-email]
+verify_jwt = true
