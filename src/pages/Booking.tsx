@@ -91,6 +91,8 @@ const Booking = () => {
     isVerified: licenseVerified, 
     isPending: licensePending,
     isRejected: licenseRejected,
+    isPendingAdminReview: licensePendingAdmin,
+    canProceedWithBooking,
     refetch: refetchLicense,
   } = useDriverLicense();
   
@@ -351,8 +353,8 @@ const Booking = () => {
         }
         return true;
       case 2:
-        // Skip driver license check if user has verified license
-        if (user && licenseVerified) {
+        // Allow proceeding if user has verified license OR if license is pending (including admin review)
+        if (user && canProceedWithBooking) {
           return true;
         }
         if (!driverLicense) {

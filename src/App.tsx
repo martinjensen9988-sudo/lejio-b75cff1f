@@ -112,6 +112,7 @@ import GpsAddPage from "./pages/admin/GpsAdd";
 import BookingsAddPage from "./pages/admin/BookingsAdd";
 import UserEditPage from "./pages/admin/UserEdit";
 import FleetVehicleEditPage from "./pages/admin/FleetVehicleEdit";
+import DriverLicenseReviewPage from "./pages/admin/DriverLicenseReview";
 
 const queryClient = new QueryClient();
 
@@ -204,6 +205,7 @@ const App = () => (
             <Route path="/admin/sales-ai/car-ad" element={<SalesAICarAdPage />} />
             <Route path="/admin/sales-ai/company-search" element={<SalesAICompanySearchPage />} />
             <Route path="/admin/stats" element={<AdminStatsPage />} />
+            <Route path="/admin/driver-licenses" element={<DriverLicenseReviewPage />} />
             <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
             <Route path="/handelsbetingelser" element={<Terms />} />
             <Route path="/faq" element={<FAQ />} />
