@@ -314,11 +314,15 @@ export type Database = {
           expected_latitude: number | null
           expected_longitude: number | null
           expected_plate: string
+          exterior_clean: boolean | null
+          exterior_cleaning_fee: number | null
           fuel_end_percent: number | null
           fuel_fee: number | null
           fuel_missing_liters: number | null
           fuel_start_percent: number | null
           id: string
+          interior_clean: boolean | null
+          interior_cleaning_fee: number | null
           km_driven: number | null
           km_included: number | null
           km_overage: number | null
@@ -355,11 +359,15 @@ export type Database = {
           expected_latitude?: number | null
           expected_longitude?: number | null
           expected_plate: string
+          exterior_clean?: boolean | null
+          exterior_cleaning_fee?: number | null
           fuel_end_percent?: number | null
           fuel_fee?: number | null
           fuel_missing_liters?: number | null
           fuel_start_percent?: number | null
           id?: string
+          interior_clean?: boolean | null
+          interior_cleaning_fee?: number | null
           km_driven?: number | null
           km_included?: number | null
           km_overage?: number | null
@@ -396,11 +404,15 @@ export type Database = {
           expected_latitude?: number | null
           expected_longitude?: number | null
           expected_plate?: string
+          exterior_clean?: boolean | null
+          exterior_cleaning_fee?: number | null
           fuel_end_percent?: number | null
           fuel_fee?: number | null
           fuel_missing_liters?: number | null
           fuel_start_percent?: number | null
           id?: string
+          interior_clean?: boolean | null
+          interior_cleaning_fee?: number | null
           km_driven?: number | null
           km_included?: number | null
           km_overage?: number | null
@@ -503,6 +515,7 @@ export type Database = {
           deductible_insurance_selected: boolean | null
           deposit_amount: number | null
           end_date: string
+          exterior_cleaning_fee: number | null
           extra_km_price: number
           fuel_missing_fee: number | null
           fuel_policy_enabled: boolean | null
@@ -511,6 +524,7 @@ export type Database = {
           included_km: number
           insurance_company: string | null
           insurance_policy_number: string | null
+          interior_cleaning_fee: number | null
           lessor_address: string | null
           lessor_company_name: string | null
           lessor_cvr: string | null
@@ -566,6 +580,7 @@ export type Database = {
           deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
           end_date: string
+          exterior_cleaning_fee?: number | null
           extra_km_price?: number
           fuel_missing_fee?: number | null
           fuel_policy_enabled?: boolean | null
@@ -574,6 +589,7 @@ export type Database = {
           included_km?: number
           insurance_company?: string | null
           insurance_policy_number?: string | null
+          interior_cleaning_fee?: number | null
           lessor_address?: string | null
           lessor_company_name?: string | null
           lessor_cvr?: string | null
@@ -629,6 +645,7 @@ export type Database = {
           deductible_insurance_selected?: boolean | null
           deposit_amount?: number | null
           end_date?: string
+          exterior_cleaning_fee?: number | null
           extra_km_price?: number
           fuel_missing_fee?: number | null
           fuel_policy_enabled?: boolean | null
@@ -637,6 +654,7 @@ export type Database = {
           included_km?: number
           insurance_company?: string | null
           insurance_policy_number?: string | null
+          interior_cleaning_fee?: number | null
           lessor_address?: string | null
           lessor_company_name?: string | null
           lessor_cvr?: string | null
@@ -4525,6 +4543,7 @@ export type Database = {
           description: string | null
           engine_cc: number | null
           engine_kw: number | null
+          exterior_cleaning_fee: number | null
           extra_km_price: number | null
           features: string[] | null
           festival_use_allowed: boolean | null
@@ -4568,6 +4587,7 @@ export type Database = {
           id: string
           image_url: string | null
           included_km: number | null
+          interior_cleaning_fee: number | null
           internal_height_cm: number | null
           internal_length_cm: number | null
           internal_width_cm: number | null
@@ -4648,6 +4668,7 @@ export type Database = {
           description?: string | null
           engine_cc?: number | null
           engine_kw?: number | null
+          exterior_cleaning_fee?: number | null
           extra_km_price?: number | null
           features?: string[] | null
           festival_use_allowed?: boolean | null
@@ -4691,6 +4712,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           included_km?: number | null
+          interior_cleaning_fee?: number | null
           internal_height_cm?: number | null
           internal_length_cm?: number | null
           internal_width_cm?: number | null
@@ -4771,6 +4793,7 @@ export type Database = {
           description?: string | null
           engine_cc?: number | null
           engine_kw?: number | null
+          exterior_cleaning_fee?: number | null
           extra_km_price?: number | null
           features?: string[] | null
           festival_use_allowed?: boolean | null
@@ -4814,6 +4837,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           included_km?: number | null
+          interior_cleaning_fee?: number | null
           internal_height_cm?: number | null
           internal_length_cm?: number | null
           internal_width_cm?: number | null

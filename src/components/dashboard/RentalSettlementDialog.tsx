@@ -33,6 +33,10 @@ interface CheckOutData {
   confirmed_fuel_percent: number | null;
   fuel_start_percent: number | null;
   km_driven: number | null;
+  exterior_clean: boolean | null;
+  interior_clean: boolean | null;
+  exterior_cleaning_fee: number | null;
+  interior_cleaning_fee: number | null;
 }
 
 interface Fine {
@@ -50,6 +54,8 @@ interface SettlementSummary {
   rentalPrice: number;
   kmOverageFee: number;
   fuelFee: number;
+  exteriorCleaningFee: number;
+  interiorCleaningFee: number;
   finesTotal: number;
   totalCharges: number;
   depositAmount: number;
@@ -62,6 +68,8 @@ interface ManualInput {
   endOdometer: number;
   startFuelPercent: number;
   endFuelPercent: number;
+  exteriorClean: boolean;
+  interiorClean: boolean;
 }
 
 const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: RentalSettlementDialogProps) => {
@@ -77,6 +85,8 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
     endOdometer: 0,
     startFuelPercent: 100,
     endFuelPercent: 100,
+    exteriorClean: true,
+    interiorClean: true,
   });
 
   // Get vehicle settings for calculations
@@ -85,6 +95,8 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
   const fuelTankSize = 50; // Default tank size in liters
   const fuelPricePerLiter = 15; // Default fuel price
   const fuelMissingFee = 150; // Service fee for fuel
+  const exteriorCleaningFeeRate = booking.vehicle?.exterior_cleaning_fee || 350;
+  const interiorCleaningFeeRate = booking.vehicle?.interior_cleaning_fee || 500;
 
   useEffect(() => {
     if (open && booking) {
@@ -119,7 +131,7 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
       // Fetch check-out record for this booking
       const { data: checkOutRecord, error: checkOutError } = await supabase
         .from('check_in_out_records')
-        .select('km_overage, km_overage_fee, fuel_fee, total_extra_charges, confirmed_odometer, confirmed_fuel_percent, fuel_start_percent, km_driven')
+        .select('km_overage, km_overage_fee, fuel_fee, total_extra_charges, confirmed_odometer, confirmed_fuel_percent, fuel_start_percent, km_driven, exterior_clean, interior_clean, exterior_cleaning_fee, interior_cleaning_fee')
         .eq('booking_id', booking.id)
         .eq('record_type', 'check_out')
         .maybeSingle();
@@ -128,7 +140,7 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
         console.error('Error fetching check-out data:', checkOutError);
       }
 
-      setCheckOutData(checkOutRecord);
+      setCheckOutData(checkOutRecord as CheckOutData | null);
 
       // Fetch unpaid fines for this booking
       const { data: bookingFines, error: finesError } = await supabase
@@ -146,7 +158,6 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
       // If no check-out data exists, enable manual mode
       if (!checkOutRecord) {
         setIsManualMode(true);
-        // Pre-fill with check-in data if available
         if (checkInRecord) {
           setManualInput(prev => ({
             ...prev,
@@ -156,8 +167,7 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
         }
         calculateManualSettlement();
       } else {
-        // Calculate settlement from check-out data
-        calculateSettlementFromCheckOut(checkOutRecord, bookingFines || []);
+        calculateSettlementFromCheckOut(checkOutRecord as CheckOutData, bookingFines || []);
       }
     } catch (err) {
       console.error('Error fetching settlement data:', err);
@@ -170,8 +180,10 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
   const calculateSettlementFromCheckOut = (checkOut: CheckOutData, bookingFines: Fine[]) => {
     const kmOverageFee = checkOut?.km_overage_fee || 0;
     const fuelFee = checkOut?.fuel_fee || 0;
+    const exteriorCleaningFee = checkOut?.exterior_cleaning_fee || 0;
+    const interiorCleaningFee = checkOut?.interior_cleaning_fee || 0;
     const finesTotal = bookingFines.reduce((sum, fine) => sum + (fine.total_amount || 0), 0);
-    const totalCharges = kmOverageFee + fuelFee + finesTotal;
+    const totalCharges = kmOverageFee + fuelFee + exteriorCleaningFee + interiorCleaningFee + finesTotal;
     const depositAmount = booking.deposit_amount || 0;
 
     const depositRefund = Math.max(0, depositAmount - totalCharges);
@@ -181,6 +193,8 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
       rentalPrice: booking.total_price,
       kmOverageFee,
       fuelFee,
+      exteriorCleaningFee,
+      interiorCleaningFee,
       finesTotal,
       totalCharges,
       depositAmount,
@@ -190,12 +204,10 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
   };
 
   const calculateManualSettlement = () => {
-    // Calculate km overage
     const kmDriven = Math.max(0, manualInput.endOdometer - manualInput.startOdometer);
     const kmOverage = Math.max(0, kmDriven - includedKm);
     const kmOverageFee = kmOverage * extraKmRate;
 
-    // Calculate fuel fee (with 5% tolerance)
     const fuelDiff = manualInput.startFuelPercent - manualInput.endFuelPercent;
     const fuelTolerance = 5;
     let fuelFee = 0;
@@ -205,8 +217,11 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
       fuelFee = (fuelMissingLiters * fuelPricePerLiter) + fuelMissingFee;
     }
 
+    const exteriorCleaningFee = !manualInput.exteriorClean ? exteriorCleaningFeeRate : 0;
+    const interiorCleaningFee = !manualInput.interiorClean ? interiorCleaningFeeRate : 0;
+
     const finesTotal = fines.reduce((sum, fine) => sum + (fine.total_amount || 0), 0);
-    const totalCharges = kmOverageFee + fuelFee + finesTotal;
+    const totalCharges = kmOverageFee + fuelFee + exteriorCleaningFee + interiorCleaningFee + finesTotal;
     const depositAmount = booking.deposit_amount || 0;
 
     const depositRefund = Math.max(0, depositAmount - totalCharges);
@@ -216,6 +231,8 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
       rentalPrice: booking.total_price,
       kmOverageFee,
       fuelFee,
+      exteriorCleaningFee,
+      interiorCleaningFee,
       finesTotal,
       totalCharges,
       depositAmount,
@@ -413,11 +430,31 @@ const RentalSettlementDialog = ({ open, onOpenChange, booking, onComplete }: Ren
                     </div>
                   </div>
 
+                  {/* Cleaning checkboxes */}
+                  <div className="space-y-2 pt-2 border-t">
+                    <Label className="text-xs">Rengøringsstatus</Label>
+                    <div 
+                      className="flex items-center justify-between p-2 rounded hover:bg-muted/50 cursor-pointer"
+                      onClick={() => setManualInput(prev => ({ ...prev, exteriorClean: !prev.exteriorClean }))}
+                    >
+                      <span className="text-sm">Udvendig ren</span>
+                      <div className={`w-4 h-4 rounded border ${manualInput.exteriorClean ? 'bg-primary border-primary' : 'border-muted-foreground'}`} />
+                    </div>
+                    <div 
+                      className="flex items-center justify-between p-2 rounded hover:bg-muted/50 cursor-pointer"
+                      onClick={() => setManualInput(prev => ({ ...prev, interiorClean: !prev.interiorClean }))}
+                    >
+                      <span className="text-sm">Indvendig ren</span>
+                      <div className={`w-4 h-4 rounded border ${manualInput.interiorClean ? 'bg-primary border-primary' : 'border-muted-foreground'}`} />
+                    </div>
+                  </div>
+
                   {/* Quick calculation summary */}
                   <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
                     <p>Kørte km: <span className="font-medium">{Math.max(0, manualInput.endOdometer - manualInput.startOdometer)} km</span></p>
                     <p>Ekstra km: <span className="font-medium">{Math.max(0, manualInput.endOdometer - manualInput.startOdometer - includedKm)} km</span> à {extraKmRate} kr/km</p>
-                    <p>Brændstof-difference: <span className="font-medium">{Math.max(0, manualInput.startFuelPercent - manualInput.endFuelPercent)}%</span> (5% tolerance)</p>
+                    {!manualInput.exteriorClean && <p>Udvendig rengøring: <span className="font-medium text-destructive">{exteriorCleaningFeeRate} kr</span></p>}
+                    {!manualInput.interiorClean && <p>Indvendig rengøring: <span className="font-medium text-destructive">{interiorCleaningFeeRate} kr</span></p>}
                   </div>
                 </CardContent>
               </Card>

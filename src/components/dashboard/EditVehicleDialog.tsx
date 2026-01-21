@@ -111,6 +111,9 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     has_kitchen: vehicle.has_kitchen || false,
     has_bathroom: vehicle.has_bathroom || false,
     has_awning: vehicle.has_awning || false,
+    // Cleaning fees
+    exterior_cleaning_fee: vehicle.exterior_cleaning_fee || 350,
+    interior_cleaning_fee: vehicle.interior_cleaning_fee || 500,
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -180,6 +183,9 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         has_kitchen: vehicle.has_kitchen || false,
         has_bathroom: vehicle.has_bathroom || false,
         has_awning: vehicle.has_awning || false,
+        // Cleaning fees
+        exterior_cleaning_fee: vehicle.exterior_cleaning_fee || 350,
+        interior_cleaning_fee: vehicle.interior_cleaning_fee || 500,
       });
     }
   };
@@ -456,6 +462,43 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
               </div>
             </div>
           )}
+
+          {/* Cleaning Fees */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Rengøringsgebyrer</Label>
+            <p className="text-xs text-muted-foreground">
+              Gebyrer der opkræves hvis bilen returneres snavset
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Udvendig rengøring (kr)</Label>
+                <Input
+                  type="number"
+                  value={formData.exterior_cleaning_fee || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    exterior_cleaning_fee: parseFloat(e.target.value) || 350 
+                  }))}
+                  placeholder="350"
+                />
+                <p className="text-xs text-muted-foreground">Standard: 350 kr</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Indvendig rengøring (kr)</Label>
+                <Input
+                  type="number"
+                  max={1500}
+                  value={formData.interior_cleaning_fee || ''}
+                  onChange={(e) => {
+                    const value = Math.min(parseFloat(e.target.value) || 500, 1500);
+                    setFormData(prev => ({ ...prev, interior_cleaning_fee: value }));
+                  }}
+                  placeholder="500"
+                />
+                <p className="text-xs text-muted-foreground">Max: 1.500 kr</p>
+              </div>
+            </div>
+          </div>
 
           {/* Description */}
           <div className="space-y-2">
