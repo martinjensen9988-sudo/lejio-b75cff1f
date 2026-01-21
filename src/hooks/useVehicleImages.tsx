@@ -94,6 +94,22 @@ export const useVehicleImages = (vehicleId?: string) => {
       // Store images under vehicleId/ so Storage RLS can validate ownership
       const fileName = `${vehicleId}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
+      // Preflight: check backend permission (helps debug RLS)
+      try {
+        const { data: canUpload, error: canUploadErr } = await supabase.rpc(
+          'can_manage_vehicle_image_path' as any,
+          { object_name: fileName } as any
+        );
+        console.log('[vehicle-images] can_manage_vehicle_image_path', {
+          vehicleId,
+          fileName,
+          canUpload,
+          canUploadErr,
+        });
+      } catch (e) {
+        console.log('[vehicle-images] can_manage_vehicle_image_path preflight failed', e);
+      }
+
       const { error: uploadError } = await supabase.storage
         .from('vehicle-images')
         .upload(fileName, file, { upsert: true });
