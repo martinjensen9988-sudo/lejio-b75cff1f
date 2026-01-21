@@ -112,9 +112,9 @@ const VehicleSearchCard = ({
         <div className="flex">
           {/* Image with carousel */}
           <div className="w-72 h-52 relative shrink-0 group/image">
-            {vehicle.image_url ? (
+            {images.length > 0 ? (
               <img
-                src={images[currentImageIndex] || vehicle.image_url}
+                src={images[currentImageIndex]}
                 alt={`${vehicle.make} ${vehicle.model}`}
                 className="w-full h-full object-cover"
               />
@@ -267,9 +267,9 @@ const VehicleSearchCard = ({
     >
       {/* Image with carousel */}
       <div className="relative h-52 overflow-hidden group/image">
-        {vehicle.image_url ? (
+        {images.length > 0 ? (
           <img
-            src={images[currentImageIndex] || vehicle.image_url}
+            src={images[currentImageIndex]}
             alt={`${vehicle.make} ${vehicle.model}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
