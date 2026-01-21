@@ -5398,6 +5398,10 @@ export type Database = {
         Args: { _datetime: string; _location_id: string }
         Returns: boolean
       }
+      is_vehicle_owner: {
+        Args: { _user_id: string; _vehicle_id: string }
+        Returns: boolean
+      }
       remove_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
