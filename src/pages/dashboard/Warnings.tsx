@@ -20,7 +20,6 @@ import {
   WARNING_REASON_LABELS,
   WARNING_STATUS_LABELS,
 } from '@/hooks/useRenterWarnings';
-import { CreateWarningModal } from '@/components/warnings/CreateWarningModal';
 import { RenterWarningAlert } from '@/components/warnings/RenterWarningAlert';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -38,7 +37,6 @@ import {
 const WarningsPage = () => {
   const navigate = useNavigate();
   const { myReportedWarnings, checkRenter, isLoading } = useRenterWarnings();
-  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Lejer-søgning
   const [searchEmail, setSearchEmail] = useState('');
@@ -100,7 +98,7 @@ const WarningsPage = () => {
               Administrer advarsler og tjek lejere inden du accepterer bookinger
             </p>
           </div>
-          <Button onClick={() => setCreateModalOpen(true)} className="gap-2">
+          <Button onClick={() => navigate('/dashboard/warnings/create')} className="gap-2">
             <Plus className="w-4 h-4" />
             Opret advarsel
           </Button>
@@ -213,7 +211,7 @@ const WarningsPage = () => {
                     <p className="text-muted-foreground text-sm mb-4">
                       Du har ikke oprettet nogen advarsler.
                     </p>
-                    <Button variant="outline" onClick={() => setCreateModalOpen(true)}>
+                    <Button variant="outline" onClick={() => navigate('/dashboard/warnings/create')}>
                       <Plus className="w-4 h-4 mr-2" />
                       Opret din første advarsel
                     </Button>
@@ -264,8 +262,6 @@ const WarningsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      <CreateWarningModal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </DashboardLayout>
   );
 };
