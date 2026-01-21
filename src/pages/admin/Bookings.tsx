@@ -135,8 +135,7 @@ const AdminBookingsPage = () => {
       .select(`
         id, vehicle_id, start_date, end_date, status, total_price, 
         renter_name, renter_email, renter_phone, created_at, lessor_id,
-        vehicle:vehicles(registration, make, model),
-        lessor:profiles!bookings_lessor_id_fkey(full_name, email)
+        vehicle:vehicles(registration, make, model)
       `)
       .order('created_at', { ascending: false })
       .limit(100);
@@ -146,10 +145,29 @@ const AdminBookingsPage = () => {
       toast.error('Kunne ikke hente bookinger: ' + error.message);
       setBookings([]);
     } else {
-      setBookings((data || []).map(b => ({
+      // Fetch lessor profiles separately to avoid reliance on schema relationship cache
+      const lessorIds = Array.from(new Set((data || []).map((b: any) => b.lessor_id).filter(Boolean)));
+      const lessorMap = new Map<string, { full_name: string | null; email: string }>();
+
+      if (lessorIds.length > 0) {
+        const { data: lessorsData, error: lessorsError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', lessorIds);
+
+        if (lessorsError) {
+          console.error('Error fetching lessor profiles:', lessorsError);
+        } else {
+          (lessorsData || []).forEach((p: any) => {
+            lessorMap.set(p.id, { full_name: p.full_name, email: p.email });
+          });
+        }
+      }
+
+      setBookings((data || []).map((b: any) => ({
         ...b,
         vehicle: b.vehicle as any,
-        lessor: b.lessor as any,
+        lessor: b.lessor_id ? (lessorMap.get(b.lessor_id) as any) : undefined,
       })));
     }
     setLoadingData(false);
@@ -160,7 +178,7 @@ const AdminBookingsPage = () => {
       .from('vehicles')
       .select(`
         id, registration, make, model, year, daily_price, is_available, owner_id,
-        owner:profiles!vehicles_owner_id_fkey(full_name, email, company_name)
+        owner_id
       `)
       .order('created_at', { ascending: false })
       .limit(200);
@@ -170,9 +188,28 @@ const AdminBookingsPage = () => {
       toast.error('Kunne ikke hente køretøjer: ' + error.message);
       setVehicles([]);
     } else {
-      setVehicles((data || []).map(v => ({
+      // Fetch owner profiles separately to avoid relationship cache issues
+      const ownerIds = Array.from(new Set((data || []).map((v: any) => v.owner_id).filter(Boolean)));
+      const ownerMap = new Map<string, { full_name: string | null; email: string; company_name: string | null }>();
+
+      if (ownerIds.length > 0) {
+        const { data: ownersData, error: ownersError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, company_name')
+          .in('id', ownerIds);
+
+        if (ownersError) {
+          console.error('Error fetching owner profiles:', ownersError);
+        } else {
+          (ownersData || []).forEach((p: any) => {
+            ownerMap.set(p.id, { full_name: p.full_name, email: p.email, company_name: p.company_name });
+          });
+        }
+      }
+
+      setVehicles((data || []).map((v: any) => ({
         ...v,
-        owner: v.owner as any,
+        owner: v.owner_id ? (ownerMap.get(v.owner_id) as any) : undefined,
       })));
     }
   };
