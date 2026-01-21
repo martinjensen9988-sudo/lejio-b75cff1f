@@ -214,6 +214,11 @@ serve(async (req) => {
       exterior_cleaning_fee: vehicle.exterior_cleaning_fee || 350,
       interior_cleaning_fee: vehicle.interior_cleaning_fee || 500,
       
+      // Pickup/Dropoff times
+      pickup_time: booking.pickup_time || vehicle.default_pickup_time || '10:00',
+      dropoff_time: booking.dropoff_time || vehicle.default_dropoff_time || '08:00',
+      late_return_fee_enabled: vehicle.late_return_charge_enabled !== false,
+      
       // Logo - use company logo for professionals, otherwise null (LEJIO logo in frontend)
       logo_url: lessorProfile?.user_type === 'professionel' && lessorProfile?.company_logo_url 
         ? lessorProfile.company_logo_url 
