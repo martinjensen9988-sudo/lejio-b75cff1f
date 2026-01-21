@@ -594,8 +594,8 @@ const CreateBookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Payment Plan Selection - show if subscription is available */}
-              {subscriptionAvailable && (
+              {/* Payment Plan Selection - only show if subscription is available AND rental is at least 1 month */}
+              {subscriptionAvailable && (periodType === 'monthly' || pricing.days >= 30) && (
                 <Card>
                   <CardContent className="pt-6">
                     <PaymentPlanSelector
