@@ -238,6 +238,13 @@ const AdminBookingsPage = () => {
     if (booking.contract?.id) return booking.contract;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Du skal være logget ind som admin');
+        navigate('/admin');
+        return null;
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-contract', {
         body: {
           bookingId: booking.id,
@@ -245,7 +252,13 @@ const AdminBookingsPage = () => {
           depositAmount: 2500,
         },
       });
-      if (error) throw error;
+
+      if (error) {
+        // 403 typically means missing/invalid session token
+        console.error('generate-contract invoke error:', error);
+        toast.error(error.message || 'Kunne ikke oprette lejekontrakt');
+        return null;
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
 
       await fetchBookings();
