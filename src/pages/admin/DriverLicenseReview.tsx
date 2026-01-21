@@ -43,6 +43,51 @@ const DriverLicenseReview = () => {
   const [selectedLicense, setSelectedLicense] = useState<DriverLicense | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [signedUrls, setSignedUrls] = useState<{ front?: string; back?: string }>({});
+
+  // Helper to get signed URL for private bucket images
+  const getSignedUrl = async (url: string | null): Promise<string | null> => {
+    if (!url) return null;
+    
+    try {
+      // Extract file path from the URL
+      const urlObj = new URL(url);
+      const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/driver-licenses\/(.+)/);
+      
+      if (pathMatch) {
+        const filePath = decodeURIComponent(pathMatch[1]);
+        const { data, error } = await supabase.storage
+          .from('driver-licenses')
+          .createSignedUrl(filePath, 3600); // 1 hour expiry
+        
+        if (error) {
+          console.error('Error creating signed URL:', error);
+          return null;
+        }
+        return data.signedUrl;
+      }
+      
+      // Try alternative path pattern
+      const altMatch = url.match(/driver-licenses\/(.+)$/);
+      if (altMatch) {
+        const filePath = decodeURIComponent(altMatch[1]);
+        const { data, error } = await supabase.storage
+          .from('driver-licenses')
+          .createSignedUrl(filePath, 3600);
+        
+        if (error) {
+          console.error('Error creating signed URL:', error);
+          return null;
+        }
+        return data.signedUrl;
+      }
+      
+      return url; // Return original if can't parse
+    } catch (e) {
+      console.error('Error parsing URL:', e);
+      return url;
+    }
+  };
 
   const fetchLicenses = async () => {
     setLoading(true);
@@ -79,6 +124,22 @@ const DriverLicenseReview = () => {
       setLoading(false);
     }
   };
+
+  // Load signed URLs when a license is selected
+  useEffect(() => {
+    const loadSignedUrls = async () => {
+      if (selectedLicense) {
+        const [frontUrl, backUrl] = await Promise.all([
+          getSignedUrl(selectedLicense.front_image_url),
+          getSignedUrl(selectedLicense.back_image_url),
+        ]);
+        setSignedUrls({ front: frontUrl || undefined, back: backUrl || undefined });
+      } else {
+        setSignedUrls({});
+      }
+    };
+    loadSignedUrls();
+  }, [selectedLicense]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -262,12 +323,22 @@ const DriverLicenseReview = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm font-medium mb-2">Forside</p>
-                    {selectedLicense.front_image_url ? (
-                      <img
-                        src={selectedLicense.front_image_url}
-                        alt="Kørekort forside"
-                        className="w-full rounded-lg border"
-                      />
+                    {signedUrls.front ? (
+                      <a href={signedUrls.front} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={signedUrls.front}
+                          alt="Kørekort forside"
+                          className="w-full rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                          onError={(e) => {
+                            console.error('Failed to load front image');
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </a>
+                    ) : selectedLicense.front_image_url ? (
+                      <div className="h-48 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      </div>
                     ) : (
                       <div className="h-48 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
                         Ingen billede
@@ -276,12 +347,22 @@ const DriverLicenseReview = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium mb-2">Bagside</p>
-                    {selectedLicense.back_image_url ? (
-                      <img
-                        src={selectedLicense.back_image_url}
-                        alt="Kørekort bagside"
-                        className="w-full rounded-lg border"
-                      />
+                    {signedUrls.back ? (
+                      <a href={signedUrls.back} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={signedUrls.back}
+                          alt="Kørekort bagside"
+                          className="w-full rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                          onError={(e) => {
+                            console.error('Failed to load back image');
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </a>
+                    ) : selectedLicense.back_image_url ? (
+                      <div className="h-48 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      </div>
                     ) : (
                       <div className="h-48 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
                         Ingen billede
