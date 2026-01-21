@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { differenceInDays, format, addMonths } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin, Bike, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
+import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin, Bike, ArrowLeft, Lock, Eye, EyeOff, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -52,6 +52,9 @@ const CreateBookingPage = () => {
     // Account creation fields
     password: '',
     confirmPassword: '',
+    // Pickup/Dropoff times
+    pickupTime: '10:00',
+    dropoffTime: '08:00',
   });
 
   // Parse dates from URL params
@@ -74,6 +77,14 @@ const CreateBookingPage = () => {
 
         if (vehicleError) throw vehicleError;
         setVehicle(vehicleData);
+        
+        // Set default pickup/dropoff times from vehicle settings
+        const vehicleAny = vehicleData as any;
+        setFormData(prev => ({
+          ...prev,
+          pickupTime: vehicleAny.default_pickup_time || '10:00',
+          dropoffTime: vehicleAny.default_dropoff_time || '08:00',
+        }));
 
         // Fetch lessor's payment settings
         if (vehicleData?.owner_id) {
@@ -259,7 +270,9 @@ const CreateBookingPage = () => {
           extra_km_price: vehicle?.extra_km_price || null,
           unlimited_km: vehicle?.unlimited_km || false,
           original_deductible: 5000,
-        })
+          pickup_time: formData.pickupTime,
+          dropoff_time: formData.dropoffTime,
+        } as any)
         .select('id')
         .single();
 
@@ -599,6 +612,49 @@ const CreateBookingPage = () => {
                 </CardContent>
               </Card>
 
+              {/* Pickup/Dropoff Times */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Afhentnings- og afleveringstid
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="pickupTime">Afhentning kl.</Label>
+                      <Input
+                        id="pickupTime"
+                        type="time"
+                        value={formData.pickupTime}
+                        onChange={(e) => setFormData(prev => ({ ...prev, pickupTime: e.target.value }))}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Tidligst kl. {(vehicle as any)?.default_pickup_time || '10:00'}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dropoffTime">Aflevering senest kl.</Label>
+                      <Input
+                        id="dropoffTime"
+                        type="time"
+                        value={formData.dropoffTime}
+                        onChange={(e) => setFormData(prev => ({ ...prev, dropoffTime: e.target.value }))}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Senest kl. {(vehicle as any)?.default_dropoff_time || '08:00'}
+                      </p>
+                    </div>
+                  </div>
+                  {(vehicle as any)?.late_return_charge_enabled !== false && (
+                    <p className="text-xs text-destructive mt-3">
+                      ⚠️ Ved aflevering efter kl. {(vehicle as any)?.default_dropoff_time || '08:00'} opkræves gebyr for en ekstra lejedag
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Payment Plan Selection - only show if subscription is available AND rental is at least 1 month */}
               {subscriptionAvailable && (periodType === 'monthly' || pricing.days >= 30) && (
                 <Card>
@@ -636,6 +692,14 @@ const CreateBookingPage = () => {
                         <span className="font-medium">
                           {format(startDate, 'dd. MMM', { locale: da })} - {format(endDate, 'dd. MMM yyyy', { locale: da })}
                         </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Afhentning:</span>
+                        <span className="font-medium">kl. {formData.pickupTime}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Aflevering senest:</span>
+                        <span className="font-medium">kl. {formData.dropoffTime}</span>
                       </div>
                     </>
                   )}

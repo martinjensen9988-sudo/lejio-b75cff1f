@@ -118,6 +118,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          actual_dropoff_time: string | null
           base_price: number | null
           created_at: string
           daily_price: number | null
@@ -137,6 +138,7 @@ export type Database = {
           has_extra_driver: boolean | null
           id: string
           included_km: number | null
+          late_return_fee: number | null
           lessor_id: string
           monthly_price: number | null
           notes: string | null
@@ -169,6 +171,7 @@ export type Database = {
           weekly_price: number | null
         }
         Insert: {
+          actual_dropoff_time?: string | null
           base_price?: number | null
           created_at?: string
           daily_price?: number | null
@@ -188,6 +191,7 @@ export type Database = {
           has_extra_driver?: boolean | null
           id?: string
           included_km?: number | null
+          late_return_fee?: number | null
           lessor_id: string
           monthly_price?: number | null
           notes?: string | null
@@ -220,6 +224,7 @@ export type Database = {
           weekly_price?: number | null
         }
         Update: {
+          actual_dropoff_time?: string | null
           base_price?: number | null
           created_at?: string
           daily_price?: number | null
@@ -239,6 +244,7 @@ export type Database = {
           has_extra_driver?: boolean | null
           id?: string
           included_km?: number | null
+          late_return_fee?: number | null
           lessor_id?: string
           monthly_price?: number | null
           notes?: string | null

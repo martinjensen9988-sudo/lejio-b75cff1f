@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin, AlertTriangle, Truck, Tent } from 'lucide-react';
+import { Edit, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin, AlertTriangle, Truck, Tent, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { TrailerFields } from './TrailerFields';
 import { CaravanFields } from './CaravanFields';
@@ -114,6 +114,10 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
     // Cleaning fees
     exterior_cleaning_fee: vehicle.exterior_cleaning_fee || 350,
     interior_cleaning_fee: vehicle.interior_cleaning_fee || 500,
+    // Pickup/Dropoff times
+    default_pickup_time: vehicle.default_pickup_time || '10:00',
+    default_dropoff_time: vehicle.default_dropoff_time || '08:00',
+    late_return_charge_enabled: vehicle.late_return_charge_enabled ?? true,
   });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -186,6 +190,10 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
         // Cleaning fees
         exterior_cleaning_fee: vehicle.exterior_cleaning_fee || 350,
         interior_cleaning_fee: vehicle.interior_cleaning_fee || 500,
+        // Pickup/Dropoff times
+        default_pickup_time: vehicle.default_pickup_time || '10:00',
+        default_dropoff_time: vehicle.default_dropoff_time || '08:00',
+        late_return_charge_enabled: vehicle.late_return_charge_enabled ?? true,
       });
     }
   };
@@ -496,6 +504,63 @@ const EditVehicleDialog = ({ vehicle, onUpdate }: EditVehicleDialogProps) => {
                   placeholder="500"
                 />
                 <p className="text-xs text-muted-foreground">Max: 1.500 kr</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Pickup/Dropoff Times */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              Afhentnings- og afleveringstider
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Standardtider for afhentning og aflevering. Lejere kan vælge tidspunkt ved booking.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Afhentning fra kl.</Label>
+                <Input
+                  type="time"
+                  value={formData.default_pickup_time || '10:00'}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    default_pickup_time: e.target.value 
+                  }))}
+                />
+                <p className="text-xs text-muted-foreground">Standard: 10:00</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Aflevering senest kl.</Label>
+                <Input
+                  type="time"
+                  value={formData.default_dropoff_time || '08:00'}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    default_dropoff_time: e.target.value 
+                  }))}
+                />
+                <p className="text-xs text-muted-foreground">Standard: 08:00</p>
+              </div>
+            </div>
+            
+            {/* Late return charge toggle */}
+            <div 
+              className="flex items-center space-x-3 p-3 rounded-xl bg-destructive/10 border border-destructive/20 cursor-pointer"
+              onClick={() => setFormData(prev => ({ ...prev, late_return_charge_enabled: !prev.late_return_charge_enabled }))}
+            >
+              <Checkbox
+                id="edit_late_return_charge"
+                checked={formData.late_return_charge_enabled}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, late_return_charge_enabled: !!checked }))}
+              />
+              <div className="flex-1">
+                <label htmlFor="edit_late_return_charge" className="text-sm font-medium cursor-pointer select-none">
+                  Gebyr ved sen aflevering
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  Hvis bilen afleveres senere end den valgte tid, betaler lejer for en ekstra lejedag
+                </p>
               </div>
             </div>
           </div>

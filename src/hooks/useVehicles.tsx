@@ -126,6 +126,10 @@ export interface Vehicle {
   // Cleaning fees
   exterior_cleaning_fee: number | null;
   interior_cleaning_fee: number | null;
+  // Pickup/Dropoff times
+  default_pickup_time: string | null;
+  default_dropoff_time: string | null;
+  late_return_charge_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -230,6 +234,10 @@ export interface VehicleInsert {
   // Cleaning fees
   exterior_cleaning_fee?: number;
   interior_cleaning_fee?: number;
+  // Pickup/Dropoff times
+  default_pickup_time?: string;
+  default_dropoff_time?: string;
+  late_return_charge_enabled?: boolean;
 }
 
 export const useVehicles = () => {
@@ -255,12 +263,18 @@ export const useVehicles = () => {
 
       if (fetchError) throw fetchError;
       // Cast vehicle_type, tire_type, and service_status to proper types
-      const typedData = (data || []).map(v => ({
-        ...v,
-        vehicle_type: (v.vehicle_type || 'bil') as VehicleType,
-        tire_type: (v.tire_type || 'summer') as 'summer' | 'winter' | 'all_season',
-        service_status: (v.service_status || 'ok') as 'ok' | 'service_soon' | 'service_required' | 'blocked',
-      }));
+      const typedData = (data || []).map(v => {
+        const vehicle = v as any;
+        return {
+          ...v,
+          vehicle_type: (v.vehicle_type || 'bil') as VehicleType,
+          tire_type: (v.tire_type || 'summer') as 'summer' | 'winter' | 'all_season',
+          service_status: (v.service_status || 'ok') as 'ok' | 'service_soon' | 'service_required' | 'blocked',
+          default_pickup_time: vehicle.default_pickup_time || '10:00',
+          default_dropoff_time: vehicle.default_dropoff_time || '08:00',
+          late_return_charge_enabled: vehicle.late_return_charge_enabled ?? true,
+        };
+      });
       setVehicles(typedData as Vehicle[]);
     } catch (err) {
       console.error('Error fetching vehicles:', err);
@@ -295,11 +309,15 @@ export const useVehicles = () => {
         throw insertError;
       }
 
+      const vehicle = data as any;
       const typedData = { 
         ...data, 
         vehicle_type: (data.vehicle_type || 'bil') as VehicleType,
         tire_type: (data.tire_type || 'summer') as 'summer' | 'winter' | 'all_season',
         service_status: (data.service_status || 'ok') as 'ok' | 'service_soon' | 'service_required' | 'blocked',
+        default_pickup_time: vehicle.default_pickup_time || '10:00',
+        default_dropoff_time: vehicle.default_dropoff_time || '08:00',
+        late_return_charge_enabled: vehicle.late_return_charge_enabled ?? true,
       } as Vehicle;
       setVehicles(prev => [typedData, ...prev]);
       toast.success('Køretøj tilføjet!');
