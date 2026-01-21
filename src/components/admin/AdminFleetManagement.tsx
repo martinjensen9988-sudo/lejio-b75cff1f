@@ -47,7 +47,8 @@ import {
 import { 
   Truck, Search, MoreHorizontal, Plus, 
   Loader2, CheckCircle, DollarSign, TrendingUp,
-  Building2, Calendar, Car, UserPlus, Trash2, Pencil
+  Building2, Calendar, Car, UserPlus, Trash2, Pencil,
+  ClipboardList, XCircle, Clock, Eye
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -101,6 +102,25 @@ interface FleetVehicle {
   owner_id: string;
 }
 
+interface FleetBooking {
+  id: string;
+  vehicle_id: string;
+  lessor_id: string;
+  start_date: string;
+  end_date: string;
+  renter_name: string | null;
+  renter_email: string | null;
+  renter_phone: string | null;
+  total_price: number;
+  status: string;
+  created_at: string;
+  vehicle?: {
+    make: string;
+    model: string;
+    registration: string;
+  };
+}
+
 const FLEET_PLAN_LABELS: Record<string, string> = {
   fleet_private: 'Privat Fleet (30%)',
   fleet_basic: 'LEJIO Varetager (20%)',
@@ -112,6 +132,7 @@ const AdminFleetManagement = () => {
   const [customers, setCustomers] = useState<FleetCustomer[]>([]);
   const [settlements, setSettlements] = useState<FleetSettlement[]>([]);
   const [vehicles, setVehicles] = useState<FleetVehicle[]>([]);
+  const [bookings, setBookings] = useState<FleetBooking[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateSettlement, setShowCreateSettlement] = useState(false);
@@ -209,9 +230,37 @@ const AdminFleetManagement = () => {
               toast.error('Kunne ikke hente fleet køretøjer');
             } else {
               setVehicles(vehiclesData || []);
+              
+              // Fetch bookings for fleet vehicles
+              const vehicleIds = (vehiclesData || []).map(v => v.id);
+              if (vehicleIds.length > 0) {
+                const { data: bookingsData, error: bookingsError } = await supabase
+                  .from('bookings')
+                  .select(`
+                    id, vehicle_id, lessor_id, start_date, end_date, 
+                    renter_name, renter_email, renter_phone, total_price, 
+                    status, created_at,
+                    vehicles:vehicle_id (make, model, registration)
+                  `)
+                  .in('vehicle_id', vehicleIds)
+                  .order('created_at', { ascending: false });
+
+                if (bookingsError) {
+                  console.error('Error fetching fleet bookings:', bookingsError);
+                } else {
+                  const formattedBookings = (bookingsData || []).map(b => ({
+                    ...b,
+                    vehicle: b.vehicles as any,
+                  }));
+                  setBookings(formattedBookings);
+                }
+              } else {
+                setBookings([]);
+              }
             }
           } else {
             setVehicles([]);
+            setBookings([]);
           }
         })(),
         timeout,
@@ -481,6 +530,24 @@ const AdminFleetManagement = () => {
       .filter(s => s.status === 'pending')
       .reduce((sum, s) => sum + s.net_payout, 0),
     totalVehicles: vehicles.length,
+    totalBookings: bookings.length,
+    pendingBookings: bookings.filter(b => b.status === 'pending').length,
+    activeBookings: bookings.filter(b => b.status === 'confirmed' || b.status === 'active').length,
+  };
+
+  const handleUpdateBookingStatus = async (bookingId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: newStatus })
+      .eq('id', bookingId);
+
+    if (error) {
+      console.error('Error updating booking:', error);
+      toast.error('Kunne ikke opdatere booking status');
+    } else {
+      toast.success(`Booking ${newStatus === 'confirmed' ? 'godkendt' : newStatus === 'cancelled' ? 'annulleret' : 'opdateret'}`);
+      fetchData();
+    }
   };
 
   const getVehiclesForCustomer = (customerId: string) => 
@@ -565,6 +632,10 @@ const AdminFleetManagement = () => {
             <TabsTrigger value="vehicles">
               <Car className="w-4 h-4 mr-2" />
               Køretøjer ({vehicles.length})
+            </TabsTrigger>
+            <TabsTrigger value="bookings">
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Bookinger ({bookings.length})
             </TabsTrigger>
             <TabsTrigger value="settlements">
               <TrendingUp className="w-4 h-4 mr-2" />
@@ -767,6 +838,152 @@ const AdminFleetManagement = () => {
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           >
                             <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </TabsContent>
+
+    {/* Bookings Tab */}
+    <TabsContent value="bookings">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5" />
+                Fleet Bookinger
+              </CardTitle>
+              <CardDescription>Alle bookinger for fleet-køretøjer</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Badge variant="outline" className="gap-1">
+                <Clock className="w-3 h-3" />
+                {stats.pendingBookings} afventer
+              </Badge>
+              <Badge variant="default" className="gap-1">
+                <CheckCircle className="w-3 h-3" />
+                {stats.activeBookings} aktive
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {bookings.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Ingen bookinger endnu</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Køretøj</TableHead>
+                  <TableHead>Lejer</TableHead>
+                  <TableHead>Periode</TableHead>
+                  <TableHead>Pris</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Handlinger</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bookings.map((booking) => {
+                  const owner = getCustomerById(booking.lessor_id);
+                  return (
+                    <TableRow key={booking.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{booking.vehicle?.make} {booking.vehicle?.model}</p>
+                          <Badge variant="outline" className="text-xs">{booking.vehicle?.registration}</Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{booking.renter_name || 'Ukendt'}</p>
+                          {booking.renter_email && (
+                            <p className="text-sm text-muted-foreground">{booking.renter_email}</p>
+                          )}
+                          {booking.renter_phone && (
+                            <p className="text-xs text-muted-foreground">{booking.renter_phone}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p>{format(new Date(booking.start_date), 'dd. MMM yyyy', { locale: da })}</p>
+                          <p className="text-muted-foreground">til {format(new Date(booking.end_date), 'dd. MMM yyyy', { locale: da })}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {booking.total_price?.toLocaleString('da-DK')} kr
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={
+                            booking.status === 'confirmed' || booking.status === 'active' ? 'default' : 
+                            booking.status === 'pending' ? 'secondary' : 
+                            booking.status === 'cancelled' ? 'destructive' : 'outline'
+                          }
+                        >
+                          {booking.status === 'pending' ? 'Afventer' :
+                           booking.status === 'confirmed' ? 'Bekræftet' :
+                           booking.status === 'active' ? 'Aktiv' :
+                           booking.status === 'completed' ? 'Afsluttet' :
+                           booking.status === 'cancelled' ? 'Annulleret' : booking.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {booking.status === 'pending' && (
+                            <>
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleUpdateBookingStatus(booking.id, 'confirmed')}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Godkend
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleUpdateBookingStatus(booking.id, 'cancelled')}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Afvis
+                              </Button>
+                            </>
+                          )}
+                          {booking.status === 'confirmed' && (
+                            <Button 
+                              size="sm"
+                              variant="outline" 
+                              onClick={() => handleUpdateBookingStatus(booking.id, 'active')}
+                            >
+                              Marker aktiv
+                            </Button>
+                          )}
+                          {booking.status === 'active' && (
+                            <Button 
+                              size="sm"
+                              variant="outline" 
+                              onClick={() => handleUpdateBookingStatus(booking.id, 'completed')}
+                            >
+                              Afslut
+                            </Button>
+                          )}
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => navigate(`/admin/bookings`)}
+                          >
+                            <Eye className="w-4 h-4" />
                           </Button>
                         </div>
                       </TableCell>
