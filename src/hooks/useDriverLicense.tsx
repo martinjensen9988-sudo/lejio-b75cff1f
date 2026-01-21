@@ -142,8 +142,12 @@ export const useDriverLicense = () => {
   };
 
   const isVerified = license?.verification_status === 'verified';
-  const isPending = license?.verification_status === 'pending' || license?.verification_status === 'pending_review';
+  const isPending = license?.verification_status === 'pending' || license?.verification_status === 'pending_review' || license?.verification_status === 'pending_admin_review';
   const isRejected = license?.verification_status === 'rejected';
+  const isPendingAdminReview = license?.verification_status === 'pending_admin_review';
+
+  // Allow booking to proceed if license is verified, pending, or pending admin review
+  const canProceedWithBooking = isVerified || isPending || isPendingAdminReview;
 
   return {
     license,
@@ -153,6 +157,8 @@ export const useDriverLicense = () => {
     isVerified,
     isPending,
     isRejected,
+    isPendingAdminReview,
+    canProceedWithBooking,
     refetch: fetchLicense,
   };
 };

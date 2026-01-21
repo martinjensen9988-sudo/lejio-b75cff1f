@@ -35,6 +35,7 @@ const menuItems = [
   { value: 'corporate', icon: Building2, label: 'Virksomheder', path: '/admin/corporate' },
   { value: 'facebook', icon: Facebook, label: 'Facebook', path: '/admin/facebook' },
   { value: 'sales-ai', icon: Sparkles, label: 'Salgs AI', path: '/admin/sales-ai' },
+  { value: 'driver-licenses', icon: ShieldCheck, label: 'Kørekort', path: '/admin/driver-licenses' },
   { value: 'stats', icon: BarChart3, label: 'Statistik', path: '/admin/stats' },
 ];
 
