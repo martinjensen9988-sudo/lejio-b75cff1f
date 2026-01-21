@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.51f97d3c03e745f98a81a2f78238f523',
+  appId: 'dk.lejio.app',
   appName: 'lejio',
   webDir: 'dist',
   server: {
