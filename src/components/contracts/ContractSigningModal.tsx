@@ -62,114 +62,116 @@ const ContractSigningModal = ({ contract, open, onOpenChange, onSign }: Contract
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col bg-card p-0 overflow-hidden">
+        <DialogHeader className="p-6 pb-0 shrink-0">
           <DialogTitle className="font-display text-2xl flex items-center gap-2 text-foreground">
             <FileCheck className="w-6 h-6 text-primary" />
             {alreadySigned ? 'Kontrakt allerede underskrevet' : 'Underskriv kontrakt'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Contract Preview */}
-          <div className="border border-border rounded-xl overflow-hidden">
-            <ContractPreview contract={contract} />
-          </div>
+        <div className="flex-1 overflow-y-auto p-6 pt-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="space-y-6">
+            {/* Contract Preview */}
+            <div className="border border-border rounded-xl overflow-hidden">
+              <ContractPreview contract={contract} />
+            </div>
 
-          {/* Signing Section */}
-          {!alreadySigned && canSign && (
-            <div className="bg-muted/50 rounded-2xl p-6 space-y-6">
-              <h3 className="font-display text-lg font-bold text-foreground">
-                Din underskrift som {role === 'lessor' ? 'udlejer' : 'lejer'}
-              </h3>
+            {/* Signing Section */}
+            {!alreadySigned && canSign && (
+              <div className="bg-muted/50 rounded-2xl p-6 space-y-6">
+                <h3 className="font-display text-lg font-bold text-foreground">
+                  Din underskrift som {role === 'lessor' ? 'udlejer' : 'lejer'}
+                </h3>
 
-              {/* Vanvidskørsel acceptance (only for renter) */}
-              {role === 'renter' && (
-                <div className="bg-destructive/5 rounded-xl p-4 border border-destructive/20">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                    <div className="space-y-3">
-                      <p className="text-sm text-foreground">
-                        Ved at acceptere denne kontrakt bekræfter jeg, at jeg er bekendt med, at jeg hæfter for 
-                        køretøjets fulde værdi (<strong>{formatCurrency(contract.vanvidskørsel_liability_amount)}</strong>) 
-                        i tilfælde af vanvidskørsel, der medfører konfiskation af køretøjet.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Checkbox 
-                          id="vanvidskorsel" 
-                          checked={acceptedVanvidskorsel}
-                          onCheckedChange={(checked) => setAcceptedVanvidskorsel(checked === true)}
-                        />
-                        <Label htmlFor="vanvidskorsel" className="text-sm font-medium text-foreground cursor-pointer">
-                          Jeg accepterer vanvidskørselsklausulen
-                        </Label>
+                {/* Vanvidskørsel acceptance (only for renter) */}
+                {role === 'renter' && (
+                  <div className="bg-destructive/5 rounded-xl p-4 border border-destructive/20">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                      <div className="space-y-3">
+                        <p className="text-sm text-foreground">
+                          Ved at acceptere denne kontrakt bekræfter jeg, at jeg er bekendt med, at jeg hæfter for 
+                          køretøjets fulde værdi (<strong>{formatCurrency(contract.vanvidskørsel_liability_amount)}</strong>) 
+                          i tilfælde af vanvidskørsel, der medfører konfiskation af køretøjet.
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Checkbox 
+                            id="vanvidskorsel" 
+                            checked={acceptedVanvidskorsel}
+                            onCheckedChange={(checked) => setAcceptedVanvidskorsel(checked === true)}
+                          />
+                          <Label htmlFor="vanvidskorsel" className="text-sm font-medium text-foreground cursor-pointer">
+                            Jeg accepterer vanvidskørselsklausulen
+                          </Label>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Terms acceptance */}
-              <div className="flex items-center gap-2">
-                <Checkbox 
-                  id="terms" 
-                  checked={acceptedTerms}
-                  onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
-                />
-                <Label htmlFor="terms" className="text-sm text-foreground cursor-pointer">
-                  Jeg har læst og accepterer kontraktens vilkår
-                </Label>
-              </div>
-
-              {/* Signature Pad */}
-              <div>
-                <Label className="text-sm font-medium mb-2 block">Tegn din underskrift</Label>
-                <SignaturePadComponent 
-                  onSave={setSignature}
-                  disabled={!acceptedTerms || (role === 'renter' && !acceptedVanvidskorsel)}
-                />
-              </div>
-
-              {signature && (
-                <div className="bg-card rounded-xl p-4 border border-border">
-                  <p className="text-sm text-muted-foreground mb-2">Din underskrift:</p>
-                  <img src={signature} alt="Din underskrift" className="h-16 object-contain" />
-                </div>
-              )}
-
-              {/* Submit */}
-              <Button
-                variant="warm"
-                size="lg"
-                className="w-full"
-                disabled={!signature || !acceptedTerms || (role === 'renter' && !acceptedVanvidskorsel) || isSigning}
-                onClick={handleSign}
-              >
-                {isSigning ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Underskriver...
-                  </>
-                ) : (
-                  'Underskriv kontrakt'
                 )}
-              </Button>
-            </div>
-          )}
 
-          {alreadySigned && (
-            <div className="bg-mint/10 rounded-2xl p-6 text-center border border-mint/20">
-              <FileCheck className="w-12 h-12 text-mint mx-auto mb-3" />
-              <h3 className="font-display text-lg font-bold text-foreground mb-2">
-                Du har allerede underskrevet denne kontrakt
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {contract.status === 'signed' 
-                  ? 'Kontrakten er fuldt underskrevet af begge parter.'
-                  : 'Kontrakten afventer underskrift fra den anden part.'}
-              </p>
-            </div>
-          )}
+                {/* Terms acceptance */}
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                  />
+                  <Label htmlFor="terms" className="text-sm text-foreground cursor-pointer">
+                    Jeg har læst og accepterer kontraktens vilkår
+                  </Label>
+                </div>
+
+                {/* Signature Pad */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Tegn din underskrift</Label>
+                  <SignaturePadComponent 
+                    onSave={setSignature}
+                    disabled={!acceptedTerms || (role === 'renter' && !acceptedVanvidskorsel)}
+                  />
+                </div>
+
+                {signature && (
+                  <div className="bg-card rounded-xl p-4 border border-border">
+                    <p className="text-sm text-muted-foreground mb-2">Din underskrift:</p>
+                    <img src={signature} alt="Din underskrift" className="h-16 object-contain" />
+                  </div>
+                )}
+
+                {/* Submit */}
+                <Button
+                  variant="warm"
+                  size="lg"
+                  className="w-full"
+                  disabled={!signature || !acceptedTerms || (role === 'renter' && !acceptedVanvidskorsel) || isSigning}
+                  onClick={handleSign}
+                >
+                  {isSigning ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Underskriver...
+                    </>
+                  ) : (
+                    'Underskriv kontrakt'
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {alreadySigned && (
+              <div className="bg-mint/10 rounded-2xl p-6 text-center border border-mint/20">
+                <FileCheck className="w-12 h-12 text-mint mx-auto mb-3" />
+                <h3 className="font-display text-lg font-bold text-foreground mb-2">
+                  Du har allerede underskrevet denne kontrakt
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {contract.status === 'signed' 
+                    ? 'Kontrakten er fuldt underskrevet af begge parter.'
+                    : 'Kontrakten afventer underskrift fra den anden part.'}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
