@@ -22,8 +22,9 @@ import { Vehicle } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useDealerLocations } from '@/hooks/useDealerLocations';
+import { useVehicleBookedDates } from '@/hooks/useVehicleBookedDates';
 import { Plus, CalendarIcon, Loader2, AlertTriangle, MapPin } from 'lucide-react';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInDays, startOfDay } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -60,6 +61,9 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
     renter_phone: '',
     notes: '',
   });
+
+  // Get booked dates for selected vehicle
+  const { disabledMatcher, bookedDates } = useVehicleBookedDates(formData.vehicle_id || null);
 
   const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
   
@@ -299,10 +303,17 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
                       start_date: date,
                       end_date: prev.end_date && date && prev.end_date < date ? date : prev.end_date
                     }))}
-                    disabled={(date) => date < new Date()}
+                    disabled={disabledMatcher}
+                    modifiers={{ booked: bookedDates }}
+                    modifiersStyles={{ booked: { backgroundColor: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))' } }}
                     initialFocus
                     className="pointer-events-auto"
                   />
+                  {bookedDates.length > 0 && (
+                    <p className="text-xs text-muted-foreground p-2 border-t">
+                      Røde datoer er allerede booket
+                    </p>
+                  )}
                 </PopoverContent>
               </Popover>
             </div>
@@ -330,10 +341,20 @@ const CreateBookingDialog = ({ vehicles, onBookingCreated }: CreateBookingDialog
                     mode="single"
                     selected={formData.end_date}
                     onSelect={(date) => setFormData(prev => ({ ...prev, end_date: date }))}
-                    disabled={(date) => date < (formData.start_date || new Date())}
+                    disabled={(date) => {
+                      if (date < (formData.start_date || new Date())) return true;
+                      return disabledMatcher(date);
+                    }}
+                    modifiers={{ booked: bookedDates }}
+                    modifiersStyles={{ booked: { backgroundColor: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))' } }}
                     initialFocus
                     className="pointer-events-auto"
                   />
+                  {bookedDates.length > 0 && (
+                    <p className="text-xs text-muted-foreground p-2 border-t">
+                      Røde datoer er allerede booket
+                    </p>
+                  )}
                 </PopoverContent>
               </Popover>
             </div>
