@@ -5226,12 +5226,12 @@ export type Database = {
           internal_length_cm?: number | null
           internal_width_cm?: number | null
           is_available?: boolean | null
-          latitude?: number | null
+          latitude?: never
           layout_type?: string | null
           location_address?: string | null
           location_city?: string | null
           location_postal_code?: string | null
-          longitude?: number | null
+          longitude?: never
           make?: string | null
           model?: string | null
           monthly_price?: number | null
@@ -5301,12 +5301,12 @@ export type Database = {
           internal_length_cm?: number | null
           internal_width_cm?: number | null
           is_available?: boolean | null
-          latitude?: number | null
+          latitude?: never
           layout_type?: string | null
           location_address?: string | null
           location_city?: string | null
           location_postal_code?: string | null
-          longitude?: number | null
+          longitude?: never
           make?: string | null
           model?: string | null
           monthly_price?: number | null
