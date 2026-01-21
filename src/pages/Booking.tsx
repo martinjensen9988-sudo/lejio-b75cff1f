@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { format, addDays, addWeeks, addMonths } from "date-fns";
+import { format, addDays, addWeeks, addMonths, isAfter, startOfDay } from "date-fns";
 import { da } from "date-fns/locale";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePayments } from "@/hooks/usePayments";
 import { useDriverLicense } from "@/hooks/useDriverLicense";
 import { useAuth } from "@/hooks/useAuth";
+import { useVehicleBookedDates } from "@/hooks/useVehicleBookedDates";
 import {
   Car,
   Calendar as CalendarIcon,
@@ -92,6 +93,16 @@ const Booking = () => {
     isRejected: licenseRejected,
     refetch: refetchLicense,
   } = useDriverLicense();
+  
+  // Get booked dates for this vehicle
+  const { 
+    bookedDates, 
+    bookedPeriods, 
+    isDateBooked, 
+    isRangeOverlapping, 
+    disabledMatcher,
+    isLoading: bookedDatesLoading 
+  } = useVehicleBookedDates(vehicleId);
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
@@ -233,6 +244,28 @@ const Booking = () => {
     }
   }, [startDate, periodType, periodCount]);
 
+  // Find next available date (first date that's not booked)
+  const nextAvailableDate = useMemo(() => {
+    const today = startOfDay(new Date());
+    let checkDate = today;
+    
+    // Check up to 365 days ahead
+    for (let i = 0; i < 365; i++) {
+      if (!isDateBooked(checkDate)) {
+        return checkDate;
+      }
+      checkDate = addDays(checkDate, 1);
+    }
+    
+    return null; // No available date found within a year
+  }, [isDateBooked, bookedDates]);
+
+  // Check if selected period overlaps with booked dates
+  const hasOverlap = useMemo(() => {
+    if (!startDate || !endDate) return false;
+    return isRangeOverlapping(startDate, endDate);
+  }, [startDate, endDate, isRangeOverlapping]);
+
   // Calculate pricing
   const pricing = useMemo(() => {
     if (!vehicle) return null;
@@ -297,6 +330,15 @@ const Booking = () => {
       case 1:
         if (!startDate) {
           toast({ title: "Vælg startdato", variant: "destructive" });
+          return false;
+        }
+        // Check for overlap with existing bookings
+        if (hasOverlap) {
+          toast({ 
+            title: "Perioden er ikke ledig", 
+            description: "Den valgte periode overlapper med en eksisterende booking. Vælg venligst andre datoer.",
+            variant: "destructive" 
+          });
           return false;
         }
         if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.birthDate || !formData.address || !formData.postalCode || !formData.city || !formData.licenseNumber || !formData.licenseIssueDate) {
@@ -658,6 +700,34 @@ const Booking = () => {
                       </Select>
                     </div>
 
+                    {/* Availability Notice - Show if there are any booked periods */}
+                    {bookedPeriods.length > 0 && (
+                      <div className="bg-muted/50 border border-border rounded-xl p-4">
+                        <div className="flex items-start gap-3">
+                          <CalendarIcon className="w-5 h-5 text-primary mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-medium text-foreground">Reserverede perioder</p>
+                            <p className="text-xs text-muted-foreground mb-2">
+                              Følgende perioder er allerede booket:
+                            </p>
+                            <div className="space-y-1">
+                              {bookedPeriods.slice(0, 3).map((period, idx) => (
+                                <div key={idx} className="text-sm bg-destructive/10 text-destructive px-2 py-1 rounded inline-block mr-2">
+                                  {format(new Date(period.start_date), "d. MMM", { locale: da })} - {format(new Date(period.end_date), "d. MMM", { locale: da })}
+                                </div>
+                              ))}
+                              {bookedPeriods.length > 3 && (
+                                <span className="text-xs text-muted-foreground">+{bookedPeriods.length - 3} mere</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Røde datoer i kalenderen kan ikke vælges.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Start Date */}
                     <div className="space-y-2">
                       <Label>Startdato *</Label>
@@ -679,12 +749,37 @@ const Booking = () => {
                             mode="single"
                             selected={startDate}
                             onSelect={setStartDate}
-                            disabled={(date) => date < new Date()}
+                            disabled={disabledMatcher}
+                            modifiers={{
+                              booked: bookedDates,
+                            }}
+                            modifiersStyles={{
+                              booked: { 
+                                backgroundColor: 'hsl(var(--destructive) / 0.2)', 
+                                color: 'hsl(var(--destructive))',
+                                fontWeight: 'bold',
+                              },
+                            }}
                             initialFocus
                           />
                         </PopoverContent>
                       </Popover>
                     </div>
+
+                    {/* Overlap warning */}
+                    {hasOverlap && startDate && endDate && (
+                      <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
+                          <div>
+                            <p className="font-medium text-destructive">Perioden er ikke ledig</p>
+                            <p className="text-sm text-destructive/80">
+                              Den valgte periode ({format(startDate, "d. MMM", { locale: da })} - {format(endDate, "d. MMM", { locale: da })}) overlapper med en eksisterende booking. Vælg venligst andre datoer.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {startDate && endDate && (
                       <div className="bg-muted/50 rounded-xl p-4 space-y-3">
