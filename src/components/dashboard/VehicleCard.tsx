@@ -12,9 +12,10 @@ interface VehicleCardProps {
   onToggleAvailability: (id: string, available: boolean) => void;
   onUpdate: (id: string, updates: Partial<Vehicle>) => Promise<boolean>;
   onDelete: (id: string) => void;
+  isFleetManaged?: boolean;
 }
 
-const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: VehicleCardProps) => {
+const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete, isFleetManaged = false }: VehicleCardProps) => {
   const navigate = useNavigate();
   const [images, setImages] = useState<string[]>([]);
 
@@ -151,24 +152,31 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
         </div>
 
         <div className="flex items-center gap-2 pt-3 border-t border-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-1 text-xs"
-            onClick={() => onToggleAvailability(vehicle.id, !vehicle.is_available)}
-          >
-            {vehicle.is_available ? (
-              <>
-                <ToggleRight className="w-4 h-4 mr-1 text-accent" />
-                Deaktiver
-              </>
-            ) : (
-              <>
-                <ToggleLeft className="w-4 h-4 mr-1" />
-                Aktiver
-              </>
-            )}
-          </Button>
+          {!isFleetManaged && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => onToggleAvailability(vehicle.id, !vehicle.is_available)}
+            >
+              {vehicle.is_available ? (
+                <>
+                  <ToggleRight className="w-4 h-4 mr-1 text-accent" />
+                  Deaktiver
+                </>
+              ) : (
+                <>
+                  <ToggleLeft className="w-4 h-4 mr-1" />
+                  Aktiver
+                </>
+              )}
+            </Button>
+          )}
+          {isFleetManaged && (
+            <span className="flex-1 text-xs text-muted-foreground text-center">
+              Administreres af Fleet
+            </span>
+          )}
           <Button 
             variant="ghost" 
             size="sm" 
@@ -177,14 +185,16 @@ const VehicleCard = ({ vehicle, onToggleAvailability, onUpdate, onDelete }: Vehi
           >
             <Pencil className="w-4 h-4" />
           </Button>
-          <Button
-            variant="ghost" 
-            size="sm" 
-            className="text-destructive text-xs" 
-            onClick={() => onDelete(vehicle.id)}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          {!isFleetManaged && (
+            <Button
+              variant="ghost" 
+              size="sm" 
+              className="text-destructive text-xs" 
+              onClick={() => onDelete(vehicle.id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
