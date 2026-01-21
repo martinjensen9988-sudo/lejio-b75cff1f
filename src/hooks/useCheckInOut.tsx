@@ -143,7 +143,10 @@ export const useCheckInOut = () => {
     expectedLatitude?: number;
     expectedLongitude?: number;
   }): Promise<CheckInOutRecord | null> => {
-    if (!user) return null;
+    if (!user) {
+      toast.error('Du skal være logget ind');
+      return null;
+    }
     setIsSubmitting(true);
 
     try {
@@ -158,12 +161,15 @@ export const useCheckInOut = () => {
         locationVerified = locationDistance <= 50; // 50km tolerance
       }
 
+      // Use the current authenticated user's ID as lessor_id if they own the booking
+      const effectiveLessorId = user.id;
+
       const { data, error } = await supabase
         .from('check_in_out_records')
         .insert({
           booking_id: params.bookingId,
           vehicle_id: params.vehicleId,
-          lessor_id: params.lessorId,
+          lessor_id: effectiveLessorId,
           renter_id: params.renterId || null,
           record_type: 'check_in',
           expected_plate: params.expectedPlate,
@@ -189,7 +195,7 @@ export const useCheckInOut = () => {
 
       if (error) {
         console.error('Error creating check-in:', error);
-        toast.error('Kunne ikke gemme check-in');
+        toast.error('Kunne ikke gemme check-in: ' + error.message);
         return null;
       }
 
@@ -231,7 +237,10 @@ export const useCheckInOut = () => {
     fuelPricePerLiter: number;
     fuelMissingFee: number;
   }): Promise<CheckInOutRecord | null> => {
-    if (!user) return null;
+    if (!user) {
+      toast.error('Du skal være logget ind');
+      return null;
+    }
     setIsSubmitting(true);
 
     try {
@@ -264,12 +273,15 @@ export const useCheckInOut = () => {
 
       const totalExtraCharges = kmOverageFee + fuelFee;
 
+      // Use the current authenticated user's ID as lessor_id if they own the booking
+      const effectiveLessorId = user.id;
+
       const { data, error } = await supabase
         .from('check_in_out_records')
         .insert({
           booking_id: params.bookingId,
           vehicle_id: params.vehicleId,
-          lessor_id: params.lessorId,
+          lessor_id: effectiveLessorId,
           renter_id: params.renterId || null,
           record_type: 'check_out',
           expected_plate: params.expectedPlate,
@@ -307,7 +319,7 @@ export const useCheckInOut = () => {
 
       if (error) {
         console.error('Error creating check-out:', error);
-        toast.error('Kunne ikke gemme check-out');
+        toast.error('Kunne ikke gemme check-out: ' + error.message);
         return null;
       }
 
