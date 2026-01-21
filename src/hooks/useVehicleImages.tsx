@@ -104,7 +104,12 @@ export const useVehicleImages = (vehicleId?: string) => {
       return publicUrl;
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Kunne ikke uploade billede');
+      const msg = typeof (error as any)?.message === 'string' ? (error as any).message : '';
+      if (msg.toLowerCase().includes('row violates row-level security')) {
+        toast.error('Du har ikke rettighed til at uploade billeder til dette køretøj');
+      } else {
+        toast.error('Kunne ikke uploade billede');
+      }
       return null;
     }
   };
