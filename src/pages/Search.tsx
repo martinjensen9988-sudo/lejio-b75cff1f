@@ -210,20 +210,24 @@ const Search = () => {
 
       // Fetch all vehicle images
       const vehicleIds = (data || []).map(v => v.id);
-      const { data: imagesData } = await supabase
-        .from('vehicle_images')
-        .select('vehicle_id, image_url')
-        .in('vehicle_id', vehicleIds)
-        .order('display_order', { ascending: true });
-
+      
       // Group images by vehicle_id
       const imagesByVehicle: Record<string, string[]> = {};
-      (imagesData || []).forEach((img: { vehicle_id: string; image_url: string }) => {
-        if (!imagesByVehicle[img.vehicle_id]) {
-          imagesByVehicle[img.vehicle_id] = [];
-        }
-        imagesByVehicle[img.vehicle_id].push(img.image_url);
-      });
+      
+      if (vehicleIds.length > 0) {
+        const { data: imagesData } = await supabase
+          .from('vehicle_images')
+          .select('vehicle_id, image_url')
+          .in('vehicle_id', vehicleIds)
+          .order('display_order', { ascending: true });
+        
+        (imagesData || []).forEach((img: { vehicle_id: string; image_url: string }) => {
+          if (!imagesByVehicle[img.vehicle_id]) {
+            imagesByVehicle[img.vehicle_id] = [];
+          }
+          imagesByVehicle[img.vehicle_id].push(img.image_url);
+        });
+      }
 
       const vehiclesWithLocations = (data || []).map((vehicle) => {
         let lat = vehicle.latitude || 55.6761;
