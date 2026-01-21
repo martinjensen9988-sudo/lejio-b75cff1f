@@ -51,7 +51,8 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { action, sessionId, sessionToken } = await req.json();
+    const body = await req.json();
+    const { action, sessionId, sessionToken, content } = body;
 
     // Validate sessionId format (UUID)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -176,8 +177,7 @@ serve(async (req) => {
       }
 
       if (action === "send_message") {
-        const body = await req.clone().json();
-        const { content } = body;
+        // content is already extracted from body at the top
 
         if (!content || typeof content !== "string" || content.length > 2000) {
           return new Response(
