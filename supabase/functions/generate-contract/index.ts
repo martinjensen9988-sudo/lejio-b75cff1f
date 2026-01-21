@@ -210,6 +210,10 @@ serve(async (req) => {
       fuel_missing_fee: lessorProfile?.fuel_missing_fee || 0,
       fuel_price_per_liter: lessorProfile?.fuel_price_per_liter || 0,
       
+      // Cleaning fees from vehicle
+      exterior_cleaning_fee: vehicle.exterior_cleaning_fee || 350,
+      interior_cleaning_fee: vehicle.interior_cleaning_fee || 500,
+      
       // Logo - use company logo for professionals, otherwise null (LEJIO logo in frontend)
       logo_url: lessorProfile?.user_type === 'professionel' && lessorProfile?.company_logo_url 
         ? lessorProfile.company_logo_url 

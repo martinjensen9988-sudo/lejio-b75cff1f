@@ -351,6 +351,39 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
           </section>
         )}
 
+        {/* Cleaning Fees */}
+        {((contract.exterior_cleaning_fee && contract.exterior_cleaning_fee > 0) || 
+          (contract.interior_cleaning_fee && contract.interior_cleaning_fee > 0)) && (
+          <section className="border-t border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                <Car className="w-4 h-4 text-cyan-600" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Rengøringsgebyrer</h2>
+            </div>
+            <div className="bg-cyan-50 rounded-xl p-5 border border-cyan-200">
+              <p className="text-sm text-gray-700 mb-4">
+                Køretøjet skal afleveres rent både udvendigt og indvendigt. Følgende gebyrer opkræves ved manglende rengøring:
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                {contract.exterior_cleaning_fee && contract.exterior_cleaning_fee > 0 && (
+                  <div className="bg-white rounded-lg p-4 border border-cyan-200">
+                    <p className="text-xs text-gray-500 mb-1">Udvendig rengøring</p>
+                    <p className="text-xl font-bold">{formatCurrency(contract.exterior_cleaning_fee)}</p>
+                  </div>
+                )}
+                {contract.interior_cleaning_fee && contract.interior_cleaning_fee > 0 && (
+                  <div className="bg-white rounded-lg p-4 border border-cyan-200">
+                    <p className="text-xs text-gray-500 mb-1">Indvendig rengøring</p>
+                    <p className="text-xl font-bold">{formatCurrency(contract.interior_cleaning_fee)}</p>
+                    <p className="text-xs text-gray-400">Maks. 1.500 kr</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Terms Section */}
         <section className="border-t border-gray-200 p-6 bg-gray-50/50">
           <div className="flex items-center gap-2 mb-4">
