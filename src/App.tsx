@@ -61,6 +61,7 @@ import MCMaintenancePage from "./pages/dashboard/MCMaintenance";
 import RevenueLossCalculatePage from "./pages/dashboard/RevenueLossCalculate";
 import VehicleSwapPage from "./pages/dashboard/VehicleSwap";
 import ServiceRemindersAddPage from "./pages/dashboard/ServiceRemindersAdd";
+import LocationsPage from "./pages/dashboard/Locations";
 import AddGeofencePage from "./pages/gps/AddGeofence";
 import AddGpsDevicePage from "./pages/gps/AddGpsDevice";
 import VehicleDetailPage from "./pages/search/VehicleDetail";
@@ -125,6 +126,7 @@ const App = () => (
             <Route path="/dashboard/calendar" element={<CalendarPage />} />
             <Route path="/dashboard/bookings" element={<BookingsPage />} />
             <Route path="/dashboard/bookings/create" element={<CreateBookingPage />} />
+            <Route path="/dashboard/locations" element={<LocationsPage />} />
             <Route path="/dashboard/invoices" element={<InvoicesPage />} />
             <Route path="/dashboard/fines" element={<FinesPage />} />
             <Route path="/dashboard/fines/add" element={<FinesAddPage />} />
