@@ -15,6 +15,7 @@ export interface Booking {
   renter_name: string | null;
   renter_email: string | null;
   renter_phone: string | null;
+  renter_license_number: string | null;
   notes: string | null;
   payment_method: string | null;
   payment_received: boolean;
