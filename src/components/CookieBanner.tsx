@@ -2,12 +2,13 @@ import { useState, useEffect, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Cookie } from "lucide-react";
 import { Link } from "react-router-dom";
+import { safeStorage } from "@/lib/safeStorage";
 
 const CookieBanner = forwardRef<HTMLDivElement>((props, ref) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem("cookie-consent");
+    const consent = safeStorage.getItem("cookie-consent");
     if (!consent) {
       // Small delay for better UX
       const timer = setTimeout(() => setIsVisible(true), 1000);
@@ -16,12 +17,12 @@ const CookieBanner = forwardRef<HTMLDivElement>((props, ref) => {
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem("cookie-consent", "accepted");
+    safeStorage.setItem("cookie-consent", "accepted");
     setIsVisible(false);
   };
 
   const handleDecline = () => {
-    localStorage.setItem("cookie-consent", "declined");
+    safeStorage.setItem("cookie-consent", "declined");
     setIsVisible(false);
   };
 

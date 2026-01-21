@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, X, Send, Loader2, Bot, User, Headphones } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { safeStorage } from '@/lib/safeStorage';
 
 interface Message {
   id: string;
@@ -86,8 +87,8 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
 
   const loadOrCreateSession = async () => {
     try {
-      const storedSessionId = localStorage.getItem('lejio_chat_session');
-      const storedSessionToken = localStorage.getItem('lejio_chat_token');
+      const storedSessionId = safeStorage.getItem('lejio_chat_session');
+      const storedSessionToken = safeStorage.getItem('lejio_chat_token');
       
       // Validate UUID format
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -107,8 +108,8 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
       
       // If session not found, invalid, or error, clear old session data
       if (storedSessionId) {
-        localStorage.removeItem('lejio_chat_session');
-        localStorage.removeItem('lejio_chat_token');
+        safeStorage.removeItem('lejio_chat_session');
+        safeStorage.removeItem('lejio_chat_token');
       }
 
       // Create new session via secure Edge Function
@@ -122,8 +123,8 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
       }
 
       // Store session ID and token securely
-      localStorage.setItem('lejio_chat_session', data.session.id);
-      localStorage.setItem('lejio_chat_token', data.token);
+      safeStorage.setItem('lejio_chat_session', data.session.id);
+      safeStorage.setItem('lejio_chat_token', data.token);
       setSession(data.session as ChatSession);
       
       // Add welcome message
@@ -140,7 +141,7 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
   };
 
   const loadMessages = async (sessionId: string, sessionToken?: string) => {
-    const token = sessionToken || localStorage.getItem('lejio_chat_token');
+    const token = sessionToken || safeStorage.getItem('lejio_chat_token');
     if (!token) return;
 
     // Use secure Edge Function for message access
