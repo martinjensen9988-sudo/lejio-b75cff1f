@@ -314,7 +314,11 @@ const Booking = () => {
           return true;
         }
         if (!driverLicense) {
-          toast({ title: "Upload dit kørekort", variant: "destructive" });
+          toast({ title: "Upload dit kørekort (forside)", variant: "destructive" });
+          return false;
+        }
+        if (!driverLicenseBack) {
+          toast({ title: "Upload dit kørekort (bagside)", variant: "destructive" });
           return false;
         }
         return true;
@@ -1065,9 +1069,9 @@ const Booking = () => {
                             </div>
                           </div>
 
-                          {/* Driver License Back */}
+                          {/* Driver License Back - Required */}
                           <div className="space-y-2">
-                            <Label>Kørekort bagside (valgfri)</Label>
+                            <Label>Kørekort bagside *</Label>
                             <div
                               className={cn(
                                 "border-2 border-dashed rounded-xl p-6 text-center transition-colors",
