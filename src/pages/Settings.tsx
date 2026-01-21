@@ -167,32 +167,62 @@ const Settings = () => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: 'Ugyldig filtype',
+        description: 'Upload venligst et billede (JPG, PNG, GIF eller WebP)',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'Fil for stor',
+        description: 'Logo må max være 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setUploadingLogo(true);
     try {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `${user.id}/company-logo.${fileExt}`;
 
-      // Upload to avatars bucket (reusing existing public bucket)
+      // Upload to avatars bucket with explicit content type
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { 
+          upsert: true,
+          contentType: file.type,
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error details:', uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
 
-      setFormData(p => ({ ...p, company_logo_url: publicUrl }));
+      // Add cache-busting timestamp
+      const urlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
+      
+      setFormData(p => ({ ...p, company_logo_url: urlWithTimestamp }));
       toast({
         title: 'Logo uploadet',
         description: 'Dit virksomhedslogo er blevet uploadet',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading logo:', error);
       toast({
-        title: 'Fejl',
-        description: 'Kunne ikke uploade logo',
+        title: 'Fejl ved upload',
+        description: error?.message || 'Kunne ikke uploade logo. Prøv igen.',
         variant: 'destructive',
       });
     } finally {

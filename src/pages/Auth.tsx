@@ -292,6 +292,7 @@ const Auth = () => {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -456,6 +457,7 @@ const Auth = () => {
                     <Input
                       id="signup-password"
                       type="password"
+                      autoComplete="new-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Mindst 8 tegn"
@@ -473,6 +475,7 @@ const Auth = () => {
                     <Input
                       id="confirm-password"
                       type="password"
+                      autoComplete="new-password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Gentag adgangskode"
