@@ -62,18 +62,32 @@ const ContractSigningModal = ({ contract, open, onOpenChange, onSign }: Contract
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col bg-card p-0 overflow-hidden">
-        <DialogHeader className="p-6 pb-0 shrink-0">
+      <DialogContent 
+        className="max-w-4xl h-[90vh] flex flex-col bg-card p-0 overflow-hidden"
+        style={{
+          // Safari-specific fixes for modal rendering
+          WebkitBackfaceVisibility: 'hidden',
+          WebkitTransform: 'translateZ(0)',
+          transform: 'translateZ(0)',
+        }}
+      >
+        <DialogHeader className="p-6 pb-0 shrink-0 bg-card">
           <DialogTitle className="font-display text-2xl flex items-center gap-2 text-foreground">
             <FileCheck className="w-6 h-6 text-primary" />
             {alreadySigned ? 'Kontrakt allerede underskrevet' : 'Underskriv kontrakt'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-6 pt-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div 
+          className="flex-1 overflow-y-auto p-6 pt-4 bg-card" 
+          style={{ 
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+          }}
+        >
           <div className="space-y-6">
             {/* Contract Preview */}
-            <div className="border border-border rounded-xl overflow-hidden">
+            <div className="border border-border rounded-xl overflow-hidden bg-white">
               <ContractPreview contract={contract} />
             </div>
 
