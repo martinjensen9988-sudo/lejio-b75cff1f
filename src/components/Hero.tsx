@@ -54,15 +54,15 @@ const Hero = () => {
               <span>Find biler, MC, campingvogne & trailere</span>
             </div>
 
-            {/* Bold headline - Lejer fokuseret */}
-            <h1 className="font-display text-5xl sm:text-7xl lg:text-[5.5rem] font-black leading-[0.9] mb-6 animate-slide-up">
+            {/* Bold headline - Lejer fokuseret - No animation delay for LCP */}
+            <h1 className="font-display text-5xl sm:text-7xl lg:text-[5.5rem] font-black leading-[0.9] mb-6">
               <span className="block text-foreground">LEJ DIT NÆSTE</span>
               <span className="block bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent py-2">
                 EVENTYR
               </span>
             </h1>
 
-            <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 animate-slide-up font-medium" style={{ animationDelay: '0.1s' }}>
+            <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 font-medium">
               Den nye, intelligente vej til leje af biler, trailere og campingvogne. Book hurtigt, få skarpe priser og kom afsted med det samme.
             </p>
 
