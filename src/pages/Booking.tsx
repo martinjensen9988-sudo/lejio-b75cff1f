@@ -386,7 +386,8 @@ const Booking = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(3) || !vehicle || !startDate || !endDate || !pricing) return;
+    // Validate all steps before submitting
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !vehicle || !startDate || !endDate || !pricing) return;
 
     setSubmitting(true);
 
