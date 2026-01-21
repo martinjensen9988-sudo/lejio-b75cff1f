@@ -49,6 +49,13 @@ export const useVehicleImages = (vehicleId?: string) => {
   const uploadImage = async (file: File): Promise<string | null> => {
     if (!vehicleId) return null;
 
+    // Require authentication (Storage write policies are authenticated)
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      toast.error('Du skal være logget ind for at uploade billeder');
+      return null;
+    }
+
     if (!file.type.startsWith('image/')) {
       toast.error('Kun billedfiler er tilladt');
       return null;
@@ -104,6 +111,13 @@ export const useVehicleImages = (vehicleId?: string) => {
 
   const deleteImage = async (imageId: string) => {
     try {
+      // Require authentication (Storage delete policies are authenticated)
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        toast.error('Du skal være logget ind for at slette billeder');
+        return false;
+      }
+
       const image = images.find(img => img.id === imageId);
       if (!image) return false;
 
