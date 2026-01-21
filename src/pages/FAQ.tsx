@@ -503,7 +503,7 @@ const FAQ = () => {
       questions: [
         {
           q: "Hvordan kontakter jeg support?",
-          a: "Brug Live Chat i appen for hurtig hjælp. Du kan også sende email til support@lejio.dk eller ringe på hverdage 9-17."
+          a: "Brug Live Chat i appen for hurtig hjælp. Du kan også ringe til os på 91 99 89 29 eller sende email til support@lejio.dk på hverdage 9-17."
         },
         {
           q: "Er der videoguides?",
