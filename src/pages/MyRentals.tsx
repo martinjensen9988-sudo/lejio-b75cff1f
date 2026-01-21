@@ -30,6 +30,8 @@ import {
   Download,
   CreditCard,
   Navigation2,
+  Receipt,
+  Files,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -60,6 +62,32 @@ interface RentalBooking {
   };
 }
 
+interface RenterInvoice {
+  id: string;
+  invoice_number: string;
+  booking_id: string;
+  lessor_id: string;
+  subtotal: number;
+  vat_amount: number;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  pdf_url: string | null;
+  booking?: {
+    start_date: string;
+    end_date: string;
+    vehicle?: {
+      make: string;
+      model: string;
+      registration: string;
+    };
+  };
+  lessor?: {
+    full_name: string | null;
+    company_name: string | null;
+  };
+}
+
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ComponentType<{ className?: string }> }> = {
   pending: { label: "Afventer bekræftelse", variant: "outline", icon: Clock },
   confirmed: { label: "Bekræftet", variant: "default", icon: CheckCircle },
@@ -75,6 +103,7 @@ const MyRentals = () => {
   const { contracts, signContract, downloadContractPdf, refetch: refetchContracts } = useContracts();
   const { redirectToPayment, isProcessing: isPaymentProcessing } = usePayments();
   const [bookings, setBookings] = useState<RentalBooking[]>([]);
+  const [invoices, setInvoices] = useState<RenterInvoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [signingModalOpen, setSigningModalOpen] = useState(false);
@@ -119,6 +148,38 @@ const MyRentals = () => {
 
     fetchBookings();
   }, [user]);
+
+  // Fetch renter's invoices
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      if (!user || !bookings.length) return;
+
+      try {
+        // Get all booking IDs for this renter
+        const bookingIds = bookings.map(b => b.id);
+        
+        const { data, error } = await supabase
+          .from("invoices")
+          .select(`
+            *,
+            booking:bookings(
+              start_date,
+              end_date,
+              vehicle:vehicles(make, model, registration)
+            )
+          `)
+          .in("booking_id", bookingIds)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setInvoices((data as any) || []);
+      } catch (error) {
+        console.error("Error fetching invoices:", error);
+      }
+    };
+
+    fetchInvoices();
+  }, [user, bookings]);
 
   // Open contract from URL param
   useEffect(() => {
@@ -265,7 +326,7 @@ const MyRentals = () => {
           </Card>
 
           <Tabs defaultValue="active" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-md h-12 p-1 bg-muted/50">
+            <TabsList className="grid w-full grid-cols-3 max-w-lg h-12 p-1 bg-muted/50">
               <TabsTrigger value="active" className="gap-2 font-bold data-[state=active]:shadow-lg">
                 <Car className="w-4 h-4" />
                 Aktive ({activeBookings.length})
@@ -273,6 +334,10 @@ const MyRentals = () => {
               <TabsTrigger value="history" className="gap-2 font-bold data-[state=active]:shadow-lg">
                 <Clock className="w-4 h-4" />
                 Historik ({pastBookings.length})
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="gap-2 font-bold data-[state=active]:shadow-lg">
+                <Files className="w-4 h-4" />
+                Dokumenter ({invoices.length + contracts.length})
               </TabsTrigger>
             </TabsList>
 
@@ -531,6 +596,161 @@ const MyRentals = () => {
                   );
                 })
               )}
+            </TabsContent>
+
+            {/* Documents Tab */}
+            <TabsContent value="documents" className="space-y-6">
+              {/* Invoices Section */}
+              <div className="space-y-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-primary" />
+                  Fakturaer ({invoices.length})
+                </h3>
+                {invoices.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center">
+                      <Receipt className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                      <h4 className="font-medium mb-1">Ingen fakturaer endnu</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Dine fakturaer vil blive vist her når de er oprettet
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  invoices.map((invoice) => (
+                    <Card key={invoice.id}>
+                      <CardContent className="p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">Faktura #{invoice.invoice_number}</span>
+                              <Badge variant={invoice.status === 'paid' ? 'default' : 'outline'}>
+                                {invoice.status === 'paid' ? 'Betalt' : invoice.status === 'sent' ? 'Sendt' : 'Kladde'}
+                              </Badge>
+                            </div>
+                            {invoice.booking?.vehicle && (
+                              <p className="text-sm text-muted-foreground">
+                                {invoice.booking.vehicle.make} {invoice.booking.vehicle.model} ({invoice.booking.vehicle.registration})
+                              </p>
+                            )}
+                            {invoice.booking && (
+                              <p className="text-sm text-muted-foreground">
+                                {format(new Date(invoice.booking.start_date), "d. MMM", { locale: da })} - {format(new Date(invoice.booking.end_date), "d. MMM yyyy", { locale: da })}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              Oprettet: {format(new Date(invoice.created_at), "d. MMM yyyy", { locale: da })}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="font-bold text-lg text-primary">
+                                {invoice.total_amount.toLocaleString('da-DK')} kr
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                heraf moms: {invoice.vat_amount.toLocaleString('da-DK')} kr
+                              </p>
+                            </div>
+                            {invoice.pdf_url && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-1"
+                                onClick={() => window.open(invoice.pdf_url!, '_blank')}
+                              >
+                                <Download className="w-4 h-4" />
+                                PDF
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+
+              {/* Contracts Section */}
+              <div className="space-y-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Kontrakter ({contracts.length})
+                </h3>
+                {contracts.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center">
+                      <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                      <h4 className="font-medium mb-1">Ingen kontrakter endnu</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Dine lejekontrakter vil blive vist her
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  contracts.map((contract) => (
+                    <Card key={contract.id}>
+                      <CardContent className="p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">Kontrakt #{contract.contract_number}</span>
+                              <Badge variant={contract.renter_signature && contract.lessor_signature ? 'default' : 'outline'}>
+                                {contract.renter_signature && contract.lessor_signature 
+                                  ? 'Underskrevet' 
+                                  : contract.renter_signature 
+                                    ? 'Afventer udlejer' 
+                                    : 'Afventer underskrift'}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {contract.vehicle_make} {contract.vehicle_model} ({contract.vehicle_registration})
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(contract.start_date), "d. MMM", { locale: da })} - {format(new Date(contract.end_date), "d. MMM yyyy", { locale: da })}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-right mr-2">
+                              <p className="font-bold text-lg text-primary">
+                                {contract.total_price.toLocaleString('da-DK')} kr
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant={contract.renter_signature ? "outline" : "default"}
+                              className="gap-1"
+                              onClick={() => handleViewContract(contract)}
+                            >
+                              {contract.renter_signature ? (
+                                <>
+                                  <FileCheck className="w-4 h-4" />
+                                  Se
+                                </>
+                              ) : (
+                                <>
+                                  <FileText className="w-4 h-4" />
+                                  Underskriv
+                                </>
+                              )}
+                            </Button>
+                            {contract.pdf_url && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-1"
+                                onClick={() => downloadContractPdf(contract)}
+                              >
+                                <Download className="w-4 h-4" />
+                                PDF
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </div>
