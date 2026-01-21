@@ -165,7 +165,13 @@ export const AdminDashboardLayout = ({ children, activeTab }: AdminDashboardLayo
         <main className="flex-1 container mx-auto px-4 py-6 relative z-10">
           {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <Card className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-primary/30 transition-all">
+            <Card 
+              className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-primary/30 transition-all cursor-pointer hover:scale-[1.02]"
+              onClick={() => navigate('/admin/users')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('/admin/users')}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                   <Users className="w-6 h-6 text-white" />
@@ -176,7 +182,13 @@ export const AdminDashboardLayout = ({ children, activeTab }: AdminDashboardLayo
                 </div>
               </div>
             </Card>
-            <Card className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-accent/30 transition-all">
+            <Card 
+              className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-accent/30 transition-all cursor-pointer hover:scale-[1.02]"
+              onClick={() => navigate('/admin/users')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('/admin/users')}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
                   <CheckCircle className="w-6 h-6 text-white" />
@@ -187,7 +199,13 @@ export const AdminDashboardLayout = ({ children, activeTab }: AdminDashboardLayo
                 </div>
               </div>
             </Card>
-            <Card className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-mint/30 transition-all">
+            <Card 
+              className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-mint/30 transition-all cursor-pointer hover:scale-[1.02]"
+              onClick={() => navigate('/admin/users')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('/admin/users')}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-mint to-mint/60 flex items-center justify-center">
                   <Clock className="w-6 h-6 text-white" />
@@ -198,7 +216,13 @@ export const AdminDashboardLayout = ({ children, activeTab }: AdminDashboardLayo
                 </div>
               </div>
             </Card>
-            <Card className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-lavender/30 transition-all">
+            <Card 
+              className="p-4 bg-card/50 backdrop-blur-sm border-2 border-border/50 hover:border-lavender/30 transition-all cursor-pointer hover:scale-[1.02]"
+              onClick={() => navigate('/admin/bookings')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('/admin/bookings')}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lavender to-lavender/60 flex items-center justify-center">
                   <Calendar className="w-6 h-6 text-white" />
