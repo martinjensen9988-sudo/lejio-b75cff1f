@@ -134,11 +134,31 @@ export const useVehicleImages = (vehicleId?: string) => {
         .from('vehicle-images')
         .upload(fileName, file, { upsert: true, contentType: file.type });
 
+      if (!uploadError) {
+        console.log('[vehicle-images] storage upload ok (default client)', { fileName });
+      } else {
+        console.warn('[vehicle-images] storage upload failed (default client)', {
+          fileName,
+          message: (uploadError as any)?.message,
+          error: uploadError,
+        });
+      }
+
       // If the default client somehow uploads as anon, retry with forced Authorization
       if (uploadError) {
         const { error: retryError } = await authed.storage
           .from('vehicle-images')
           .upload(fileName, file, { upsert: true, contentType: file.type });
+
+        if (!retryError) {
+          console.log('[vehicle-images] storage upload ok (forced auth retry)', { fileName });
+        } else {
+          console.warn('[vehicle-images] storage upload failed (forced auth retry)', {
+            fileName,
+            message: (retryError as any)?.message,
+            error: retryError,
+          });
+        }
 
         if (retryError) throw retryError;
       }
@@ -164,6 +184,8 @@ export const useVehicleImages = (vehicleId?: string) => {
         .single();
 
       if (error) throw error;
+
+      console.log('[vehicle-images] db insert ok', { vehicleId, publicUrl, imageId: (data as any)?.id });
 
       setImages(prev => [...prev, data as VehicleImage]);
       toast.success('Billede uploadet!');
