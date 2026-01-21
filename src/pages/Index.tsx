@@ -7,7 +7,6 @@ import HowItWorks from "@/components/HowItWorks";
 import LeaderSection from "@/components/LeaderSection";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
-import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
 import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
@@ -45,7 +44,6 @@ const Index = () => {
       </main>
       <Footer />
       <CookieBanner />
-      <LiveChatWidget />
     </div>
   );
 };
