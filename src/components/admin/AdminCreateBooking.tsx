@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Calendar, Car, User } from 'lucide-react';
+import { Loader2, Calendar, Car, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,6 +47,8 @@ const AdminCreateBooking = ({ open, onClose, onSuccess }: AdminCreateBookingProp
     renter_email: '',
     renter_phone: '',
     total_price: '',
+    pickup_time: '10:00',
+    dropoff_time: '08:00',
   });
 
   useEffect(() => {
@@ -96,7 +98,9 @@ const AdminCreateBooking = ({ open, onClose, onSuccess }: AdminCreateBookingProp
       renter_phone: formData.renter_phone || null,
       total_price: parseFloat(formData.total_price) || 0,
       status: 'pending',
-    });
+      pickup_time: formData.pickup_time,
+      dropoff_time: formData.dropoff_time,
+    } as any);
 
     if (error) {
       console.error('Error creating booking:', error);
@@ -114,6 +118,8 @@ const AdminCreateBooking = ({ open, onClose, onSuccess }: AdminCreateBookingProp
       renter_email: '',
       renter_phone: '',
       total_price: '',
+      pickup_time: '10:00',
+      dropoff_time: '08:00',
     });
     onSuccess();
   };
@@ -173,6 +179,31 @@ const AdminCreateBooking = ({ open, onClose, onSuccess }: AdminCreateBookingProp
                   value={formData.end_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
                   required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Afhentning kl.
+                </Label>
+                <Input
+                  type="time"
+                  value={formData.pickup_time}
+                  onChange={(e) => setFormData(prev => ({ ...prev, pickup_time: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Aflevering senest kl.
+                </Label>
+                <Input
+                  type="time"
+                  value={formData.dropoff_time}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dropoff_time: e.target.value }))}
                 />
               </div>
             </div>

@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Calendar } from 'lucide-react';
+import { Loader2, ArrowLeft, Calendar, Clock } from 'lucide-react';
 
 interface Vehicle {
   id: string;
@@ -34,6 +34,8 @@ const BookingsAddPage = () => {
     renter_email: '',
     renter_phone: '',
     total_price: '',
+    pickup_time: '10:00',
+    dropoff_time: '08:00',
   });
 
   useEffect(() => {
@@ -79,7 +81,9 @@ const BookingsAddPage = () => {
       renter_phone: formData.renter_phone || null,
       total_price: parseFloat(formData.total_price) || 0,
       status: 'pending',
-    });
+      pickup_time: formData.pickup_time,
+      dropoff_time: formData.dropoff_time,
+    } as any);
 
     if (error) {
       console.error('Error creating booking:', error);
