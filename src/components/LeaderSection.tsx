@@ -1,4 +1,4 @@
-import rasmusImage from '@/assets/rasmus-damsgaard.jpg';
+import rasmusImage from '@/assets/rasmus-damsgaard-small.jpg';
 
 const LeaderSection = () => {
   return (
