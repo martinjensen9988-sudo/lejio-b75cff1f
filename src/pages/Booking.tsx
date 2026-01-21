@@ -301,7 +301,7 @@ const Booking = () => {
       prepaidRent,
       deductibleInsurance: deductibleInsurancePrice,
       referralDiscount: referralCredit,
-      grandTotal: Math.max(0, unitPrice + deposit + prepaidRent + deductibleInsurancePrice - referralCredit),
+      grandTotal: Math.max(0, rentalTotal + deposit + prepaidRent + deductibleInsurancePrice - referralCredit),
       periodCount,
       periodType,
     };
