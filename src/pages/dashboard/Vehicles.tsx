@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useVehicles } from '@/hooks/useVehicles';
@@ -7,11 +7,27 @@ import { Skeleton } from '@/components/ui/skeleton';
 import VehicleCard from '@/components/dashboard/VehicleCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Car, Loader2, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const VehiclesPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { vehicles, isLoading: vehiclesLoading, updateVehicle, deleteVehicle } = useVehicles();
+  const [isFleetManaged, setIsFleetManaged] = useState(false);
+
+  // Check if current user has a fleet plan
+  useEffect(() => {
+    const checkFleetPlan = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('fleet_plan')
+        .eq('id', user.id)
+        .single();
+      setIsFleetManaged(!!data?.fleet_plan);
+    };
+    checkFleetPlan();
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -75,6 +91,7 @@ const VehiclesPage = () => {
                 onToggleAvailability={handleToggleAvailability}
                 onUpdate={updateVehicle}
                 onDelete={deleteVehicle}
+                isFleetManaged={isFleetManaged}
               />
             ))}
           </div>
