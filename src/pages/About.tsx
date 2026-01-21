@@ -3,7 +3,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Car, Caravan, Truck, Scan, FileCheck, Shield, Wrench, RefreshCw, Leaf, Star, CreditCard, Zap } from 'lucide-react';
-import rasmusImage from '@/assets/rasmus-damsgaard.jpg';
+import rasmusImage from '@/assets/rasmus-damsgaard-small.jpg';
 
 const About = () => {
   const navigate = useNavigate();
