@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, startOfMonth, subMonths } from 'date-fns';
@@ -46,7 +47,7 @@ import {
 import { 
   Truck, Search, MoreHorizontal, Plus, 
   Loader2, CheckCircle, DollarSign, TrendingUp,
-  Building2, Calendar, Car, UserPlus, Trash2
+  Building2, Calendar, Car, UserPlus, Trash2, Pencil
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -107,6 +108,7 @@ const FLEET_PLAN_LABELS: Record<string, string> = {
 };
 
 const AdminFleetManagement = () => {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState<FleetCustomer[]>([]);
   const [settlements, setSettlements] = useState<FleetSettlement[]>([]);
   const [vehicles, setVehicles] = useState<FleetVehicle[]>([]);
@@ -742,6 +744,14 @@ const AdminFleetManagement = () => {
                       <TableCell>{vehicle.monthly_price?.toLocaleString('da-DK') || '-'} kr</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => navigate(`/dashboard/vehicles/edit/${vehicle.id}`)}
+                          >
+                            <Pencil className="w-4 h-4 mr-1" />
+                            Rediger
+                          </Button>
                           <Button 
                             size="sm" 
                             onClick={() => openFleetBookingDialog(vehicle)}
