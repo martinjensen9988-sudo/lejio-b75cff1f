@@ -95,15 +95,27 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
             </div>
             <div className="space-y-2 text-sm">
               <InfoRow label="Navn" value={contract.renter_name} />
+              {contract.renter_birth_date && (
+                <InfoRow label="Fødselsdato" value={formatDate(contract.renter_birth_date)} />
+              )}
               <InfoRow label="Email" value={contract.renter_email || 'Afventer'} />
               {contract.renter_phone && (
                 <InfoRow label="Telefon" value={contract.renter_phone} />
               )}
-              {contract.renter_address && (
-                <InfoRow label="Adresse" value={contract.renter_address} />
+              {(contract.renter_address || (contract.renter_street_address && contract.renter_postal_code && contract.renter_city)) && (
+                <InfoRow 
+                  label="Adresse" 
+                  value={contract.renter_address || `${contract.renter_street_address}, ${contract.renter_postal_code} ${contract.renter_city}`} 
+                />
               )}
               {contract.renter_license_number && (
                 <InfoRow label="Kørekort nr." value={contract.renter_license_number} mono highlight />
+              )}
+              {contract.renter_license_country && (
+                <InfoRow label="Kørekort land" value={contract.renter_license_country} />
+              )}
+              {contract.renter_license_issue_date && (
+                <InfoRow label="Kørekort udstedt" value={formatDate(contract.renter_license_issue_date)} />
               )}
             </div>
           </section>
@@ -181,15 +193,34 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="divide-y divide-gray-100">
                   <PriceRow label="Dagspris" value={formatCurrency(contract.daily_price)} sublabel="inkl. moms" />
-                  <PriceRow label={`Inkluderet km/dag`} value={`${contract.included_km} km`} />
-                  <PriceRow label="Pris pr. overkørt km" value={`${contract.extra_km_price} kr`} />
+                  <PriceRow label={`Inkluderet km/dag`} value={contract.included_km === 0 ? 'Ubegrænset' : `${contract.included_km} km`} />
+                  {contract.included_km > 0 && (
+                    <PriceRow label="Pris pr. overkørt km" value={`${contract.extra_km_price} kr`} />
+                  )}
+                  {contract.deductible_insurance_selected && contract.deductible_insurance_price && contract.deductible_insurance_price > 0 && (
+                    <PriceRow label="Nul-selvrisiko forsikring" value={formatCurrency(contract.deductible_insurance_price)} sublabel="tilkøbt" />
+                  )}
                   {contract.deposit_amount && contract.deposit_amount > 0 && (
-                    <PriceRow label="Depositum" value={formatCurrency(contract.deposit_amount)} />
+                    <PriceRow label="Depositum" value={formatCurrency(contract.deposit_amount)} sublabel="refunderes ved aflevering" />
                   )}
                 </div>
-                <div className="bg-primary/5 p-4 flex justify-between items-center">
-                  <span className="font-semibold text-gray-900">Total pris</span>
-                  <span className="text-2xl font-bold text-primary">{formatCurrency(contract.total_price)}</span>
+                <div className="bg-primary/5 p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">Lejepris</span>
+                    <span className="font-medium">{formatCurrency(contract.total_price)}</span>
+                  </div>
+                  {contract.deposit_amount && contract.deposit_amount > 0 && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">+ Depositum</span>
+                      <span className="font-medium">{formatCurrency(contract.deposit_amount)}</span>
+                    </div>
+                  )}
+                  <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between items-center">
+                    <span className="font-semibold text-gray-900">Total at betale</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {formatCurrency((contract.total_price || 0) + (contract.deposit_amount || 0))}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

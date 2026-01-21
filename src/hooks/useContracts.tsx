@@ -34,10 +34,18 @@ export interface Contract {
   renter_email: string;
   renter_phone: string | null;
   renter_address: string | null;
+  renter_street_address: string | null;
+  renter_postal_code: string | null;
+  renter_city: string | null;
   renter_license_number: string | null;
+  renter_license_country: string | null;
+  renter_license_issue_date: string | null;
+  renter_birth_date: string | null;
   insurance_company: string | null;
   insurance_policy_number: string | null;
   deductible_amount: number | null;
+  deductible_insurance_selected: boolean;
+  deductible_insurance_price: number | null;
   vanvidskørsel_accepted: boolean;
   vanvidskørsel_liability_amount: number | null;
   lessor_signature: string | null;
