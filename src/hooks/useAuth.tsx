@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { safeStorage } from '@/lib/safeStorage';
 
 interface Profile {
   id: string;
@@ -161,7 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Sign out error:', error);
       // If signOut fails, manually clear localStorage to prevent auto-login
-      localStorage.removeItem('sb-aqzggwewjttbkaqnbmrb-auth-token');
+      safeStorage.removeItem('sb-aqzggwewjttbkaqnbmrb-auth-token');
     }
   };
 
