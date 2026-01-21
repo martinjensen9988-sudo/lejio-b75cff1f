@@ -3,8 +3,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
+
+// Component to conditionally render LiveChatWidget (hide on admin pages)
+const ConditionalLiveChat = () => {
+  const location = useLocation();
+  // Hide chat on admin pages
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+  return <LiveChatWidget />;
+};
 
 // Critical path - loaded immediately for homepage
 import Index from "./pages/Index";
@@ -241,6 +252,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <ConditionalLiveChat />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
