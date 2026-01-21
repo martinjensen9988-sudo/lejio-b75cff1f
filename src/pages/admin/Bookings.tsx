@@ -359,64 +359,72 @@ const AdminBookingsPage = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {bookings.map((booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium text-sm">
-                                {booking.vehicle?.make} {booking.vehicle?.model}
-                              </p>
-                              <p className="text-xs text-muted-foreground">{booking.vehicle?.registration}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="text-sm">{booking.lessor?.full_name || 'Ukendt'}</p>
-                              <p className="text-xs text-muted-foreground">{booking.lessor?.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium text-sm">{booking.renter_name || 'Ukendt'}</p>
-                              <p className="text-xs text-muted-foreground">{booking.renter_email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {format(new Date(booking.start_date), 'd. MMM', { locale: da })} - {format(new Date(booking.end_date), 'd. MMM', { locale: da })}
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(booking.status)}
-                          </TableCell>
-                          <TableCell>{booking.total_price.toLocaleString('da-DK')} kr</TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => openEditBooking(booking)}>
-                                  <Pencil className="w-4 h-4 mr-2" />
-                                  Rediger booking
-                                </DropdownMenuItem>
-                                {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                      onClick={() => openCancelBooking(booking)}
-                                      className="text-destructive"
-                                    >
-                                      <XCircle className="w-4 h-4 mr-2" />
-                                      Annuller booking
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                      {bookings.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                            Ingen bookinger fundet (eller du mangler adgang).
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        bookings.map((booking) => (
+                          <TableRow key={booking.id}>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium text-sm">
+                                  {booking.vehicle?.make} {booking.vehicle?.model}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{booking.vehicle?.registration}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="text-sm">{booking.lessor?.full_name || 'Ukendt'}</p>
+                                <p className="text-xs text-muted-foreground">{booking.lessor?.email}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium text-sm">{booking.renter_name || 'Ukendt'}</p>
+                                <p className="text-xs text-muted-foreground">{booking.renter_email}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {format(new Date(booking.start_date), 'd. MMM', { locale: da })} - {format(new Date(booking.end_date), 'd. MMM', { locale: da })}
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(booking.status)}
+                            </TableCell>
+                            <TableCell>{booking.total_price.toLocaleString('da-DK')} kr</TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => openEditBooking(booking)}>
+                                    <Pencil className="w-4 h-4 mr-2" />
+                                    Rediger booking
+                                  </DropdownMenuItem>
+                                  {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem 
+                                        onClick={() => openCancelBooking(booking)}
+                                        className="text-destructive"
+                                      >
+                                        <XCircle className="w-4 h-4 mr-2" />
+                                        Annuller booking
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 )}
@@ -445,40 +453,48 @@ const AdminBookingsPage = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {vehicles.map((vehicle) => (
-                      <TableRow key={vehicle.id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium text-sm">{vehicle.make} {vehicle.model}</p>
-                            <p className="text-xs text-muted-foreground">{vehicle.registration} • {vehicle.year}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="text-sm">{vehicle.owner?.full_name || vehicle.owner?.company_name || 'Ukendt'}</p>
-                            <p className="text-xs text-muted-foreground">{vehicle.owner?.email}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {vehicle.daily_price ? `${vehicle.daily_price.toLocaleString('da-DK')} kr` : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={vehicle.is_available ? 'default' : 'secondary'}>
-                            {vehicle.is_available ? 'Tilgængelig' : 'Ikke tilgængelig'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => openDeleteVehicle(vehicle)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                    {vehicles.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                          Ingen køretøjer fundet (eller du mangler adgang).
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      vehicles.map((vehicle) => (
+                        <TableRow key={vehicle.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium text-sm">{vehicle.make} {vehicle.model}</p>
+                              <p className="text-xs text-muted-foreground">{vehicle.registration} • {vehicle.year}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="text-sm">{vehicle.owner?.full_name || vehicle.owner?.company_name || 'Ukendt'}</p>
+                              <p className="text-xs text-muted-foreground">{vehicle.owner?.email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {vehicle.daily_price ? `${vehicle.daily_price.toLocaleString('da-DK')} kr` : '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={vehicle.is_available ? 'default' : 'secondary'}>
+                              {vehicle.is_available ? 'Tilgængelig' : 'Ikke tilgængelig'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => openDeleteVehicle(vehicle)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
