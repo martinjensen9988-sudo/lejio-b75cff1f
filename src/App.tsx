@@ -64,6 +64,9 @@ import ServiceRemindersAddPage from "./pages/dashboard/ServiceRemindersAdd";
 import LocationsPage from "./pages/dashboard/Locations";
 import LocationAddPage from "./pages/dashboard/LocationAdd";
 import LocationEditPage from "./pages/dashboard/LocationEdit";
+import SettlementPage from "./pages/dashboard/Settlement";
+import CheckInOutPage from "./pages/dashboard/CheckInOut";
+import ScanHistoryPage from "./pages/dashboard/ScanHistory";
 import AddGeofencePage from "./pages/gps/AddGeofence";
 import AddGpsDevicePage from "./pages/gps/AddGpsDevice";
 import VehicleDetailPage from "./pages/search/VehicleDetail";
@@ -151,6 +154,10 @@ const App = () => (
             <Route path="/dashboard/damage-report/:bookingId" element={<DamageReportPage />} />
             <Route path="/dashboard/rate-lessor/:bookingId" element={<RateLessorPage />} />
             <Route path="/dashboard/rate-renter/:bookingId" element={<RateRenterPage />} />
+            <Route path="/dashboard/settlement/:bookingId" element={<SettlementPage />} />
+            <Route path="/dashboard/checkinout/:bookingId" element={<CheckInOutPage />} />
+            <Route path="/dashboard/scan-history/:bookingId" element={<ScanHistoryPage />} />
+            <Route path="/dashboard/vehicle-swap/:bookingId" element={<VehicleSwapPage />} />
             <Route path="/dashboard/warnings" element={<WarningsPage />} />
             <Route path="/dashboard/warnings/create" element={<CreateWarningPage />} />
             <Route path="/gps/add-device" element={<AddGpsDevicePage />} />
