@@ -1,18 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useVehicles, Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Loader2, Upload, X, Car, CreditCard, CalendarClock, MapPin, AlertTriangle, Truck, Tent, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { TrailerFields } from '@/components/dashboard/TrailerFields';
 import { CaravanFields } from '@/components/dashboard/CaravanFields';
+import { Vehicle, PaymentScheduleType } from '@/hooks/useVehicles';
 
 const VEHICLE_FEATURES = [
   { id: 'aircon', label: 'Aircondition' },
@@ -33,45 +34,15 @@ const VEHICLE_FEATURES = [
   { id: 'winter_tires', label: 'Vinterdæk' },
 ];
 
-const EditVehiclePage = () => {
+const FleetVehicleEditPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { vehicles, updateVehicle } = useVehicles();
-  const [isLoading, setIsLoading] = useState(false);
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [ownerName, setOwnerName] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isFleetVehicle, setIsFleetVehicle] = useState(false);
-  const [checkingFleet, setCheckingFleet] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const vehicle = vehicles.find(v => v.id === id);
-
-  // Check if this vehicle belongs to a fleet user
-  useEffect(() => {
-    const checkFleetStatus = async () => {
-      if (!vehicle) {
-        setCheckingFleet(false);
-        return;
-      }
-      
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('fleet_plan')
-          .eq('id', vehicle.owner_id)
-          .single();
-        
-        if (profile?.fleet_plan) {
-          setIsFleetVehicle(true);
-        }
-      } catch (error) {
-        console.error('Error checking fleet status:', error);
-      } finally {
-        setCheckingFleet(false);
-      }
-    };
-    
-    checkFleetStatus();
-  }, [vehicle]);
 
   const [formData, setFormData] = useState({
     daily_price: undefined as number | undefined,
@@ -139,71 +110,110 @@ const EditVehiclePage = () => {
   });
 
   useEffect(() => {
-    if (vehicle) {
-      setFormData({
-        daily_price: vehicle.daily_price || undefined,
-        weekly_price: vehicle.weekly_price || undefined,
-        monthly_price: vehicle.monthly_price || undefined,
-        included_km: vehicle.included_km || 100,
-        extra_km_price: vehicle.extra_km_price || 2.5,
-        unlimited_km: vehicle.unlimited_km || false,
-        description: vehicle.description || '',
-        image_url: vehicle.image_url || '',
-        features: vehicle.features || [],
-        deposit_required: vehicle.deposit_required || false,
-        deposit_amount: vehicle.deposit_amount || 0,
-        prepaid_rent_enabled: vehicle.prepaid_rent_enabled || false,
-        prepaid_rent_months: vehicle.prepaid_rent_months || 1,
-        payment_schedule: (vehicle.payment_schedule || 'upfront') as PaymentScheduleType,
-        use_custom_location: vehicle.use_custom_location || false,
-        location_address: vehicle.location_address || '',
-        location_postal_code: vehicle.location_postal_code || '',
-        location_city: vehicle.location_city || '',
-        latitude: vehicle.latitude || undefined,
-        longitude: vehicle.longitude || undefined,
-        vehicle_value: vehicle.vehicle_value || undefined,
-        trailer_type: vehicle.trailer_type || '',
-        internal_length_cm: vehicle.internal_length_cm || undefined,
-        internal_width_cm: vehicle.internal_width_cm || undefined,
-        internal_height_cm: vehicle.internal_height_cm || undefined,
-        plug_type: vehicle.plug_type || '',
-        tempo_approved: vehicle.tempo_approved || false,
-        requires_b_license: vehicle.requires_b_license ?? true,
-        has_ramps: vehicle.has_ramps || false,
-        has_winch: vehicle.has_winch || false,
-        has_tarpaulin: vehicle.has_tarpaulin || false,
-        has_net: vehicle.has_net || false,
-        has_jockey_wheel: vehicle.has_jockey_wheel || false,
-        has_lock_included: vehicle.has_lock_included || false,
-        has_adapter: vehicle.has_adapter || false,
-        adult_sleeping_capacity: vehicle.adult_sleeping_capacity || undefined,
-        child_sleeping_capacity: vehicle.child_sleeping_capacity || undefined,
-        layout_type: vehicle.layout_type || '',
-        has_fridge: vehicle.has_fridge || false,
-        has_freezer: vehicle.has_freezer || false,
-        has_gas_burner: vehicle.has_gas_burner || false,
-        has_toilet: vehicle.has_toilet || false,
-        has_shower: vehicle.has_shower || false,
-        has_hot_water: vehicle.has_hot_water || false,
-        has_awning_tent: vehicle.has_awning_tent || false,
-        has_mover: vehicle.has_mover || false,
-        has_bike_rack: vehicle.has_bike_rack || false,
-        has_ac: vehicle.has_ac || false,
-        has_floor_heating: vehicle.has_floor_heating || false,
-        has_tv: vehicle.has_tv || false,
-        service_included: vehicle.service_included || false,
-        camping_furniture_included: vehicle.camping_furniture_included || false,
-        gas_bottle_included: vehicle.gas_bottle_included || false,
-        pets_allowed: vehicle.pets_allowed || false,
-        smoking_allowed: vehicle.smoking_allowed || false,
-        festival_use_allowed: vehicle.festival_use_allowed || false,
-        total_weight: vehicle.total_weight || undefined,
-        has_kitchen: vehicle.has_kitchen || false,
-        has_bathroom: vehicle.has_bathroom || false,
-        has_awning: vehicle.has_awning || false,
-      });
-    }
-  }, [vehicle]);
+    const fetchVehicle = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      try {
+        // Fetch vehicle directly (admin can see all)
+        const { data: vehicleData, error: vehicleError } = await supabase
+          .from('vehicles')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (vehicleError || !vehicleData) {
+          toast.error('Køretøj ikke fundet');
+          navigate('/admin/fleet');
+          return;
+        }
+
+        setVehicle(vehicleData as Vehicle);
+
+        // Fetch owner name
+        const { data: ownerData } = await supabase
+          .from('profiles')
+          .select('full_name, company_name, email')
+          .eq('id', vehicleData.owner_id)
+          .single();
+
+        if (ownerData) {
+          setOwnerName(ownerData.company_name || ownerData.full_name || ownerData.email || 'Ukendt');
+        }
+
+        // Populate form
+        setFormData({
+          daily_price: vehicleData.daily_price || undefined,
+          weekly_price: vehicleData.weekly_price || undefined,
+          monthly_price: vehicleData.monthly_price || undefined,
+          included_km: vehicleData.included_km || 100,
+          extra_km_price: vehicleData.extra_km_price || 2.5,
+          unlimited_km: vehicleData.unlimited_km || false,
+          description: vehicleData.description || '',
+          image_url: vehicleData.image_url || '',
+          features: vehicleData.features || [],
+          deposit_required: vehicleData.deposit_required || false,
+          deposit_amount: vehicleData.deposit_amount || 0,
+          prepaid_rent_enabled: vehicleData.prepaid_rent_enabled || false,
+          prepaid_rent_months: vehicleData.prepaid_rent_months || 1,
+          payment_schedule: (vehicleData.payment_schedule || 'upfront') as PaymentScheduleType,
+          use_custom_location: vehicleData.use_custom_location || false,
+          location_address: vehicleData.location_address || '',
+          location_postal_code: vehicleData.location_postal_code || '',
+          location_city: vehicleData.location_city || '',
+          latitude: vehicleData.latitude || undefined,
+          longitude: vehicleData.longitude || undefined,
+          vehicle_value: vehicleData.vehicle_value || undefined,
+          trailer_type: vehicleData.trailer_type || '',
+          internal_length_cm: vehicleData.internal_length_cm || undefined,
+          internal_width_cm: vehicleData.internal_width_cm || undefined,
+          internal_height_cm: vehicleData.internal_height_cm || undefined,
+          plug_type: vehicleData.plug_type || '',
+          tempo_approved: vehicleData.tempo_approved || false,
+          requires_b_license: vehicleData.requires_b_license ?? true,
+          has_ramps: vehicleData.has_ramps || false,
+          has_winch: vehicleData.has_winch || false,
+          has_tarpaulin: vehicleData.has_tarpaulin || false,
+          has_net: vehicleData.has_net || false,
+          has_jockey_wheel: vehicleData.has_jockey_wheel || false,
+          has_lock_included: vehicleData.has_lock_included || false,
+          has_adapter: vehicleData.has_adapter || false,
+          adult_sleeping_capacity: vehicleData.adult_sleeping_capacity || undefined,
+          child_sleeping_capacity: vehicleData.child_sleeping_capacity || undefined,
+          layout_type: vehicleData.layout_type || '',
+          has_fridge: vehicleData.has_fridge || false,
+          has_freezer: vehicleData.has_freezer || false,
+          has_gas_burner: vehicleData.has_gas_burner || false,
+          has_toilet: vehicleData.has_toilet || false,
+          has_shower: vehicleData.has_shower || false,
+          has_hot_water: vehicleData.has_hot_water || false,
+          has_awning_tent: vehicleData.has_awning_tent || false,
+          has_mover: vehicleData.has_mover || false,
+          has_bike_rack: vehicleData.has_bike_rack || false,
+          has_ac: vehicleData.has_ac || false,
+          has_floor_heating: vehicleData.has_floor_heating || false,
+          has_tv: vehicleData.has_tv || false,
+          service_included: vehicleData.service_included || false,
+          camping_furniture_included: vehicleData.camping_furniture_included || false,
+          gas_bottle_included: vehicleData.gas_bottle_included || false,
+          pets_allowed: vehicleData.pets_allowed || false,
+          smoking_allowed: vehicleData.smoking_allowed || false,
+          festival_use_allowed: vehicleData.festival_use_allowed || false,
+          total_weight: vehicleData.total_weight || undefined,
+          has_kitchen: vehicleData.has_kitchen || false,
+          has_bathroom: vehicleData.has_bathroom || false,
+          has_awning: vehicleData.has_awning || false,
+        });
+      } catch (error) {
+        console.error('Error fetching vehicle:', error);
+        toast.error('Kunne ikke hente køretøj');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVehicle();
+  }, [id, navigate]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -255,11 +265,11 @@ const EditVehiclePage = () => {
 
   const handleSave = async () => {
     if (!vehicle) return;
-    
-    setIsLoading(true);
-    
+
+    setIsSaving(true);
+
     let finalData = { ...formData };
-    
+
     if (formData.use_custom_location && formData.location_address) {
       try {
         const { data, error } = await supabase.functions.invoke('geocode-address', {
@@ -269,7 +279,7 @@ const EditVehiclePage = () => {
             city: formData.location_city,
           },
         });
-        
+
         if (!error && data?.latitude && data?.longitude) {
           finalData = {
             ...finalData,
@@ -287,67 +297,56 @@ const EditVehiclePage = () => {
         longitude: undefined,
       };
     }
-    
-    const success = await updateVehicle(vehicle.id, finalData);
-    setIsLoading(false);
-    if (success) {
-      navigate('/dashboard/vehicles');
+
+    const { error } = await supabase
+      .from('vehicles')
+      .update(finalData)
+      .eq('id', vehicle.id);
+
+    setIsSaving(false);
+
+    if (error) {
+      console.error('Error updating vehicle:', error);
+      toast.error('Kunne ikke opdatere køretøj');
+    } else {
+      toast.success('Køretøj opdateret!');
+      navigate('/admin/fleet');
     }
   };
 
-  if (checkingFleet) {
+  if (isLoading) {
     return (
-      <DashboardLayout activeTab="vehicles">
+      <AdminDashboardLayout activeTab="fleet">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
+      </AdminDashboardLayout>
     );
   }
 
   if (!vehicle) {
     return (
-      <DashboardLayout activeTab="vehicles">
+      <AdminDashboardLayout activeTab="fleet">
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">Køretøj ikke fundet</p>
         </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (isFleetVehicle) {
-    return (
-      <DashboardLayout activeTab="vehicles">
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <AlertTriangle className="w-12 h-12 text-yellow-500" />
-          <div className="text-center">
-            <h2 className="text-lg font-semibold">Fleet-køretøj</h2>
-            <p className="text-muted-foreground">
-              Dette køretøj administreres af LEJIO Fleet og kan kun redigeres af administratorer.
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => navigate('/dashboard/vehicles')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Tilbage til køretøjer
-          </Button>
-        </div>
-      </DashboardLayout>
+      </AdminDashboardLayout>
     );
   }
 
   const VehicleIcon = vehicle.vehicle_type === 'trailer' ? Truck : vehicle.vehicle_type === 'campingvogn' ? Tent : Car;
 
   return (
-    <DashboardLayout activeTab="vehicles">
+    <AdminDashboardLayout activeTab="fleet">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/vehicles')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/fleet')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
             <h1 className="text-2xl font-display font-bold">Rediger {vehicle.make} {vehicle.model}</h1>
-            <p className="text-muted-foreground">{vehicle.registration}</p>
+            <p className="text-muted-foreground">{vehicle.registration} • Ejer: {ownerName}</p>
           </div>
         </div>
 
@@ -361,8 +360,8 @@ const EditVehiclePage = () => {
               <div className="flex items-center gap-4">
                 <div className="w-32 h-32 rounded-xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
                   {formData.image_url ? (
-                    <img 
-                      src={formData.image_url} 
+                    <img
+                      src={formData.image_url}
                       alt={`${vehicle.make} ${vehicle.model}`}
                       className="w-full h-full object-cover"
                     />
@@ -418,9 +417,9 @@ const EditVehiclePage = () => {
                   <Input
                     type="number"
                     value={formData.daily_price || ''}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      daily_price: parseFloat(e.target.value) || undefined 
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      daily_price: parseFloat(e.target.value) || undefined
                     }))}
                     placeholder="499"
                   />
@@ -430,9 +429,9 @@ const EditVehiclePage = () => {
                   <Input
                     type="number"
                     value={formData.weekly_price || ''}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      weekly_price: parseFloat(e.target.value) || undefined 
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      weekly_price: parseFloat(e.target.value) || undefined
                     }))}
                     placeholder="2.800"
                   />
@@ -442,39 +441,12 @@ const EditVehiclePage = () => {
                   <Input
                     type="number"
                     value={formData.monthly_price || ''}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      monthly_price: parseFloat(e.target.value) || undefined 
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      monthly_price: parseFloat(e.target.value) || undefined
                     }))}
                     placeholder="9.900"
                   />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Vehicle Value */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Bilens værdi (vanvidskørsel)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input
-                type="number"
-                value={formData.vehicle_value || ''}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  vehicle_value: parseFloat(e.target.value) || undefined 
-                }))}
-                placeholder="F.eks. 150.000"
-              />
-              <div className="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
-                  <div className="text-xs text-muted-foreground">
-                    <p className="font-medium text-yellow-600 mb-1">Vigtig information</p>
-                    <p>Denne værdi bruges ved vanvidskørsel-ansvar i lejekontrakten.</p>
-                  </div>
                 </div>
               </div>
             </CardContent>
@@ -486,8 +458,8 @@ const EditVehiclePage = () => {
               <CardTitle className="text-base">Kilometer</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div 
-                className="flex items-center space-x-3 p-3 rounded-xl bg-mint/10 border border-mint/20 cursor-pointer"
+              <div
+                className="flex items-center space-x-3 p-3 rounded-xl bg-primary/10 border border-primary/20 cursor-pointer"
                 onClick={() => setFormData(prev => ({ ...prev, unlimited_km: !prev.unlimited_km }))}
               >
                 <Checkbox
@@ -496,7 +468,7 @@ const EditVehiclePage = () => {
                 />
                 <Label>Fri kilometer</Label>
               </div>
-              
+
               {!formData.unlimited_km && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
@@ -504,51 +476,26 @@ const EditVehiclePage = () => {
                     <Input
                       type="number"
                       value={formData.included_km}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        included_km: parseInt(e.target.value) || 100 
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        included_km: parseInt(e.target.value) || 100
                       }))}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Ekstra km pris (kr)</Label>
+                    <Label className="text-xs text-muted-foreground">Pris pr. ekstra km</Label>
                     <Input
                       type="number"
                       step="0.5"
                       value={formData.extra_km_price}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        extra_km_price: parseFloat(e.target.value) || 2.5 
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        extra_km_price: parseFloat(e.target.value) || 2.5
                       }))}
                     />
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Features */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-base">Udstyr</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {VEHICLE_FEATURES.map((feature) => (
-                  <div
-                    key={feature.id}
-                    className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                      formData.features.includes(feature.id)
-                        ? 'bg-primary/10 border border-primary/30'
-                        : 'bg-muted/50 hover:bg-muted'
-                    }`}
-                    onClick={() => handleFeatureToggle(feature.id)}
-                  >
-                    <Checkbox checked={formData.features.includes(feature.id)} />
-                    <span className="text-sm">{feature.label}</span>
-                  </div>
-                ))}
-              </div>
             </CardContent>
           </Card>
 
@@ -561,8 +508,8 @@ const EditVehiclePage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div 
-                className="flex items-center space-x-3 p-3 rounded-xl bg-muted/50 cursor-pointer"
+              <div
+                className="flex items-center space-x-3 p-3 rounded-xl bg-muted cursor-pointer"
                 onClick={() => setFormData(prev => ({ ...prev, deposit_required: !prev.deposit_required }))}
               >
                 <Checkbox
@@ -571,143 +518,102 @@ const EditVehiclePage = () => {
                 />
                 <Label>Kræv depositum</Label>
               </div>
-              
+
               {formData.deposit_required && (
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">Beløb (kr)</Label>
                   <Input
                     type="number"
-                    value={formData.deposit_amount}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      deposit_amount: parseInt(e.target.value) || 0 
+                    value={formData.deposit_amount || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      deposit_amount: parseFloat(e.target.value) || 0
                     }))}
+                    placeholder="5000"
                   />
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Custom Location */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                Afhentningssted
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div 
-                className="flex items-center space-x-3 p-3 rounded-xl bg-muted/50 cursor-pointer"
-                onClick={() => setFormData(prev => ({ ...prev, use_custom_location: !prev.use_custom_location }))}
-              >
-                <Checkbox
-                  checked={formData.use_custom_location}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, use_custom_location: !!checked }))}
-                />
-                <Label>Brug anden adresse end forhandler</Label>
-              </div>
-              
-              {formData.use_custom_location && (
-                <div className="space-y-3">
-                  <Input
-                    placeholder="Adresse"
-                    value={formData.location_address}
-                    onChange={(e) => setFormData(prev => ({ ...prev, location_address: e.target.value }))}
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      placeholder="Postnummer"
-                      value={formData.location_postal_code}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location_postal_code: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="By"
-                      value={formData.location_city}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location_city: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Payment Schedule */}
+          {/* Description */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <CalendarClock className="w-4 h-4" />
-                Betalingsplan
-              </CardTitle>
+              <CardTitle className="text-base">Beskrivelse</CardTitle>
             </CardHeader>
             <CardContent>
-              <RadioGroup
-                value={formData.payment_schedule}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, payment_schedule: value as PaymentScheduleType }))}
-                className="grid grid-cols-1 md:grid-cols-2 gap-3"
-              >
-                <div className={`flex items-center space-x-3 p-4 rounded-xl border cursor-pointer ${formData.payment_schedule === 'upfront' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                  <RadioGroupItem value="upfront" id="upfront" />
-                  <div>
-                    <Label htmlFor="upfront" className="font-medium cursor-pointer">Forudbetaling</Label>
-                    <p className="text-xs text-muted-foreground">Fuld betaling ved booking</p>
-                  </div>
-                </div>
-                <div className={`flex items-center space-x-3 p-4 rounded-xl border cursor-pointer ${formData.payment_schedule === 'monthly' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                  <RadioGroupItem value="monthly" id="monthly" />
-                  <div>
-                    <Label htmlFor="monthly" className="font-medium cursor-pointer">Månedlig</Label>
-                    <p className="text-xs text-muted-foreground">Betaling hver måned</p>
-                  </div>
-                </div>
-              </RadioGroup>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Beskriv køretøjet..."
+                className="min-h-[100px]"
+              />
             </CardContent>
           </Card>
 
-          {/* Trailer-specific fields */}
+          {/* Features */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base">Udstyr & Features</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {VEHICLE_FEATURES.map(feature => (
+                  <div
+                    key={feature.id}
+                    className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                      formData.features.includes(feature.id)
+                        ? 'bg-primary/10 border border-primary/30'
+                        : 'bg-muted hover:bg-muted/80'
+                    }`}
+                    onClick={() => handleFeatureToggle(feature.id)}
+                  >
+                    <Checkbox checked={formData.features.includes(feature.id)} />
+                    <Label className="text-sm cursor-pointer">{feature.label}</Label>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Trailer specific fields */}
           {vehicle.vehicle_type === 'trailer' && (
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Truck className="w-4 h-4" />
-                  Trailer-specifikke oplysninger
+                  Trailer detaljer
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <TrailerFields 
-                  vehicleDetails={formData as Record<string, unknown>} 
-                  setVehicleDetails={(fn) => setFormData(prev => ({ ...prev, ...fn(prev as Record<string, unknown>) }))} 
-                />
+                <TrailerFields vehicleDetails={formData} setVehicleDetails={setFormData as any} />
               </CardContent>
             </Card>
           )}
 
-          {/* Caravan-specific fields */}
+          {/* Caravan specific fields */}
           {vehicle.vehicle_type === 'campingvogn' && (
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Tent className="w-4 h-4" />
-                  Campingvogn-specifikke oplysninger
+                  Campingvogn detaljer
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CaravanFields 
-                  vehicleDetails={formData as Record<string, unknown>} 
-                  setVehicleDetails={(fn) => setFormData(prev => ({ ...prev, ...fn(prev as Record<string, unknown>) }))} 
-                />
+                <CaravanFields vehicleDetails={formData} setVehicleDetails={setFormData as any} />
               </CardContent>
             </Card>
           )}
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button variant="outline" onClick={() => navigate('/dashboard/vehicles')}>
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" onClick={() => navigate('/admin/fleet')}>
             Annuller
           </Button>
-          <Button onClick={handleSave} disabled={isLoading}>
-            {isLoading ? (
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
             ) : (
               <Save className="w-4 h-4 mr-2" />
@@ -716,8 +622,8 @@ const EditVehiclePage = () => {
           </Button>
         </div>
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 
-export default EditVehiclePage;
+export default FleetVehicleEditPage;

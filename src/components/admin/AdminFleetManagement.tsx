@@ -747,12 +747,12 @@ const AdminFleetManagement = () => {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => navigate(`/dashboard/vehicles/edit/${vehicle.id}`)}
+                            onClick={() => navigate(`/admin/fleet/edit/${vehicle.id}`)}
                           >
                             <Pencil className="w-4 h-4 mr-1" />
                             Rediger
                           </Button>
-                          <Button 
+                          <Button
                             size="sm" 
                             onClick={() => openFleetBookingDialog(vehicle)}
                             className="bg-primary hover:bg-primary/90"
