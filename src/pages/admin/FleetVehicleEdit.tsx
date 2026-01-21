@@ -317,16 +317,19 @@ const FleetVehicleEditPage = () => {
       };
     }
 
-    const { error } = await supabase
-      .from('vehicles')
-      .update(finalData)
-      .eq('id', vehicle.id);
+    // Use admin edge function to bypass RLS
+    const { data: result, error } = await supabase.functions.invoke('admin-update-vehicle', {
+      body: {
+        vehicleId: vehicle.id,
+        updates: finalData,
+      },
+    });
 
     setIsSaving(false);
 
-    if (error) {
-      console.error('Error updating vehicle:', error);
-      toast.error('Kunne ikke opdatere køretøj');
+    if (error || !result?.success) {
+      console.error('Error updating vehicle:', error || result?.error);
+      toast.error(result?.error || 'Kunne ikke opdatere køretøj');
     } else {
       toast.success('Køretøj opdateret!');
       navigate('/admin/fleet');
