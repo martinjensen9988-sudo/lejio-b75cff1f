@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { differenceInDays, format } from 'date-fns';
+import { differenceInDays, format, addMonths } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { Calendar, Car, Check, User, Mail, Phone, Loader2, MapPin, Bike, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { MCCategory } from '@/lib/mcLicenseValidation';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { PaymentMethodSelector, PaymentMethod } from '@/components/booking/PaymentMethodSelector';
+import { PaymentPlanSelector, PaymentPlan } from '@/components/booking/PaymentPlanSelector';
 
 const CreateBookingPage = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
@@ -40,6 +41,7 @@ const CreateBookingPage = () => {
     bank_account_number: string | null;
   } | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [selectedPaymentPlan, setSelectedPaymentPlan] = useState<PaymentPlan>('upfront');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -115,9 +117,13 @@ const CreateBookingPage = () => {
   const isMCOrScooter = vehicleType === 'motorcykel' || vehicleType === 'scooter';
   const mcCategory = isMCOrScooter ? (vehicle?.mc_category as MCCategory) : null;
 
-  // Calculate pricing
+  // Check if subscription is available for this vehicle
+  const subscriptionAvailable = vehicle?.subscription_available === true;
+  const subscriptionMonthlyPrice = vehicle?.subscription_monthly_price || vehicle?.monthly_price;
+
+  // Calculate pricing based on selected payment plan
   const pricing = useMemo(() => {
-    if (!vehicle) return { unitPrice: 0, unitLabel: '', totalPrice: 0, periodCount: 1, periodType: 'daily', days: 1 };
+    if (!vehicle) return { unitPrice: 0, unitLabel: '', totalPrice: 0, periodCount: 1, periodType: 'daily', days: 1, isSubscription: false };
 
     let unitPrice = 0;
     let unitLabel = '';
@@ -128,6 +134,15 @@ const CreateBookingPage = () => {
       days = differenceInDays(endDate, startDate) + 1;
     }
 
+    // If subscription is selected, use subscription pricing
+    if (selectedPaymentPlan === 'subscription' && subscriptionAvailable) {
+      unitPrice = subscriptionMonthlyPrice || (vehicle.daily_price || 0) * 30;
+      unitLabel = 'pr. måned (abonnement)';
+      totalPrice = unitPrice; // First month only
+      return { unitPrice, unitLabel, totalPrice, periodCount: 1, periodType: 'monthly', days, isSubscription: true };
+    }
+
+    // Standard pricing based on period type
     switch (periodType) {
       case 'monthly':
         unitPrice = vehicle.monthly_price || (vehicle.daily_price || 0) * 30;
@@ -145,8 +160,8 @@ const CreateBookingPage = () => {
         totalPrice = unitPrice * periodCount;
     }
 
-    return { unitPrice, unitLabel, totalPrice, periodCount, periodType, days };
-  }, [vehicle, startDate, endDate, periodType, periodCount]);
+    return { unitPrice, unitLabel, totalPrice, periodCount, periodType, days, isSubscription: false };
+  }, [vehicle, startDate, endDate, periodType, periodCount, selectedPaymentPlan, subscriptionAvailable, subscriptionMonthlyPrice]);
 
   // Handle proceeding to account step
   const handleProceedToAccount = async (e: React.FormEvent) => {
@@ -218,22 +233,22 @@ const CreateBookingPage = () => {
           lessor_id: vehicleData.owner_id,
           renter_id: userId || user?.id || null,
           start_date: format(startDate!, 'yyyy-MM-dd'),
-          end_date: format(endDate!, 'yyyy-MM-dd'),
+          end_date: pricing.isSubscription ? format(addMonths(startDate!, 1), 'yyyy-MM-dd') : format(endDate!, 'yyyy-MM-dd'),
           total_price: pricing.totalPrice,
           status: 'pending',
           renter_name: bookingData.name,
           renter_email: bookingData.email || formData.email,
           renter_phone: bookingData.phone,
-          notes: bookingData.notes || null,
+          notes: pricing.isSubscription ? `Abonnement - løbende månedlig betaling. ${bookingData.notes || ''}`.trim() : (bookingData.notes || null),
           pickup_location_id: vehicleData.current_location_id || null,
           dropoff_location_id: vehicleData.current_location_id || null,
           payment_method: selectedPaymentMethod,
           // Pricing details for contract
-          period_type: periodType,
-          period_count: periodCount,
+          period_type: pricing.isSubscription ? 'monthly' : periodType,
+          period_count: pricing.isSubscription ? 1 : periodCount,
           daily_price: vehicle?.daily_price || null,
           weekly_price: vehicle?.weekly_price || null,
-          monthly_price: vehicle?.monthly_price || null,
+          monthly_price: pricing.isSubscription ? pricing.unitPrice : (vehicle?.monthly_price || null),
           base_price: pricing.unitPrice,
           included_km: vehicle?.included_km || null,
           extra_km_price: vehicle?.extra_km_price || null,
@@ -244,6 +259,29 @@ const CreateBookingPage = () => {
         .single();
 
       if (bookingError) throw new Error('Kunne ikke oprette booking');
+
+      // If subscription selected, create recurring rental entry
+      if (pricing.isSubscription && createdBooking) {
+        const nextBillingDate = addMonths(startDate!, 1);
+        await supabase
+          .from('recurring_rentals')
+          .insert({
+            booking_id: createdBooking.id,
+            vehicle_id: vehicleId!,
+            lessor_id: vehicleData.owner_id,
+            renter_id: userId || user?.id || null,
+            renter_email: bookingData.email || formData.email,
+            renter_name: bookingData.name,
+            renter_phone: bookingData.phone,
+            monthly_price: pricing.unitPrice,
+            deposit_amount: 0,
+            included_km: vehicle?.included_km || 100,
+            extra_km_price: vehicle?.extra_km_price || 2.5,
+            billing_day: startDate!.getDate(),
+            next_billing_date: format(nextBillingDate, 'yyyy-MM-dd'),
+            status: 'active',
+          });
+      }
 
       // Send notification to lessor
       try {
@@ -556,6 +594,20 @@ const CreateBookingPage = () => {
                 </CardContent>
               </Card>
 
+              {/* Payment Plan Selection - show if subscription is available */}
+              {subscriptionAvailable && (
+                <Card>
+                  <CardContent className="pt-6">
+                    <PaymentPlanSelector
+                      selectedPlan={selectedPaymentPlan}
+                      onPlanChange={setSelectedPaymentPlan}
+                      subscriptionAvailable={subscriptionAvailable}
+                      monthlyPrice={subscriptionMonthlyPrice}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Summary */}
               <Card>
                 <CardHeader>
@@ -566,6 +618,12 @@ const CreateBookingPage = () => {
                     <span className="text-muted-foreground">Køretøj:</span>
                     <span className="font-medium">{vehicle.make} {vehicle.model}</span>
                   </div>
+                  {pricing.isSubscription && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Type:</span>
+                      <span className="font-medium text-accent">Månedligt abonnement</span>
+                    </div>
+                  )}
                   {startDate && endDate && (
                     <>
                       <div className="flex justify-between text-sm">
@@ -581,9 +639,14 @@ const CreateBookingPage = () => {
                     <span className="font-medium">{pricing.unitPrice.toLocaleString('da-DK')} kr</span>
                   </div>
                   <div className="pt-2 border-t flex justify-between">
-                    <span className="font-semibold">Total:</span>
+                    <span className="font-semibold">{pricing.isSubscription ? 'Første måned:' : 'Total:'}</span>
                     <span className="font-bold text-lg text-primary">{pricing.totalPrice.toLocaleString('da-DK')} kr</span>
                   </div>
+                  {pricing.isSubscription && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      * Herefter trækkes {pricing.unitPrice.toLocaleString('da-DK')} kr automatisk hver måned
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
