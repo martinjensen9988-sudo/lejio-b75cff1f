@@ -5255,6 +5255,15 @@ export type Database = {
         Args: { vehicle_id: string }
         Returns: boolean
       }
+      check_vehicle_availability: {
+        Args: {
+          p_end_date: string
+          p_exclude_booking_id?: string
+          p_start_date: string
+          p_vehicle_id: string
+        }
+        Returns: boolean
+      }
       generate_contract_number: { Args: never; Returns: string }
       generate_corporate_invoice_number: { Args: never; Returns: string }
       generate_invoice_number: { Args: never; Returns: string }
