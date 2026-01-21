@@ -180,9 +180,49 @@ serve(async (req) => {
     }
 
     const { data: urlData } = service.storage.from("vehicle-images").getPublicUrl(objectPath);
+    const publicUrl = urlData.publicUrl;
+
+    // Get max display_order for this vehicle
+    const { data: existingImages } = await service
+      .from("vehicle_images")
+      .select("display_order")
+      .eq("vehicle_id", vehicleId)
+      .order("display_order", { ascending: false })
+      .limit(1);
+
+    const maxOrder = existingImages && existingImages.length > 0 
+      ? (existingImages[0] as any).display_order 
+      : -1;
+
+    // Insert into vehicle_images table using service role (bypasses RLS)
+    const { data: imageRecord, error: insertErr } = await service
+      .from("vehicle_images")
+      .insert({
+        vehicle_id: vehicleId,
+        image_url: publicUrl,
+        display_order: maxOrder + 1,
+      })
+      .select()
+      .single();
+
+    if (insertErr) {
+      console.error("upload-vehicle-image db insert error", insertErr);
+      // Clean up uploaded file
+      await service.storage.from("vehicle-images").remove([objectPath]);
+      return new Response(
+        JSON.stringify({ error: "Failed to save image record" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     return new Response(
-      JSON.stringify({ success: true, publicUrl: urlData.publicUrl, objectPath }),
+      JSON.stringify({ 
+        success: true, 
+        publicUrl, 
+        objectPath,
+        imageId: (imageRecord as any)?.id,
+        displayOrder: (imageRecord as any)?.display_order,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {

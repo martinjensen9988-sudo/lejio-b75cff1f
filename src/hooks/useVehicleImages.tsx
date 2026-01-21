@@ -119,7 +119,7 @@ export const useVehicleImages = (vehicleId?: string) => {
         console.log('[vehicle-images] can_manage_vehicle_image_path preflight failed', e);
       }
 
-      // Upload via backend function (service upload + ownership check)
+      // Upload via backend function (service upload + ownership check + db insert)
       const imageBase64 = await fileToBase64(file);
       const { data: uploadData, error: uploadFnError } = await supabase.functions.invoke('upload-vehicle-image', {
         body: {
@@ -131,36 +131,28 @@ export const useVehicleImages = (vehicleId?: string) => {
       });
 
       if (uploadFnError) throw uploadFnError;
-      const publicUrl = (uploadData as any)?.publicUrl as string | undefined;
-      if (!publicUrl) throw new Error('Missing publicUrl from upload function');
+      const result = uploadData as { publicUrl?: string; imageId?: string; displayOrder?: number } | null;
+      if (!result?.publicUrl || !result?.imageId) {
+        throw new Error('Missing publicUrl or imageId from upload function');
+      }
 
-      // Get max display_order
-      const maxOrder = images.length > 0 
-        ? Math.max(...images.map(img => img.display_order)) 
-        : -1;
+      console.log('[vehicle-images] upload complete', { vehicleId, publicUrl: result.publicUrl, imageId: result.imageId });
 
-      // Insert into database
-      const { data, error } = await supabase
-        .from('vehicle_images')
-        .insert({
-          vehicle_id: vehicleId,
-          image_url: publicUrl,
-          display_order: maxOrder + 1,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      console.log('[vehicle-images] db insert ok', { vehicleId, publicUrl, imageId: (data as any)?.id });
-
-      setImages(prev => [...prev, data as VehicleImage]);
+      // Add to local state
+      setImages(prev => [...prev, {
+        id: result.imageId!,
+        vehicle_id: vehicleId,
+        image_url: result.publicUrl!,
+        display_order: result.displayOrder ?? prev.length,
+        created_at: new Date().toISOString(),
+      }]);
+      
       toast.success('Billede uploadet!');
-      return publicUrl;
+      return result.publicUrl;
     } catch (error) {
       console.error('Upload error:', error);
       const msg = typeof (error as any)?.message === 'string' ? (error as any).message : '';
-      if (msg.toLowerCase().includes('row violates row-level security')) {
+      if (msg.toLowerCase().includes('forbidden')) {
         toast.error('Du har ikke rettighed til at uploade billeder til dette køretøj');
       } else {
         toast.error('Kunne ikke uploade billede');
