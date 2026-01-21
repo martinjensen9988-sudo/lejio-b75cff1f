@@ -81,7 +81,7 @@ serve(async (req) => {
       );
     }
 
-    if (action === "get" || action === "messages") {
+    if (action === "get" || action === "messages" || action === "request_human" || action === "send_message") {
       if (!sessionId || !sessionToken) {
         return new Response(
           JSON.stringify({ error: "Session ID and token required" }),
@@ -146,6 +146,65 @@ serve(async (req) => {
 
         return new Response(
           JSON.stringify({ messages: messages || [] }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (action === "request_human") {
+        // Update session to request human support - uses service role key so bypasses RLS
+        const { error: updateError } = await supabase
+          .from("visitor_chat_sessions")
+          .update({ 
+            needs_human_support: true, 
+            session_status: "waiting_for_agent",
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", sessionId);
+
+        if (updateError) {
+          console.error("Update session error:", updateError);
+          return new Response(
+            JSON.stringify({ error: "Failed to update session" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (action === "send_message") {
+        const body = await req.clone().json();
+        const { content } = body;
+
+        if (!content || typeof content !== "string" || content.length > 2000) {
+          return new Response(
+            JSON.stringify({ error: "Invalid message content" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Insert message using service role key - bypasses RLS
+        const { error: msgError } = await supabase
+          .from("visitor_chat_messages")
+          .insert({
+            session_id: sessionId,
+            sender_type: "visitor",
+            content: content.trim()
+          });
+
+        if (msgError) {
+          console.error("Insert message error:", msgError);
+          return new Response(
+            JSON.stringify({ error: "Failed to send message" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ success: true }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }

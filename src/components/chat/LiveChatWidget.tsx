@@ -258,11 +258,10 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
     };
     setMessages((prev) => [...prev, userMsg]);
 
-    // Save user message to DB
-    await supabase.from('visitor_chat_messages').insert({
-      session_id: session.id,
-      sender_type: 'visitor',
-      content: userMessage,
+    // Save user message via edge function (bypasses RLS)
+    const sessionToken = safeStorage.getItem('lejio_chat_token');
+    await supabase.functions.invoke('chat-session', {
+      body: { action: 'send_message', sessionId: session.id, sessionToken, content: userMessage }
     });
 
     // If session is already handled by human agent (in_progress or waiting_for_agent), 
@@ -279,11 +278,11 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
       if (aiResponse.includes('[NEEDS_HUMAN_SUPPORT]')) {
         const cleanResponse = aiResponse.replace('[NEEDS_HUMAN_SUPPORT]', '').trim();
         
-        // Update session to need human support
-        await supabase
-          .from('visitor_chat_sessions')
-          .update({ needs_human_support: true, session_status: 'waiting_for_agent' })
-          .eq('id', session.id);
+        // Update session to need human support via edge function
+        const sessionToken = safeStorage.getItem('lejio_chat_token');
+        await supabase.functions.invoke('chat-session', {
+          body: { action: 'request_human', sessionId: session.id, sessionToken }
+        });
 
         setSession((prev) => prev ? { ...prev, needs_human_support: true, session_status: 'waiting_for_agent' } : prev);
 
@@ -387,10 +386,13 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
   const requestHumanSupport = async () => {
     if (!session) return;
 
-    await supabase
-      .from('visitor_chat_sessions')
-      .update({ needs_human_support: true, session_status: 'waiting_for_agent' })
-      .eq('id', session.id);
+    // Update session via edge function (bypasses RLS)
+    const sessionToken = safeStorage.getItem('lejio_chat_token');
+    await supabase.functions.invoke('chat-session', {
+      body: { action: 'request_human', sessionId: session.id, sessionToken }
+    });
+    
+    setSession((prev) => prev ? { ...prev, needs_human_support: true, session_status: 'waiting_for_agent' } : prev);
 
     if (!isLiveChatActive) {
       setShowContactForm(true);
