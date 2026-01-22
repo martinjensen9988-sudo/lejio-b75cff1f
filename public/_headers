@@ -1,0 +1,19 @@
+# Cache static assets with content hashes for 1 year
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache service worker for 1 hour (needs shorter cache for updates)
+/registerSW.js
+  Cache-Control: public, max-age=3600
+
+# Cache favicon and icons for 1 week
+/favicon.ico
+  Cache-Control: public, max-age=604800
+/favicon.png
+  Cache-Control: public, max-age=604800
+/pwa-*.png
+  Cache-Control: public, max-age=604800
+
+# Cache placeholder for 1 week
+/placeholder.svg
+  Cache-Control: public, max-age=604800
