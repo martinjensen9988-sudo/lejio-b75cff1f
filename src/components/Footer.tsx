@@ -120,10 +120,11 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             <p className="text-sm text-background/50 flex items-center gap-2">
               © {new Date().getFullYear()} LEJIO. Lavet med <Heart className="w-4 h-4 text-accent" /> i Danmark
             </p>
-            <div className="flex gap-8 text-sm text-background/50">
+            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-background/50">
               <a href="/om-os" className="hover:text-primary transition-colors">Om os</a>
               <a href="/privatlivspolitik" className="hover:text-primary transition-colors">Privatlivspolitik</a>
               <a href="/handelsbetingelser" className="hover:text-primary transition-colors">Handelsbetingelser</a>
+              <a href="/udlejervilkaar" className="hover:text-primary transition-colors">Udlejervilkår</a>
             </div>
           </div>
         </div>

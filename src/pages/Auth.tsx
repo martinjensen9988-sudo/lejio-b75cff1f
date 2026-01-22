@@ -37,6 +37,7 @@ const Auth = () => {
   const [phone, setPhone] = useState("");
   const [cvrNumber, setCvrNumber] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -170,6 +171,14 @@ const Auth = () => {
       return;
     }
 
+    // Check if terms are accepted
+    if (!acceptedTerms) {
+      toast.error('Du skal acceptere udlejervilkårene', {
+        description: 'Marker boksen for at fortsætte.',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     const { error } = await signUp(
       email, 
@@ -211,6 +220,7 @@ const Auth = () => {
     setPhone("");
     setCvrNumber("");
     setCompanyName("");
+    setAcceptedTerms(false);
     setErrors({});
     setSignupStep("choose-type");
   };
@@ -660,21 +670,40 @@ const Auth = () => {
                     </>
                   )}
 
+                  {/* Terms acceptance checkbox */}
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border">
+                    <input
+                      type="checkbox"
+                      id="accept-terms"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="accept-terms" className="text-sm text-muted-foreground cursor-pointer">
+                      Jeg accepterer LEJIOs{" "}
+                      <a href="/udlejervilkaar" target="_blank" className="text-primary hover:underline font-medium">
+                        Udlejervilkår
+                      </a>
+                      ,{" "}
+                      <a href="/handelsbetingelser" target="_blank" className="text-primary hover:underline font-medium">
+                        Handelsbetingelser
+                      </a>{" "}
+                      og{" "}
+                      <a href="/privatlivspolitik" target="_blank" className="text-primary hover:underline font-medium">
+                        Privatlivspolitik
+                      </a>
+                    </label>
+                  </div>
+
                   <Button 
                     type="submit" 
                     variant={userType === "privat" ? "warm" : "hero"}
                     size="lg" 
                     className="w-full"
-                    disabled={isSubmitting || (userType === "professionel" && cvrData && !cvrData.isActive)}
+                    disabled={isSubmitting || !acceptedTerms || (userType === "professionel" && cvrData && !cvrData.isActive)}
                   >
                     {isSubmitting ? "Opretter konto..." : "Opret konto 🎉"}
                   </Button>
-
-                  <p className="text-center text-xs text-muted-foreground">
-                    Ved at oprette en konto accepterer du vores{" "}
-                    <a href="#" className="text-primary hover:underline">vilkår</a> og{" "}
-                    <a href="#" className="text-primary hover:underline">privatlivspolitik</a>.
-                  </p>
                 </form>
               )}
             </>
