@@ -139,7 +139,7 @@ const Features = () => {
             </div>
             <div className="flex items-center gap-2 bg-card/80 rounded-full px-4 py-2">
               <CheckCircle2 className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Sikker betaling</span>
+              <span className="text-sm font-medium">Enkel afregning</span>
             </div>
           </div>
 

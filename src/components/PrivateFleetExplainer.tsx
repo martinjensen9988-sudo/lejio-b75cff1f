@@ -163,7 +163,7 @@ const PrivateFleetExplainer = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              Du ejer bilen – vi klarer resten. LEJIO håndterer alt fra markedsføring til betaling, 
+              Du ejer bilen – vi klarer resten. LEJIO håndterer alt fra markedsføring til kontrakter og dokumentation, 
               så du kan læne dig tilbage og se pengene tikke ind.
             </p>
             

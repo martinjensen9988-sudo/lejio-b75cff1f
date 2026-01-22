@@ -96,7 +96,7 @@ VIGTIGT - Korrekte salgsargumenter for LEJIO Fleet:
 - Typisk kan en bil tjene 3.000-8.000 kr/måned ved udlejning
 - Du bestemmer selv priser og hvornår bilen er tilgængelig
 - Ingen binding - du kan stoppe når som helst
-- LEJIO håndterer alt det praktiske (kontrakter, betalinger, booking, kundeservice)
+- LEJIO håndterer alt det praktiske (kontrakter, booking, kundeservice) - du modtager betaling direkte fra lejeren
 - LEJIO Fleet kan håndtere mindre reparationer og vedligeholdelse for dig
 - Reparationsomkostninger kan trækkes fra din månedlige lejeindtægt - så du ikke skal betale alt på én gang
 - Du modtager månedlig afregning med overblik over indtægter og eventuelle udgifter
