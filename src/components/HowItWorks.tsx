@@ -48,7 +48,7 @@ const HowItWorks = () => {
             <div className="space-y-6 mb-8">
               {[
                 { step: 1, icon: Search, title: "Søg", desc: "Find køretøjer i dit område og vælg datoer", color: "bg-primary", iconBg: "bg-primary/10" },
-                { step: 2, icon: CreditCard, title: "Book & betal", desc: "Gennemfør sikker online betaling med kort", color: "bg-mint", iconBg: "bg-mint/10" },
+                { step: 2, icon: CreditCard, title: "Book & bekræft", desc: "Reservér dit køretøj online og modtag instruktioner til direkte afregning med udlejer", color: "bg-mint", iconBg: "bg-mint/10" },
                 { step: 3, icon: Car, title: "Hent & kør", desc: "Modtag nøgler, kontrakt og afsted!", color: "bg-accent", iconBg: "bg-accent/10" },
               ].map((item, i) => {
                 const Icon = item.icon;
@@ -100,7 +100,7 @@ const HowItWorks = () => {
               {[
                 { step: 1, icon: Car, title: "Opret køretøj", desc: "Indtast nummerplade – vi henter data automatisk", color: "bg-accent", iconBg: "bg-accent/10" },
                 { step: 2, icon: Users, title: "Modtag bookinger", desc: "Godkend anmodninger med ét enkelt klik", color: "bg-lavender", iconBg: "bg-lavender/10" },
-                { step: 3, icon: Wallet, title: "Få betaling", desc: "Pengene overføres direkte til din konto", color: "bg-mint", iconBg: "bg-mint/10" },
+                { step: 3, icon: Wallet, title: "Modtag betaling", desc: "Du modtager leje og depositum direkte fra lejeren. Vi fakturerer blot vores kommission efterfølgende.", color: "bg-mint", iconBg: "bg-mint/10" },
               ].map((item, i) => {
                 const Icon = item.icon;
                 return (

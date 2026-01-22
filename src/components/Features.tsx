@@ -21,8 +21,8 @@ const Features = () => {
     },
     {
       icon: Shield,
-      title: "Sikker betaling",
-      description: "Betal trygt med kort eller MobilePay. Depositum håndteres automatisk.",
+      title: "Direkte afregning",
+      description: "Afregn leje og depositum direkte med udlejeren via MobilePay eller bankoverførsel. Enkelt og gennemskueligt.",
       color: "from-mint to-mint/60",
     },
     {
@@ -125,7 +125,7 @@ const Features = () => {
           </h3>
           
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Bliv udlejer på LEJIO og lad dit køretøj arbejde for dig. Vi håndterer kontrakter, betaling og alt det praktiske.
+            Bliv udlejer på LEJIO og lad dit køretøj arbejde for dig. Vi håndterer kontrakter, booking og formidling – så du kan fokusere på udlejningen.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8">
