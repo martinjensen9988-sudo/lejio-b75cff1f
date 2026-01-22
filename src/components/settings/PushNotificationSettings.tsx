@@ -1,29 +1,45 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Bell, BellOff, Loader2, AlertTriangle } from 'lucide-react';
+import { Bell, BellOff, Loader2, AlertTriangle, Smartphone } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useNativePushNotifications } from '@/hooks/useNativePushNotifications';
+import { Capacitor } from '@capacitor/core';
 
 const PushNotificationSettings = () => {
+  const isNative = Capacitor.isNativePlatform();
+  
+  // Use native push for Android/iOS, web push for browser
+  const webPush = usePushNotifications();
+  const nativePush = useNativePushNotifications();
+
   const {
     isSupported,
-    isSubscribed,
     isLoading,
     permission,
-    subscribe,
-    unsubscribe,
-  } = usePushNotifications();
+  } = webPush;
+
+  const isSubscribed = isNative ? nativePush.isRegistered : webPush.isSubscribed;
+  const loading = isNative ? nativePush.isLoading : isLoading;
 
   const handleToggle = async () => {
-    if (isSubscribed) {
-      await unsubscribe();
+    if (isNative) {
+      if (nativePush.isRegistered) {
+        await nativePush.unregister();
+      } else {
+        await nativePush.register();
+      }
     } else {
-      await subscribe();
+      if (webPush.isSubscribed) {
+        await webPush.unsubscribe();
+      } else {
+        await webPush.subscribe();
+      }
     }
   };
 
-  if (!isSupported) {
+  // Native app always supports push notifications
+  if (!isNative && !isSupported) {
     return (
       <Card className="border-yellow-500/30 bg-yellow-500/5">
         <CardHeader>
@@ -49,9 +65,16 @@ const PushNotificationSettings = () => {
             <BellOff className="w-5 h-5 text-muted-foreground" />
           )}
           Push notifikationer
+          {isNative && (
+            <span className="ml-auto">
+              <Smartphone className="w-4 h-4 text-mint" />
+            </span>
+          )}
         </CardTitle>
         <CardDescription>
-          Få besked om nye bookinger, beskeder og vigtige opdateringer.
+          {isNative 
+            ? 'Få native notifikationer direkte på din enhed.'
+            : 'Få besked om nye bookinger, beskeder og vigtige opdateringer.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -65,22 +88,29 @@ const PushNotificationSettings = () => {
             </span>
           </Label>
           <div className="flex items-center gap-2">
-            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             <Switch
               id="push-notifications"
               checked={isSubscribed}
               onCheckedChange={handleToggle}
-              disabled={isLoading}
+              disabled={loading}
             />
           </div>
         </div>
 
-        {permission === 'denied' && (
+        {!isNative && permission === 'denied' && (
           <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm">
             <p className="text-destructive font-medium">Notifikationer er blokeret</p>
             <p className="text-muted-foreground mt-1">
               Du har blokeret notifikationer i din browser. Gå til browserens indstillinger for at ændre dette.
             </p>
+          </div>
+        )}
+
+        {nativePush.error && isNative && (
+          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm">
+            <p className="text-destructive font-medium">Fejl</p>
+            <p className="text-muted-foreground mt-1">{nativePush.error}</p>
           </div>
         )}
 
