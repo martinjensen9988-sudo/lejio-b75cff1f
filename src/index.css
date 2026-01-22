@@ -250,27 +250,8 @@
   animation: blob-move 8s ease-in-out infinite;
 }
 
-/* Leaflet custom styles */
+/* Mapbox marker styles */
 .custom-car-marker {
   background: transparent;
   border: none;
-}
-
-.leaflet-popup-content-wrapper {
-  border-radius: 1rem;
-  padding: 0;
-  overflow: hidden;
-}
-
-.leaflet-popup-content {
-  margin: 0;
-  min-width: 200px;
-}
-
-.leaflet-popup-tip {
-  background: hsl(var(--card));
-}
-
-.leaflet-container {
-  font-family: var(--font-body);
 }
