@@ -34,8 +34,8 @@ const BecomeLessor = () => {
     },
     {
       icon: Shield,
-      title: "Fuld forsikringsdækning",
-      description: "Alle udlejninger er dækket af vores omfattende forsikring. Du risikerer ingenting."
+      title: "Brug din egen forsikring",
+      description: "Som udlejer bruger du din egen forsikring. Vi hjælper dig med automatisk skadesdokumentation og lynhurtig check-in/out, så du altid står stærkt."
     },
     {
       icon: FileText,
@@ -44,8 +44,8 @@ const BecomeLessor = () => {
     },
     {
       icon: CreditCard,
-      title: "Sikker betaling",
-      description: "Betalinger håndteres automatisk. Du modtager pengene direkte på din konto."
+      title: "Direkte afregning",
+      description: "Lejeren betaler dig direkte via din valgte betalingsløsning. Du har pengene med det samme, og vi sender dig blot en samlet faktura på vores kommission en gang om måneden."
     },
     {
       icon: Clock,
