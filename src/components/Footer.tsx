@@ -80,18 +80,32 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-background text-lg mb-6">Kontakt</h4>
-              <div className="flex items-center gap-3 text-background/70 mb-4">
+              <h4 className="font-display font-bold text-background text-lg mb-6">Kontakt os direkte</h4>
+              <p className="text-background/70 text-sm mb-4">
+                Vi sidder klar til at hjælpe 🙌
+              </p>
+              <div className="flex items-center gap-3 text-background/70 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-background/10 flex items-center justify-center">
                   <Phone className="w-5 h-5" />
                 </div>
-                <a href="tel:+4591998929" className="hover:text-primary transition-colors">91 99 89 29</a>
+                <div>
+                  <a href="tel:+4591998929" className="hover:text-primary transition-colors">+45 91 99 89 29</a>
+                  <p className="text-xs text-background/50">Hverdage 09:00 - 16:00</p>
+                </div>
               </div>
               <div className="flex items-center gap-3 text-background/70 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-background/10 flex items-center justify-center">
                   <Mail className="w-5 h-5" />
                 </div>
                 <a href="mailto:hej@lejio.dk" className="hover:text-primary transition-colors">hej@lejio.dk</a>
+              </div>
+              
+              {/* Company info */}
+              <div className="text-sm text-background/50 space-y-1 mb-6">
+                <p className="font-semibold text-background/70">LEJIO</p>
+                <p>Erantisvej 2, st. 103</p>
+                <p>8800 Viborg</p>
+                <p>CVR: 44691507</p>
               </div>
               
               {/* Social icons */}
