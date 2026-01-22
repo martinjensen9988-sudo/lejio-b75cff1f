@@ -144,9 +144,10 @@ const BecomeLessor = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
-      
+
+      <main className="flex-1">
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         {/* Background */}
@@ -361,6 +362,8 @@ const BecomeLessor = () => {
           </Button>
         </div>
       </section>
+
+      </main>
 
       <Footer />
     </div>

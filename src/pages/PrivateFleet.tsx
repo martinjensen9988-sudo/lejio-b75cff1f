@@ -10,9 +10,9 @@ const PrivateFleet = () => {
     window.scrollTo(0, 0);
   }, []);
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
       <Navigation />
-      <main className="pt-16">
+      <main className="flex-1 pt-16">
         <PrivateFleetExplainer />
       </main>
       <Footer />
