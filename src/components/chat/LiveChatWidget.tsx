@@ -34,9 +34,20 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Run independently to prevent blocking
-    checkLiveChatStatus().catch(console.error);
-    loadOrCreateSession().catch(console.error);
+    // Defer chat initialization to avoid blocking critical render path
+    // Use requestIdleCallback if available, fallback to setTimeout
+    const initChat = () => {
+      checkLiveChatStatus().catch(console.error);
+      loadOrCreateSession().catch(console.error);
+    };
+
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(initChat, { timeout: 2000 });
+      return () => window.cancelIdleCallback(idleId);
+    } else {
+      const timeoutId = setTimeout(initChat, 1000);
+      return () => clearTimeout(timeoutId);
+    }
   }, []);
 
   useEffect(() => {
