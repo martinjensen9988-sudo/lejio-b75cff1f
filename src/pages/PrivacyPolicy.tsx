@@ -135,6 +135,14 @@ const PrivacyPolicy = () => {
                     Hvis du modtager en advarsel, vil du blive informeret via e-mail og have mulighed for at klage. 
                     Klager behandles af LEJIO's administration.
                   </p>
+                  <div className="mt-4 p-4 bg-mint/10 border border-mint/30 rounded-xl">
+                    <p className="text-foreground font-medium">
+                      En lejer kan til enhver tid gøre indsigelse mod en registreret advarsel ved at kontakte{" "}
+                      <a href="mailto:hej@lejio.dk" className="text-primary hover:underline">hej@lejio.dk</a>. 
+                      Vi behandler indsigelsen inden for 14 dage og fjerner advarslen, hvis den vurderes ubegrundet 
+                      eller mangler dokumentation.
+                    </p>
+                  </div>
                 </section>
 
                 <section>
