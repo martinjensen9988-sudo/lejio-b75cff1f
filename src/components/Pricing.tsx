@@ -162,45 +162,109 @@ const Pricing = () => {
         {/* Erhverv pricing cards */}
         {activeTab === "erhverv" && (
           <div className="animate-fade-in">
-            {/* Forhandler main card */}
-            <div className="max-w-lg mx-auto mb-12">
-              <div className="rounded-[2rem] bg-card border-2 border-primary/20 p-8 hover:shadow-2xl hover:border-primary/50 transition-all group hover:-translate-y-2">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-8 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                  <Building2 className="w-8 h-8 text-white" />
+            {/* Three tier pricing */}
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+              {/* Starter */}
+              <div className="rounded-[2rem] bg-card border-2 border-primary/20 p-8 hover:shadow-2xl hover:border-primary/50 transition-all relative hover:-translate-y-2">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-white text-sm font-bold shadow-lg flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Anbefalet
                 </div>
 
-                <h3 className="font-display text-2xl font-black text-foreground mb-2">Forhandler SaaS</h3>
-                <p className="text-muted-foreground mb-8">Professionelt abonnement til bilforhandlere</p>
+                <h3 className="font-display text-2xl font-black text-foreground mb-1 mt-4">Starter</h3>
+                <p className="text-muted-foreground text-sm mb-6">1-5 biler</p>
 
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-muted-foreground text-sm">fra</span>
-                    <span className="font-display text-6xl font-black text-foreground">349</span>
-                    <span className="text-muted-foreground text-lg">kr/md</span>
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-display text-5xl font-black text-foreground">349</span>
+                    <span className="text-muted-foreground text-sm">kr/md</span>
                   </div>
-                  <p className="text-primary font-bold mt-2 text-lg">+ 25 kr per booking</p>
+                  <p className="text-primary font-bold mt-2 text-sm">+ 3% kommission</p>
                 </div>
 
-                <ul className="space-y-4 mb-10">
+                <ul className="space-y-3 mb-8">
                   {[
-                    "Brug din egen betalingsløsning",
-                    "Brug din egen forsikring",
-                    "B2B kontrakter inkluderet",
-                    "GPS tracking modul",
-                    "30 dages gratis prøve"
+                    "Op til 5 køretøjer",
+                    "Ubegrænsede bookinger",
+                    "Digitale kontrakter",
+                    "Dashboard & statistik"
                   ].map((f, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Check className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="text-muted-foreground">{f}</span>
+                    <li key={i} className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-primary" />
+                      <span className="text-muted-foreground text-sm">{f}</span>
                     </li>
                   ))}
                 </ul>
 
-                <Button size="lg" className="w-full font-bold text-lg py-6 shadow-lg shadow-primary/20" onClick={() => navigate('/auth')}>
-                  Start 30 dages gratis prøve
-                  <ArrowRight className="w-5 h-5" />
+                <Button size="lg" className="w-full font-bold shadow-lg shadow-primary/20" onClick={() => navigate('/auth')}>
+                  Vælg Starter
+                </Button>
+              </div>
+
+              {/* Standard */}
+              <div className="rounded-[2rem] bg-card border-2 border-border p-8 hover:shadow-2xl hover:border-primary/30 transition-all hover:-translate-y-2">
+                <h3 className="font-display text-2xl font-black text-foreground mb-1">Standard</h3>
+                <p className="text-muted-foreground text-sm mb-6">6-15 biler</p>
+
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-display text-5xl font-black text-foreground">599</span>
+                    <span className="text-muted-foreground text-sm">kr/md</span>
+                  </div>
+                  <p className="text-primary font-bold mt-2 text-sm">+ 3% kommission</p>
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Op til 15 køretøjer",
+                    "Ubegrænsede bookinger",
+                    "Digitale kontrakter",
+                    "Dashboard & statistik",
+                    "Prioriteret support"
+                  ].map((f, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-primary" />
+                      <span className="text-muted-foreground text-sm">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button variant="outline" size="lg" className="w-full font-bold" onClick={() => navigate('/auth')}>
+                  Vælg Standard
+                </Button>
+              </div>
+
+              {/* Enterprise */}
+              <div className="rounded-[2rem] bg-card border-2 border-border p-8 hover:shadow-2xl hover:border-primary/30 transition-all hover:-translate-y-2">
+                <h3 className="font-display text-2xl font-black text-foreground mb-1">Enterprise</h3>
+                <p className="text-muted-foreground text-sm mb-6">16+ biler</p>
+
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-display text-5xl font-black text-foreground">899</span>
+                    <span className="text-muted-foreground text-sm">kr/md</span>
+                  </div>
+                  <p className="text-primary font-bold mt-2 text-sm">+ 3% kommission</p>
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Ubegrænsede køretøjer",
+                    "Ubegrænsede bookinger",
+                    "Digitale kontrakter",
+                    "Dashboard & statistik",
+                    "Dedikeret support",
+                    "API adgang"
+                  ].map((f, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-primary" />
+                      <span className="text-muted-foreground text-sm">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button variant="outline" size="lg" className="w-full font-bold" onClick={() => navigate('/auth')}>
+                  Vælg Enterprise
                 </Button>
               </div>
             </div>
