@@ -302,6 +302,14 @@ const BecomeLessor = () => {
               </Card>
             ))}
           </div>
+          
+          {/* Link to terms */}
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            * Alle priser er ekskl. moms. Betaling sker via Stripe. Du kan til enhver tid ændre eller annullere dit abonnement.{" "}
+            <a href="/udlejervilkaar" className="text-primary hover:underline font-medium">
+              Læs vores udlejervilkår →
+            </a>
+          </p>
         </div>
       </section>
 
