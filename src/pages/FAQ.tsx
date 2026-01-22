@@ -185,11 +185,11 @@ const FAQ = () => {
       questions: [
         {
           q: "Hvordan sender jeg en bøde videre til lejeren?",
-          a: "Gå til 'Bøder' i dit dashboard, upload bøden som PDF eller foto, og vælg det relevante køretøj og dato. Systemet finder automatisk den rette booking."
+          a: "Hvis du modtager en parkeringsbøde eller en fartbøde i udlejningsperioden, skal du som udlejer indsende dokumentation for lejeforholdet (lejekontrakten fra LEJIO) til den relevante myndighed eller p-selskab. Herefter vil ansvaret for bøden normalt blive overført til lejeren."
         },
         {
           q: "Kan jeg tage et administrationsgebyr?",
-          a: "Ja! Du kan indstille et gebyr fra 0-800 kr, som lægges oven i bødens beløb. Dette dækker din tid til at håndtere bøden og kommunikere med lejeren."
+          a: "Ja! Som udlejer kan du opkræve et administrationsgebyr for håndtering af bøder, hvis dette er angivet i dine lejebetingelser. LEJIO anbefaler et standardgebyr på f.eks. 250 kr. for besværet. Du kan indstille gebyret fra 0-800 kr i dit dashboard."
         },
         {
           q: "Hvordan ved lejeren, at de har fået en bøde?",
@@ -214,12 +214,16 @@ const FAQ = () => {
           a: "Gå til 'GPS-sporing' i dit dashboard og tilføj din GPS-enhed. Vi understøtter de fleste GPS-udbydere via webhook-integration. Du får en unik webhook-URL til din tracker."
         },
         {
+          q: "Hvad er reglerne for GPS-sporing og GDPR?",
+          a: "Hvis dit køretøj er udstyret med GPS, skal dette oplyses i annoncen. Sporing må kun anvendes til at verificere afhentning/aflevering eller i tilfælde af mistanke om tyveri eller kontraktbrud. Uberettiget overvågning af lejeren kan være i strid med GDPR og privatlivets fred."
+        },
+        {
           q: "Hvad er geofencing?",
-          a: "Geofencing lader dig definere et område på kortet. Du får automatisk besked, når en bil kører ind i eller ud af området – nyttigt ved landeoverskridende kørsel."
+          a: "Udlejere kan opsætte Geofencing-alarmer, der definerer geografiske grænser for køretøjet. Hvis en lejer overtræder de geografiske begrænsninger, der er sat i kontrakten, betragtes det som et væsentligt brud på lejeaftalen. Dette kan give udlejer ret til at annullere lejemålet med øjeblikkelig virkning og kræve køretøjet returneret."
         },
         {
           q: "Kan jeg se bilernes position i realtid?",
-          a: "Ja! GPS-kortet viser alle dine biler med aktuel position, hastighed og retning. Du kan klikke på en bil for at se historik og detaljer."
+          a: "Ja, GPS-kortet viser dine biler med aktuel position. Bemærk dog, at realtidssporing kun bør bruges til sikkerhedsformål (tyverisikring) eller ved konkret mistanke om kontraktbrud – ikke til generel overvågning af lejeren."
         },
         {
           q: "Opdateres kilometertallet automatisk?",
