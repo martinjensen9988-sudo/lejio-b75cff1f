@@ -65,7 +65,7 @@ const FAQ = () => {
         },
         {
           q: "Hvad er en advarsel, og hvordan påvirker det mig?",
-          a: "Udlejere kan registrere advarsler mod lejere ved problemer som skader eller manglende betaling. Advarsler er synlige for andre udlejere i op til 5 år, men du kan klage, hvis du mener advarslen er uberettiget."
+          a: "En advarsel gives ved brud på lejeaftalen eller god skik. Hvis du har modtaget en advarsel, du er uenig i, har du ret til at gøre indsigelse. Kontakt os på hej@lejio.dk, hvis du ønsker at få revurderet en advarsel eller få den slettet, hvis dokumentationen ikke er korrekt."
         },
         {
           q: "Hvordan fungerer dynamisk selvrisiko?",
@@ -91,15 +91,15 @@ const FAQ = () => {
         },
         {
           q: "Hvad koster det at bruge LEJIO?",
-          a: "Private udlejere betaler 49 kr pr. gennemført booking. Forhandlere (CVR) betaler 299-799 kr/måned afhængig af antal køretøjer, uden pr. booking gebyr. LEJIO Varetager har 10-15% kommission."
+          a: "For private udlejere er det gratis at oprette sig (vi tager kun en kommission ved udlejning). For professionelle forhandlere har vi tre pakker: Starter (349 kr./md.), Standard (599 kr./md.) og Enterprise (899 kr./md.). Alle professionelle pakker tillægges en kommission på 3% pr. gennemført udlejning."
         },
         {
           q: "Hvordan får jeg mine penge?",
-          a: "Betalingen håndteres direkte mellem dig og lejeren via din valgte betalingsmetode (kort, bankoverførsel, MobilePay eller kontant). LEJIO håndterer ikke pengene."
+          a: "LEJIO fungerer som den tekniske platform, der formidler kontakten og kontrakten. Selve betalingen for lejen og depositum afregnes direkte mellem lejer og udlejer (f.eks. via MobilePay eller bankoverførsel). LEJIO fakturerer efterfølgende udlejeren for platformens kommission."
         },
         {
           q: "Skal jeg have forsikring på min bil?",
-          a: "Ja, alle køretøjer skal have minimum lovpligtig ansvarsforsikring. Vi anbefaler også kaskoforsikring. Du skal angive dit forsikringsselskab og policenummer i dine indstillinger."
+          a: "Som udlejer på LEJIO er det dit eget ansvar at sikre, at dit køretøj er korrekt forsikret til udlejning. LEJIO tilbyder ikke en kollektiv forsikring. Vi anbefaler altid, at du kontakter dit forsikringsselskab og informerer dem om, at du udlejer dit køretøj via en platform."
         },
         {
           q: "Hvordan opretter jeg en advarsel mod en lejer?",
@@ -441,7 +441,7 @@ const FAQ = () => {
         },
         {
           q: "Hvad dækker forsikringen?",
-          a: "LEJIO håndterer ikke forsikring – det er udlejers ansvar. Sørg for at din bilforsikring dækker udlejning til tredjemand og notér policenummer i systemet."
+          a: "Som udlejer på LEJIO er det dit eget ansvar at sikre, at dit køretøj er korrekt forsikret til udlejning. LEJIO tilbyder ikke en kollektiv forsikring. Vi anbefaler altid, at du kontakter dit forsikringsselskab og informerer dem om, at du udlejer dit køretøj via en platform."
         },
         {
           q: "Hvordan håndteres skader?",
@@ -449,7 +449,7 @@ const FAQ = () => {
         },
         {
           q: "Hvad er vanvidskørsel-klausulen?",
-          a: "Kontrakten indeholder en klausul om fuld erstatningspligt ved vanvidskørsel (hasarderet kørsel, spirituskørsel m.m.). Lejeren hæfter for hele bilens værdi."
+          a: "I lejekontrakten, som genereres via LEJIO, accepterer lejeren det fulde økonomiske ansvar for køretøjets værdi i tilfælde af vanvidskørsel. Dette betyder, at hvis bilen beslaglægges eller konfiskeres af politiet som følge af lejerens kørsel, hæfter lejeren for bilens fulde værdi over for ejeren."
         }
       ]
     },
@@ -459,11 +459,11 @@ const FAQ = () => {
       questions: [
         {
           q: "Hvordan modtager jeg betaling?",
-          a: "Du opsætter selv din betalingsmetode i indstillinger (MobilePay, bankoverførsel, kort). LEJIO håndterer ikke pengene mellem dig og lejeren."
+          a: "LEJIO fungerer som den tekniske platform, der formidler kontakten og kontrakten. Selve betalingen for lejen og depositum afregnes direkte mellem lejer og udlejer (f.eks. via MobilePay eller bankoverførsel). LEJIO fakturerer efterfølgende udlejeren for platformens kommission."
         },
         {
           q: "Hvad koster det at bruge LEJIO?",
-          a: "Private: 49 kr/booking. Forhandlere: 299-799 kr/md uden pr. booking gebyr. Fleet-planer: 10-15% kommission."
+          a: "For private udlejere er det gratis at oprette sig (vi tager kun en kommission ved udlejning). For professionelle forhandlere har vi tre pakker: Starter (349 kr./md.), Standard (599 kr./md.) og Enterprise (899 kr./md.). Alle professionelle pakker tillægges en kommission på 3% pr. gennemført udlejning."
         },
         {
           q: "Hvordan betaler jeg platformgebyr?",
