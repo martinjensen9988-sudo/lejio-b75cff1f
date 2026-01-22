@@ -1,6 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { FileText, Zap } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const Terms = () => {
   return (
@@ -37,7 +37,7 @@ const Terms = () => {
                 </span>
               </h1>
               <p className="text-sm text-muted-foreground">
-                Sidst opdateret: {new Date().toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' })}
+                Sidst opdateret: 22. januar 2026
               </p>
             </div>
           </div>
@@ -48,248 +48,132 @@ const Terms = () => {
             <div className="bg-card rounded-[2rem] border-2 border-border p-8 sm:p-12 shadow-xl">
               <div className="prose prose-lg max-w-none space-y-8 text-muted-foreground">
                 <p className="text-lg">
-                  Disse handelsbetingelser ("Betingelser") gælder for brugen af LEJIO's platform lejio.dk 
-                  og udgør en bindende aftale mellem dig og LEJIO.
+                  Disse handelsbetingelser gælder for alle brugere af LEJIO's platform. LEJIO er en formidlingsplatform 
+                  og er ikke part i selve lejeaftalen mellem lejer og udlejer.
                 </p>
 
                 <section>
                   <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">1. Om LEJIO</h2>
                   <p>
-                    LEJIO er en online platform, der forbinder lejere med private udlejere og forhandlere 
-                    af køretøjer. LEJIO fungerer som formidler og er ikke part i lejeaftalen mellem lejer og udlejer.
+                    LEJIO (lejio.dk) formidler kontakt mellem private/erhvervsmæssige udlejere og lejere af køretøjer.
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>LEJIO</li>
-                    <li>Telefon: 91 99 89 29</li>
                     <li>E-mail: hej@lejio.dk</li>
-                    <li>Web: lejio.dk</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">2. Definitioner</h2>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li><strong>"Platformen":</strong> LEJIO's hjemmeside og tilhørende services på lejio.dk</li>
-                    <li><strong>"Udlejer":</strong> En privatperson eller virksomhed, der udlejer køretøjer via Platformen</li>
-                    <li><strong>"Lejer":</strong> En person, der lejer et køretøj via Platformen</li>
-                    <li><strong>"Bruger":</strong> Enhver person, der anvender Platformen (lejere og udlejere)</li>
-                    <li><strong>"Booking":</strong> En reservation af et køretøj via Platformen</li>
-                    <li><strong>"Lejekontrakt":</strong> Den juridisk bindende aftale mellem lejer og udlejer</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">3. Registrering og brugerkonto</h2>
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">3.1 Oprettelse af konto</h3>
-                  <p>
-                    For at bruge Platformen skal du oprette en brugerkonto med korrekte og opdaterede oplysninger. 
-                    Du er ansvarlig for at holde dine kontooplysninger og adgangskode fortrolige.
-                  </p>
-
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">3.2 Krav til udlejere</h3>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Skal være fyldt 18 år</li>
-                    <li>Skal have gyldigt kørekort</li>
-                    <li>Skal have gyldig ansvarsforsikring på køretøjet</li>
-                    <li>Forhandlere skal have gyldigt CVR-nummer</li>
-                  </ul>
-
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">3.3 Krav til lejere</h3>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Skal være fyldt 21 år (kan variere afhængigt af udlejers krav)</li>
-                    <li>Skal have gyldigt kørekort i mindst 2 år</li>
-                    <li>Skal kunne fremvise gyldig legitimation</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">4. Udlejers forpligtelser</h2>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Sikre at køretøjet er lovligt, forsikret og i sikker stand</li>
-                    <li>Give korrekte og fyldestgørende oplysninger om køretøjet</li>
-                    <li>Stille køretøjet til rådighed som aftalt</li>
-                    <li>Have gyldig ansvarsforsikring og kaskoforsikring</li>
-                    <li>Overholde alle gældende love og regler for udlejning</li>
-                    <li>Behandle lejers personoplysninger fortroligt</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">5. Lejers forpligtelser</h2>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Behandle køretøjet med omhu og forsvarligt</li>
-                    <li>Kun bruge køretøjet til lovlige formål</li>
-                    <li>Returnere køretøjet i samme stand som ved modtagelse</li>
-                    <li>Overholde alle færdselsregler</li>
-                    <li>Straks meddele udlejer om skader eller uheld</li>
-                    <li>Betale for brændstof, bøder og afgifter pådraget i lejeperioden</li>
-                    <li>Ikke videreleje eller udlåne køretøjet til tredjemand</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">6. Vanvidskørsel og ansvar</h2>
-                  <p>
-                    Lejer accepterer ved indgåelse af lejekontrakten fuldt økonomisk ansvar for køretøjets værdi i 
-                    tilfælde af skade forårsaget af vanvidskørsel eller groft uagtsom kørsel.
-                  </p>
-                  <p className="mt-4">
-                    Dette ansvar gælder uanset forsikringsdækning og kan omfatte køretøjets fulde genanskaffelsesværdi.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">7. Booking og betaling</h2>
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">7.1 Booking</h3>
-                  <p>
-                    En booking er først bindende, når begge parter har underskrevet lejekontrakten digitalt, og 
-                    eventuel betaling er gennemført.
-                  </p>
-
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">7.2 Betalingsmetoder</h3>
-                  <p>
-                    Betalingen håndteres direkte mellem lejer og udlejer via udlejers valgte betalingsmetode 
-                    (kort, bankoverførsel, MobilePay eller kontant).
-                  </p>
-
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">7.3 Depositum</h3>
-                  <p>
-                    Udlejer kan kræve depositum som sikkerhed. Depositum tilbagebetales efter returneringen, 
-                    fratrukket eventuelle omkostninger til skader, manglende brændstof eller andre udeståender.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">8. Priser og gebyrer</h2>
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">8.1 Private udlejere</h3>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Gratis at oprette profil og køretøjer</li>
-                    <li>49 kr pr. gennemført booking</li>
-                  </ul>
-
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">8.2 Forhandler (CVR)</h3>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>299 kr/måned for 1-5 køretøjer</li>
-                    <li>499 kr/måned for 6-15 køretøjer</li>
-                    <li>799 kr/måned for 16+ køretøjer</li>
-                    <li>14 dages gratis prøveperiode</li>
-                  </ul>
-
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">8.3 LEJIO Varetager</h3>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>LEJIO Varetager: 15% kommission</li>
-                    <li>LEJIO Varetager Pro: 10% kommission</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">9. Afbestilling</h2>
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">9.1 Lejers afbestilling</h3>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Mere end 48 timer før: Fuld refundering (ekskl. eventuelle gebyrer)</li>
-                    <li>24-48 timer før: 50% refundering</li>
-                    <li>Mindre end 24 timer før: Ingen refundering</li>
-                  </ul>
-
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">9.2 Udlejers afbestilling</h3>
-                  <p>
-                    Udlejer bør undgå at aflyse bekræftede bookinger. Gentagne aflysninger kan medføre 
-                    suspension fra platformen.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">10. Forsikring</h2>
-                  <p>
-                    Udlejer er ansvarlig for at køretøjet er forsikret med minimum lovpligtig ansvarsforsikring. 
-                    LEJIO formidler ikke forsikring og er ikke ansvarlig for forsikringsdækning.
-                  </p>
-                  <p className="mt-4">
-                    Lejer anbefales at tegne egen rejseforsikring og evt. supplerende forsikring.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">11. Advarselssystem</h2>
-                  <p>
-                    LEJIO driver et advarselssystem, hvor udlejere kan registrere problematiske lejere. 
-                    Advarsler kan udstedes ved:
-                  </p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Skader på køretøj</li>
-                    <li>Manglende betaling</li>
-                    <li>Kontraktbrud</li>
-                    <li>Svindel eller misbrug</li>
-                    <li>Vanvidskørsel</li>
-                    <li>Sen returnering</li>
-                  </ul>
-                  <p className="mt-4">
-                    Lejere kan klage over advarsler, og LEJIO's administration behandler alle klager.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">12. LEJIO's ansvar</h2>
-                  <p>
-                    LEJIO er en formidlingsplatform og er ikke part i lejeaftalen mellem lejer og udlejer. 
-                    LEJIO er derfor ikke ansvarlig for:
-                  </p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Køretøjets stand eller egnethed</li>
-                    <li>Skader eller tab i forbindelse med udlejningen</li>
-                    <li>Brugernes opfyldelse af deres forpligtelser</li>
-                    <li>Tvister mellem lejer og udlejer</li>
-                  </ul>
-                  <p className="mt-4">
-                    LEJIO's ansvar er under alle omstændigheder begrænset til de gebyrer, der er betalt til 
-                    LEJIO i de seneste 12 måneder.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">13. Kontosuspension og udelukkelse</h2>
-                  <p>LEJIO kan suspendere eller lukke en brugerkonto ved:</p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Overtrædelse af disse betingelser</li>
-                    <li>Svigagtig eller ulovlig adfærd</li>
-                    <li>Gentagne klager fra andre brugere</li>
-                    <li>Manglende betaling af gebyrer</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">14. Ændringer af betingelser</h2>
-                  <p>
-                    LEJIO kan ændre disse betingelser med 30 dages varsel. Fortsat brug af platformen efter 
-                    ændringer udgør accept af de nye betingelser.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">15. Tvistløsning</h2>
-                  <p>
-                    Eventuelle tvister skal forsøges løst ved forhandling. Hvis dette ikke lykkes, afgøres 
-                    tvisten ved de danske domstole efter dansk ret.
-                  </p>
-                  <p className="mt-4">
-                    Du kan også klage til Forbrugerklagenævnet:
-                  </p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Forbrugerklagenævnet</li>
-                    <li>Carl Jacobsens Vej 35</li>
-                    <li>2500 Valby</li>
-                    <li>www.forbrug.dk</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">16. Kontakt</h2>
-                  <p>
-                    Har du spørgsmål til disse handelsbetingelser, er du velkommen til at kontakte os:
-                  </p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
                     <li>Telefon: 91 99 89 29</li>
-                    <li>E-mail: hej@lejio.dk</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">2. Brugerkrav</h2>
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">Lejer</h3>
+                  <p>
+                    Skal være min. 21 år (medmindre udlejer kræver højere alder) og have haft gyldigt kørekort i min. 2 år.
+                  </p>
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">Udlejer</h3>
+                  <p>
+                    Skal være min. 18 år og eje/have råderet over et lovligt, forsikret og trafiksikkert køretøj.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">3. Booking og Ingen Fortrydelsesret</h2>
+                  <p>
+                    En booking er bindende, når lejekontrakten er underskrevet digitalt.
+                  </p>
+                  <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 mt-4">
+                    <p className="text-foreground font-medium">
+                      <strong>Bemærk:</strong> Jf. Forbrugeraftalelovens § 18, stk. 2, nr. 12, er der ingen 14 dages 
+                      fortrydelsesret ved leje af køretøjer til en specifik dato.
+                    </p>
+                  </div>
+                  <p className="mt-4">Afbestilling følger LEJIO's afbestillingspolitik:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li><strong>&gt; 48 timer før:</strong> Fuld refundering (minus gebyrer)</li>
+                    <li><strong>24-48 timer før:</strong> 50% refundering</li>
+                    <li><strong>&lt; 24 timer før:</strong> Ingen refundering</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">4. Betaling og Depositum</h2>
+                  <p>
+                    LEJIO håndterer sikker betaling via kort og MobilePay.
+                  </p>
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">Depositum</h3>
+                  <p>
+                    Udlejer fastsætter depositum. Dette reserveres/opkræves ved booking og refunderes automatisk efter 
+                    lejeperiodens ophør (typisk indenfor 8 hverdage), forudsat at der ikke er anmeldt skader eller krav.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">5. Vanvidskørsel og Erstatningsansvar</h2>
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
+                    <p className="text-foreground font-medium">
+                      Lejer bærer det fulde personlige og økonomiske ansvar ved konfiskation af køretøjet som følge af 
+                      vanvidskørsel (jf. Færdselsloven).
+                    </p>
+                  </div>
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">Bilens værdi</h3>
+                  <p>
+                    Erstatningskravet mod lejer udgør altid køretøjets fulde handelsværdi på tidspunktet for konfiskationen.
+                  </p>
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">Fastlæggelse af beløb</h3>
+                  <p>
+                    Udlejer angiver køretøjets værdi i lejekontrakten. LEJIO foretager løbende stikprøvekontrol, hvor 
+                    udlejer skal kunne fremvise bevis for bilens pris/værdi (f.eks. købsfaktura eller aktuel vurdering) 
+                    for at sikre, at kravet mod lejer er retfærdigt og dokumenteret.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">6. Forsikring</h2>
+                  <p>
+                    Udlejer er ansvarlig for, at køretøjet er lovmæssigt forsikret til udlejning. LEJIO formidler ikke 
+                    forsikring og hæfter ikke for skader, der ikke dækkes af udlejers forsikring.
+                  </p>
+                  <p className="mt-4">
+                    Lejer hæfter for selvrisiko og skader ej dækket af kasko (f.eks. stenslag, jf. lejekontrakten).
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">7. Advarselssystem og Data</h2>
+                  <p>
+                    LEJIO registrerer oplysninger om kontraktbrud, skader og vanvidskørsel for at beskytte platformens brugere.
+                  </p>
+                  <p className="mt-4">
+                    Behandling af personoplysninger sker i overensstemmelse med vores{" "}
+                    <a href="/privatlivspolitik" className="text-primary hover:underline">Privatlivspolitik</a> og GDPR.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">8. Ansvarsfraskrivelse</h2>
+                  <p>
+                    LEJIO er ikke part i lejeaftalen og hæfter ikke for køretøjets stand, brugernes adfærd eller 
+                    økonomiske tab opstået i forbindelse med udlejningen.
+                  </p>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">9. Klagemulighed</h2>
+                  <p>
+                    Tvister søges løst mellem lejer og udlejer. Kan der ikke opnås enighed, kan der klages til:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                    <li>Center for Klageløsning (Nævnenes Hus)</li>
+                    <li>
+                      EU's online klageportal (ODR):{" "}
+                      <a 
+                        href="http://ec.europa.eu/consumers/odr/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        http://ec.europa.eu/consumers/odr/
+                      </a>
+                    </li>
                   </ul>
                 </section>
               </div>
