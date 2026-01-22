@@ -110,7 +110,7 @@ const WhatIsLejio = () => {
       description: 'Fuld kontrol over dine værdier, uanset hvor de befinder sig.',
       color: 'from-lavender to-lavender/60',
       features: [
-        { icon: Navigation2, title: 'Real-time Tracking', description: 'Se bilens præcise placering på et kort døgnet rundt.' },
+        { icon: Navigation2, title: 'GPS-sikkerhed', description: 'Dokumentation for lokation og kilometerstand ved check-in/out. Få besked ved uautoriseret brug.' },
         { icon: AlertTriangle, title: 'Geofencing', description: 'Tegn en usynlig grænse på kortet (f.eks. Danmark). Hvis bilen krydser grænsen, får du en SMS/Push-advarsel med det samme.' },
         { icon: Route, title: 'Logbog', description: 'Se historiske ruter og kørselshistorik for hver bil.' },
         { icon: Lock, title: 'Tyverisikring', description: 'Mulighed for at spærre for genstart af bilen (afhængig af hardware).' },

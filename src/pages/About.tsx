@@ -277,9 +277,9 @@ const About = () => {
                     <CreditCard className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-bold mb-1">Sikker Betaling</h4>
+                    <h4 className="font-bold mb-1">Enkel Afregning</h4>
                     <p className="text-sm text-muted-foreground">
-                      Alle transaktioner håndteres gennem krypterede betalingsveje, og vi tilbyder integreret depositumshåndtering, der beskytter udlejeren mod uforudsete udgifter.
+                      Du modtager betaling for leje og depositum direkte fra lejeren (f.eks. via MobilePay, bankoverførsel eller kontant). Vi sørger for alt det administrative omkring bookingen.
                     </p>
                   </div>
                 </div>

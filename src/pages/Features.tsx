@@ -118,7 +118,7 @@ const Features = () => {
       icon: MapPin,
       color: "from-green-500 to-green-500/60",
       features: [
-        { title: "Real-time GPS-sporing", description: "Se hvor dine biler befinder sig i realtid på kortet.", icon: MapPin },
+        { title: "GPS-sikkerhed", description: "Få besked ved uautoriseret brug eller hvis køretøjet forlader aftalte zoner.", icon: MapPin },
         { title: "Geofencing-alarmer", description: "Få besked når en bil forlader et defineret område.", icon: CircleDot },
         { title: "Kilometerregistrering", description: "Automatisk opdatering af kilometertal via GPS-tracker.", icon: Gauge },
         { title: "Webhook-integration", description: "Modtag GPS-data fra alle førende GPS-udbydere via webhook.", icon: Zap, badge: "Ny" },

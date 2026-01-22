@@ -102,7 +102,7 @@ export const DeductibleInsuranceOption = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2 text-sm">
                 <Check className="w-4 h-4 text-green-600" />
-                <span>Fuld dækning ved skader</span>
+                <span>Reduceret selvrisiko</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Check className="w-4 h-4 text-green-600" />
@@ -131,7 +131,7 @@ export const DeductibleInsuranceOption = ({
               <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 flex items-start gap-2">
                 <Shield className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-green-700 dark:text-green-400">
-                  Du er nu fuldt dækket! Ved eventuelle skader betaler du 0 kr i selvrisiko
+                  Du har tilvalgt reduceret selvrisiko! Ved eventuelle skader betaler du kun 0 kr i selvrisiko til udlejer.
                 </p>
               </div>
             )}

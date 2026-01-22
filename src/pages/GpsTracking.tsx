@@ -66,7 +66,7 @@ const GpsTracking = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">GPS-sporing</h1>
-            <p className="text-muted-foreground">Spor dine køretøjer i realtid</p>
+            <p className="text-muted-foreground">Sikkerhed og dokumentation for dine køretøjer</p>
           </div>
         </div>
 

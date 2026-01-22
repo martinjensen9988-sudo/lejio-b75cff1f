@@ -54,8 +54,8 @@ const BecomeLessor = () => {
     },
     {
       icon: MapPin,
-      title: "GPS-sporing",
-      description: "Hold øje med dine køretøjer i realtid. Geofencing og tyverisikring inkluderet."
+      title: "GPS-sikkerhed",
+      description: "Få besked ved uautoriseret brug eller hvis køretøjet forlader aftalte zoner (Geofencing). Dokumentation for lokation og kilometerstand sker automatisk."
     }
   ];
 
@@ -167,7 +167,7 @@ const BecomeLessor = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Lejio håndterer alt fra kontrakter og betaling til forsikring og skadesdokumentation. 
+              Lejio leverer de juridiske kontrakter og dokumentationsværktøjer, der sikrer dig i tilfælde af skader. 
               Du læner dig tilbage og tjener penge.
             </p>
             
