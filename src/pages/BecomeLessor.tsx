@@ -61,69 +61,61 @@ const BecomeLessor = () => {
 
   const plans = [
     {
-      name: "Gratis",
-      price: "0",
-      period: "kr./md.",
-      description: "Perfekt til at komme i gang",
-      highlight: false,
-      features: [
-        "Op til 3 køretøjer",
-        "Grundlæggende booking-system",
-        "Automatiske kontrakter",
-        "Chat med lejere",
-        "Basis statistik",
-        "Email-support"
-      ],
-      limitations: [
-        "5% kommission pr. booking"
-      ],
-      cta: "Start gratis",
-      ctaVariant: "outline" as const
-    },
-    {
-      name: "Pro",
-      price: "299",
-      period: "kr./md.",
-      description: "For seriøse udlejere",
+      name: "Starter",
+      price: "349",
+      period: "kr/md",
+      description: "1-5 biler",
       highlight: true,
-      badge: "Mest populær",
+      badge: "Anbefalet",
       features: [
-        "Ubegrænsede køretøjer",
-        "AI Vision Scanner",
-        "GPS-sporing & geofencing",
-        "Avanceret statistik",
-        "Multi-lokationer",
-        "Prioriteret support",
-        "Sæsonpriser",
-        "Bødehåndtering",
-        "Dæk- & service-styring"
+        "Op til 5 køretøjer",
+        "Ubegrænsede bookinger",
+        "Digitale kontrakter",
+        "Dashboard & statistik"
       ],
       limitations: [
-        "3% kommission pr. booking"
+        "+ 3% kommission"
       ],
-      cta: "Start 14 dages prøveperiode",
+      cta: "Vælg Starter",
       ctaVariant: "default" as const
     },
     {
-      name: "Fleet",
-      price: "Kontakt os",
-      period: "",
-      description: "For professionelle flåder",
+      name: "Standard",
+      price: "599",
+      period: "kr/md",
+      description: "6-15 biler",
       highlight: false,
       features: [
-        "Alt i Pro +",
-        "API-adgang",
-        "White-label løsning",
-        "Dedikeret account manager",
-        "SLA-garanti",
-        "Custom integrationer",
-        "Flåde-afregning",
-        "Medarbejder-styring"
+        "Op til 15 køretøjer",
+        "Ubegrænsede bookinger",
+        "Digitale kontrakter",
+        "Dashboard & statistik",
+        "Prioriteret support"
       ],
       limitations: [
-        "Individuel kommission"
+        "+ 3% kommission"
       ],
-      cta: "Kontakt salg",
+      cta: "Vælg Standard",
+      ctaVariant: "outline" as const
+    },
+    {
+      name: "Enterprise",
+      price: "899",
+      period: "kr/md",
+      description: "16+ biler",
+      highlight: false,
+      features: [
+        "Ubegrænsede køretøjer",
+        "Ubegrænsede bookinger",
+        "Digitale kontrakter",
+        "Dashboard & statistik",
+        "Dedikeret support",
+        "API adgang"
+      ],
+      limitations: [
+        "+ 3% kommission"
+      ],
+      cta: "Vælg Enterprise",
       ctaVariant: "outline" as const
     }
   ];
