@@ -5,7 +5,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
+
+// Lazy load LiveChatWidget to reduce initial bundle size
+const LiveChatWidget = lazy(() => import("@/components/chat/LiveChatWidget").then(m => ({ default: m.LiveChatWidget })));
 
 // Component to conditionally render LiveChatWidget (hide on admin pages)
 const ConditionalLiveChat = () => {
