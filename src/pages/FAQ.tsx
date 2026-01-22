@@ -155,7 +155,7 @@ const FAQ = () => {
       questions: [
         {
           q: "Hvordan fungerer nummerplade-scanning?",
-          a: "Ved udlevering og aflevering scanner du bilens nummerplade med kameraet. Systemet verificerer automatisk, at det er den rigtige bil og registrerer tidspunktet."
+          a: "Vores AI-værktøjer hjælper med at identificere køretøjet og læse data, men teknikken er kun vejledende. Det er altid dit eget ansvar som udlejer at kontrollere, at de scannede oplysninger (f.eks. kilometertal og brændstofniveau) stemmer overens med virkeligheden, før du godkender check-in."
         },
         {
           q: "Hvad er dashboard-foto med AI?",
@@ -175,7 +175,7 @@ const FAQ = () => {
         },
         {
           q: "Hvordan dokumenterer jeg bilens stand?",
-          a: "Brug skaderapport-funktionen til at fotografere og markere eksisterende skader på et visuelt diagram af bilen. Begge parter godkender rapporten digitalt."
+          a: "Både ved udlevering og aflevering skal der tages tydelige billeder af køretøjet fra alle fire sider samt af interiør og kilometerstand. Disse billeder er jeres primære dokumentation i tilfælde af en skade. LEJIO gemmer disse billeder sammen med lejekontrakten, men det er altid udlejerens ansvar at sikre, at billederne er skarpe og dækkende."
         }
       ]
     },
@@ -445,7 +445,7 @@ const FAQ = () => {
         },
         {
           q: "Hvordan håndteres skader?",
-          a: "Skader dokumenteres via check-in/check-out systemet. Selvrisiko opkræves fra lejeren, og du kan evt. anmelde til din forsikring for resten."
+          a: "Hvis der opstår en skade, skal den registreres i LEJIO-appen med det samme ved check-out. Da forsikringsforholdet er mellem udlejer og dennes forsikringsselskab, skal skadesanmeldelsen ske direkte til forsikringen. LEJIO leverer de nødvendige data (kontrakt, tjekliste og fotos) til brug for din skadessag."
         },
         {
           q: "Hvad er vanvidskørsel-klausulen?",
@@ -493,7 +493,7 @@ const FAQ = () => {
         },
         {
           q: "Hvad hvis lejeren ikke underskriver?",
-          a: "Bookingen kan ikke starte før begge parter har underskrevet. Du får besked når lejeren har underskrevet."
+          a: "Udlever aldrig nøglerne til et køretøj, før lejekontrakten er underskrevet digitalt via LEJIO, og du har set gyldig legitimation (kørekort). En udlevering uden underskrevet kontrakt betyder, at du ikke er dækket af platformens vilkår eller din forsikring."
         }
       ]
     },
