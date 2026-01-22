@@ -38,6 +38,7 @@ const TIERS = [
       'Ubegrænsede bookinger',
       'Digitale kontrakter',
       'Dashboard & statistik',
+      '+ 3% kommission pr. booking',
     ],
   },
   {
@@ -54,6 +55,7 @@ const TIERS = [
       'Digitale kontrakter',
       'Dashboard & statistik',
       'Prioriteret support',
+      '+ 3% kommission pr. booking',
     ],
   },
   {
@@ -70,6 +72,7 @@ const TIERS = [
       'Dashboard & statistik',
       'Dedikeret support',
       'API adgang',
+      '+ 3% kommission pr. booking',
     ],
   },
 ];
@@ -464,7 +467,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
       </div>
 
       <p className="text-xs text-center text-muted-foreground">
-        * Alle priser er ekskl. moms. Betalingen sker via Stripe. Du kan til enhver tid ændre eller annullere dit abonnement.
+        * Alle priser er ekskl. moms. Der tillægges 3% kommission pr. gennemført booking. Betalingen sker via Stripe. Du kan til enhver tid ændre eller annullere dit abonnement.
       </p>
     </div>
   );
