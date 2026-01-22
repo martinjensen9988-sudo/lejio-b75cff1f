@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 
 // Lazy load LiveChatWidget to reduce initial bundle size
 const LiveChatWidget = lazy(() => import("@/components/chat/LiveChatWidget").then(m => ({ default: m.LiveChatWidget })));
@@ -203,40 +204,40 @@ const App = () => (
               <Route path="/my-rentals" element={<MyRentals />} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              {/* Admin sub-routes */}
-              <Route path="/admin/users" element={<AdminUsersPage />} />
-              <Route path="/admin/staff" element={<AdminStaffPage />} />
-              <Route path="/admin/bookings" element={<AdminBookingsPage />} />
-              <Route path="/admin/bookings/add" element={<BookingsAddPage />} />
-              <Route path="/admin/locations" element={<AdminLocationsPage />} />
-              <Route path="/admin/fees" element={<AdminFeesPage />} />
-              <Route path="/admin/discounts" element={<AdminDiscountsPage />} />
-              <Route path="/admin/discounts/add" element={<DiscountsAddPage />} />
-              <Route path="/admin/fleet" element={<AdminFleetPage />} />
-              <Route path="/admin/fleet/edit/:id" element={<FleetVehicleEditPage />} />
-              <Route path="/admin/staff/add" element={<StaffAddPage />} />
-              <Route path="/admin/corporate/add" element={<CorporateAddPage />} />
-              <Route path="/admin/corporate/:id" element={<CorporateDetailPage />} />
-              <Route path="/admin/warnings" element={<AdminWarningsPage />} />
-              <Route path="/admin/reports" element={<AdminReportsPage />} />
-              <Route path="/admin/messages" element={<AdminMessagesPage />} />
-              <Route path="/admin/live-chat" element={<AdminLiveChatPage />} />
-              <Route path="/admin/vehicle-values" element={<AdminVehicleValuesPage />} />
-              <Route path="/admin/gps" element={<AdminGpsPage />} />
-              <Route path="/admin/gps/add" element={<GpsAddPage />} />
-              <Route path="/admin/users/edit/:id" element={<UserEditPage />} />
-              <Route path="/admin/checkinout" element={<AdminCheckInOutPage />} />
-              <Route path="/admin/corporate" element={<AdminCorporatePage />} />
-              <Route path="/admin/facebook" element={<AdminFacebookPage />} />
-              <Route path="/admin/sales-ai" element={<AdminSalesAIPage />} />
-              <Route path="/admin/sales-ai/add" element={<SalesAIAddLeadPage />} />
-              <Route path="/admin/sales-ai/import" element={<SalesAIImportPage />} />
-              <Route path="/admin/sales-ai/email/:id" element={<SalesAIEmailPage />} />
-              <Route path="/admin/sales-ai/outreach/:id" element={<SalesAIOutreachPage />} />
-              <Route path="/admin/sales-ai/car-ad" element={<SalesAICarAdPage />} />
-              <Route path="/admin/sales-ai/company-search" element={<SalesAICompanySearchPage />} />
-              <Route path="/admin/stats" element={<AdminStatsPage />} />
-              <Route path="/admin/driver-licenses" element={<DriverLicenseReviewPage />} />
+              {/* Admin sub-routes - wrapped in AdminAuthProvider */}
+              <Route path="/admin/users" element={<AdminAuthProvider><AdminUsersPage /></AdminAuthProvider>} />
+              <Route path="/admin/staff" element={<AdminAuthProvider><AdminStaffPage /></AdminAuthProvider>} />
+              <Route path="/admin/bookings" element={<AdminAuthProvider><AdminBookingsPage /></AdminAuthProvider>} />
+              <Route path="/admin/bookings/add" element={<AdminAuthProvider><BookingsAddPage /></AdminAuthProvider>} />
+              <Route path="/admin/locations" element={<AdminAuthProvider><AdminLocationsPage /></AdminAuthProvider>} />
+              <Route path="/admin/fees" element={<AdminAuthProvider><AdminFeesPage /></AdminAuthProvider>} />
+              <Route path="/admin/discounts" element={<AdminAuthProvider><AdminDiscountsPage /></AdminAuthProvider>} />
+              <Route path="/admin/discounts/add" element={<AdminAuthProvider><DiscountsAddPage /></AdminAuthProvider>} />
+              <Route path="/admin/fleet" element={<AdminAuthProvider><AdminFleetPage /></AdminAuthProvider>} />
+              <Route path="/admin/fleet/edit/:id" element={<AdminAuthProvider><FleetVehicleEditPage /></AdminAuthProvider>} />
+              <Route path="/admin/staff/add" element={<AdminAuthProvider><StaffAddPage /></AdminAuthProvider>} />
+              <Route path="/admin/corporate/add" element={<AdminAuthProvider><CorporateAddPage /></AdminAuthProvider>} />
+              <Route path="/admin/corporate/:id" element={<AdminAuthProvider><CorporateDetailPage /></AdminAuthProvider>} />
+              <Route path="/admin/warnings" element={<AdminAuthProvider><AdminWarningsPage /></AdminAuthProvider>} />
+              <Route path="/admin/reports" element={<AdminAuthProvider><AdminReportsPage /></AdminAuthProvider>} />
+              <Route path="/admin/messages" element={<AdminAuthProvider><AdminMessagesPage /></AdminAuthProvider>} />
+              <Route path="/admin/live-chat" element={<AdminAuthProvider><AdminLiveChatPage /></AdminAuthProvider>} />
+              <Route path="/admin/vehicle-values" element={<AdminAuthProvider><AdminVehicleValuesPage /></AdminAuthProvider>} />
+              <Route path="/admin/gps" element={<AdminAuthProvider><AdminGpsPage /></AdminAuthProvider>} />
+              <Route path="/admin/gps/add" element={<AdminAuthProvider><GpsAddPage /></AdminAuthProvider>} />
+              <Route path="/admin/users/edit/:id" element={<AdminAuthProvider><UserEditPage /></AdminAuthProvider>} />
+              <Route path="/admin/checkinout" element={<AdminAuthProvider><AdminCheckInOutPage /></AdminAuthProvider>} />
+              <Route path="/admin/corporate" element={<AdminAuthProvider><AdminCorporatePage /></AdminAuthProvider>} />
+              <Route path="/admin/facebook" element={<AdminAuthProvider><AdminFacebookPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai" element={<AdminAuthProvider><AdminSalesAIPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai/add" element={<AdminAuthProvider><SalesAIAddLeadPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai/import" element={<AdminAuthProvider><SalesAIImportPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai/email/:id" element={<AdminAuthProvider><SalesAIEmailPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai/outreach/:id" element={<AdminAuthProvider><SalesAIOutreachPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai/car-ad" element={<AdminAuthProvider><SalesAICarAdPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai/company-search" element={<AdminAuthProvider><SalesAICompanySearchPage /></AdminAuthProvider>} />
+              <Route path="/admin/stats" element={<AdminAuthProvider><AdminStatsPage /></AdminAuthProvider>} />
+              <Route path="/admin/driver-licenses" element={<AdminAuthProvider><DriverLicenseReviewPage /></AdminAuthProvider>} />
               <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
               <Route path="/handelsbetingelser" element={<Terms />} />
               <Route path="/faq" element={<FAQ />} />
