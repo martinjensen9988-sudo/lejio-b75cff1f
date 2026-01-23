@@ -251,6 +251,7 @@ const App = () => (
               <Route path="/corporate/add-vehicle" element={<CorporateAddFleetVehiclePage />} />
               <Route path="/corporate/booking" element={<CorporateCreateBookingPage />} />
               <Route path="/privat-fleet" element={<PrivateFleet />} />
+              <Route path="/fleet-loesning" element={<PrivateFleet />} />
               <Route path="/om-os" element={<About />} />
               <Route path="/hvad-er-lejio" element={<WhatIsLejio />} />
               <Route path="/bliv-udlejer" element={<BecomeLessor />} />
