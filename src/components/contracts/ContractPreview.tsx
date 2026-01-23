@@ -233,19 +233,18 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
           </div>
         </section>
 
-        {/* Insurance */}
+        {/* Insurance & Roadside */}
         <section className="border-t border-gray-200 p-6 bg-blue-50/30">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
               <Shield className="w-4 h-4 text-blue-600" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900">Forsikring</h2>
+            <h2 className="text-lg font-bold text-gray-900">Forsikring & Vejhjælp</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4 mb-4">
             <div className="bg-white rounded-xl p-4 border border-blue-200">
               <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Selvrisiko</p>
               <p className="text-xl font-bold text-gray-900">{formatCurrency(contract.deductible_amount)}</p>
-              <p className="text-xs text-gray-500">momsfri</p>
             </div>
             {contract.insurance_company && (
               <div className="bg-white rounded-xl p-4 border border-blue-200">
@@ -253,12 +252,21 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
                 <p className="font-semibold">{contract.insurance_company}</p>
               </div>
             )}
-            {contract.insurance_policy_number && (
+            {contract.roadside_assistance_provider && (
               <div className="bg-white rounded-xl p-4 border border-blue-200">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Policenummer</p>
-                <p className="font-mono text-sm">{contract.insurance_policy_number}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Vejhjælp</p>
+                <p className="font-semibold">{contract.roadside_assistance_provider}</p>
+                {contract.roadside_assistance_phone && (
+                  <p className="font-mono text-sm text-emerald-600">{contract.roadside_assistance_phone}</p>
+                )}
               </div>
             )}
+          </div>
+          <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+            <p className="text-sm text-amber-800 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span><strong>Bemærk:</strong> Stenslag og udskiftning af ruder er ikke dækket af forsikringen og betales af lejer.</span>
+            </p>
           </div>
         </section>
 
@@ -300,31 +308,7 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
           </div>
         </section>
 
-        {/* Roadside Assistance */}
-        {(contract.roadside_assistance_provider || contract.roadside_assistance_phone) && (
-          <section className="border-t border-gray-200 p-6 bg-emerald-50/30">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <Phone className="w-4 h-4 text-emerald-600" />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">Vejhjælp</h2>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-emerald-200 inline-flex items-center gap-6">
-              {contract.roadside_assistance_provider && (
-                <div>
-                  <p className="text-xs text-gray-500">Udbyder</p>
-                  <p className="font-semibold">{contract.roadside_assistance_provider}</p>
-                </div>
-              )}
-              {contract.roadside_assistance_phone && (
-                <div>
-                  <p className="text-xs text-gray-500">Kontakt</p>
-                  <p className="font-mono text-lg font-bold text-emerald-600">{contract.roadside_assistance_phone}</p>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
+        {/* Roadside Assistance - Standalone section removed, now part of Insurance section */}
 
         {/* Fuel Policy */}
         {contract.fuel_policy_enabled && (
@@ -423,18 +407,42 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
           
           <div className="space-y-4 text-sm text-gray-600">
             <TermsSection title="Førerforhold">
-              Bilen må kun føres af den lejer, der har tegnet lejekontrakten samt personer – over 23 år – der hører til lejers husstand, hvis disse har et gyldigt dansk kørekort. Bilen må ikke fremlejes, benyttes til motorsport, eller til person- eller godstransport mod betaling.
+              Bilen må kun føres af lejer og personer over 23 år i lejers husstand med gyldigt kørekort. Bilen må kun anvendes i Danmark medmindre andet er aftalt.
             </TermsSection>
             
-            <TermsSection title="Generelle vilkår">
-              <ul className="list-disc list-inside space-y-1 mt-2">
-                <li>Køretøjet skal afleveres i samme stand som ved modtagelse</li>
-                <li>Rygning i køretøjet er ikke tilladt</li>
-                <li>Lejer er ansvarlig for at overholde færdselsreglerne</li>
-                <li>Ved skader skal udlejer kontaktes omgående</li>
-                <li>Alle bøder og afgifter pålagt køretøjet i lejeperioden betales af lejer</li>
-              </ul>
+            <TermsSection title="Service & Vedligeholdelse">
+              Ved lejeperioder under 30 dage påhviler det udlejer at sikre, at køretøjet er serviceret og synet. Ved lejeperioder over 30 dage er lejer ansvarlig for, at bilen får gennemført regelmæssige services og syn efter aftale med udlejer. Lejer skal altid vedligeholde bilen i god stand.
             </TermsSection>
+            
+            <TermsSection title="Tilbagelevering & Depositum">
+              Tilbagelevering skal ske senest kl. 15.00 på kontraktens sidste dag. Bilen afleveres rengjort og med fuld tank. Det indbetalte depositum refunderes senest 8 hverdage efter indlevering, forudsat at der ikke er konstateret skader, mangler eller ubetalte gebyrer/bøder.
+            </TermsSection>
+          </div>
+        </section>
+
+        {/* Fees Section */}
+        <section className="border-t border-gray-200 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
+              <CreditCard className="w-4 h-4 text-rose-600" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Gebyrer</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="bg-rose-50 rounded-xl p-4 border border-rose-200">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Rygning i køretøjet</p>
+              <p className="text-xl font-bold text-rose-700">5.000 kr.</p>
+            </div>
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Manglende brændstof</p>
+              <p className="text-lg font-bold text-amber-700">250 kr. + literpris</p>
+              <p className="text-xs text-gray-500">(18,50 kr./liter)</p>
+            </div>
+            <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Ubetalte p-bøder</p>
+              <p className="text-lg font-bold text-orange-700">Bøde + 500 kr.</p>
+              <p className="text-xs text-gray-500">i administrationsgebyr</p>
+            </div>
           </div>
         </section>
 
@@ -500,7 +508,7 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
             <div className="flex items-center gap-2">
               <span className="font-semibold text-primary">LEJIO</span>
               <span>•</span>
-              <span>lejio.dk</span>
+              <a href="https://www.lejio.dk" className="hover:text-primary transition-colors">www.lejio.dk</a>
             </div>
             <div>
               Kontrakt nr. {contract.contract_number}
