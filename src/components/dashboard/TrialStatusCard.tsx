@@ -77,7 +77,7 @@ const TrialStatusCard = () => {
             <p className="text-sm text-muted-foreground mb-3">
               {daysRemaining === 0 
                 ? 'Din prøveperiode udløber i dag!' 
-                : `Du har ${daysRemaining} dag${daysRemaining === 1 ? '' : 'e'} tilbage af din gratis prøveperiode.`
+                : `Du har ${daysRemaining} dag${daysRemaining === 1 ? '' : 'e'} tilbage af din prøveperiode.`
               }
               {' '}Aktiver dit abonnement nu for at sikre uafbrudt adgang.
             </p>
@@ -108,7 +108,7 @@ const TrialStatusCard = () => {
               Du er på prøveperiode
             </h3>
             <p className="text-sm text-muted-foreground mb-3">
-              Du har {daysRemaining} dage tilbage af din gratis 14-dages prøveperiode. Dine biler er skjulte for lejere indtil du aktiverer dit abonnement.
+              Du har {daysRemaining} dage tilbage af din prøveperiode. Dine biler er skjulte for lejere indtil du aktiverer dit abonnement.
             </p>
             <Button 
               onClick={() => navigate('/settings?tab=subscription')}

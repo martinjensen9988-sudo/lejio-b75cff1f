@@ -28,7 +28,7 @@ const Pricing = () => {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Ingen skjulte gebyrer. Start gratis og betal kun når du tjener.
+            Ingen skjulte gebyrer. Gennemsigtig prissætning fra dag ét.
           </p>
         </div>
 
@@ -102,7 +102,7 @@ const Pricing = () => {
               </ul>
 
               <Button variant="warm" size="lg" className="w-full font-bold text-lg py-6" onClick={() => navigate('/auth')}>
-                Kom i gang gratis
+                Kom i gang
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </div>

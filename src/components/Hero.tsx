@@ -167,7 +167,7 @@ const Hero = () => {
                 onClick={() => navigate('/auth')}
               >
                 <Sparkles className="w-5 h-5 text-accent" />
-                Bliv udlejer – 6 mdr. gratis
+                Bliv udlejer
               </Button>
               <Button 
                 variant="ghost" 

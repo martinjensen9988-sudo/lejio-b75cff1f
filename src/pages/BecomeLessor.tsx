@@ -159,7 +159,7 @@ const BecomeLessor = () => {
           <div className="max-w-4xl mx-auto text-center">
             <Badge variant="outline" className="mb-6 px-4 py-2 text-sm border-primary/30 bg-primary/5">
               <Sparkles className="w-4 h-4 mr-2 text-primary" />
-              Kom i gang gratis – ingen binding
+              Kom i gang – ingen binding
             </Badge>
             
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
@@ -174,7 +174,7 @@ const BecomeLessor = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-lg px-8" onClick={() => navigate("/auth")}>
-                Start gratis nu
+                Kom i gang nu
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8" onClick={() => navigate("/hvad-er-lejio")}>
@@ -183,7 +183,7 @@ const BecomeLessor = () => {
             </div>
             
             <p className="text-sm text-muted-foreground mt-4">
-              Ingen kreditkort påkrævet · Gratis at prøve · Opsig når som helst
+              Ingen binding · Opsig når som helst
             </p>
           </div>
         </div>
@@ -246,7 +246,7 @@ const BecomeLessor = () => {
               Simpel og gennemsigtig prissætning
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start gratis og opgrader når du er klar. Ingen skjulte gebyrer.
+              Vælg den plan der passer til dig. Ingen skjulte gebyrer.
             </p>
           </div>
           
@@ -349,7 +349,7 @@ const BecomeLessor = () => {
             Klar til at begynde?
           </h2>
           <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Opret din gratis konto på under 2 minutter og tilføj dit første køretøj i dag.
+            Opret din konto på under 2 minutter og tilføj dit første køretøj i dag.
           </p>
           <Button 
             size="lg" 
@@ -357,7 +357,7 @@ const BecomeLessor = () => {
             className="text-lg px-8"
             onClick={() => navigate("/auth")}
           >
-            Opret gratis konto
+            Opret konto
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
         </div>

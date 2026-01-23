@@ -91,7 +91,7 @@ const FAQ = () => {
         },
         {
           q: "Hvad koster det at bruge LEJIO?",
-          a: "For private udlejere er det gratis at oprette sig (vi tager kun en kommission ved udlejning). For professionelle forhandlere har vi tre pakker: Starter (349 kr./md.), Standard (599 kr./md.) og Enterprise (899 kr./md.). Alle professionelle pakker tillægges en kommission på 3% pr. gennemført udlejning."
+          a: "For private udlejere koster det 59 kr pr. booking. For professionelle forhandlere har vi tre pakker: Starter (349 kr./md.), Standard (599 kr./md.) og Enterprise (899 kr./md.). Alle professionelle pakker tillægges en kommission på 3% pr. gennemført udlejning."
         },
         {
           q: "Hvordan får jeg mine penge?",
@@ -107,7 +107,7 @@ const FAQ = () => {
         },
         {
           q: "Hvad er forskellen på Privat og Forhandler?",
-          a: "Private udlejere betaler pr. booking (49 kr), mens Forhandlere (med CVR) betaler fast månedsbeløb uden pr. booking gebyr. Forhandlere får også 14 dages gratis prøveperiode og kan uploade firmalogo til kontrakter."
+          a: "Private udlejere betaler pr. booking (59 kr), mens Forhandlere (med CVR) betaler fast månedsbeløb (fra 349 kr/md) + 3% kommission pr. booking. Forhandlere kan uploade firmalogo til kontrakter og får adgang til alle Pro-funktioner."
         },
         {
           q: "Hvordan fungerer LEJIO Varetager?",
@@ -467,7 +467,7 @@ const FAQ = () => {
         },
         {
           q: "Hvad koster det at bruge LEJIO?",
-          a: "For private udlejere er det gratis at oprette sig (vi tager kun en kommission ved udlejning). For professionelle forhandlere har vi tre pakker: Starter (349 kr./md.), Standard (599 kr./md.) og Enterprise (899 kr./md.). Alle professionelle pakker tillægges en kommission på 3% pr. gennemført udlejning."
+          a: "For private udlejere koster det 59 kr pr. booking. For professionelle forhandlere har vi tre pakker: Starter (349 kr./md.), Standard (599 kr./md.) og Enterprise (899 kr./md.). Alle professionelle pakker tillægges en kommission på 3% pr. gennemført udlejning."
         },
         {
           q: "Hvordan betaler jeg platformgebyr?",

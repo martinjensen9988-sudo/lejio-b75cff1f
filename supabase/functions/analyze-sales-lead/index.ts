@@ -60,13 +60,12 @@ LEJIO er Danmarks førende platform for biludlejning - tænk det som "Hotels.com
 5. Erhvervskunder der har brug for flådestyring
 
 **PRISER & ABONNEMENTER:**
-- Gratis for private udlejere (CPR) - kun 5% platformgebyr per booking
+- Private udlejere (CPR): 59 kr pr. booking
 - Pro abonnement for erhverv (CVR):
-  * 299 kr/md for 1-5 køretøjer
-  * 499 kr/md for 6-15 køretøjer  
-  * 799 kr/md for 16+ køretøjer
-- INGEN booking-gebyrer for Pro-brugere
-- 14 dages gratis prøveperiode
+  * Starter: 349 kr/md for 1-5 køretøjer
+  * Standard: 599 kr/md for 6-15 køretøjer  
+  * Enterprise: 899 kr/md for 16+ køretøjer
+- 3% kommission pr. booking for Pro-brugere
 
 **LEJIO FLEET (Varetager-ordning):**
 - "LEJIO Varetager" (15% kommission): Platform + kundeservice

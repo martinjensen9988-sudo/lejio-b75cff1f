@@ -211,7 +211,7 @@ const WhatIsLejio = () => {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button size="lg" className="font-bold text-lg px-8 shadow-xl shadow-primary/20" asChild>
                 <Link to="/auth">
-                  Kom i gang gratis
+                  Kom i gang
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
@@ -328,7 +328,7 @@ const WhatIsLejio = () => {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button size="lg" className="font-bold text-lg px-8 shadow-xl shadow-primary/20" asChild>
                 <Link to="/auth">
-                  Start din gratis prøveperiode
+                  Kom i gang som udlejer
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
