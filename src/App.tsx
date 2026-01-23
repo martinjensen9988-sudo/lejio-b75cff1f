@@ -97,6 +97,7 @@ const LocationEditPage = lazy(() => import("./pages/dashboard/LocationEdit"));
 const SettlementPage = lazy(() => import("./pages/dashboard/Settlement"));
 const CheckInOutPage = lazy(() => import("./pages/dashboard/CheckInOut"));
 const ScanHistoryPage = lazy(() => import("./pages/dashboard/ScanHistory"));
+const ApiKeysPage = lazy(() => import("./pages/dashboard/ApiKeys"));
 const AddGeofencePage = lazy(() => import("./pages/gps/AddGeofence"));
 const AddGpsDevicePage = lazy(() => import("./pages/gps/AddGpsDevice"));
 const VehicleDetailPage = lazy(() => import("./pages/search/VehicleDetail"));
@@ -206,6 +207,7 @@ const App = () => (
               <Route path="/dashboard/vehicle-swap/:bookingId" element={<VehicleSwapPage />} />
               <Route path="/dashboard/warnings" element={<WarningsPage />} />
               <Route path="/dashboard/warnings/create" element={<CreateWarningPage />} />
+              <Route path="/dashboard/api-keys" element={<ApiKeysPage />} />
               <Route path="/gps/add-device" element={<AddGpsDevicePage />} />
               <Route path="/gps/add-geofence" element={<AddGeofencePage />} />
               <Route path="/settings" element={<Settings />} />
