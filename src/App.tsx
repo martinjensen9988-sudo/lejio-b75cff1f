@@ -117,6 +117,7 @@ const AdminWarningsPage = lazy(() => import("./pages/admin/Warnings"));
 const AdminReportsPage = lazy(() => import("./pages/admin/Reports"));
 const AdminMessagesPage = lazy(() => import("./pages/admin/Messages"));
 const AdminLiveChatPage = lazy(() => import("./pages/admin/LiveChat"));
+const AdminCustomerServicePage = lazy(() => import("./pages/admin/CustomerService"));
 const AdminVehicleValuesPage = lazy(() => import("./pages/admin/VehicleValues"));
 const AdminGpsPage = lazy(() => import("./pages/admin/Gps"));
 const AdminCheckInOutPage = lazy(() => import("./pages/admin/CheckInOut"));
@@ -232,6 +233,7 @@ const App = () => (
               <Route path="/admin/reports" element={<AdminAuthProvider><AdminReportsPage /></AdminAuthProvider>} />
               <Route path="/admin/messages" element={<AdminAuthProvider><AdminMessagesPage /></AdminAuthProvider>} />
               <Route path="/admin/live-chat" element={<AdminAuthProvider><AdminLiveChatPage /></AdminAuthProvider>} />
+              <Route path="/admin/customer-service" element={<AdminAuthProvider><AdminCustomerServicePage /></AdminAuthProvider>} />
               <Route path="/admin/vehicle-values" element={<AdminAuthProvider><AdminVehicleValuesPage /></AdminAuthProvider>} />
               <Route path="/admin/gps" element={<AdminAuthProvider><AdminGpsPage /></AdminAuthProvider>} />
               <Route path="/admin/gps/add" element={<AdminAuthProvider><GpsAddPage /></AdminAuthProvider>} />

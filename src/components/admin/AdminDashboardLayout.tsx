@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Calendar, Receipt, Tag, Truck, AlertTriangle, Flag, 
   UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3,
-  Menu, Camera, Building2, Facebook, UsersRound, LogOut, CheckCircle, Clock, Sparkles
+  Menu, Camera, Building2, Facebook, UsersRound, LogOut, CheckCircle, Clock, Sparkles, HeadphonesIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -18,6 +18,7 @@ interface AdminDashboardLayoutProps {
 }
 
 const menuItems = [
+  { value: 'customer-service', icon: HeadphonesIcon, label: 'Kundeservice', path: '/admin/customer-service' },
   { value: 'users', icon: UserCog, label: 'Brugerstyring', path: '/admin/users' },
   { value: 'staff', icon: UsersRound, label: 'Medarbejdere', path: '/admin/staff' },
   { value: 'bookings', icon: Calendar, label: 'Bookinger', path: '/admin/bookings' },
