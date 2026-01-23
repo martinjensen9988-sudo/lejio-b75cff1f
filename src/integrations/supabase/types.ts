@@ -1928,6 +1928,45 @@ export type Database = {
           },
         ]
       }
+      fleet_api_keys: {
+        Row: {
+          allowed_origins: string[] | null
+          api_key: string
+          created_at: string
+          fleet_owner_id: string
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          requests_count: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_origins?: string[] | null
+          api_key: string
+          created_at?: string
+          fleet_owner_id: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          requests_count?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_origins?: string[] | null
+          api_key?: string
+          created_at?: string
+          fleet_owner_id?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          requests_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fleet_dispatch_recommendations: {
         Row: {
           acted_at: string | null
@@ -5448,6 +5487,7 @@ export type Database = {
       }
       generate_contract_number: { Args: never; Returns: string }
       generate_corporate_invoice_number: { Args: never; Returns: string }
+      generate_fleet_api_key: { Args: never; Returns: string }
       generate_invoice_number: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_admin_users: {
