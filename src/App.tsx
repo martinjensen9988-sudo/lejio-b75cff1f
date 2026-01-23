@@ -77,6 +77,7 @@ const FinesAddPage = lazy(() => import("./pages/dashboard/FinesAdd"));
 const ServiceTaskAddPage = lazy(() => import("./pages/dashboard/ServiceTaskAdd"));
 const AIPricingPage = lazy(() => import("./pages/dashboard/AIPricing"));
 const FleetAIPage = lazy(() => import("./pages/dashboard/FleetAI"));
+const FleetPage = lazy(() => import("./pages/dashboard/Fleet"));
 const DeductiblesPage = lazy(() => import("./pages/dashboard/Deductibles"));
 const DeductiblesAddPage = lazy(() => import("./pages/dashboard/DeductiblesAdd"));
 const EditVehiclePage = lazy(() => import("./pages/dashboard/EditVehicle"));
@@ -196,6 +197,7 @@ const App = () => (
               <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
               <Route path="/dashboard/ai-pricing" element={<AIPricingPage />} />
               <Route path="/dashboard/fleet-ai" element={<FleetAIPage />} />
+              <Route path="/dashboard/fleet" element={<FleetPage />} />
               <Route path="/dashboard/deductibles" element={<DeductiblesPage />} />
               <Route path="/dashboard/vehicles/edit/:id" element={<EditVehiclePage />} />
               <Route path="/dashboard/contract/sign/:id" element={<ContractSignPage />} />
