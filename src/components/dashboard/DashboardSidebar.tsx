@@ -90,6 +90,7 @@ export const DashboardSidebar = ({
       'analytics': '/dashboard/analytics',
       'ai-pricing': '/dashboard/ai-pricing',
       'fleet-ai': '/dashboard/fleet-ai',
+      'fleet': '/dashboard/fleet',
       'deductibles': '/dashboard/deductibles',
       'api-keys': '/dashboard/api-keys',
     };
@@ -111,6 +112,7 @@ export const DashboardSidebar = ({
         { label: "Kalender", icon: CalendarDays, value: "calendar" },
         { label: "Bookinger", icon: Calendar, value: "bookings", badge: pendingBookings },
         { label: "Lokationer", icon: MapPin, value: "locations" },
+        { label: "Fleet", icon: Truck, value: "fleet" },
       ],
     },
     {
