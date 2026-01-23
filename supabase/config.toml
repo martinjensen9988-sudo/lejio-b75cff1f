@@ -173,3 +173,6 @@ verify_jwt = false
 
 [functions.send-critical-action-alert]
 verify_jwt = false
+
+[functions.create-booking]
+verify_jwt = true
