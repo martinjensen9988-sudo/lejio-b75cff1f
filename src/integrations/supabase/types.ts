@@ -1937,7 +1937,7 @@ export type Database = {
           id: string
           is_active: boolean
           last_used_at: string | null
-          name: string
+          name: string | null
           requests_count: number
           updated_at: string
         }
@@ -1949,7 +1949,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_used_at?: string | null
-          name?: string
+          name?: string | null
           requests_count?: number
           updated_at?: string
         }
@@ -1961,7 +1961,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_used_at?: string | null
-          name?: string
+          name?: string | null
           requests_count?: number
           updated_at?: string
         }
