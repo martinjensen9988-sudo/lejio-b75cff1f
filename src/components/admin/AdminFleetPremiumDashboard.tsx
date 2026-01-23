@@ -30,6 +30,8 @@ import {
   Users,
   TrendingUp,
   Wallet,
+  RefreshCw,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -39,11 +41,32 @@ export const AdminFleetPremiumDashboard = () => {
     allVehicles,
     globalSummary,
     isLoading,
+    lastCalculatedAt,
     selectedYear,
     selectedMonth,
     setSelectedYear,
     setSelectedMonth,
+    triggerRecalculation,
   } = useAdminFleetPremiumVehicles();
+  
+  const [isRecalculating, setIsRecalculating] = useState(false);
+  
+  const handleRecalculate = async () => {
+    setIsRecalculating(true);
+    await triggerRecalculation();
+    setIsRecalculating(false);
+  };
+  
+  const formatLastUpdated = (dateString: string | null) => {
+    if (!dateString) return 'Aldrig';
+    const date = new Date(dateString);
+    return date.toLocaleString('da-DK', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [currentVehicleIndex, setCurrentVehicleIndex] = useState(0);
@@ -187,6 +210,22 @@ export const AdminFleetPremiumDashboard = () => {
           month={selectedMonth}
           year={selectedYear}
         />
+
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRecalculate} 
+          disabled={isRecalculating}
+          className="rounded-xl"
+        >
+          <RefreshCw className={cn("w-4 h-4 mr-2", isRecalculating && "animate-spin")} />
+          {isRecalculating ? 'Opdaterer...' : 'Opdater data'}
+        </Button>
+
+        <div className="flex items-center gap-2 text-xs text-muted-foreground ml-auto">
+          <Clock className="w-3 h-3" />
+          <span>Sidst opdateret: {formatLastUpdated(lastCalculatedAt)}</span>
+        </div>
       </div>
 
       {/* Global Stats Bar */}

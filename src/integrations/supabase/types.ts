@@ -2085,6 +2085,36 @@ export type Database = {
           },
         ]
       }
+      fleet_premium_cache: {
+        Row: {
+          cache_key: string
+          calculated_at: string
+          created_at: string
+          data: Json
+          expires_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          cache_key: string
+          calculated_at?: string
+          created_at?: string
+          data: Json
+          expires_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          cache_key?: string
+          calculated_at?: string
+          created_at?: string
+          data?: Json
+          expires_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fleet_settlements: {
         Row: {
           bookings_count: number
