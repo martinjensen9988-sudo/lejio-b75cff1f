@@ -5150,6 +5150,42 @@ export type Database = {
           },
         ]
       }
+      workshop_services: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_minutes: number
+          fleet_owner_id: string
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          fleet_owner_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          fleet_owner_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       vehicles_public: {
