@@ -8,11 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, Send, Loader2, User, Bot, CheckCircle2, Clock, Mail, Phone, AlertCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { MessageCircle, Send, Loader2, User, Bot, CheckCircle2, Clock, Mail, Phone, AlertCircle, Users, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useVisitorPresence } from '@/hooks/useVisitorPresence';
 import { toast } from 'sonner';
-
 interface ChatSession {
   id: string;
   visitor_name: string | null;
@@ -45,6 +46,7 @@ interface ContactSubmission {
 
 export const AdminLiveChat = () => {
   const { user } = useAuth();
+  const { visitors, visitorCount } = useVisitorPresence({ isAdmin: true });
   const [isLiveChatActive, setIsLiveChatActive] = useState(false);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
@@ -203,6 +205,49 @@ export const AdminLiveChat = () => {
 
   return (
     <div className="space-y-6">
+      {/* Live Visitors Card */}
+      <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Besøgende lige nu</p>
+                <p className="text-3xl font-bold text-primary">{visitorCount}</p>
+              </div>
+            </div>
+            {visitorCount > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    Se detaljer
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-xs">
+                  <div className="space-y-2 p-1">
+                    <p className="font-semibold text-sm">Aktive besøgende:</p>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {visitors.map((v, i) => (
+                        <div key={v.visitorId} className="text-xs flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="truncate max-w-[150px]">{v.page}</span>
+                          <span className="text-muted-foreground">
+                            ({Math.floor((Date.now() - new Date(v.enteredAt).getTime()) / 60000)}m)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Live Chat Toggle */}
       <Card>
         <CardHeader>

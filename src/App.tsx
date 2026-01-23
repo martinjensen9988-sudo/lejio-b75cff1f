@@ -10,14 +10,22 @@ import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 // Lazy load LiveChatWidget to reduce initial bundle size
 const LiveChatWidget = lazy(() => import("@/components/chat/LiveChatWidget").then(m => ({ default: m.LiveChatWidget })));
 
-// Component to conditionally render LiveChatWidget (hide on admin pages)
+// Lazy load VisitorPresenceTracker
+const VisitorPresenceTracker = lazy(() => import("@/components/chat/VisitorPresenceTracker").then(m => ({ default: m.VisitorPresenceTracker })));
+
+// Component to conditionally render LiveChatWidget and presence tracker (hide on admin pages)
 const ConditionalLiveChat = () => {
   const location = useLocation();
-  // Hide chat on admin pages
+  // Hide chat and presence tracking on admin pages
   if (location.pathname.startsWith('/admin')) {
     return null;
   }
-  return <LiveChatWidget />;
+  return (
+    <>
+      <VisitorPresenceTracker />
+      <LiveChatWidget />
+    </>
+  );
 };
 
 // Critical path - loaded immediately for homepage
