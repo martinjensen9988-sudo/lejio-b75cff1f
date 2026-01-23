@@ -56,14 +56,16 @@ const PrivacyPolicy = () => {
               </div>
               <div className="prose prose-lg max-w-none text-muted-foreground space-y-4">
                 <p>
-                  <strong className="text-foreground">LEJIO ApS</strong><br />
+                  <strong className="text-foreground">LEJIO</strong><br />
+                  CVR-nr.: 44691507<br />
+                  Adresse: Erantisvej 2, st. 103, 8800 Viborg, Danmark<br />
                   E-mail: <a href="mailto:hej@lejio.dk" className="text-primary hover:underline">hej@lejio.dk</a><br />
                   Hjemmeside: <a href="https://www.lejio.dk" className="text-primary hover:underline">www.lejio.dk</a>
                 </p>
                 <p>
-                  LEJIO ApS (herefter "LEJIO", "vi", "os" eller "vores") er dataansvarlig for behandlingen af de personoplysninger, 
+                  LEJIO (herefter "LEJIO", "vi", "os" eller "vores") er dataansvarlig for behandlingen af de personoplysninger, 
                   som vi modtager om dig. Denne privatlivspolitik beskriver, hvordan vi indsamler, anvender, opbevarer og beskytter 
-                  dine personoplysninger i overensstemmelse med Europa-Parlamentets og Rådets forordning (EU) 2016/679 (GDPR) 
+                  dine personoplysninger i overensstemmelse med Europa-Parlamentets og Rådets forordning (EU) 2016/679 af 27. april 2016 (GDPR) 
                   samt den danske databeskyttelseslov.
                 </p>
               </div>
@@ -211,6 +213,8 @@ const PrivacyPolicy = () => {
                     <li>Håndtere betalinger, depositum og udbetalinger</li>
                     <li>Generere og administrere lejekontrakter</li>
                     <li>Videreformidle nødvendige kontaktoplysninger (f.eks. navn, telefonnummer og e-mail) mellem lejer og udlejer, så parterne kan koordinere afhentning/aflevering og opfylde lejekontrakten</li>
+                    <li>Kommunikere med dig om aktive bookinger</li>
+                    <li>Levere kundesupport</li>
                   </ul>
                 </div>
 
@@ -484,10 +488,13 @@ const PrivacyPolicy = () => {
                   <li><strong className="text-foreground">Ret til indsigelse (art. 21):</strong> Du har ret til at gøre indsigelse mod vores behandling af dine personoplysninger baseret på vores legitime interesser.</li>
                   <li><strong className="text-foreground">Ret til at tilbagekalde samtykke:</strong> Hvis behandlingen er baseret på samtykke, kan du til enhver tid tilbagekalde dit samtykke.</li>
                 </ul>
-                <p className="mt-4">
-                  Kontakt os på <a href="mailto:privacy@lejio.dk" className="text-primary hover:underline">privacy@lejio.dk</a> med 
-                  din anmodning. Vi besvarer din henvendelse inden for 30 dage.
-                </p>
+                <div className="mt-6 p-5 bg-mint/10 border border-mint/30 rounded-xl">
+                  <h4 className="font-semibold text-foreground mb-3">Sådan udøver du dine rettigheder</h4>
+                  <p>
+                    Kontakt os på <a href="mailto:privacy@lejio.dk" className="text-primary hover:underline">privacy@lejio.dk</a> med 
+                    din anmodning. Vi besvarer din henvendelse inden for 30 dage. Ved komplekse anmodninger kan fristen forlænges med yderligere 60 dage.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -630,7 +637,7 @@ const PrivacyPolicy = () => {
                   er du velkommen til at kontakte os:
                 </p>
                 <div className="mt-4 p-5 bg-mint/10 border border-mint/30 rounded-xl">
-                  <p className="font-semibold text-foreground">LEJIO ApS</p>
+                  <p className="font-semibold text-foreground">LEJIO</p>
                   <p>E-mail: <a href="mailto:privacy@lejio.dk" className="text-primary hover:underline">privacy@lejio.dk</a></p>
                   <p>Hjemmeside: <a href="https://www.lejio.dk" className="text-primary hover:underline">www.lejio.dk</a></p>
                 </div>
