@@ -46,6 +46,7 @@ const About = lazy(() => import("./pages/About"));
 const WhatIsLejio = lazy(() => import("./pages/WhatIsLejio"));
 const BecomeLessor = lazy(() => import("./pages/BecomeLessor"));
 const LessorTerms = lazy(() => import("./pages/LessorTerms"));
+const Forhandler = lazy(() => import("./pages/Forhandler"));
 const Contact = lazy(() => import("./pages/Contact"));
 
 // Dashboard sub-pages - lazy loaded
@@ -256,6 +257,7 @@ const App = () => (
               <Route path="/hvad-er-lejio" element={<WhatIsLejio />} />
               <Route path="/bliv-udlejer" element={<BecomeLessor />} />
               <Route path="/udlejervilkaar" element={<LessorTerms />} />
+              <Route path="/forhandler" element={<Forhandler />} />
               <Route path="/kontakt" element={<Contact />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
