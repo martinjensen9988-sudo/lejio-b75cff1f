@@ -92,15 +92,21 @@ const LessorTerms = () => {
                   
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">3.1 Krav til udlejere</h3>
                   <p>For at blive udlejer på LEJIO skal du:</p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
+                  <ol className="list-[lower-alpha] pl-6 space-y-2 mt-4">
                     <li>Være fyldt 18 år eller være en registreret virksomhed i Danmark.</li>
                     <li>Oprette en profil med fuldstændige og korrekte oplysninger, herunder:
                       <ul className="list-disc pl-6 space-y-1 mt-2">
                         <li>Fulde navn eller virksomhedsnavn</li>
                         <li>Adresse</li>
+                        <li>Telefonnummer</li>
+                        <li>E-mailadresse</li>
+                        <li>CPR-nummer (skjult) eller CVR-nummer</li>
+                        <li>Bankoplysninger til udbetaling</li>
                       </ul>
                     </li>
-                  </ul>
+                    <li>Verificere din identitet via det af LEJIO anviste verifikationssystem.</li>
+                    <li>Acceptere disse Udlejervilkår samt LEJIOs generelle Handelsbetingelser og Privatlivspolitik.</li>
+                  </ol>
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">3.2 Verifikation af køretøjer</h3>
                   <p>Alle køretøjer skal verificeres, før de kan udlejes. Du skal uploade:</p>
@@ -183,35 +189,58 @@ const LessorTerms = () => {
                 <section>
                   <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">5. Kommission og betaling</h2>
                   
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">5.1 Kommission (Gratis/Pro) og afregning</h3>
-                  <p>Kommissionen beregnes på baggrund af den samlede lejepris (ekskl. depositum).</p>
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">5.1 Kommission og abonnement – fakturering</h3>
+                  <p>LEJIO tilbyder følgende afregningsmodeller (som aftales pr. samarbejde/opsætning):</p>
+                  <div className="overflow-x-auto mt-4">
+                    <table className="min-w-full border border-border rounded-xl overflow-hidden">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="px-4 py-3 text-left font-bold text-foreground">Model</th>
+                          <th className="px-4 py-3 text-left font-bold text-foreground">Kommission/Revenue Share</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Software</td><td className="px-4 py-3">3%</td></tr>
+                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Partner</td><td className="px-4 py-3">18%</td></tr>
+                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Fleet Basic</td><td className="px-4 py-3">20% revenue share</td></tr>
+                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Fleet Premium</td><td className="px-4 py-3">35% revenue share</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <p className="mt-6">Kommissionen beregnes på baggrund af den samlede lejepris (ekskl. depositum).</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
                     <li><strong>Gratis:</strong> 5% kommission pr. booking.</li>
                     <li><strong>Pro:</strong> 3% kommission pr. booking.</li>
+                    <li><strong>Starter/Standard/Enterprise:</strong> 3% kommission pr. booking.</li>
                   </ul>
-                  <p className="mt-4">
-                    For Gratis og Pro håndterer LEJIO ikke selve lejebetalingen. Kommissionen afregnes i stedet ved fakturering:
-                  </p>
+                  
+                  <p className="mt-4">LEJIO fakturerer kommission og (hvis relevant) abonnement/kontingent månedligt:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Kommissionen faktureres bagudrettet hver den 1. i måneden for den foregående måneds gennemførte udlejninger.</li>
+                    <li>Der faktureres bagudrettet hver den 1. i måneden for den foregående måned.</li>
                     <li>Betalingsfrist og betalingsmåde fremgår af fakturaen.</li>
                   </ul>
                   <p className="mt-4">
-                    For Starter, Standard og Enterprise faktureres både kontingent (abonnement) og kommission bagudrettet hver den 1. i måneden.
+                    <strong>Fleet:</strong> Kommission, abonnement og/eller revenue share samt afregningsmodel følger særskilt aftale.
                   </p>
                   <p className="mt-4">
                     <strong>Eksempel:</strong> Ved en booking på 1.000 kr. og en kommission på 5% udgør kommissionen 50 kr.
                   </p>
 
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">5.2 Betaling (pengevejen)</h3>
-                  <p>
-                    <strong>Gratis og Pro (direkte betaling mellem lejer og udlejer):</strong> LEJIO stiller en teknisk betalingsintegration til rådighed, så betaling kan gennemføres direkte mellem lejeren og udlejeren. LEJIO modtager, opbevarer eller udbetaler ikke lejebetalingerne for Gratis- og Pro-brugere.
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">5.2 Betaling (pengevejen) – leje og depositum</h3>
+                  <p className="font-medium text-foreground">Gratis, Pro, Starter, Standard og Enterprise (direkte afregning mellem lejer og udlejer):</p>
+                  <p className="mt-2">
+                    Leje og depositum afregnes direkte mellem lejer og udlejer via LEJIOs tekniske betalingsintegration. LEJIO modtager, opbevarer eller udbetaler ikke leje/depositum under disse abonnementer.
                   </p>
                   <p className="mt-4">Som udlejer skal du derfor:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>Oprette og vedligeholde din egen konto hos den integrerede betalingsudbyder</li>
-                    <li>Sikre, at dine udbetalings- og virksomhedsoplysninger (f.eks. bankkonto, CVR/CPR, m.v.) er korrekte hos betalingsudbyderen</li>
+                    <li>Oprette og vedligeholde din egen konto hos den integrerede betalingsudbyder, og</li>
+                    <li>Sikre, at dine udbetalings- og virksomhedsoplysninger (f.eks. bankkonto, CVR/CPR, m.v.) er korrekte hos betalingsudbyderen.</li>
                   </ul>
+                  <p className="mt-4 font-medium text-foreground">Fleet (særskilt aftale):</p>
+                  <p className="mt-2">
+                    Fleet-løsningen følger en særskilt aftale vedrørende betalingshåndtering, herunder om LEJIO håndterer opkrævning og/eller udbetaling (payouts), samt vilkår for timing og eventuelle forudsætninger.
+                  </p>
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">5.3 Depositum</h3>
                   <p>LEJIO håndterer depositum på vegne af dig:</p>
@@ -351,9 +380,10 @@ const LessorTerms = () => {
                   
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">10.1 Skader på køretøjet</h3>
                   <p>Ved skader på dit køretøj under en lejeperiode skal du:</p>
-                  <ol className="list-decimal pl-6 space-y-2 mt-4">
+                  <ol className="list-[lower-alpha] pl-6 space-y-2 mt-4">
                     <li>Dokumentere skaden med billeder og skriftlig beskrivelse inden for 48 timer efter aflevering.</li>
                     <li>Indrapportere skaden via Platformens tvistfunktion.</li>
+                    <li>Indhente minimum 2 uafhængige reparationstilbud.</li>
                   </ol>
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">10.2 Tvistløsning</h3>
@@ -492,11 +522,13 @@ const LessorTerms = () => {
                   <p>
                     Har du spørgsmål til disse vilkår, er du velkommen til at kontakte os:
                   </p>
-                  <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li><strong>LEJIO</strong></li>
-                    <li>E-mail: <a href="mailto:support@lejio.dk" className="text-primary hover:underline">support@lejio.dk</a></li>
-                    <li>Hjemmeside: <a href="https://www.lejio.dk" className="text-primary hover:underline">www.lejio.dk</a></li>
-                  </ul>
+                  <div className="mt-4 p-5 bg-primary/10 border border-primary/30 rounded-xl">
+                    <p className="font-semibold text-foreground">LEJIO</p>
+                    <p>CVR: 44691507</p>
+                    <p>Adresse: Erantisvej 2, st. 103, 8800 Viborg</p>
+                    <p>E-mail: <a href="mailto:support@lejio.dk" className="text-primary hover:underline">support@lejio.dk</a></p>
+                    <p>Hjemmeside: <a href="https://www.lejio.dk" className="text-primary hover:underline">www.lejio.dk</a></p>
+                  </div>
                   <p className="mt-6 text-sm text-muted-foreground italic">
                     Disse Udlejervilkår er senest opdateret den 22. januar 2026.
                   </p>
