@@ -1967,6 +1967,87 @@ export type Database = {
         }
         Relationships: []
       }
+      fleet_category_caps: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          max_amount: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fleet_coverage_shortfalls: {
+        Row: {
+          created_at: string
+          earned_amount: number
+          id: string
+          lessor_id: string
+          month: string
+          notes: string | null
+          required_amount: number
+          shortfall_amount: number
+          status: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          earned_amount: number
+          id?: string
+          lessor_id: string
+          month: string
+          notes?: string | null
+          required_amount: number
+          shortfall_amount: number
+          status?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          earned_amount?: number
+          id?: string
+          lessor_id?: string
+          month?: string
+          notes?: string | null
+          required_amount?: number
+          shortfall_amount?: number
+          status?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_coverage_shortfalls_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_coverage_shortfalls_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fleet_dispatch_recommendations: {
         Row: {
           acted_at: string | null
@@ -2085,6 +2166,78 @@ export type Database = {
           },
         ]
       }
+      fleet_loan_requests: {
+        Row: {
+          admin_notes: string | null
+          ai_analysis: string | null
+          created_at: string
+          description: string
+          id: string
+          lessor_id: string
+          requested_amount: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          suggested_monthly_installment: number | null
+          suggested_months: number | null
+          updated_at: string
+          vehicle_id: string | null
+          workshop_invoice_url: string | null
+          workshop_name: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          ai_analysis?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          lessor_id: string
+          requested_amount: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggested_monthly_installment?: number | null
+          suggested_months?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+          workshop_invoice_url?: string | null
+          workshop_name?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          ai_analysis?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          lessor_id?: string
+          requested_amount?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggested_monthly_installment?: number | null
+          suggested_months?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+          workshop_invoice_url?: string | null
+          workshop_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_loan_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_loan_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fleet_premium_cache: {
         Row: {
           cache_key: string
@@ -2114,6 +2267,66 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      fleet_service_queue: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          id: string
+          lessor_id: string
+          priority: string
+          scheduled_date: string | null
+          service_type: string
+          status: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          lessor_id: string
+          priority?: string
+          scheduled_date?: string | null
+          service_type: string
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          lessor_id?: string
+          priority?: string
+          scheduled_date?: string | null
+          service_type?: string
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_service_queue_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_service_queue_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fleet_settlements: {
         Row: {
@@ -3162,6 +3375,9 @@ export type Database = {
           email: string
           fine_admin_fee: number | null
           fleet_commission_rate: number | null
+          fleet_contract_expires_at: string | null
+          fleet_contract_months: number | null
+          fleet_contract_start_date: string | null
           fleet_plan: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee: number | null
           fuel_policy_enabled: boolean | null
@@ -3213,6 +3429,9 @@ export type Database = {
           email: string
           fine_admin_fee?: number | null
           fleet_commission_rate?: number | null
+          fleet_contract_expires_at?: string | null
+          fleet_contract_months?: number | null
+          fleet_contract_start_date?: string | null
           fleet_plan?: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee?: number | null
           fuel_policy_enabled?: boolean | null
@@ -3264,6 +3483,9 @@ export type Database = {
           email?: string
           fine_admin_fee?: number | null
           fleet_commission_rate?: number | null
+          fleet_contract_expires_at?: string | null
+          fleet_contract_months?: number | null
+          fleet_contract_start_date?: string | null
           fleet_plan?: Database["public"]["Enums"]["fleet_plan_type"] | null
           fuel_missing_fee?: number | null
           fuel_policy_enabled?: boolean | null
