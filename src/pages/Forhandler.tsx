@@ -388,33 +388,146 @@ const Forhandler = () => {
           </div>
         </section>
 
-        {/* Fleet CTA */}
-        <section className="py-20 bg-muted/30">
+        {/* Fleet Models Section - Commission Based */}
+        <section id="fleet-plans" className="py-20 bg-muted/30">
           <div className="container mx-auto px-6">
-            <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-              <CardContent className="p-8 md:p-12">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <TrendingUp className="w-10 h-10 text-primary" />
+            <div className="text-center mb-16">
+              <Badge variant="secondary" className="mb-4">
+                <Building2 className="w-4 h-4 mr-2" />
+                Professionel Flåde
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Over 35 biler? Vælg ren kommission
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                For større flåder tilbyder vi 100% kommissionsbaserede modeller – ingen månedlig betaling, 
+                kun en procentdel af din omsætning.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {/* Partner Starter */}
+              <Card className="border-border/50 hover:border-primary/30 transition-colors">
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-2xl">Partner Starter</CardTitle>
+                  <CardDescription>Selvstændig drift</CardDescription>
+                  <div className="pt-4">
+                    <span className="text-4xl font-bold">15%</span>
+                    <span className="text-muted-foreground ml-1">kommission</span>
                   </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-2xl md:text-3xl font-bold mb-3">
-                      Har du flere end 35 biler?
-                    </h3>
-                    <p className="text-muted-foreground text-lg">
-                      Kontakt os for en skræddersyet løsning med multi-lokationer, 
-                      avanceret medarbejderstyring og API-integration til dit eksisterende system.
-                    </p>
-                  </div>
-                  <Button size="lg" className="shrink-0" onClick={() => navigate("/kontakt")}>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Ubegrænset antal køretøjer</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Du håndterer selv køretøjer & forsikring</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Platform & support fra LEJIO</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Ingen månedlig betaling</span>
+                    </li>
+                  </ul>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/kontakt")}>
                     Kontakt os
-                    <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* Fleet Basic */}
+              <Card className="border-primary shadow-lg shadow-primary/10 scale-105 relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground px-4">
+                    <Star className="w-3 h-3 mr-1" />
+                    Populær
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-2xl">Fleet Basic</CardTitle>
+                  <CardDescription>LEJIO-styret platform</CardDescription>
+                  <div className="pt-4">
+                    <span className="text-4xl font-bold">25%</span>
+                    <span className="text-muted-foreground ml-1">kommission</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Ubegrænset antal køretøjer</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">LEJIO håndterer booking & support</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Du håndterer køretøjer & forsikring</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Dedikeret kontaktperson</span>
+                    </li>
+                  </ul>
+                  <Button className="w-full" onClick={() => navigate("/kontakt")}>
+                    Kontakt os
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Fleet Premium */}
+              <Card className="border-border/50 hover:border-primary/30 transition-colors">
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-2xl">Fleet Premium</CardTitle>
+                  <CardDescription>Fuld service</CardDescription>
+                  <div className="pt-4">
+                    <span className="text-4xl font-bold">35%</span>
+                    <span className="text-muted-foreground ml-1">kommission</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Ubegrænset antal køretøjer</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">LEJIO håndterer alt operationelt</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Afhentning, levering & klargøring</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">Du læner dig tilbage</span>
+                    </li>
+                  </ul>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/kontakt")}>
+                    Kontakt os
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            <p className="text-center text-sm text-muted-foreground mt-8">
+              Fleet-modeller kræver individuel aftale.{" "}
+              <a href="/fleet-loesning" className="text-primary hover:underline font-medium">
+                Læs mere om Fleet-løsningen →
+              </a>
+            </p>
           </div>
         </section>
+
+        {/* Final CTA */}
 
         {/* Final CTA */}
         <section className="py-20">
