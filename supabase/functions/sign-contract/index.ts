@@ -130,7 +130,7 @@ serve(async (req) => {
       });
     }
 
-    // If both parties have signed, update the booking status
+    // If both parties have signed, update the booking status and send emails to both parties
     if (updatedContract.status === 'signed') {
       await supabase
         .from('bookings')
@@ -138,10 +138,46 @@ serve(async (req) => {
         .eq('id', contract.booking_id);
 
       console.log(`Booking ${contract.booking_id} confirmed`);
-    }
 
-    // Send email confirmation to renter when they sign
-    if (role === 'renter') {
+      // Send email to BOTH parties when fully signed
+      try {
+        const functionUrl = `${supabaseUrl}/functions/v1/send-contract-signed`;
+        
+        // Send to renter
+        await fetch(functionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            contractId,
+            signerRole: 'renter',
+            bothPartiesSigned: true,
+          }),
+        });
+        console.log('Contract fully signed email sent to renter');
+
+        // Send to lessor
+        await fetch(functionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            contractId,
+            signerRole: 'lessor',
+            bothPartiesSigned: true,
+          }),
+        });
+        console.log('Contract fully signed email sent to lessor');
+      } catch (emailError) {
+        console.error('Failed to send contract signed emails:', emailError);
+        // Don't fail the signing if email fails
+      }
+    } else {
+      // Send email confirmation to the party that just signed
       try {
         const functionUrl = `${supabaseUrl}/functions/v1/send-contract-signed`;
         await fetch(functionUrl, {
@@ -153,9 +189,10 @@ serve(async (req) => {
           body: JSON.stringify({
             contractId,
             signerRole: role,
+            bothPartiesSigned: false,
           }),
         });
-        console.log('Contract signed email sent to renter');
+        console.log(`Contract signed email sent to ${role}`);
       } catch (emailError) {
         console.error('Failed to send contract signed email:', emailError);
         // Don't fail the signing if email fails

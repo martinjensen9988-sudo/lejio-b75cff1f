@@ -199,6 +199,21 @@ export const useCheckInOut = () => {
         return null;
       }
 
+      // Send check-in email to renter
+      try {
+        await supabase.functions.invoke('send-checkinout-email', {
+          body: {
+            bookingId: params.bookingId,
+            recordType: 'check_in',
+            odometerReading: params.confirmedOdometer,
+            fuelPercent: params.confirmedFuelPercent,
+          }
+        });
+        console.log('Check-in email sent');
+      } catch (emailError) {
+        console.error('Failed to send check-in email:', emailError);
+      }
+
       toast.success('Check-in gennemført!');
       return data as CheckInOutRecord;
     } catch (err) {
@@ -321,6 +336,21 @@ export const useCheckInOut = () => {
         console.error('Error creating check-out:', error);
         toast.error('Kunne ikke gemme check-out: ' + error.message);
         return null;
+      }
+
+      // Send check-out email to renter
+      try {
+        await supabase.functions.invoke('send-checkinout-email', {
+          body: {
+            bookingId: params.bookingId,
+            recordType: 'check_out',
+            odometerReading: params.confirmedOdometer,
+            fuelPercent: params.confirmedFuelPercent,
+          }
+        });
+        console.log('Check-out email sent');
+      } catch (emailError) {
+        console.error('Failed to send check-out email:', emailError);
       }
 
       if (totalExtraCharges > 0) {

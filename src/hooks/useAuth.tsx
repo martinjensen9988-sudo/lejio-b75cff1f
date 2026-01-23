@@ -122,6 +122,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error };
     }
 
+    // Send welcome email
+    try {
+      await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          email,
+          fullName,
+          userType,
+        }
+      });
+      console.log('Welcome email sent successfully');
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+      // Don't fail signup if email fails
+    }
+
     // If Pro user, update profile with CVR info after signup
     if (userType === 'professionel' && (cvrNumber || companyName)) {
       // Wait a moment for the trigger to create the profile

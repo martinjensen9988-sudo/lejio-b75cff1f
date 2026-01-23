@@ -19,6 +19,7 @@ function escapeHtml(text: string | null | undefined): string {
 interface ContractSignedRequest {
   contractId: string;
   signerRole: 'lessor' | 'renter';
+  bothPartiesSigned?: boolean;
 }
 
 interface Contract {
@@ -436,9 +437,9 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { contractId, signerRole }: ContractSignedRequest = await req.json();
+    const { contractId, signerRole, bothPartiesSigned }: ContractSignedRequest = await req.json();
 
-    console.log(`Sending contract signed email for contract: ${contractId}, signer: ${signerRole}`);
+    console.log(`Sending contract signed email for contract: ${contractId}, signer: ${signerRole}, bothPartiesSigned: ${bothPartiesSigned}`);
 
     // Fetch contract details
     const { data: contract, error: contractError } = await supabaseAdmin
@@ -689,13 +690,29 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-    // Send email to renter with PDF attachment
+    // Determine recipient based on signerRole when bothPartiesSigned is true
+    const recipientEmail = signerRole === 'lessor' ? contract.lessor_email : contract.renter_email;
+    const recipientName = signerRole === 'lessor' ? safeLessorName : safeRenterName;
+    
+    // Customize email content based on recipient
+    let finalEmailHtml = emailHtml;
+    let emailSubject = `Kontrakt ${contract.contract_number} - ${isFullySigned ? 'Fuldt underskrevet ✓' : 'Din underskrift er registreret'}`;
+    
+    if (bothPartiesSigned && signerRole === 'lessor') {
+      // Lessor version when both have signed
+      finalEmailHtml = emailHtml
+        .replace('Du har underskrevet lejekontrakten', `Kontrakten er nu underskrevet af begge parter`)
+        .replace('Se mine lejeaftaler', 'Se mine udlejninger');
+      emailSubject = `Kontrakt ${contract.contract_number} - Fuldt underskrevet! ✓`;
+    }
+
+    // Send email to the appropriate recipient
     await client.send({
       from: fromEmail,
-      to: contract.renter_email,
-      subject: `Kontrakt ${contract.contract_number} - ${isFullySigned ? 'Fuldt underskrevet ✓' : 'Din underskrift er registreret'}`,
-      content: emailHtml,
-      html: emailHtml,
+      to: recipientEmail,
+      subject: emailSubject,
+      content: finalEmailHtml,
+      html: finalEmailHtml,
       attachments: [
         {
           filename: `Lejekontrakt-${contract.contract_number}.pdf`,
@@ -706,32 +723,7 @@ const handler = async (req: Request): Promise<Response> => {
       ],
     });
 
-    console.log("Contract signed email with PDF sent to renter:", contract.renter_email);
-
-    // If fully signed, also notify the lessor
-    if (isFullySigned) {
-      const lessorEmailHtml = emailHtml
-        .replace('Du har underskrevet lejekontrakten', `${safeRenterName} har underskrevet lejekontrakten`)
-        .replace('Se mine lejeaftaler', 'Se mine udlejninger');
-
-      await client.send({
-        from: fromEmail,
-        to: contract.lessor_email,
-        subject: `Kontrakt ${contract.contract_number} - Fuldt underskrevet! ✓`,
-        content: lessorEmailHtml,
-        html: lessorEmailHtml,
-        attachments: [
-          {
-            filename: `Lejekontrakt-${contract.contract_number}.pdf`,
-            content: pdfBase64,
-            encoding: 'base64',
-            contentType: 'application/pdf',
-          },
-        ],
-      });
-
-      console.log("Contract signed notification with PDF sent to lessor:", contract.lessor_email);
-    }
+    console.log(`Contract signed email with PDF sent to ${signerRole}:`, recipientEmail);
 
     await client.close();
 
