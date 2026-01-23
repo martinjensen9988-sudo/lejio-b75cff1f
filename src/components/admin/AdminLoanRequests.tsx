@@ -30,13 +30,14 @@ import {
 import { 
   Wallet, MoreHorizontal, CheckCircle, XCircle, 
   Clock, AlertTriangle, Calculator, FileText, Sparkles,
-  Download, ExternalLink
+  Download, ExternalLink, Upload, File, X, Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
+import { useRef } from 'react';
 
 interface LoanRequest {
   id: string;
@@ -76,6 +77,7 @@ interface CategoryCap {
 
 export const AdminLoanRequests = () => {
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [requests, setRequests] = useState<LoanRequest[]>([]);
   const [categoryCaps, setCategoryCaps] = useState<CategoryCap[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -84,6 +86,8 @@ export const AdminLoanRequests = () => {
   const [showCapsDialog, setShowCapsDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCalculatingAI, setIsCalculatingAI] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedInvoice, setUploadedInvoice] = useState<{ name: string; path: string } | null>(null);
 
   const [reviewForm, setReviewForm] = useState({
     suggested_monthly_installment: '',
@@ -237,7 +241,82 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
       suggested_months: request.suggested_months?.toString() || '',
       admin_notes: request.admin_notes || '',
     });
+    // Pre-populate uploaded invoice if exists
+    if (request.invoice_url && request.invoice_filename) {
+      setUploadedInvoice({ name: request.invoice_filename, path: request.invoice_url });
+    } else {
+      setUploadedInvoice(null);
+    }
     setShowReviewDialog(true);
+  };
+
+  const handleInvoiceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedRequest) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Kun PDF-filer er tilladt');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Filen må maks være 10MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileName = `${Date.now()}_${file.name}`;
+      const filePath = `${selectedRequest.lessor_id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('workshop-invoices')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Update the request with the invoice URL
+      const { error: updateError } = await supabase
+        .from('fleet_loan_requests')
+        .update({ 
+          invoice_url: filePath,
+          invoice_filename: file.name 
+        })
+        .eq('id', selectedRequest.id);
+
+      if (updateError) throw updateError;
+
+      setUploadedInvoice({ name: file.name, path: filePath });
+      toast.success('Faktura uploadet');
+      fetchData();
+    } catch (error) {
+      console.error('Error uploading invoice:', error);
+      toast.error('Kunne ikke uploade faktura');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeInvoice = async () => {
+    if (!uploadedInvoice || !selectedRequest) return;
+
+    try {
+      await supabase.storage
+        .from('workshop-invoices')
+        .remove([uploadedInvoice.path]);
+
+      await supabase
+        .from('fleet_loan_requests')
+        .update({ invoice_url: null, invoice_filename: null })
+        .eq('id', selectedRequest.id);
+
+      setUploadedInvoice(null);
+      toast.success('Faktura fjernet');
+      fetchData();
+    } catch (error) {
+      console.error('Error removing invoice:', error);
+      toast.error('Kunne ikke fjerne faktura');
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -468,20 +547,62 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
                   <span className="text-muted-foreground">Kontraktperiode:</span>
                   <span className="font-medium">{selectedRequest.lessor?.fleet_contract_months || 12} måneder</span>
                 </div>
-                {selectedRequest.invoice_url && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Faktura:</span>
+                {/* Invoice Upload Section */}
+                <div className="pt-2 border-t border-border/50">
+                  <span className="text-muted-foreground text-sm">Værkstedsfaktura (PDF):</span>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={handleInvoiceUpload}
+                  />
+                  
+                  {uploadedInvoice ? (
+                    <div className="flex items-center justify-between mt-2 p-2 bg-muted rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <File className="w-4 h-4 text-primary" />
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="h-auto p-0"
+                          onClick={() => handleDownloadInvoice(selectedRequest)}
+                        >
+                          {uploadedInvoice.name}
+                        </Button>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeInvoice}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
-                      variant="link"
+                      type="button"
+                      variant="outline"
                       size="sm"
-                      className="h-auto p-0 gap-1"
-                      onClick={() => handleDownloadInvoice(selectedRequest)}
+                      className="w-full mt-2 gap-2"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
                     >
-                      <Download className="w-4 h-4" />
-                      {selectedRequest.invoice_filename || 'Download'}
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Uploader...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload faktura
+                        </>
+                      )}
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
                 <div>
                   <span className="text-muted-foreground">Beskrivelse:</span>
                   <p className="mt-1 text-sm">{selectedRequest.description}</p>
