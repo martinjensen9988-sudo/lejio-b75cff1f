@@ -133,6 +133,7 @@ const SalesAICarAdPage = lazy(() => import("./pages/admin/SalesAICarAd"));
 const SalesAICompanySearchPage = lazy(() => import("./pages/admin/SalesAICompanySearch"));
 const SalesAIOutreachPage = lazy(() => import("./pages/admin/SalesAIOutreach"));
 const DiscountsAddPage = lazy(() => import("./pages/admin/DiscountsAdd"));
+const AdminApiKeysPage = lazy(() => import("./pages/admin/ApiKeys"));
 const StaffAddPage = lazy(() => import("./pages/admin/StaffAdd"));
 const CorporateAddPage = lazy(() => import("./pages/admin/CorporateAdd"));
 const CorporateDetailPage = lazy(() => import("./pages/admin/CorporateDetail"));
@@ -244,6 +245,7 @@ const App = () => (
               <Route path="/admin/checkinout" element={<AdminAuthProvider><AdminCheckInOutPage /></AdminAuthProvider>} />
               <Route path="/admin/corporate" element={<AdminAuthProvider><AdminCorporatePage /></AdminAuthProvider>} />
               <Route path="/admin/facebook" element={<AdminAuthProvider><AdminFacebookPage /></AdminAuthProvider>} />
+              <Route path="/admin/api-keys" element={<AdminAuthProvider><AdminApiKeysPage /></AdminAuthProvider>} />
               <Route path="/admin/sales-ai" element={<AdminAuthProvider><AdminSalesAIPage /></AdminAuthProvider>} />
               <Route path="/admin/sales-ai/add" element={<AdminAuthProvider><SalesAIAddLeadPage /></AdminAuthProvider>} />
               <Route path="/admin/sales-ai/import" element={<AdminAuthProvider><SalesAIImportPage /></AdminAuthProvider>} />
