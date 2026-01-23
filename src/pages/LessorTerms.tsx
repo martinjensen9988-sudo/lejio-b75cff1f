@@ -172,7 +172,8 @@ const LessorTerms = () => {
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">4.2 Binding og opsigelse</h3>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li><strong>Privat:</strong> Ingen binding. Kan opsiges når som helst.</li>
+                    <li><strong>Gratis:</strong> Ingen binding. Kan opsiges når som helst.</li>
+                    <li><strong>Pro:</strong> Abonnementet kan opsiges med løbende måned + 30 dages varsel.</li>
                     <li><strong>Starter/Standard/Enterprise:</strong> Abonnementet kan opsiges med løbende måned + 30 dages varsel.</li>
                     <li><strong>Fleet:</strong> Vilkår for binding og opsigelse aftales individuelt.</li>
                   </ul>
@@ -225,7 +226,8 @@ const LessorTerms = () => {
                   
                   <p className="mt-6">Kommissionen beregnes på baggrund af den samlede lejepris (ekskl. depositum).</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li><strong>Privat:</strong> 59 kr pr. booking.</li>
+                    <li><strong>Gratis:</strong> 5% kommission pr. booking.</li>
+                    <li><strong>Pro:</strong> 3% kommission pr. booking.</li>
                     <li><strong>Starter/Standard/Enterprise:</strong> 3% kommission pr. booking.</li>
                   </ul>
                   
@@ -365,21 +367,6 @@ const LessorTerms = () => {
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">9.2 Aflysning fra din side</h3>
                   <p>Hvis du aflyser en bekræftet booking:</p>
-                  <div className="overflow-x-auto mt-4">
-                    <table className="min-w-full border border-border rounded-xl overflow-hidden">
-                      <thead className="bg-muted">
-                        <tr>
-                          <th className="px-4 py-3 text-left font-bold text-foreground">Tidspunkt for aflysning</th>
-                          <th className="px-4 py-3 text-left font-bold text-foreground">Konsekvens</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-t border-border"><td className="px-4 py-3">Mere end 7 dage før lejestart</td><td className="px-4 py-3">Ingen gebyr, men advarsel registreres</td></tr>
-                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3">2-7 dage før lejestart</td><td className="px-4 py-3">Gebyr på 100 kr. + advarsel</td></tr>
-                        <tr className="border-t border-border"><td className="px-4 py-3">Mindre end 48 timer før lejestart</td><td className="px-4 py-3">Gebyr på 250 kr. + advarsel</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
                   <p className="mt-4">Ved 3 eller flere aflysninger inden for 6 måneder kan din profil suspenderes.</p>
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">9.3 Force majeure</h3>
