@@ -206,7 +206,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
       if (error) throw error;
 
       toast.success('Din profil er nu opgraderet til Pro!', {
-        description: 'Du har nu 14 dages gratis prøveperiode.',
+        description: 'Du har nu adgang til alle Pro-funktioner.',
       });
 
       setIsOpen(false);
@@ -228,9 +228,9 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
     'Få dine biler vist på søgesiden',
     'Automatisk kontraktgenerering',
     'Digital signatur på kontrakter',
-    'Ingen gebyr per booking',
-    'Fast månedlig pris fra 299 kr',
-    '14 dages gratis prøveperiode',
+    'Fast månedlig pris fra 349 kr',
+    '3% kommission pr. booking',
+    'Ingen binding',
   ];
 
   return (
@@ -281,7 +281,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                   Opgrader til Pro-profil
                 </DialogTitle>
                 <DialogDescription>
-                  Indtast dine virksomhedsoplysninger for at blive forhandler. Du får 14 dages gratis prøveperiode.
+                  Indtast dine virksomhedsoplysninger for at blive forhandler og få adgang til alle Pro-funktioner.
                 </DialogDescription>
               </DialogHeader>
 
@@ -503,11 +503,11 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
                 <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                   <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-primary" />
-                    14 dages gratis prøveperiode
+                    Pro-abonnement
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    Under prøveperioden kan du udforske alle Pro-funktioner. Dine biler vil være skjulte for lejere indtil du aktiverer dit abonnement.
-                    {validatedDiscount && ' Din rabatkode vil blive anvendt når du aktiverer dit abonnement.'}
+                    Med Pro-abonnement får du adgang til alle funktioner og dine biler bliver synlige for lejere.
+                    {validatedDiscount && ' Din rabatkode vil blive anvendt på dit abonnement.'}
                   </p>
                 </div>
 

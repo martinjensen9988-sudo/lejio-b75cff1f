@@ -195,7 +195,7 @@ const SalesAIEmailPage = () => {
                   <SelectItem value="offer">
                     <div>
                       <p className="font-medium">Særligt tilbud</p>
-                      <p className="text-xs text-muted-foreground">Tilbyd gratis prøveperiode</p>
+                      <p className="text-xs text-muted-foreground">Præsenter konkurrencedygtige priser</p>
                     </div>
                   </SelectItem>
                 </SelectContent>

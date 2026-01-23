@@ -131,7 +131,7 @@ const HowItWorks = () => {
               className="w-full font-bold text-lg py-6"
               onClick={() => navigate('/auth')}
             >
-              Bliv udlejer gratis
+              Bliv udlejer
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>

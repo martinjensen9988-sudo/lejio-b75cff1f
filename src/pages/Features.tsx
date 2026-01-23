@@ -239,7 +239,7 @@ const Features = () => {
               
               <div className="flex flex-wrap justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
                 <Button size="lg" className="font-bold text-lg px-8 py-6 shadow-lg shadow-primary/20" onClick={() => navigate('/auth')}>
-                  Kom i gang gratis
+                  Kom i gang
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 <Button variant="outline" size="lg" className="font-bold text-lg px-8 py-6" onClick={() => navigate('/faq')}>
@@ -329,10 +329,10 @@ const Features = () => {
                 Klar til at komme i gang?
               </h2>
               <p className="text-xl text-muted-foreground mb-8">
-                Opret en gratis konto og oplev alle funktioner selv.
+                Opret din konto og oplev alle funktioner selv.
               </p>
               <Button size="lg" className="font-bold text-lg px-10 py-6 shadow-lg shadow-primary/20" onClick={() => navigate('/auth')}>
-                Start gratis nu
+                Kom i gang nu
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>

@@ -139,8 +139,8 @@ const LessorTerms = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Gratis</td><td className="px-4 py-3">0 kr./md.</td><td className="px-4 py-3">5% per booking</td><td className="px-4 py-3">Grundlæggende funktioner, maks. 3 køretøjer</td></tr>
-                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Pro</td><td className="px-4 py-3">299 kr./md.</td><td className="px-4 py-3">3% per booking</td><td className="px-4 py-3">Ubegrænset antal køretøjer</td></tr>
+                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Privat</td><td className="px-4 py-3">0 kr./md.</td><td className="px-4 py-3">59 kr pr. booking</td><td className="px-4 py-3">Grundlæggende funktioner, maks. 3 køretøjer</td></tr>
+                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Starter/Standard/Enterprise</td><td className="px-4 py-3">349-899 kr./md.</td><td className="px-4 py-3">3% per booking</td><td className="px-4 py-3">Alle Pro-funktioner</td></tr>
                         <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Fleet</td><td className="px-4 py-3">Kontakt os</td><td className="px-4 py-3">Efter aftale</td><td className="px-4 py-3">Til større flåder og særlige behov</td></tr>
                       </tbody>
                     </table>
@@ -172,8 +172,7 @@ const LessorTerms = () => {
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">4.2 Binding og opsigelse</h3>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li><strong>Gratis:</strong> Ingen binding. Kan opsiges når som helst.</li>
-                    <li><strong>Pro:</strong> Abonnementet kan opsiges med løbende måned + 30 dages varsel.</li>
+                    <li><strong>Privat:</strong> Ingen binding. Kan opsiges når som helst.</li>
                     <li><strong>Starter/Standard/Enterprise:</strong> Abonnementet kan opsiges med løbende måned + 30 dages varsel.</li>
                     <li><strong>Fleet:</strong> Vilkår for binding og opsigelse aftales individuelt.</li>
                   </ul>
@@ -226,8 +225,7 @@ const LessorTerms = () => {
                   
                   <p className="mt-6">Kommissionen beregnes på baggrund af den samlede lejepris (ekskl. depositum).</p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li><strong>Gratis:</strong> 5% kommission pr. booking.</li>
-                    <li><strong>Pro:</strong> 3% kommission pr. booking.</li>
+                    <li><strong>Privat:</strong> 59 kr pr. booking.</li>
                     <li><strong>Starter/Standard/Enterprise:</strong> 3% kommission pr. booking.</li>
                   </ul>
                   
@@ -240,11 +238,11 @@ const LessorTerms = () => {
                     <strong>Fleet:</strong> Kommission, abonnement og/eller revenue share samt afregningsmodel følger særskilt aftale.
                   </p>
                   <p className="mt-4">
-                    <strong>Eksempel:</strong> Ved en booking på 1.000 kr. og en kommission på 5% udgør kommissionen 50 kr.
+                    <strong>Eksempel:</strong> Ved en booking på 1.000 kr. og en kommission på 3% udgør kommissionen 30 kr.
                   </p>
 
                   <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">5.2 Betaling (pengevejen) – leje og depositum</h3>
-                  <p className="font-medium text-foreground">Gratis, Pro, Starter, Standard og Enterprise (direkte afregning mellem lejer og udlejer):</p>
+                  <p className="font-medium text-foreground">Privat, Starter, Standard og Enterprise (direkte afregning mellem lejer og udlejer):</p>
                   <p className="mt-2">
                     Leje og depositum afregnes direkte mellem lejer og udlejer via LEJIOs tekniske betalingsintegration. LEJIO modtager, opbevarer eller udbetaler ikke leje/depositum under disse abonnementer.
                   </p>

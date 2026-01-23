@@ -232,7 +232,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
                 Prøveperiode aktiv
               </CardTitle>
               <CardDescription>
-                Udforsk alle Pro-funktioner gratis
+                Udforsk alle Pro-funktioner
               </CardDescription>
             </div>
             <Badge variant="outline" className="border-primary text-primary">
@@ -244,7 +244,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
           <div className="bg-muted p-4 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Status</span>
-              <span className="font-semibold text-primary">Gratis prøveperiode</span>
+              <span className="font-semibold text-primary">Prøveperiode</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Udløber</span>

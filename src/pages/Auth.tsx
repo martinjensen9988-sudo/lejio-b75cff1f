@@ -373,7 +373,7 @@ const Auth = () => {
                           </p>
                           <div className="flex items-center gap-2 mt-3 text-xs text-accent font-medium">
                             <Check className="w-4 h-4" />
-                            <span>Gratis at starte • 15-20% provision</span>
+                            <span>59 kr pr. booking • Ingen binding</span>
                           </div>
                         </div>
                       </div>

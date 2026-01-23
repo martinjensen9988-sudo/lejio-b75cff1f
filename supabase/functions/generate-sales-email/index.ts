@@ -97,7 +97,7 @@ Returner kun email-teksten uden emne eller hilsner.`;
 ${callContextString}
 Emailen skal:
 ${callContextString ? '- Referere til jeres telefonsamtale og inkludere eventuelle aftaler' : ''}
-- Tilbyde en gratis prøveperiode på 30 dage
+- Præsentere vores konkurrencedygtige priser (fra 349 kr/md + 3% kommission)
 - Fremhæve at der ingen binding er
 - Nævne at de kan starte med få biler og skalere op
 - Være overbevisende men ikke pushy (max 150 ord)
@@ -173,7 +173,7 @@ www.lejio.dk`
         subject = `Opfølgning: LEJIO biludlejningsplatform`;
         break;
       case 'offer':
-        subject = `Særligt tilbud: 30 dages gratis prøveperiode`;
+        subject = `Særligt tilbud til ${leadData.company_name}`;
         break;
       default:
         subject = `LEJIO - Effektiv biludlejning`;

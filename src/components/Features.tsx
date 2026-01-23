@@ -131,7 +131,7 @@ const Features = () => {
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <div className="flex items-center gap-2 bg-card/80 rounded-full px-4 py-2">
               <CheckCircle2 className="w-4 h-4 text-mint" />
-              <span className="text-sm font-medium">6 mdr. gratis</span>
+              <span className="text-sm font-medium">Fra 349 kr/md</span>
             </div>
             <div className="flex items-center gap-2 bg-card/80 rounded-full px-4 py-2">
               <CheckCircle2 className="w-4 h-4 text-accent" />
@@ -150,7 +150,7 @@ const Features = () => {
               className="font-bold text-lg px-8"
               onClick={() => navigate('/auth')}
             >
-              Bliv udlejer gratis
+              Bliv udlejer
               <ArrowRight className="w-5 h-5" />
             </Button>
             <Button 

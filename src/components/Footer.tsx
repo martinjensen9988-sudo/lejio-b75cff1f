@@ -15,7 +15,7 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             Klar til at komme i gang?
           </h2>
           <p className="text-primary-foreground/80 text-lg max-w-xl mx-auto mb-10">
-            Opret en gratis konto og begynd at leje ud eller find dit næste køretøj i dag.
+            Opret en konto og begynd at leje ud eller find dit næste køretøj i dag.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -24,7 +24,7 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
               className="font-bold text-lg shadow-lg"
               onClick={() => navigate('/auth')}
             >
-              Opret gratis konto
+              Opret konto
               <ArrowRight className="w-5 h-5" />
             </Button>
             <Button 

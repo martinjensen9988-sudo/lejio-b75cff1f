@@ -159,8 +159,7 @@ Vi understøtter udlejning af:
 - Starter: 349 kr/måned (1-5 køretøjer)
 - Standard: 599 kr/måned (6-15 køretøjer)
 - Enterprise: 899 kr/måned (16+ køretøjer)
-- 25 kr pr. booking for alle Pro-kunder
-- 14 dages gratis prøveperiode
+- 3% kommission pr. booking for alle Pro-kunder
 
 ### LEJIO Fleet (vi styrer din flåde)
 - Fleet Basic: 15% kommission - LEJIO håndterer platform, booking og kundeservice
