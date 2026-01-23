@@ -4,19 +4,46 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import AdminFleetManagement from '@/components/admin/AdminFleetManagement';
 import { AdminFleetPremiumDashboard } from '@/components/admin/AdminFleetPremiumDashboard';
 import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
+import { AdminServiceQueue } from '@/components/admin/AdminServiceQueue';
+import { AdminLoanRequests } from '@/components/admin/AdminLoanRequests';
+import { AdminCoverageShortfalls } from '@/components/admin/AdminCoverageShortfalls';
+import { AdminPartnerAlerts } from '@/components/admin/AdminPartnerAlerts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, BarChart3, Settings } from 'lucide-react';
+import { Loader2, BarChart3, Settings, Wrench, Wallet, AlertTriangle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminFleetPage = () => {
   const navigate = useNavigate();
   const { user, hasAccess, isLoading } = useAdminAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [fleetVehicles, setFleetVehicles] = useState<{ id: string; registration: string; make: string; model: string; owner_id: string }[]>([]);
 
   useEffect(() => {
     if (!isLoading && (!user || !hasAccess)) {
       navigate('/admin');
     }
   }, [user, hasAccess, isLoading, navigate]);
+
+  // Fetch fleet vehicles for service queue
+  useEffect(() => {
+    const fetchFleetVehicles = async () => {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .not('fleet_plan', 'is', null);
+
+      if (profiles && profiles.length > 0) {
+        const ownerIds = profiles.map(p => p.id);
+        const { data: vehicles } = await supabase
+          .from('vehicles')
+          .select('id, registration, make, model, owner_id')
+          .in('owner_id', ownerIds);
+        
+        setFleetVehicles(vehicles || []);
+      }
+    };
+    fetchFleetVehicles();
+  }, []);
 
   if (isLoading) {
     return (
@@ -42,6 +69,18 @@ const AdminFleetPage = () => {
               <Settings className="w-4 h-4" />
               Administration
             </TabsTrigger>
+            <TabsTrigger value="service" className="flex items-center gap-2">
+              <Wrench className="w-4 h-4" />
+              Servicekø
+            </TabsTrigger>
+            <TabsTrigger value="loans" className="flex items-center gap-2">
+              <Wallet className="w-4 h-4" />
+              Lån
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Alarmer
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard">
@@ -50,6 +89,21 @@ const AdminFleetPage = () => {
 
           <TabsContent value="management">
             <AdminFleetManagement />
+          </TabsContent>
+
+          <TabsContent value="service">
+            <AdminServiceQueue fleetVehicles={fleetVehicles} />
+          </TabsContent>
+
+          <TabsContent value="loans">
+            <div className="space-y-6">
+              <AdminLoanRequests />
+              <AdminCoverageShortfalls />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="alerts">
+            <AdminPartnerAlerts />
           </TabsContent>
         </Tabs>
       </div>

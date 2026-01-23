@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useFleetPremiumVehicles, getCommissionRate, FleetVehicleStats } from '@/hooks/useFleetPremiumVehicles';
 import { FleetExportButton } from './FleetExportButton';
+import { LoanModuleCard } from './LoanModuleCard';
 import { 
   Car, ChevronLeft, ChevronRight, Wrench, 
   Gauge, MapPin, Star, Calendar, Droplets, Home
@@ -23,6 +24,7 @@ export const FleetPremiumDashboard = () => {
     selectedMonth,
     setSelectedYear,
     setSelectedMonth,
+    refetch,
   } = useFleetPremiumVehicles();
 
   const [currentVehicleIndex, setCurrentVehicleIndex] = useState(0);
@@ -333,6 +335,18 @@ export const FleetPremiumDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Loan Module Section */}
+      {summary && (
+        <LoanModuleCard
+          totalLoanBalance={summary.totalLoanBalance}
+          monthlyInstallment={summary.totalMonthlyInstallments}
+          activeLoan={currentVehicle?.activeLoan || null}
+          loanPaymentHistory={currentVehicle?.loanPaymentHistory || []}
+          vehicles={vehicles.map(v => ({ id: v.id, registration: v.registration, make: v.make, model: v.model }))}
+          onRefresh={refetch}
+        />
+      )}
 
       {/* Vehicle list for multiple vehicles */}
       {vehicles.length > 1 && (
