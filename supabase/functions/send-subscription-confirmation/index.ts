@@ -36,8 +36,8 @@ const TIER_INFO = {
   },
   enterprise: {
     name: "LEJIO Pro - Enterprise",
-    maxVehicles: "Ubegrænset",
-    price: 799,
+    maxVehicles: "35",
+    price: 899,
   },
 };
 

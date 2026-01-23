@@ -237,7 +237,7 @@ const Pricing = () => {
               {/* Enterprise */}
               <div className="rounded-[2rem] bg-card border-2 border-border p-8 hover:shadow-2xl hover:border-primary/30 transition-all hover:-translate-y-2">
                 <h3 className="font-display text-2xl font-black text-foreground mb-1">Enterprise</h3>
-                <p className="text-muted-foreground text-sm mb-6">16+ biler</p>
+                <p className="text-muted-foreground text-sm mb-6">16-35 biler</p>
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">

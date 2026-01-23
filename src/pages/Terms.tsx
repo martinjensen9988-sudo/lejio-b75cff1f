@@ -126,7 +126,7 @@ const Terms = () => {
                         <tr className="border-t border-border">
                           <td className="px-4 py-3 font-medium">Enterprise</td>
                           <td className="px-4 py-3">899 kr./md + 3% kommission</td>
-                          <td className="px-4 py-3">16-100 biler</td>
+                          <td className="px-4 py-3">16-35 biler</td>
                         </tr>
                       </tbody>
                     </table>
