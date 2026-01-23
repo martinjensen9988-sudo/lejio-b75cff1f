@@ -405,7 +405,7 @@ const Booking = () => {
     setSubmitting(true);
 
     try {
-      // Fetch owner profile
+      // Fetch owner profile for notification
       const { data: ownerProfile, error: profileError } = await supabase
         .from("profiles")
         .select("email, full_name")
@@ -415,99 +415,73 @@ const Booking = () => {
       if (profileError) throw new Error("Kunne ikke finde udlejer");
 
       // Upload documents to storage
-      let driverLicenseUrl = null;
       if (driverLicense) {
         const fileName = `${Date.now()}-license-${driverLicense.name}`;
-        const { error: uploadError } = await supabase.storage
+        await supabase.storage
           .from("contracts")
           .upload(fileName, driverLicense);
-        if (!uploadError) {
-          driverLicenseUrl = fileName;
-        }
       }
 
-      // Create booking
-      const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
-        vehicle_id: vehicle.id,
-        lessor_id: vehicle.owner_id,
-        start_date: format(startDate, "yyyy-MM-dd"),
-        end_date: format(endDate, "yyyy-MM-dd"),
-        total_price: pricing.grandTotal,
-        status: "pending",
-        renter_name: `${formData.firstName} ${formData.lastName}`,
-        renter_email: formData.email,
-        renter_phone: formData.phone,
-        notes: formData.notes || null,
-        // Pricing details for contract
-        period_type: periodType,
-        period_count: periodCount,
-        daily_price: vehicle.daily_price || null,
-        weekly_price: vehicle.weekly_price || null,
-        monthly_price: vehicle.monthly_price || null,
-        base_price: pricing.unitPrice,
-        included_km: vehicle.included_km || null,
-        extra_km_price: vehicle.extra_km_price || null,
-        unlimited_km: vehicle.unlimited_km || false,
-        deposit_amount: pricing.deposit || null,
-        // Deductible insurance
-        deductible_insurance_selected: hasDeductibleInsurance,
-        deductible_insurance_price: hasDeductibleInsurance ? deductibleInsurancePrice : 0,
-        original_deductible: 5000,
-        // New driver info fields
-        renter_first_name: formData.firstName,
-        renter_last_name: formData.lastName,
-        renter_birth_date: formData.birthDate || null,
-        renter_address: formData.address,
-        renter_postal_code: formData.postalCode,
-        renter_city: formData.city,
-        renter_license_number: formData.licenseNumber,
-        renter_license_issue_date: formData.licenseIssueDate || null,
-        renter_license_country: formData.licenseCountry,
-        // Pickup/Dropoff times
-        pickup_time: formData.pickupTime,
-        dropoff_time: formData.dropoffTime,
-        // Extra driver
-        has_extra_driver: hasExtraDriver,
-        extra_driver_first_name: hasExtraDriver ? extraDriver.firstName : null,
-        extra_driver_last_name: hasExtraDriver ? extraDriver.lastName : null,
-        extra_driver_birth_date: hasExtraDriver && extraDriver.birthDate ? extraDriver.birthDate : null,
-        extra_driver_license_number: hasExtraDriver ? extraDriver.licenseNumber : null,
-        extra_driver_license_issue_date: hasExtraDriver && extraDriver.licenseIssueDate ? extraDriver.licenseIssueDate : null,
-        extra_driver_license_country: hasExtraDriver ? extraDriver.licenseCountry : null,
-      }).select("id").single();
+      // Create booking via server-side validated edge function
+      const { data: bookingResponse, error: bookingError } = await supabase.functions.invoke("create-booking", {
+        body: {
+          vehicle_id: vehicle.id,
+          start_date: format(startDate, "yyyy-MM-dd"),
+          end_date: format(endDate, "yyyy-MM-dd"),
+          renter_first_name: formData.firstName,
+          renter_last_name: formData.lastName,
+          renter_email: formData.email,
+          renter_phone: formData.phone,
+          renter_address: formData.address,
+          renter_postal_code: formData.postalCode,
+          renter_city: formData.city,
+          renter_birth_date: formData.birthDate || null,
+          renter_license_number: formData.licenseNumber,
+          renter_license_issue_date: formData.licenseIssueDate || null,
+          renter_license_country: formData.licenseCountry,
+          notes: formData.notes || null,
+          period_type: periodType,
+          period_count: periodCount,
+          pickup_time: formData.pickupTime,
+          dropoff_time: formData.dropoffTime,
+          has_extra_driver: hasExtraDriver,
+          extra_driver_first_name: hasExtraDriver ? extraDriver.firstName : null,
+          extra_driver_last_name: hasExtraDriver ? extraDriver.lastName : null,
+          extra_driver_birth_date: hasExtraDriver && extraDriver.birthDate ? extraDriver.birthDate : null,
+          extra_driver_license_number: hasExtraDriver ? extraDriver.licenseNumber : null,
+          extra_driver_license_issue_date: hasExtraDriver && extraDriver.licenseIssueDate ? extraDriver.licenseIssueDate : null,
+          extra_driver_license_country: hasExtraDriver ? extraDriver.licenseCountry : null,
+          deductible_insurance_selected: hasDeductibleInsurance,
+          deductible_insurance_price: hasDeductibleInsurance ? deductibleInsurancePrice : 0,
+        },
+      });
 
-      if (bookingError) throw new Error("Kunne ikke oprette booking");
+      if (bookingError) {
+        console.error("Booking edge function error:", bookingError);
+        throw new Error("Kunne ikke oprette booking");
+      }
+
+      // Check for server-side validation errors
+      if (bookingResponse?.error) {
+        const errorDetails = bookingResponse.details?.join(", ") || bookingResponse.error;
+        throw new Error(errorDetails);
+      }
+
+      if (!bookingResponse?.booking_id) {
+        throw new Error("Booking blev ikke oprettet korrekt");
+      }
       
       // Store the booking ID for payment step
-      setCreatedBookingId(bookingData.id);
-
-      // Save deductible insurance if selected
-      if (hasDeductibleInsurance && deductibleInsurancePrice > 0) {
-        const totalDays = periodType === 'monthly' 
-          ? periodCount * 30 
-          : periodType === 'weekly' 
-            ? periodCount * 7 
-            : periodCount;
-        
-        await supabase.from("deductible_insurance").insert({
-          booking_id: bookingData.id,
-          days_covered: totalDays,
-          daily_rate: 49,
-          total_amount: deductibleInsurancePrice,
-          original_deductible: 5000,
-          new_deductible: 0,
-          status: 'active',
-        });
-      }
+      setCreatedBookingId(bookingResponse.booking_id);
 
       // Handle referral credit/discount
       if (referralCredit > 0) {
         // If using available credit, deduct it
         if (!pendingRedemptionId) {
-          await useCredit(referralCredit, bookingData.id);
+          await useCredit(referralCredit, bookingResponse.booking_id);
         } else {
           // Complete the pending referral redemption
-          await completePendingReferral(pendingRedemptionId, bookingData.id);
+          await completePendingReferral(pendingRedemptionId, bookingResponse.booking_id);
         }
       }
 
@@ -524,7 +498,7 @@ const Booking = () => {
           vehicleRegistration: vehicle.registration,
           startDate: format(startDate, "dd. MMMM yyyy", { locale: da }),
           endDate: format(endDate, "dd. MMMM yyyy", { locale: da }),
-          totalPrice: pricing.grandTotal,
+          totalPrice: bookingResponse.total_price || pricing.grandTotal,
           notes: formData.notes,
         },
       });
