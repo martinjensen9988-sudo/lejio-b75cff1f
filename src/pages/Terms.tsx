@@ -58,8 +58,10 @@ const Terms = () => {
                     LEJIO (lejio.dk) formidler kontakt mellem private/erhvervsmæssige udlejere og lejere af køretøjer.
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-4">
-                    <li>E-mail: hej@lejio.dk</li>
-                    <li>Telefon: 91 99 89 29</li>
+                    <li><strong>CVR:</strong> 44691507</li>
+                    <li><strong>Adresse:</strong> Erantisvej 2, st. 103, 8800 Viborg</li>
+                    <li><strong>E-mail:</strong> hej@lejio.dk</li>
+                    <li><strong>Telefon:</strong> 91 99 89 29</li>
                   </ul>
                 </section>
 
@@ -88,18 +90,58 @@ const Terms = () => {
                   </div>
                   <p className="mt-4">Afbestilling følger LEJIO's afbestillingspolitik:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
-                    <li><strong>&gt; 48 timer før:</strong> Fuld refundering (minus gebyrer)</li>
-                    <li><strong>24-48 timer før:</strong> 50% refundering</li>
-                    <li><strong>&lt; 24 timer før:</strong> Ingen refundering</li>
+                    <li>Afbestilling skal ske <strong>senest 48 timer</strong> før lejeperiodens start for at få refundering (minus gebyrer).</li>
+                    <li>Ved afbestilling <strong>senere end 48 timer</strong> før gives ingen refundering.</li>
                   </ul>
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">4. Betaling og Depositum</h2>
+                  <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">4. Prisstruktur (ekskl. moms)</h2>
                   <p>
-                    LEJIO håndterer sikker betaling via kort og MobilePay.
+                    Følgende prisstruktur gælder for LEJIO's modeller. Alle priser er ekskl. moms.
                   </p>
-                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">Depositum</h3>
+
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">4.1 Software-modellen (Udlej selv)</h3>
+                  <p>Abonnement pr. måned (baseret på antal biler), plus 3% kommission pr. booking:</p>
+                  <div className="overflow-x-auto mt-4">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="text-left px-4 py-3 font-semibold text-foreground border-b border-border">Plan</th>
+                          <th className="text-left px-4 py-3 font-semibold text-foreground border-b border-border">Pris</th>
+                          <th className="text-left px-4 py-3 font-semibold text-foreground border-b border-border">Antal biler</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-t border-border">
+                          <td className="px-4 py-3 font-medium">Starter</td>
+                          <td className="px-4 py-3">349 kr./md + 3% kommission</td>
+                          <td className="px-4 py-3">1-5 biler</td>
+                        </tr>
+                        <tr className="border-t border-border bg-muted/30">
+                          <td className="px-4 py-3 font-medium">Standard</td>
+                          <td className="px-4 py-3">599 kr./md + 3% kommission</td>
+                          <td className="px-4 py-3">6-15 biler</td>
+                        </tr>
+                        <tr className="border-t border-border">
+                          <td className="px-4 py-3 font-medium">Enterprise</td>
+                          <td className="px-4 py-3">899 kr./md + 3% kommission</td>
+                          <td className="px-4 py-3">16-100 biler</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">4.2 Partner-modellen</h3>
+                  <p><strong>Partner-modellen:</strong> 18% pr. booking</p>
+
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">4.3 Fleet-modeller</h3>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li><strong>Fleet Basic:</strong> 20% pr. booking</li>
+                    <li><strong>Fleet Premium:</strong> 35% pr. booking</li>
+                  </ul>
+
+                  <h3 className="font-display text-xl font-medium text-foreground mt-6 mb-3">4.4 Depositum</h3>
                   <p>
                     Udlejer fastsætter depositum. Dette reserveres/opkræves ved booking og refunderes automatisk efter 
                     lejeperiodens ophør (typisk indenfor 8 hverdage), forudsat at der ikke er anmeldt skader eller krav.
@@ -129,8 +171,8 @@ const Terms = () => {
                 <section>
                   <h2 className="font-display text-2xl font-bold text-foreground mt-8 mb-4">6. Forsikring</h2>
                   <p>
-                    Udlejer er ansvarlig for, at køretøjet er lovmæssigt forsikret til udlejning. LEJIO formidler ikke 
-                    forsikring og hæfter ikke for skader, der ikke dækkes af udlejers forsikring.
+                    Udlejer er ansvarlig for, at køretøjet er lovmæssigt forsikret til udlejning. LEJIO hæfter ikke for skader, 
+                    der ikke dækkes af udlejers forsikring.
                   </p>
                   <p className="mt-4">
                     Lejer hæfter for selvrisiko og skader ej dækket af kasko (f.eks. stenslag, jf. lejekontrakten).
