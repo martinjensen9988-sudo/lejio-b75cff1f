@@ -29,7 +29,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { 
   Wallet, MoreHorizontal, CheckCircle, XCircle, 
-  Clock, AlertTriangle, Calculator, FileText, Sparkles
+  Clock, AlertTriangle, Calculator, FileText, Sparkles,
+  Download, ExternalLink
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,7 +44,8 @@ interface LoanRequest {
   vehicle_id: string | null;
   requested_amount: number;
   workshop_name: string | null;
-  workshop_invoice_url: string | null;
+  invoice_url: string | null;
+  invoice_filename: string | null;
   description: string;
   suggested_monthly_installment: number | null;
   suggested_months: number | null;
@@ -242,6 +244,27 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
     return amount.toLocaleString('da-DK', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   };
 
+  const handleDownloadInvoice = async (request: LoanRequest) => {
+    if (!request.invoice_url) {
+      toast.error('Ingen faktura tilgængelig');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('workshop-invoices')
+        .createSignedUrl(request.invoice_url, 3600);
+
+      if (error) throw error;
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast.error('Kunne ikke hente faktura');
+    }
+  };
+
   const totalPendingAmount = requests
     .filter(r => r.status === 'pending')
     .reduce((sum, r) => sum + r.requested_amount, 0);
@@ -281,10 +304,10 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
         <CardContent>
           {/* Risk Overview Cards */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <Card className="bg-amber-500/10 border-amber-500/20">
+            <Card className="bg-accent/50 border-accent">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-8 h-8 text-amber-500" />
+                  <AlertTriangle className="w-8 h-8 text-accent-foreground" />
                   <div>
                     <p className="text-2xl font-bold">{formatCurrency(totalPendingAmount)} kr</p>
                     <p className="text-sm text-muted-foreground">Afventer godkendelse</p>
@@ -292,10 +315,10 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-green-500/10 border-green-500/20">
+            <Card className="bg-mint/10 border-mint/20">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="w-8 h-8 text-green-500" />
+                  <CheckCircle className="w-8 h-8 text-mint" />
                   <div>
                     <p className="text-2xl font-bold">{formatCurrency(totalApprovedAmount)} kr</p>
                     <p className="text-sm text-muted-foreground">Godkendt i alt</p>
@@ -362,10 +385,23 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="font-medium">{formatCurrency(request.requested_amount)} kr</span>
-                      {request.workshop_name && (
-                        <p className="text-xs text-muted-foreground">{request.workshop_name}</p>
-                      )}
+                      <div>
+                        <span className="font-medium">{formatCurrency(request.requested_amount)} kr</span>
+                        {request.workshop_name && (
+                          <p className="text-xs text-muted-foreground">{request.workshop_name}</p>
+                        )}
+                        {request.invoice_url && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-xs gap-1"
+                            onClick={() => handleDownloadInvoice(request)}
+                          >
+                            <Download className="w-3 h-3" />
+                            Faktura
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="max-w-xs">
                       <p className="truncate text-sm">{request.description}</p>
@@ -432,6 +468,20 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
                   <span className="text-muted-foreground">Kontraktperiode:</span>
                   <span className="font-medium">{selectedRequest.lessor?.fleet_contract_months || 12} måneder</span>
                 </div>
+                {selectedRequest.invoice_url && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Faktura:</span>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 gap-1"
+                      onClick={() => handleDownloadInvoice(selectedRequest)}
+                    >
+                      <Download className="w-4 h-4" />
+                      {selectedRequest.invoice_filename || 'Download'}
+                    </Button>
+                  </div>
+                )}
                 <div>
                   <span className="text-muted-foreground">Beskrivelse:</span>
                   <p className="mt-1 text-sm">{selectedRequest.description}</p>

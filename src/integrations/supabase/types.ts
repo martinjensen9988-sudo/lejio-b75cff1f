@@ -2173,6 +2173,8 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          invoice_filename: string | null
+          invoice_url: string | null
           lessor_id: string
           requested_amount: number
           reviewed_at: string | null
@@ -2191,6 +2193,8 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          invoice_filename?: string | null
+          invoice_url?: string | null
           lessor_id: string
           requested_amount: number
           reviewed_at?: string | null
@@ -2209,6 +2213,8 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          invoice_filename?: string | null
+          invoice_url?: string | null
           lessor_id?: string
           requested_amount?: number
           reviewed_at?: string | null

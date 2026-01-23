@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,8 @@ import {
 } from '@/components/ui/select';
 import { 
   Wallet, CreditCard, FileText, Plus, 
-  AlertTriangle, CheckCircle, Clock, TrendingDown
+  AlertTriangle, CheckCircle, Clock, TrendingDown,
+  Upload, File, X, Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,8 +51,11 @@ export const LoanModuleCard = ({
   onRefresh,
 }: LoanModuleCardProps) => {
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; path: string } | null>(null);
   const [requestForm, setRequestForm] = useState({
     vehicle_id: '',
     requested_amount: '',
@@ -61,6 +65,54 @@ export const LoanModuleCard = ({
 
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('da-DK', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Kun PDF-filer er tilladt');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Filen må maks være 10MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileName = `${Date.now()}_${file.name}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('workshop-invoices')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      setUploadedFile({ name: file.name, path: filePath });
+      toast.success('Faktura uploadet');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Kunne ikke uploade faktura');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeUploadedFile = async () => {
+    if (!uploadedFile) return;
+
+    try {
+      await supabase.storage
+        .from('workshop-invoices')
+        .remove([uploadedFile.path]);
+      setUploadedFile(null);
+    } catch (error) {
+      console.error('Error removing file:', error);
+    }
   };
 
   const handleSubmitRequest = async () => {
@@ -77,6 +129,8 @@ export const LoanModuleCard = ({
         requested_amount: parseFloat(requestForm.requested_amount),
         workshop_name: requestForm.workshop_name || null,
         description: requestForm.description,
+        invoice_url: uploadedFile?.path || null,
+        invoice_filename: uploadedFile?.name || null,
         status: 'pending',
       });
 
@@ -90,6 +144,7 @@ export const LoanModuleCard = ({
         workshop_name: '',
         description: '',
       });
+      setUploadedFile(null);
       onRefresh?.();
     } catch (error) {
       console.error('Error submitting loan request:', error);
@@ -97,6 +152,20 @@ export const LoanModuleCard = ({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCloseDialog = () => {
+    if (uploadedFile && !isSubmitting) {
+      removeUploadedFile();
+    }
+    setShowRequestDialog(false);
+    setRequestForm({
+      vehicle_id: '',
+      requested_amount: '',
+      workshop_name: '',
+      description: '',
+    });
+    setUploadedFile(null);
   };
 
   // Calculate loan progress
@@ -216,7 +285,7 @@ export const LoanModuleCard = ({
       </Card>
 
       {/* Request Financing Dialog */}
-      <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
+      <Dialog open={showRequestDialog} onOpenChange={handleCloseDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -277,8 +346,58 @@ export const LoanModuleCard = ({
               />
             </div>
 
-            <div className="bg-amber-500/10 rounded-lg p-3 flex gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+            {/* Invoice Upload Section */}
+            <div className="space-y-2">
+              <Label>Værkstedsfaktura (PDF)</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+              
+              {uploadedFile ? (
+                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <File className="w-4 h-4 text-primary" />
+                    <span className="text-sm truncate max-w-[200px]">{uploadedFile.name}</span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={removeUploadedFile}
+                    disabled={isSubmitting}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploader...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      Upload faktura (PDF)
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+
+            <div className="bg-accent/50 rounded-lg p-3 flex gap-2">
+              <AlertTriangle className="w-5 h-5 text-accent-foreground flex-shrink-0" />
               <p className="text-sm text-muted-foreground">
                 LEJIO gennemgår din anmodning og beregner et forslag til afdrag baseret på din resterende kontraktperiode.
               </p>
@@ -286,7 +405,7 @@ export const LoanModuleCard = ({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRequestDialog(false)}>
+            <Button variant="outline" onClick={handleCloseDialog}>
               Annuller
             </Button>
             <Button onClick={handleSubmitRequest} disabled={isSubmitting}>
