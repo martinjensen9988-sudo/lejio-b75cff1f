@@ -170,3 +170,6 @@ verify_jwt = false
 
 [functions.test-all-emails]
 verify_jwt = false
+
+[functions.send-critical-action-alert]
+verify_jwt = false
