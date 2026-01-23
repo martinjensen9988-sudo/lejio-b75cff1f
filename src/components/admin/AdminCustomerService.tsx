@@ -103,6 +103,8 @@ export const AdminCustomerService = () => {
   const [selectedSwapVehicle, setSelectedSwapVehicle] = useState<string>('');
   const [swapReason, setSwapReason] = useState<string>('breakdown');
   const [swapNotes, setSwapNotes] = useState('');
+  const [breakdownAddress, setBreakdownAddress] = useState('');
+  const [breakdownDescription, setBreakdownDescription] = useState('');
   const [isSwapping, setIsSwapping] = useState(false);
   const [isLoadingSwapVehicles, setIsLoadingSwapVehicles] = useState(false);
 
@@ -237,6 +239,8 @@ export const AdminCustomerService = () => {
     setSelectedSwapVehicle('');
     setSwapReason('breakdown');
     setSwapNotes('');
+    setBreakdownAddress('');
+    setBreakdownDescription('');
     setIsLoadingSwapVehicles(true);
 
     try {
@@ -289,6 +293,15 @@ export const AdminCustomerService = () => {
 
       if (!bookingData?.vehicle_id) throw new Error('Kunne ikke finde original bil');
 
+      // Build notes with breakdown info if applicable
+      let fullNotes = swapNotes;
+      if ((swapReason === 'breakdown' || swapReason === 'damage') && (breakdownAddress || breakdownDescription)) {
+        const breakdownInfo = [];
+        if (breakdownAddress) breakdownInfo.push(`📍 Adresse: ${breakdownAddress}`);
+        if (breakdownDescription) breakdownInfo.push(`📝 Hændelse: ${breakdownDescription}`);
+        fullNotes = breakdownInfo.join('\n') + (swapNotes ? `\n\nNoter: ${swapNotes}` : '');
+      }
+
       // Create swap record
       const { error: swapError } = await supabase
         .from('vehicle_swaps')
@@ -297,7 +310,7 @@ export const AdminCustomerService = () => {
           original_vehicle_id: bookingData.vehicle_id,
           new_vehicle_id: selectedSwapVehicle,
           swap_reason: swapReason,
-          notes: swapNotes || null,
+          notes: fullNotes || null,
           created_by: user.id,
         });
 
@@ -907,6 +920,33 @@ export const AdminCustomerService = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Breakdown/Damage specific fields */}
+              {(swapReason === 'breakdown' || swapReason === 'damage') && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      📍 Adresse (hvor skete det?)
+                    </Label>
+                    <Input
+                      value={breakdownAddress}
+                      onChange={(e) => setBreakdownAddress(e.target.value)}
+                      placeholder="F.eks. Vesterbrogade 42, 1620 København V"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      📝 Hvad skete der?
+                    </Label>
+                    <Textarea
+                      value={breakdownDescription}
+                      onChange={(e) => setBreakdownDescription(e.target.value)}
+                      placeholder="Beskriv hændelsen - hvad gik galt, hvornår skete det, evt. skader..."
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Select new vehicle */}
               <div className="space-y-2">
