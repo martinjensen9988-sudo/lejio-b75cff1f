@@ -3,11 +3,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useFleetPremiumVehicles } from '@/hooks/useFleetPremiumVehicles';
+import { Button } from '@/components/ui/button';
+import { useFleetPremiumVehicles, getCommissionRate } from '@/hooks/useFleetPremiumVehicles';
 import { FleetPremiumVehicleCard } from './FleetPremiumVehicleCard';
+import { FleetExportButton } from './FleetExportButton';
 import { 
   Car, TrendingUp, Wallet, Calendar, Target, 
-  CheckCircle2, AlertCircle, Loader2, DollarSign
+  CheckCircle2, Loader2, DollarSign, CreditCard, FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +23,6 @@ export const FleetPremiumDashboard = () => {
     setSelectedYear,
     setSelectedMonth,
     GUARANTEE_DAYS,
-    COMMISSION_RATE,
   } = useFleetPremiumVehicles();
 
   const months = [
@@ -44,6 +45,8 @@ export const FleetPremiumDashboard = () => {
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('da-DK', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   };
+
+  const currentCommissionRate = summary ? getCommissionRate(summary.totalVehicles) : 0.35;
 
   if (isLoading) {
     return (
@@ -77,18 +80,17 @@ export const FleetPremiumDashboard = () => {
     );
   }
 
-  // Calculate final payout after installments
-  const finalPayout = summary.totalNetPayout - summary.totalInstallments;
-
   return (
     <div className="space-y-6">
-      {/* Header with period selector */}
+      {/* Header with period selector and export */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Fleet Premium Overblik</h2>
-          <p className="text-muted-foreground">Real-time status på dine køretøjer</p>
+          <p className="text-muted-foreground">
+            Real-time status • Kommission: {Math.round(currentCommissionRate * 100)}% ({summary.totalVehicles} biler)
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -109,70 +111,70 @@ export const FleetPremiumDashboard = () => {
               ))}
             </SelectContent>
           </Select>
+          <FleetExportButton 
+            vehicles={vehicles} 
+            summary={summary} 
+            month={selectedMonth} 
+            year={selectedYear} 
+          />
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Summary cards - Økonomi oversigt */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Brutto-indtjening */}
         <SummaryCard
           icon={TrendingUp}
-          label="Brutto-indtjening"
-          value={`${formatCurrency(summary.totalMonthlyRevenue)} kr`}
-          subtext={`${formatCurrency(summary.totalYearlyRevenue)} kr i år`}
-          gradient="from-blue-500 to-blue-600"
+          label="Brutto lejeindtægt"
+          value={`${formatCurrency(summary.totalMonthlyGrossRevenue)} kr`}
+          subtext={`${formatCurrency(summary.totalYearlyGrossRevenue)} kr i år`}
         />
 
         {/* LEJIO Kommission */}
         <SummaryCard
           icon={DollarSign}
-          label={`LEJIO Kommission (${Math.round(COMMISSION_RATE * 100)}%)`}
+          label={`LEJIO Salær (${Math.round(currentCommissionRate * 100)}%)`}
           value={`-${formatCurrency(summary.totalCommission)} kr`}
           subtext="Denne måned"
-          gradient="from-orange-500 to-red-500"
           negative
         />
 
         {/* Afdrag */}
-        {summary.totalInstallments > 0 ? (
-          <SummaryCard
-            icon={Calendar}
-            label="Månedlige afdrag"
-            value={`-${formatCurrency(summary.totalInstallments)} kr`}
-            subtext="Reparationer & lån"
-            gradient="from-amber-500 to-amber-600"
-            negative
-          />
-        ) : (
-          <SummaryCard
-            icon={Calendar}
-            label="Månedlige afdrag"
-            value="0 kr"
-            subtext="Ingen aktive afdrag"
-            gradient="from-green-500 to-green-600"
-          />
-        )}
+        <SummaryCard
+          icon={CreditCard}
+          label="Månedlige afdrag"
+          value={summary.totalMonthlyInstallments > 0 ? `-${formatCurrency(summary.totalMonthlyInstallments)} kr` : '0 kr'}
+          subtext={summary.totalLoanBalance > 0 ? `Restgæld: ${formatCurrency(summary.totalLoanBalance)} kr` : 'Ingen aktive lån'}
+          negative={summary.totalMonthlyInstallments > 0}
+        />
+
+        {/* Rengøring */}
+        <SummaryCard
+          icon={FileText}
+          label="Rengøringsgebyrer"
+          value={`+${formatCurrency(summary.totalCleaningFees)} kr`}
+          subtext="Betalt af lejere"
+        />
 
         {/* Netto-udbetaling */}
         <SummaryCard
           icon={Wallet}
           label="Netto-udbetaling"
-          value={`${formatCurrency(finalPayout)} kr`}
+          value={`${formatCurrency(summary.finalNetPayout)} kr`}
           subtext="Til din konto"
-          gradient="from-primary to-primary/80"
           highlight
         />
       </div>
 
-      {/* Guarantee overview */}
+      {/* Guarantee overview - 10-måneders garanti */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Target className="w-5 h-5 text-primary" />
-            10-måneders Garanti
+            10-måneders Garanti (300 dage)
           </CardTitle>
           <CardDescription>
-            LEJIO garanterer minimum 300 udlejningsdage om året
+            LEJIO garanterer minimum {GUARANTEE_DAYS} udlejningsdage om året
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -210,7 +212,6 @@ export const FleetPremiumDashboard = () => {
             <FleetPremiumVehicleCard 
               key={vehicle.id} 
               vehicle={vehicle} 
-              commissionRate={COMMISSION_RATE}
             />
           ))}
         </div>
@@ -224,20 +225,17 @@ interface SummaryCardProps {
   label: string;
   value: string;
   subtext: string;
-  gradient: string;
   negative?: boolean;
   highlight?: boolean;
 }
 
-const SummaryCard = ({ icon: Icon, label, value, subtext, gradient, negative, highlight }: SummaryCardProps) => (
+const SummaryCard = ({ icon: Icon, label, value, subtext, negative, highlight }: SummaryCardProps) => (
   <Card className={cn(
     'relative overflow-hidden',
     highlight && 'border-primary/50 shadow-lg shadow-primary/10'
   )}>
     <CardContent className="p-4">
-      <div className={cn(
-        'w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-primary'
-      )}>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-primary">
         <Icon className="w-5 h-5 text-primary-foreground" />
       </div>
       <p className="text-xs text-muted-foreground mb-1 truncate">{label}</p>
