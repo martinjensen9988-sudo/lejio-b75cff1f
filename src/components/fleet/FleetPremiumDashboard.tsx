@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useFleetPremiumVehicles, getCommissionRate, FleetVehicleStats } from '@/hooks/useFleetPremiumVehicles';
 import { FleetExportButton } from './FleetExportButton';
 import { LoanModuleCard } from './LoanModuleCard';
+import { FleetDocumentsCard } from './FleetDocumentsCard';
 import { 
   Car, ChevronLeft, ChevronRight, Wrench, 
   Gauge, MapPin, Star, Calendar, Droplets, Home
@@ -347,6 +348,9 @@ export const FleetPremiumDashboard = () => {
           onRefresh={refetch}
         />
       )}
+
+      {/* Documents Section */}
+      <FleetDocumentsCard />
 
       {/* Vehicle list for multiple vehicles */}
       {vehicles.length > 1 && (

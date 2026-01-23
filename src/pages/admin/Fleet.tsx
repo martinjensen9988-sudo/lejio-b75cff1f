@@ -8,6 +8,7 @@ import { AdminServiceQueue } from '@/components/admin/AdminServiceQueue';
 import { AdminLoanRequests } from '@/components/admin/AdminLoanRequests';
 import { AdminCoverageShortfalls } from '@/components/admin/AdminCoverageShortfalls';
 import { AdminPartnerAlerts } from '@/components/admin/AdminPartnerAlerts';
+import { AdminFleetRiskOverview } from '@/components/admin/AdminFleetRiskOverview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, BarChart3, Settings, Wrench, Wallet, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,6 +98,7 @@ const AdminFleetPage = () => {
 
           <TabsContent value="loans">
             <div className="space-y-6">
+              <AdminFleetRiskOverview />
               <AdminLoanRequests />
               <AdminCoverageShortfalls />
             </div>
