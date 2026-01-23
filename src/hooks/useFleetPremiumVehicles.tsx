@@ -46,6 +46,7 @@ export interface VehicleLocation {
 export interface FleetVehicleStats {
   // 1. Stamdata
   id: string;
+  owner_id: string;
   registration: string;
   make: string;
   model: string;
@@ -302,6 +303,7 @@ export const useFleetPremiumVehicles = () => {
         return {
           // Stamdata
           id: vehicle.id,
+          owner_id: vehicle.owner_id,
           registration: vehicle.registration,
           make: vehicle.make,
           model: vehicle.model,

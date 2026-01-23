@@ -181,6 +181,7 @@ export const useAdminFleetPremiumVehicles = () => {
 
           return {
             id: vehicle.id,
+            owner_id: vehicle.owner_id,
             registration: vehicle.registration,
             make: vehicle.make,
             model: vehicle.model,
