@@ -16,7 +16,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.send-contract-signed]
-verify_jwt = true
+verify_jwt = false
 
 [functions.process-payment]
 verify_jwt = true
@@ -163,7 +163,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-checkinout-email]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-booking-paid-confirmation]
-verify_jwt = true
+verify_jwt = false
+
+[functions.test-all-emails]
+verify_jwt = false
