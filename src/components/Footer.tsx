@@ -73,7 +73,8 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
               <h4 className="font-display font-bold text-background text-lg mb-6">For udlejere</h4>
               <ul className="space-y-4 text-background/70">
                 <li><a href="/funktioner" className="hover:text-primary transition-colors">Alle funktioner</a></li>
-                <li><a href="/auth" className="hover:text-primary transition-colors">Bliv privat udlejer</a></li>
+                <li><a href="/bliv-udlejer" className="hover:text-primary transition-colors">Bliv privat udlejer</a></li>
+                <li><a href="/forhandler" className="hover:text-primary transition-colors">For forhandlere</a></li>
                 <li><a href="/privat-fleet" className="hover:text-primary transition-colors">Privat Fleet</a></li>
                 <li><a href="#pricing" className="hover:text-primary transition-colors">Priser</a></li>
               </ul>
