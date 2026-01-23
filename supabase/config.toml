@@ -45,9 +45,6 @@ verify_jwt = false
 [functions.send-message-notification]
 verify_jwt = true
 
-[functions.send-warning-notification]
-verify_jwt = true
-
 [functions.geocode-address]
 verify_jwt = true
 
@@ -176,3 +173,6 @@ verify_jwt = false
 
 [functions.create-booking]
 verify_jwt = true
+
+[functions.fleet-site]
+verify_jwt = false
