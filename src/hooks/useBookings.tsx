@@ -114,6 +114,18 @@ export const useBookings = () => {
           ? { ...b, payment_received: true, payment_received_at: new Date().toISOString() } 
           : b
       ));
+
+      // Send booking paid confirmation email to renter
+      try {
+        await supabase.functions.invoke('send-booking-paid-confirmation', {
+          body: { bookingId: id }
+        });
+        console.log('Booking paid confirmation email sent');
+      } catch (emailError) {
+        console.error('Failed to send booking paid email:', emailError);
+        // Don't fail the payment marking if email fails
+      }
+
       toast.success('Betaling markeret som modtaget');
       return true;
     } catch (err) {

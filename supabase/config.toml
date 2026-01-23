@@ -158,3 +158,12 @@ verify_jwt = false
 
 [functions.admin-update-vehicle]
 verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.send-checkinout-email]
+verify_jwt = true
+
+[functions.send-booking-paid-confirmation]
+verify_jwt = true
