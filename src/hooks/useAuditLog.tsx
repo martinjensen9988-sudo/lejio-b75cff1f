@@ -11,10 +11,49 @@ export interface AuditLogEntry {
   old_values?: Json;
   new_values?: Json;
   description: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }
+
+// Define which actions are considered critical and should alert super admins
+const CRITICAL_ACTIONS: Record<string, { severity: 'high' | 'critical'; entityTypes?: string[] }> = {
+  delete: { severity: 'critical', entityTypes: ['profile', 'vehicle', 'booking'] },
+  swap: { severity: 'high' },
+};
+
+const CRITICAL_ENTITY_TYPES = ['profile', 'user_role'];
 
 export const useAuditLog = () => {
   const { user } = useAuth();
+
+  // Send critical action alert to super admins
+  const sendCriticalAlert = useCallback(async (entry: AuditLogEntry, adminEmail: string, adminName?: string) => {
+    try {
+      const severity = entry.severity || 
+        (CRITICAL_ACTIONS[entry.action_type]?.severity) ||
+        (CRITICAL_ENTITY_TYPES.includes(entry.entity_type) ? 'high' : undefined);
+
+      if (!severity) return; // Not a critical action
+
+      const { error } = await supabase.functions.invoke('send-critical-action-alert', {
+        body: {
+          action_type: entry.action_type,
+          entity_type: entry.entity_type,
+          entity_identifier: entry.entity_identifier,
+          description: entry.description,
+          admin_email: adminEmail,
+          admin_name: adminName,
+          details: entry.new_values || entry.old_values,
+          severity,
+        },
+      });
+
+      if (error) {
+        console.error('Failed to send critical action alert:', error);
+      }
+    } catch (err) {
+      console.error('Critical alert error:', err);
+    }
+  }, []);
 
   const logAction = useCallback(async (entry: AuditLogEntry) => {
     if (!user) {
@@ -23,6 +62,7 @@ export const useAuditLog = () => {
     }
 
     try {
+      // Log to database
       const { error } = await supabase
         .from('admin_audit_logs')
         .insert([{
@@ -40,10 +80,31 @@ export const useAuditLog = () => {
       if (error) {
         console.error('Failed to create audit log:', error);
       }
+
+      // Check if this is a critical action that should alert super admins
+      const isCriticalAction = CRITICAL_ACTIONS[entry.action_type] && 
+        (!CRITICAL_ACTIONS[entry.action_type].entityTypes || 
+         CRITICAL_ACTIONS[entry.action_type].entityTypes!.includes(entry.entity_type));
+      
+      const isCriticalEntity = CRITICAL_ENTITY_TYPES.includes(entry.entity_type);
+      const hasExplicitSeverity = entry.severity === 'high' || entry.severity === 'critical';
+
+      if (isCriticalAction || isCriticalEntity || hasExplicitSeverity) {
+        // Get admin profile for the alert
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email, full_name')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.email) {
+          await sendCriticalAlert(entry, profile.email, profile.full_name || undefined);
+        }
+      }
     } catch (err) {
       console.error('Audit log error:', err);
     }
-  }, [user]);
+  }, [user, sendCriticalAlert]);
 
   // Convenience methods for common actions
   const logCreate = useCallback((entityType: string, entityId: string, identifier: string, description: string, newValues?: Json) => {
@@ -77,6 +138,7 @@ export const useAuditLog = () => {
       entity_identifier: identifier,
       old_values: oldValues,
       description,
+      severity: 'critical', // Deletions are always critical
     });
   }, [logAction]);
 
@@ -87,6 +149,27 @@ export const useAuditLog = () => {
       entity_id: bookingId,
       new_values: details,
       description,
+      severity: 'high', // Vehicle swaps are high priority
+    });
+  }, [logAction]);
+
+  // Explicit critical action logging
+  const logCriticalAction = useCallback((
+    actionType: AuditLogEntry['action_type'],
+    entityType: string, 
+    entityId: string, 
+    identifier: string, 
+    description: string, 
+    values?: Json
+  ) => {
+    return logAction({
+      action_type: actionType,
+      entity_type: entityType,
+      entity_id: entityId,
+      entity_identifier: identifier,
+      new_values: values,
+      description,
+      severity: 'critical',
     });
   }, [logAction]);
 
@@ -96,5 +179,6 @@ export const useAuditLog = () => {
     logUpdate,
     logDelete,
     logSwap,
+    logCriticalAction,
   };
 };
