@@ -11,8 +11,11 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Search, User, Car, Calendar, Receipt, Phone, Mail, 
   ExternalLink, Loader2, AlertCircle, CheckCircle2, Clock,
-  MessageCircle, FileText, Eye, History, CreditCard
+  MessageCircle, FileText, Eye, History, CreditCard, RefreshCw, Wrench
 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -93,6 +96,15 @@ export const AdminCustomerService = () => {
   const [userVehicles, setUserVehicles] = useState<VehicleResult[]>([]);
   const [userInvoices, setUserInvoices] = useState<InvoiceResult[]>([]);
   const [isLoadingUserDetails, setIsLoadingUserDetails] = useState(false);
+
+  // Vehicle swap
+  const [swapBooking, setSwapBooking] = useState<BookingResult | null>(null);
+  const [availableVehicles, setAvailableVehicles] = useState<VehicleResult[]>([]);
+  const [selectedSwapVehicle, setSelectedSwapVehicle] = useState<string>('');
+  const [swapReason, setSwapReason] = useState<string>('breakdown');
+  const [swapNotes, setSwapNotes] = useState('');
+  const [isSwapping, setIsSwapping] = useState(false);
+  const [isLoadingSwapVehicles, setIsLoadingSwapVehicles] = useState(false);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -216,6 +228,120 @@ export const AdminCustomerService = () => {
       toast.error('Kunne ikke hente brugerdetaljer');
     } finally {
       setIsLoadingUserDetails(false);
+    }
+  };
+
+  // Open vehicle swap dialog
+  const openSwapDialog = async (booking: BookingResult) => {
+    setSwapBooking(booking);
+    setSelectedSwapVehicle('');
+    setSwapReason('breakdown');
+    setSwapNotes('');
+    setIsLoadingSwapVehicles(true);
+
+    try {
+      // Get available vehicles from the same lessor
+      const { data: lessorData } = await supabase
+        .from('bookings')
+        .select('lessor_id')
+        .eq('id', booking.id)
+        .single();
+
+      if (lessorData?.lessor_id) {
+        const { data: vehiclesData } = await supabase
+          .from('vehicles')
+          .select(`
+            id, make, model, registration, year, daily_price, is_available,
+            owner:profiles!vehicles_owner_id_fkey(id, full_name, email)
+          `)
+          .eq('owner_id', lessorData.lessor_id)
+          .eq('is_available', true)
+          .neq('id', booking.vehicle?.registration ? undefined : ''); // Exclude current vehicle
+
+        setAvailableVehicles((vehiclesData as unknown as VehicleResult[]) || []);
+      }
+    } catch (error) {
+      console.error('Error loading vehicles:', error);
+      toast.error('Kunne ikke hente tilgængelige biler');
+    } finally {
+      setIsLoadingSwapVehicles(false);
+    }
+  };
+
+  // Perform the vehicle swap
+  const handleVehicleSwap = async () => {
+    if (!swapBooking || !selectedSwapVehicle) {
+      toast.error('Vælg venligst en ny bil');
+      return;
+    }
+
+    setIsSwapping(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Ikke logget ind');
+
+      // Get original vehicle ID
+      const { data: bookingData } = await supabase
+        .from('bookings')
+        .select('vehicle_id')
+        .eq('id', swapBooking.id)
+        .single();
+
+      if (!bookingData?.vehicle_id) throw new Error('Kunne ikke finde original bil');
+
+      // Create swap record
+      const { error: swapError } = await supabase
+        .from('vehicle_swaps')
+        .insert({
+          booking_id: swapBooking.id,
+          original_vehicle_id: bookingData.vehicle_id,
+          new_vehicle_id: selectedSwapVehicle,
+          swap_reason: swapReason,
+          notes: swapNotes || null,
+          created_by: user.id,
+        });
+
+      if (swapError) throw swapError;
+
+      // Update booking with new vehicle
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .update({ vehicle_id: selectedSwapVehicle })
+        .eq('id', swapBooking.id);
+
+      if (bookingError) throw bookingError;
+
+      // Mark old vehicle as needing service/blocked
+      const { error: oldVehicleError } = await supabase
+        .from('vehicles')
+        .update({ 
+          service_status: swapReason === 'breakdown' || swapReason === 'damage' ? 'blocked' : 'service_required',
+          is_available: false,
+        })
+        .eq('id', bookingData.vehicle_id);
+
+      if (oldVehicleError) throw oldVehicleError;
+
+      // Mark new vehicle as not available
+      const { error: newVehicleError } = await supabase
+        .from('vehicles')
+        .update({ is_available: false })
+        .eq('id', selectedSwapVehicle);
+
+      if (newVehicleError) throw newVehicleError;
+
+      toast.success('Bil byttet succesfuldt!');
+      setSwapBooking(null);
+      
+      // Refresh search results
+      if (searchQuery) {
+        handleSearch();
+      }
+    } catch (error) {
+      console.error('Swap error:', error);
+      toast.error('Kunne ikke bytte bil');
+    } finally {
+      setIsSwapping(false);
     }
   };
 
@@ -413,14 +539,27 @@ export const AdminCustomerService = () => {
                               </div>
                             </div>
                           </div>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => navigate(`/admin/bookings`)}
-                          >
-                            <ExternalLink className="w-4 h-4 mr-1" />
-                            Se booking
-                          </Button>
+                          <div className="flex gap-2">
+                            {(booking.status === 'active' || booking.status === 'confirmed') && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => openSwapDialog(booking)}
+                                className="text-accent border-accent/20 hover:bg-accent/10"
+                              >
+                                <RefreshCw className="w-4 h-4 mr-1" />
+                                Byt bil
+                              </Button>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => navigate(`/admin/bookings`)}
+                            >
+                              <ExternalLink className="w-4 h-4 mr-1" />
+                              Se booking
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -706,6 +845,130 @@ export const AdminCustomerService = () => {
                 )}
               </div>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Vehicle Swap Dialog */}
+      <Dialog open={!!swapBooking} onOpenChange={() => setSwapBooking(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-primary" />
+              Byt bil på booking
+            </DialogTitle>
+          </DialogHeader>
+
+          {swapBooking && (
+            <div className="space-y-4">
+              {/* Current booking info */}
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-sm text-muted-foreground">Nuværende bil</p>
+                <p className="font-semibold">
+                  {swapBooking.vehicle?.make} {swapBooking.vehicle?.model} ({swapBooking.vehicle?.registration})
+                </p>
+                <p className="text-sm">
+                  Lejer: {swapBooking.renter_name || swapBooking.renter_email}
+                </p>
+              </div>
+
+              {/* Swap reason */}
+              <div className="space-y-2">
+                <Label>Årsag til bilbytte</Label>
+                <Select value={swapReason} onValueChange={setSwapReason}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="breakdown">
+                      <span className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-destructive" />
+                        Nedbrud
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="damage">
+                      <span className="flex items-center gap-2">
+                        <Wrench className="w-4 h-4 text-destructive" />
+                        Skade
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="service">
+                      <span className="flex items-center gap-2">
+                        <Wrench className="w-4 h-4 text-accent" />
+                        Service
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="upgrade">
+                      <span className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-primary" />
+                        Opgradering
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Select new vehicle */}
+              <div className="space-y-2">
+                <Label>Vælg ny bil</Label>
+                {isLoadingSwapVehicles ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                ) : availableVehicles.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">
+                    Ingen tilgængelige biler fra denne udlejer
+                  </p>
+                ) : (
+                  <Select value={selectedSwapVehicle} onValueChange={setSelectedSwapVehicle}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Vælg en bil..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableVehicles.map((vehicle) => (
+                        <SelectItem key={vehicle.id} value={vehicle.id}>
+                          {vehicle.make} {vehicle.model} ({vehicle.registration}) - {vehicle.daily_price} kr/dag
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label>Noter (valgfrit)</Label>
+                <Textarea
+                  value={swapNotes}
+                  onChange={(e) => setSwapNotes(e.target.value)}
+                  placeholder="Beskriv situationen..."
+                  rows={3}
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setSwapBooking(null)}
+                  className="flex-1"
+                >
+                  Annuller
+                </Button>
+                <Button
+                  onClick={handleVehicleSwap}
+                  disabled={!selectedSwapVehicle || isSwapping}
+                  className="flex-1"
+                >
+                  {isSwapping ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  Byt bil
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
