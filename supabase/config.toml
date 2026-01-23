@@ -176,3 +176,6 @@ verify_jwt = true
 
 [functions.fleet-site]
 verify_jwt = false
+
+[functions.calculate-fleet-premium-stats]
+verify_jwt = false
