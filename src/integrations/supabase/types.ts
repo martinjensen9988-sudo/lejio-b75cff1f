@@ -2047,6 +2047,44 @@ export type Database = {
           },
         ]
       }
+      fleet_loan_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          loan_id: string
+          notes: string | null
+          payment_date: string
+          payment_type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          loan_id: string
+          notes?: string | null
+          payment_date?: string
+          payment_type?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          loan_id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_loan_payments_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicle_loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fleet_settlements: {
         Row: {
           bookings_count: number
@@ -2091,6 +2129,75 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      fleet_vehicle_loans: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          interest_rate: number | null
+          lessor_id: string
+          monthly_installment: number
+          original_amount: number
+          remaining_balance: number
+          remaining_months: number
+          setup_fee: number | null
+          start_date: string
+          status: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          end_date?: string | null
+          id?: string
+          interest_rate?: number | null
+          lessor_id: string
+          monthly_installment: number
+          original_amount: number
+          remaining_balance: number
+          remaining_months: number
+          setup_fee?: number | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          interest_rate?: number | null
+          lessor_id?: string
+          monthly_installment?: number
+          original_amount?: number
+          remaining_balance?: number
+          remaining_months?: number
+          setup_fee?: number | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_vehicle_loans_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_vehicle_loans_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       geofence_alerts: {
         Row: {
@@ -4682,6 +4789,7 @@ export type Database = {
           current_location_id: string | null
           current_odometer: number | null
           daily_price: number | null
+          days_available_this_year: number | null
           default_dropoff_time: string | null
           default_pickup_time: string | null
           deposit_amount: number | null
@@ -4738,6 +4846,7 @@ export type Database = {
           internal_length_cm: number | null
           internal_width_cm: number | null
           is_available: boolean | null
+          last_availability_sync: string | null
           last_service_date: string | null
           last_service_odometer: number | null
           late_return_charge_enabled: boolean | null
@@ -4810,6 +4919,7 @@ export type Database = {
           current_location_id?: string | null
           current_odometer?: number | null
           daily_price?: number | null
+          days_available_this_year?: number | null
           default_dropoff_time?: string | null
           default_pickup_time?: string | null
           deposit_amount?: number | null
@@ -4866,6 +4976,7 @@ export type Database = {
           internal_length_cm?: number | null
           internal_width_cm?: number | null
           is_available?: boolean | null
+          last_availability_sync?: string | null
           last_service_date?: string | null
           last_service_odometer?: number | null
           late_return_charge_enabled?: boolean | null
@@ -4938,6 +5049,7 @@ export type Database = {
           current_location_id?: string | null
           current_odometer?: number | null
           daily_price?: number | null
+          days_available_this_year?: number | null
           default_dropoff_time?: string | null
           default_pickup_time?: string | null
           deposit_amount?: number | null
@@ -4994,6 +5106,7 @@ export type Database = {
           internal_length_cm?: number | null
           internal_width_cm?: number | null
           is_available?: boolean | null
+          last_availability_sync?: string | null
           last_service_date?: string | null
           last_service_odometer?: number | null
           late_return_charge_enabled?: boolean | null
