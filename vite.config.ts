@@ -48,7 +48,9 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Avoid precaching HTML, as stale cached HTML can reference old hashed CSS/JS
+        // and cause white-screen issues after deployments.
+        globPatterns: ["**/*.{js,css,ico,png,svg,woff2}"],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB limit
         cleanupOutdatedCaches: true,
         skipWaiting: true,
