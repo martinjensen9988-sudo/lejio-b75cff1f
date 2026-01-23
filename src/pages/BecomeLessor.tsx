@@ -342,26 +342,6 @@ const BecomeLessor = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Klar til at begynde?
-          </h2>
-          <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Opret din konto på under 2 minutter og tilføj dit første køretøj i dag.
-          </p>
-          <Button 
-            size="lg" 
-            variant="secondary" 
-            className="text-lg px-8"
-            onClick={() => navigate("/auth")}
-          >
-            Opret konto
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-        </div>
-      </section>
 
       </main>
 
