@@ -1,0 +1,91 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/images/*",
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.ico",
+      "*.svg",
+      "*.js",
+      "*.css",
+      "*.woff",
+      "*.woff2",
+      "*.ttf",
+      "*.eot",
+      "*.json",
+      "*.xml",
+      "*.txt",
+      "*.map"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/privatlivspolitik",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/handelsbetingelser",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/udlejervilkaar",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/fleet-loesning",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/privat-fleet",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/faq",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/kontakt",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/bliv-udlejer",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/om-os",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/hvad-er-lejio",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/*",
+      "rewrite": "/index.html"
+    }
+  ],
+  "mimeTypes": {
+    ".js": "application/javascript",
+    ".mjs": "application/javascript",
+    ".json": "application/json",
+    ".css": "text/css",
+    ".html": "text/html",
+    ".svg": "image/svg+xml",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2"
+  },
+  "globalHeaders": {
+    "Cache-Control": "no-cache",
+    "X-Content-Type-Options": "nosniff"
+  },
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/index.html",
+      "statusCode": 200
+    }
+  }
+}
