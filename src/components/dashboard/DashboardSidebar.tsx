@@ -29,6 +29,7 @@ import {
   ChevronDown,
   ChevronRight,
   Zap,
+  Key,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,6 +91,7 @@ export const DashboardSidebar = ({
       'ai-pricing': '/dashboard/ai-pricing',
       'fleet-ai': '/dashboard/fleet-ai',
       'deductibles': '/dashboard/deductibles',
+      'api-keys': '/dashboard/api-keys',
     };
     return routeMap[tab] || '/dashboard/vehicles';
   };
@@ -158,6 +160,14 @@ export const DashboardSidebar = ({
       gradient: "from-teal-500 to-teal-500/60",
       items: [
         { label: "Selvrisko-profiler", icon: Shield, value: "deductibles" },
+      ],
+    },
+    {
+      title: "Integrationer",
+      icon: Key,
+      gradient: "from-violet-500 to-violet-500/60",
+      items: [
+        { label: "API-nøgler", icon: Key, value: "api-keys" },
       ],
     },
   ];
