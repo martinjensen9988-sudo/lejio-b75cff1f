@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 interface UserResult {
   id: string;
@@ -81,6 +82,7 @@ interface InvoiceResult {
 
 export const AdminCustomerService = () => {
   const navigate = useNavigate();
+  const { logSwap } = useAuditLog();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
@@ -438,6 +440,29 @@ export const AdminCustomerService = () => {
         .eq('id', selectedSwapVehicle);
 
       if (newVehicleError) throw newVehicleError;
+
+      // Log the swap action to audit log
+      const newVehicle = availableVehicles.find(v => v.id === selectedSwapVehicle);
+      const reasonLabels: Record<string, string> = {
+        breakdown: 'Nedbrud',
+        damage: 'Skade',
+        service: 'Service',
+        upgrade: 'Opgradering'
+      };
+      
+      await logSwap(
+        swapBooking.id,
+        `Bilbytte: ${swapBooking.vehicle?.make} ${swapBooking.vehicle?.model} (${swapBooking.vehicle?.registration}) → ${newVehicle?.make} ${newVehicle?.model} (${newVehicle?.registration}) - ${reasonLabels[swapReason] || swapReason}`,
+        {
+          booking_id: swapBooking.id,
+          original_vehicle: swapBooking.vehicle,
+          new_vehicle: newVehicle ? { make: newVehicle.make, model: newVehicle.model, registration: newVehicle.registration } : null,
+          swap_reason: swapReason,
+          breakdown_address: breakdownAddress || null,
+          breakdown_description: breakdownDescription || null,
+          notes: swapNotes || null,
+        }
+      );
 
       toast.success('Bil byttet succesfuldt!');
       setSwapBooking(null);

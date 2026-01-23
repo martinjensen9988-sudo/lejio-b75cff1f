@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Users, Calendar, Receipt, Tag, Truck, AlertTriangle, Flag, 
   UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3,
-  Menu, Camera, Building2, Facebook, UsersRound, LogOut, CheckCircle, Clock, Sparkles, HeadphonesIcon
+  Menu, Camera, Building2, Facebook, UsersRound, LogOut, CheckCircle, Clock, Sparkles, HeadphonesIcon,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -38,13 +39,25 @@ const menuItems = [
   { value: 'sales-ai', icon: Sparkles, label: 'Salgs AI', path: '/admin/sales-ai' },
   { value: 'driver-licenses', icon: ShieldCheck, label: 'Kørekort', path: '/admin/driver-licenses' },
   { value: 'stats', icon: BarChart3, label: 'Statistik', path: '/admin/stats' },
+  { value: 'audit-log', icon: FileText, label: 'Audit Log', path: '/admin/audit-log', superAdminOnly: true },
 ];
+
+interface MenuItem {
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  path: string;
+  superAdminOnly?: boolean;
+}
 
 export const AdminDashboardLayout = ({ children, activeTab }: AdminDashboardLayoutProps) => {
   const navigate = useNavigate();
-  const { user, signOut } = useAdminAuth();
+  const { user, signOut, isSuperAdmin } = useAdminAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({ totalCustomers: 0, activeCustomers: 0, trialCustomers: 0, totalBookings: 0 });
+
+  // Filter menu items based on role
+  const filteredMenuItems = (menuItems as MenuItem[]).filter(item => !item.superAdminOnly || isSuperAdmin);
 
   useEffect(() => {
     fetchStats();
@@ -109,7 +122,7 @@ export const AdminDashboardLayout = ({ children, activeTab }: AdminDashboardLayo
                   <span className="font-display font-bold">LEJIO Admin</span>
                 </div>
                 <nav className="p-2 max-h-[calc(100vh-80px)] overflow-y-auto">
-                  {menuItems.map((item) => (
+                  {filteredMenuItems.map((item) => (
                     <button
                       key={item.value}
                       onClick={() => handleNavigate(item.path)}
@@ -146,7 +159,7 @@ export const AdminDashboardLayout = ({ children, activeTab }: AdminDashboardLayo
         {/* Desktop Sidebar */}
         <aside className="hidden lg:block w-64 border-r bg-card/50 backdrop-blur-sm min-h-[calc(100vh-73px)] sticky top-[73px]">
           <nav className="p-3 space-y-1">
-            {menuItems.map((item) => (
+            {filteredMenuItems.map((item) => (
               <button
                 key={item.value}
                 onClick={() => handleNavigate(item.path)}
