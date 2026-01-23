@@ -7,10 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { 
   Search, Loader2, Shield, Clock, User, FileText, 
   Car, Calendar, Receipt, RefreshCw, Eye, Trash2,
-  Edit, Plus, ArrowLeftRight, CheckCircle, XCircle, Send
+  Edit, Plus, ArrowLeftRight, CheckCircle, XCircle, Send,
+  Download, FileSpreadsheet, FileDown
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -82,6 +84,7 @@ const ENTITY_LABELS: Record<string, string> = {
 export const AdminAuditLog = () => {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [actionFilter, setActionFilter] = useState<string>('all');
   const [entityFilter, setEntityFilter] = useState<string>('all');
@@ -194,6 +197,232 @@ export const AdminAuditLog = () => {
     );
   };
 
+  // Fetch all logs for export (bypasses pagination)
+  const fetchAllLogsForExport = async (): Promise<AuditLogEntry[]> => {
+    let allLogs: AuditLogEntry[] = [];
+    let offset = 0;
+    const batchSize = 1000;
+    let hasMoreData = true;
+
+    while (hasMoreData) {
+      let query = supabase
+        .from('admin_audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + batchSize - 1);
+
+      if (actionFilter !== 'all') {
+        query = query.eq('action_type', actionFilter);
+      }
+      if (entityFilter !== 'all') {
+        query = query.eq('entity_type', entityFilter);
+      }
+      if (searchQuery) {
+        query = query.or(`description.ilike.%${searchQuery}%,entity_identifier.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Fetch admin profiles
+        const logsWithProfiles = await Promise.all(
+          data.map(async (log) => {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('full_name, email')
+              .eq('id', log.admin_user_id)
+              .single();
+            return { ...log, admin_profile: profileData || undefined };
+          })
+        );
+        allLogs = [...allLogs, ...logsWithProfiles];
+        offset += batchSize;
+        hasMoreData = data.length === batchSize;
+      } else {
+        hasMoreData = false;
+      }
+    }
+
+    return allLogs;
+  };
+
+  const exportToCSV = async () => {
+    setIsExporting(true);
+    try {
+      const exportLogs = await fetchAllLogsForExport();
+      
+      if (exportLogs.length === 0) {
+        toast.error('Ingen data at eksportere');
+        return;
+      }
+
+      const headers = [
+        'Tidspunkt',
+        'Admin',
+        'Admin Email',
+        'Handling',
+        'Type',
+        'Entity ID',
+        'Identifier',
+        'Beskrivelse',
+        'Gamle værdier',
+        'Nye værdier',
+        'User Agent'
+      ];
+
+      const rows = exportLogs.map(log => [
+        format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
+        log.admin_profile?.full_name || '',
+        log.admin_profile?.email || '',
+        ACTION_LABELS[log.action_type] || log.action_type,
+        ENTITY_LABELS[log.entity_type] || log.entity_type,
+        log.entity_id || '',
+        log.entity_identifier || '',
+        log.description,
+        log.old_values ? JSON.stringify(log.old_values) : '',
+        log.new_values ? JSON.stringify(log.new_values) : '',
+        log.user_agent || ''
+      ]);
+
+      // Escape CSV values
+      const escapeCsvValue = (value: string) => {
+        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      };
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(escapeCsvValue).join(','))
+      ].join('\n');
+
+      // Add BOM for Excel UTF-8 compatibility
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `audit-log-${format(new Date(), 'yyyy-MM-dd-HHmm')}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`Eksporteret ${exportLogs.length} log entries til CSV`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Kunne ikke eksportere audit log');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportToPDF = async () => {
+    setIsExporting(true);
+    try {
+      const exportLogs = await fetchAllLogsForExport();
+      
+      if (exportLogs.length === 0) {
+        toast.error('Ingen data at eksportere');
+        return;
+      }
+
+      // Create HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Audit Log Rapport</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; font-size: 10px; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+            .header h1 { font-size: 24px; margin-bottom: 5px; }
+            .header p { color: #666; font-size: 12px; }
+            .meta { display: flex; justify-content: space-between; margin-bottom: 20px; background: #f5f5f5; padding: 10px; border-radius: 4px; }
+            .meta div { font-size: 11px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { background: #333; color: white; padding: 8px 4px; text-align: left; font-size: 9px; }
+            td { padding: 6px 4px; border-bottom: 1px solid #ddd; font-size: 9px; vertical-align: top; }
+            tr:nth-child(even) { background: #f9f9f9; }
+            .action-create { color: #059669; }
+            .action-update { color: #0284c7; }
+            .action-delete { color: #dc2626; }
+            .action-swap { color: #d97706; }
+            .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #666; border-top: 1px solid #ddd; padding-top: 15px; }
+            .json-preview { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; font-size: 8px; color: #666; }
+            @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>🛡️ Audit Log Rapport</h1>
+            <p>Compliance-rapport over alle administrative handlinger</p>
+          </div>
+          <div class="meta">
+            <div><strong>Genereret:</strong> ${format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: da })}</div>
+            <div><strong>Antal entries:</strong> ${exportLogs.length}</div>
+            <div><strong>Filter:</strong> ${actionFilter !== 'all' ? ACTION_LABELS[actionFilter] : 'Alle handlinger'} | ${entityFilter !== 'all' ? ENTITY_LABELS[entityFilter] : 'Alle typer'}</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 12%">Tidspunkt</th>
+                <th style="width: 15%">Admin</th>
+                <th style="width: 8%">Handling</th>
+                <th style="width: 8%">Type</th>
+                <th style="width: 12%">Identifier</th>
+                <th style="width: 25%">Beskrivelse</th>
+                <th style="width: 10%">Gamle værdier</th>
+                <th style="width: 10%">Nye værdier</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${exportLogs.map(log => `
+                <tr>
+                  <td>${format(new Date(log.created_at), 'dd/MM/yy HH:mm')}</td>
+                  <td>${log.admin_profile?.full_name || log.admin_profile?.email || 'Ukendt'}</td>
+                  <td class="action-${log.action_type}">${ACTION_LABELS[log.action_type] || log.action_type}</td>
+                  <td>${ENTITY_LABELS[log.entity_type] || log.entity_type}</td>
+                  <td>${log.entity_identifier || '-'}</td>
+                  <td>${log.description}</td>
+                  <td class="json-preview">${log.old_values ? JSON.stringify(log.old_values).substring(0, 50) + '...' : '-'}</td>
+                  <td class="json-preview">${log.new_values ? JSON.stringify(log.new_values).substring(0, 50) + '...' : '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">
+            <p>Denne rapport er genereret automatisk fra Lejio Admin Audit Log System</p>
+            <p>For komplet JSON-data af ændringer, brug venligst CSV-eksport</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Open print dialog for PDF
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+        }, 250);
+        toast.success(`Åbner print-dialog med ${exportLogs.length} log entries`);
+      } else {
+        toast.error('Kunne ikke åbne print-vindue. Tjek popup-blocker.');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Kunne ikke eksportere audit log');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -259,10 +488,34 @@ export const AdminAuditLog = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Handlingslog ({logs.length})</span>
-            <Button variant="outline" size="sm" onClick={() => loadLogs(true)}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Opdater
-            </Button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={isExporting || logs.length === 0}>
+                    {isExporting ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-2" />
+                    )}
+                    Eksporter
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportToCSV} disabled={isExporting}>
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
+                    Eksporter til CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToPDF} disabled={isExporting}>
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Eksporter til PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button variant="outline" size="sm" onClick={() => loadLogs(true)}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Opdater
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
