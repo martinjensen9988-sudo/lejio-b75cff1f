@@ -64,7 +64,7 @@ LEJIO er Danmarks førende platform for biludlejning - tænk det som "Hotels.com
 - Pro abonnement for erhverv (CVR):
   * Starter: 349 kr/md for 1-5 køretøjer
   * Standard: 599 kr/md for 6-15 køretøjer  
-  * Enterprise: 899 kr/md for 16+ køretøjer
+  * Enterprise: 899 kr/md for 16-35 køretøjer
 - 3% kommission pr. booking for Pro-brugere
 
 **LEJIO FLEET (Varetager-ordning):**

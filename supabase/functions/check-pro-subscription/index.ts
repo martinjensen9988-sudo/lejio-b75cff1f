@@ -15,9 +15,9 @@ const PRICE_TO_TIER: Record<string, string> = {
 };
 
 const TIER_DETAILS: Record<string, { name: string; maxVehicles: number; price: number }> = {
-  starter: { name: "LEJIO Pro - Starter", maxVehicles: 5, price: 299 },
-  standard: { name: "LEJIO Pro - Standard", maxVehicles: 15, price: 499 },
-  enterprise: { name: "LEJIO Pro - Enterprise", maxVehicles: 999, price: 799 },
+  starter: { name: "LEJIO Pro - Starter", maxVehicles: 5, price: 349 },
+  standard: { name: "LEJIO Pro - Standard", maxVehicles: 15, price: 599 },
+  enterprise: { name: "LEJIO Pro - Enterprise", maxVehicles: 35, price: 899 },
 };
 
 const logStep = (step: string, details?: any) => {

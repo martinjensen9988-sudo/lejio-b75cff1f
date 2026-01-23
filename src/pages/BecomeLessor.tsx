@@ -102,10 +102,10 @@ const BecomeLessor = () => {
       name: "Enterprise",
       price: "899",
       period: "kr/md",
-      description: "16+ biler",
+      description: "16-35 biler",
       highlight: false,
       features: [
-        "Ubegrænsede køretøjer",
+        "Op til 35 køretøjer",
         "Ubegrænsede bookinger",
         "Digitale kontrakter",
         "Dashboard & statistik",

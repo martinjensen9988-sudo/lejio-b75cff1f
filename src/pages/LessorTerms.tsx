@@ -161,7 +161,7 @@ const LessorTerms = () => {
                       <tbody>
                         <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Starter</td><td className="px-4 py-3">349 kr./md.</td><td className="px-4 py-3">3% per booking</td><td className="px-4 py-3">Op til 5 køretøjer</td></tr>
                         <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Standard</td><td className="px-4 py-3">599 kr./md.</td><td className="px-4 py-3">3% per booking</td><td className="px-4 py-3">Op til 15 køretøjer</td></tr>
-                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Enterprise</td><td className="px-4 py-3">899 kr./md.</td><td className="px-4 py-3">3% per booking</td><td className="px-4 py-3">Ubegrænset antal køretøjer</td></tr>
+                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Enterprise</td><td className="px-4 py-3">899 kr./md.</td><td className="px-4 py-3">3% per booking</td><td className="px-4 py-3">16-35 køretøjer</td></tr>
                       </tbody>
                     </table>
                   </div>

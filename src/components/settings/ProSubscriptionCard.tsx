@@ -61,12 +61,12 @@ const TIERS = [
   {
     id: 'enterprise',
     name: 'Enterprise',
-    subtitle: '16+ biler',
+    subtitle: '16-35 biler',
     monthlyPrice: 899,
     yearlyPrice: 9170, // 899 * 12 * 0.85 = 9169.80
-    maxVehicles: 999,
+    maxVehicles: 35,
     features: [
-      'Ubegrænsede køretøjer',
+      'Op til 35 køretøjer',
       'Ubegrænsede bookinger',
       'Digitale kontrakter',
       'Dashboard & statistik',
