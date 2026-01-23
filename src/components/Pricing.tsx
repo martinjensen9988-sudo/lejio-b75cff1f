@@ -270,7 +270,7 @@ const Pricing = () => {
             </div>
 
             {/* Fleet plans for dealers */}
-            <div className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-4xl mx-auto">
+            <div className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-5xl mx-auto">
               <div className="text-center mb-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lavender/10 border border-lavender/20 text-sm font-bold text-lavender mb-4">
                   <Shield className="w-4 h-4" />
@@ -280,25 +280,56 @@ const Pricing = () => {
                 <p className="text-muted-foreground text-lg">Lad LEJIO drive din udlejning – vi tager os af alt</p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Fleet Basic */}
-                <div className="rounded-2xl bg-lavender/5 border-2 border-lavender/30 p-8 hover:shadow-xl hover:border-lavender/50 transition-all">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-lavender to-lavender/60 flex items-center justify-center shadow-lg">
-                      <Shield className="w-7 h-7 text-white" />
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* Partner Starter */}
+                <div className="rounded-2xl bg-accent/5 border-2 border-accent/30 p-6 hover:shadow-xl hover:border-accent/50 transition-all">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg">
+                      <Building2 className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-display text-xl font-black text-foreground">Fleet Basic</h4>
-                      <p className="text-sm text-muted-foreground">Vi driver udlejningen</p>
+                      <h4 className="font-display text-lg font-black text-foreground">Partner Starter</h4>
+                      <p className="text-xs text-muted-foreground">Samarbejdspartner</p>
                     </div>
                   </div>
 
-                  <div className="flex items-baseline gap-2 mb-6">
-                    <span className="font-display text-4xl font-black text-foreground">20%</span>
-                    <span className="text-lavender font-bold">af omsætningen</span>
+                  <div className="flex items-baseline gap-2 mb-5">
+                    <span className="font-display text-4xl font-black text-foreground">15%</span>
+                    <span className="text-accent font-bold text-sm">af omsætningen</span>
                   </div>
 
-                  <ul className="space-y-3 mb-8 text-sm">
+                  <ul className="space-y-2 mb-6 text-sm">
+                    {["Ingen månedlig udgift", "Platform & support", "Du styrer køretøjer"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-accent" />
+                        <span className="text-muted-foreground">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button variant="outline" size="sm" className="w-full border-accent/40 hover:bg-accent/10 hover:border-accent/60" onClick={() => navigate('/kontakt')}>
+                    Kontakt os
+                  </Button>
+                </div>
+
+                {/* Fleet Basic */}
+                <div className="rounded-2xl bg-lavender/5 border-2 border-lavender/30 p-6 hover:shadow-xl hover:border-lavender/50 transition-all">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lavender to-lavender/60 flex items-center justify-center shadow-lg">
+                      <Shield className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-display text-lg font-black text-foreground">Fleet Basic</h4>
+                      <p className="text-xs text-muted-foreground">Vi driver udlejningen</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-baseline gap-2 mb-5">
+                    <span className="font-display text-4xl font-black text-foreground">25%</span>
+                    <span className="text-lavender font-bold text-sm">af omsætningen</span>
+                  </div>
+
+                  <ul className="space-y-2 mb-6 text-sm">
                     {["Ingen månedlig udgift", "LEJIO håndterer alt", "Badge på køretøjer"].map((f, i) => (
                       <li key={i} className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-lavender" />
@@ -307,34 +338,34 @@ const Pricing = () => {
                     ))}
                   </ul>
 
-                  <Button variant="outline" className="w-full border-lavender/40 hover:bg-lavender/10 hover:border-lavender/60">
+                  <Button variant="outline" size="sm" className="w-full border-lavender/40 hover:bg-lavender/10 hover:border-lavender/60" onClick={() => navigate('/kontakt')}>
                     Kontakt os
                   </Button>
                 </div>
 
                 {/* Fleet Premium */}
-                <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-lavender/5 border-2 border-primary/30 p-8 hover:shadow-xl hover:border-primary/50 transition-all relative">
+                <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-lavender/5 border-2 border-primary/30 p-6 hover:shadow-xl hover:border-primary/50 transition-all relative">
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-primary to-lavender text-white text-xs font-bold shadow-lg flex items-center gap-1">
                     <Crown className="w-3 h-3" />
                     Premium
                   </div>
 
-                  <div className="flex items-center gap-4 mb-6 mt-2">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-lavender flex items-center justify-center shadow-lg">
-                      <Shield className="w-7 h-7 text-white" />
+                  <div className="flex items-center gap-3 mb-5 mt-2">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-lavender flex items-center justify-center shadow-lg">
+                      <Shield className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-display text-xl font-black text-foreground">Fleet Premium</h4>
-                      <p className="text-sm text-muted-foreground">Fuld service løsning</p>
+                      <h4 className="font-display text-lg font-black text-foreground">Fleet Premium</h4>
+                      <p className="text-xs text-muted-foreground">Fuld service løsning</p>
                     </div>
                   </div>
 
-                  <div className="flex items-baseline gap-2 mb-6">
+                  <div className="flex items-baseline gap-2 mb-5">
                     <span className="font-display text-4xl font-black text-foreground">35%</span>
-                    <span className="text-primary font-bold">af omsætningen</span>
+                    <span className="text-primary font-bold text-sm">af omsætningen</span>
                   </div>
 
-                  <ul className="space-y-3 mb-8 text-sm">
+                  <ul className="space-y-2 mb-6 text-sm">
                     {["Alt fra Basic", "Prioriteret synlighed", "Dedikeret kontaktperson"].map((f, i) => (
                       <li key={i} className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-primary" />
@@ -343,7 +374,7 @@ const Pricing = () => {
                     ))}
                   </ul>
 
-                  <Button className="w-full bg-gradient-to-r from-primary to-lavender hover:opacity-90">
+                  <Button size="sm" className="w-full bg-gradient-to-r from-primary to-lavender hover:opacity-90" onClick={() => navigate('/kontakt')}>
                     Kontakt os
                   </Button>
                 </div>
