@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FleetPlanCard } from './FleetPlanCard';
+import { FleetPremiumDashboard } from './FleetPremiumDashboard';
 import { useFleetPlan, FleetSettlement, FLEET_PLANS } from '@/hooks/useFleetPlan';
 import { useAuth } from '@/hooks/useAuth';
 import { Building2, TrendingUp, Calendar, Wallet, Loader2, User } from 'lucide-react';
@@ -27,6 +28,7 @@ export const FleetDashboard = () => {
   const [selectedPlan, setSelectedPlan] = useState<'fleet_private' | 'fleet_basic' | 'fleet_premium' | null>(null);
 
   const isProfessional = profile?.user_type === 'professionel';
+  const isFleetPremium = currentPlan.type === 'fleet_premium';
 
   const handleSelectPlan = (plan: 'fleet_private' | 'fleet_basic' | 'fleet_premium') => {
     setSelectedPlan(plan);
@@ -51,6 +53,11 @@ export const FleetDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Fleet Premium Dashboard for active Fleet Premium users */}
+      {isFleetPremium && (
+        <FleetPremiumDashboard />
+      )}
+
       {/* Plan Selection for Private Users */}
       {!isProfessional && (
         <Card>
