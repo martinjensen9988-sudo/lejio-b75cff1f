@@ -140,6 +140,7 @@ const BookingsAddPage = lazy(() => import("./pages/admin/BookingsAdd"));
 const UserEditPage = lazy(() => import("./pages/admin/UserEdit"));
 const FleetVehicleEditPage = lazy(() => import("./pages/admin/FleetVehicleEdit"));
 const DriverLicenseReviewPage = lazy(() => import("./pages/admin/DriverLicenseReview"));
+const AdminAuditLogPage = lazy(() => import("./pages/admin/AuditLog"));
 
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
@@ -250,6 +251,7 @@ const App = () => (
               <Route path="/admin/sales-ai/company-search" element={<AdminAuthProvider><SalesAICompanySearchPage /></AdminAuthProvider>} />
               <Route path="/admin/stats" element={<AdminAuthProvider><AdminStatsPage /></AdminAuthProvider>} />
               <Route path="/admin/driver-licenses" element={<AdminAuthProvider><DriverLicenseReviewPage /></AdminAuthProvider>} />
+              <Route path="/admin/audit-log" element={<AdminAuthProvider><AdminAuditLogPage /></AdminAuthProvider>} />
               <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
               <Route path="/handelsbetingelser" element={<Terms />} />
               <Route path="/faq" element={<FAQ />} />
