@@ -201,9 +201,25 @@ const LessorTerms = () => {
                       </thead>
                       <tbody>
                         <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Software</td><td className="px-4 py-3">3%</td></tr>
-                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Partner</td><td className="px-4 py-3">18%</td></tr>
-                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Fleet Basic</td><td className="px-4 py-3">20% revenue share</td></tr>
-                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Fleet Premium</td><td className="px-4 py-3">35% revenue share</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <p className="mt-4 text-sm italic">
+                    Følgende tre modeller er Fleet-/Partner-løsninger og er særskilte aftaler, som ikke følger prisstrukturen for de faste månedsabonnementer (Starter/Standard/Enterprise) i pkt. 4:
+                  </p>
+                  <div className="overflow-x-auto mt-4">
+                    <table className="min-w-full border border-border rounded-xl overflow-hidden">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="px-4 py-3 text-left font-bold text-foreground">Model</th>
+                          <th className="px-4 py-3 text-left font-bold text-foreground">Kommission/Revenue Share</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Partner Starter</td><td className="px-4 py-3">15%</td></tr>
+                        <tr className="border-t border-border bg-muted/30"><td className="px-4 py-3 font-medium">Fleet Basic</td><td className="px-4 py-3">25% revenue share</td></tr>
+                        <tr className="border-t border-border"><td className="px-4 py-3 font-medium">Fleet Premium</td><td className="px-4 py-3">35% revenue share</td></tr>
                       </tbody>
                     </table>
                   </div>
