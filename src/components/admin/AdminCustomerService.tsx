@@ -11,7 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Search, User, Car, Calendar, Receipt, Phone, Mail, 
   ExternalLink, Loader2, AlertCircle, CheckCircle2, Clock,
-  MessageCircle, FileText, Eye, History, CreditCard, RefreshCw, Wrench
+  MessageCircle, FileText, Eye, History, CreditCard, RefreshCw, Wrench,
+  MapPin, Navigation
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -105,8 +106,10 @@ export const AdminCustomerService = () => {
   const [swapNotes, setSwapNotes] = useState('');
   const [breakdownAddress, setBreakdownAddress] = useState('');
   const [breakdownDescription, setBreakdownDescription] = useState('');
+  const [gpsCoordinates, setGpsCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [isSwapping, setIsSwapping] = useState(false);
   const [isLoadingSwapVehicles, setIsLoadingSwapVehicles] = useState(false);
+  const [isLoadingGps, setIsLoadingGps] = useState(false);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -241,6 +244,7 @@ export const AdminCustomerService = () => {
     setSwapNotes('');
     setBreakdownAddress('');
     setBreakdownDescription('');
+    setGpsCoordinates(null);
     setIsLoadingSwapVehicles(true);
 
     try {
@@ -269,6 +273,98 @@ export const AdminCustomerService = () => {
       toast.error('Kunne ikke hente tilgængelige biler');
     } finally {
       setIsLoadingSwapVehicles(false);
+    }
+  };
+
+  // Fetch GPS position for the vehicle in the swap booking
+  const fetchGpsPosition = async () => {
+    if (!swapBooking) return;
+
+    setIsLoadingGps(true);
+    try {
+      // Get vehicle_id from booking
+      const { data: bookingData } = await supabase
+        .from('bookings')
+        .select('vehicle_id')
+        .eq('id', swapBooking.id)
+        .single();
+
+      if (!bookingData?.vehicle_id) {
+        toast.error('Kunne ikke finde bilens ID');
+        return;
+      }
+
+      // Get GPS device for this vehicle
+      const { data: gpsDevice } = await supabase
+        .from('gps_devices')
+        .select('id, device_name')
+        .eq('vehicle_id', bookingData.vehicle_id)
+        .eq('is_active', true)
+        .single();
+
+      if (!gpsDevice) {
+        toast.error('Denne bil har ingen GPS-tracker tilknyttet');
+        return;
+      }
+
+      // Get latest GPS position
+      const { data: gpsPoint } = await supabase
+        .from('gps_data_points')
+        .select('latitude, longitude, recorded_at')
+        .eq('device_id', gpsDevice.id)
+        .order('recorded_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!gpsPoint) {
+        toast.error('Ingen GPS-position tilgængelig for denne bil');
+        return;
+      }
+
+      setGpsCoordinates({ lat: gpsPoint.latitude, lon: gpsPoint.longitude });
+
+      // Try to reverse geocode the coordinates to an address
+      try {
+        const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-address', {
+          body: { 
+            reverse: true,
+            latitude: gpsPoint.latitude,
+            longitude: gpsPoint.longitude
+          }
+        });
+
+        if (!geocodeError && geocodeData?.address) {
+          setBreakdownAddress(geocodeData.address);
+          toast.success(`GPS-position hentet: ${geocodeData.address}`);
+        } else {
+          // Fallback to coordinates
+          setBreakdownAddress(`${gpsPoint.latitude.toFixed(6)}, ${gpsPoint.longitude.toFixed(6)}`);
+          toast.success('GPS-koordinater hentet (kunne ikke finde adresse)');
+        }
+      } catch {
+        // Fallback to coordinates if geocoding fails
+        setBreakdownAddress(`${gpsPoint.latitude.toFixed(6)}, ${gpsPoint.longitude.toFixed(6)}`);
+        toast.success('GPS-koordinater hentet');
+      }
+
+      // Show when the position was recorded
+      const recordedAt = new Date(gpsPoint.recorded_at);
+      const now = new Date();
+      const diffMinutes = Math.floor((now.getTime() - recordedAt.getTime()) / 60000);
+      
+      if (diffMinutes < 60) {
+        toast.info(`Position opdateret for ${diffMinutes} minutter siden`);
+      } else if (diffMinutes < 1440) {
+        toast.info(`Position opdateret for ${Math.floor(diffMinutes / 60)} timer siden`);
+      } else {
+        toast.info(`Position opdateret ${format(recordedAt, 'dd/MM/yyyy HH:mm', { locale: da })}`);
+      }
+
+    } catch (error) {
+      console.error('GPS fetch error:', error);
+      toast.error('Kunne ikke hente GPS-position');
+    } finally {
+      setIsLoadingGps(false);
     }
   };
 
@@ -926,13 +1022,45 @@ export const AdminCustomerService = () => {
                 <>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      📍 Adresse (hvor skete det?)
+                      <MapPin className="w-4 h-4" />
+                      Adresse (hvor skete det?)
                     </Label>
-                    <Input
-                      value={breakdownAddress}
-                      onChange={(e) => setBreakdownAddress(e.target.value)}
-                      placeholder="F.eks. Vesterbrogade 42, 1620 København V"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        value={breakdownAddress}
+                        onChange={(e) => setBreakdownAddress(e.target.value)}
+                        placeholder="F.eks. Vesterbrogade 42, 1620 København V"
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={fetchGpsPosition}
+                        disabled={isLoadingGps}
+                        title="Hent position fra GPS-tracker"
+                      >
+                        {isLoadingGps ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Navigation className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {gpsCoordinates && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        GPS: {gpsCoordinates.lat.toFixed(6)}, {gpsCoordinates.lon.toFixed(6)}
+                        <a 
+                          href={`https://www.google.com/maps?q=${gpsCoordinates.lat},${gpsCoordinates.lon}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline ml-2"
+                        >
+                          Åbn i Google Maps
+                        </a>
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">

@@ -12,21 +12,63 @@ serve(async (req) => {
   }
 
   try {
-    const { address, postalCode, city } = await req.json();
+    const { address, postalCode, city, reverse, latitude, longitude } = await req.json();
     
-    if (!address && !postalCode && !city) {
-      return new Response(
-        JSON.stringify({ error: 'Address information required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const mapboxToken = Deno.env.get('MAPBOX_PUBLIC_TOKEN');
     if (!mapboxToken) {
       console.error('MAPBOX_PUBLIC_TOKEN not configured');
       return new Response(
         JSON.stringify({ error: 'Geocoding service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Reverse geocoding: coordinates to address
+    if (reverse && latitude !== undefined && longitude !== undefined) {
+      console.log('Reverse geocoding:', { latitude, longitude });
+      
+      const reverseUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${mapboxToken}&limit=1&types=address,place`;
+      
+      const response = await fetch(reverseUrl);
+      
+      if (!response.ok) {
+        console.error('Mapbox reverse geocode error:', response.status, await response.text());
+        return new Response(
+          JSON.stringify({ error: 'Reverse geocoding request failed' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const data = await response.json();
+      
+      if (!data.features || data.features.length === 0) {
+        console.log('No reverse geocoding results found');
+        return new Response(
+          JSON.stringify({ error: 'Address not found', address: null }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const placeName = data.features[0].place_name;
+      
+      console.log('Reverse geocoded successfully:', placeName);
+
+      return new Response(
+        JSON.stringify({ 
+          address: placeName,
+          latitude,
+          longitude,
+          success: true 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Forward geocoding: address to coordinates
+    if (!address && !postalCode && !city) {
+      return new Response(
+        JSON.stringify({ error: 'Address information required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -59,15 +101,15 @@ serve(async (req) => {
       );
     }
 
-    const [longitude, latitude] = data.features[0].center;
+    const [lon, lat] = data.features[0].center;
     const placeName = data.features[0].place_name;
     
-    console.log('Geocoded successfully:', { latitude, longitude, placeName });
+    console.log('Geocoded successfully:', { lat, lon, placeName });
 
     return new Response(
       JSON.stringify({ 
-        latitude, 
-        longitude, 
+        latitude: lat, 
+        longitude: lon, 
         placeName,
         success: true 
       }),
