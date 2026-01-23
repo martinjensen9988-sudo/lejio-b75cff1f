@@ -247,9 +247,9 @@ const Pricing = () => {
                   <p className="text-primary font-bold mt-2 text-sm">+ 3% kommission</p>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-6">
                   {[
-                    "Ubegrænsede køretøjer",
+                    "Op til 35 køretøjer",
                     "Ubegrænsede bookinger",
                     "Digitale kontrakter",
                     "Dashboard & statistik",
@@ -263,14 +263,24 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                <Button variant="outline" size="lg" className="w-full font-bold" onClick={() => navigate('/auth')}>
+                <Button variant="outline" size="lg" className="w-full font-bold mb-4" onClick={() => navigate('/auth')}>
                   Vælg Enterprise
                 </Button>
+                
+                <p className="text-center text-sm text-muted-foreground">
+                  Har du mere end 35 biler?{' '}
+                  <button 
+                    onClick={() => document.getElementById('fleet-plans')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Se vores Fleet-løsninger
+                  </button>
+                </p>
               </div>
             </div>
 
             {/* Fleet plans for dealers */}
-            <div className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-5xl mx-auto">
+            <div id="fleet-plans" className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-5xl mx-auto scroll-mt-24">
               <div className="text-center mb-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lavender/10 border border-lavender/20 text-sm font-bold text-lavender mb-4">
                   <Shield className="w-4 h-4" />
