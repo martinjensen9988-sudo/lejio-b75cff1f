@@ -35,7 +35,7 @@ export default {
   				'Noto Color Emoji'
   			],
   			mono: [
-  				'Roboto Mono',
+  				'JetBrains Mono',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
@@ -46,7 +46,6 @@ export default {
   				'monospace'
   			],
   			serif: [
-  				'Crimson Text',
   				'ui-serif',
   				'Georgia',
   				'Cambria',

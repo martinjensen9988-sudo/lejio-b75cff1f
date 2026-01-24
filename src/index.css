@@ -19,7 +19,7 @@
     /* ===== TITANIUM MID - Balanced Design (Half Dark) ===== */
 
     /* Core backgrounds - Medium slate */
-    --background: 220 25% 12%;
+    --background: 213 26.8293% 83.9216%;
     --foreground: 210 25% 96%;
 
     /* Cards - Slightly elevated surfaces */
@@ -93,7 +93,7 @@
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
     --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
     /* ===== SIDEBAR ===== */
     --sidebar-background: 220 20% 8%;
