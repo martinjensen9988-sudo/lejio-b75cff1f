@@ -842,7 +842,9 @@ export type Database = {
           created_at: string | null
           cvr_number: string
           ean_number: string | null
+          fleet_model: string | null
           id: string
+          initial_vehicle_count: number | null
           monthly_budget: number | null
           notes: string | null
           status: string | null
@@ -862,7 +864,9 @@ export type Database = {
           created_at?: string | null
           cvr_number: string
           ean_number?: string | null
+          fleet_model?: string | null
           id?: string
+          initial_vehicle_count?: number | null
           monthly_budget?: number | null
           notes?: string | null
           status?: string | null
@@ -882,7 +886,9 @@ export type Database = {
           created_at?: string | null
           cvr_number?: string
           ean_number?: string | null
+          fleet_model?: string | null
           id?: string
+          initial_vehicle_count?: number | null
           monthly_budget?: number | null
           notes?: string | null
           status?: string | null
@@ -2247,6 +2253,110 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_partner_contracts: {
+        Row: {
+          binding_end_date: string
+          commission_rate: number
+          contract_number: string
+          contract_start_date: string
+          corporate_account_id: string
+          created_at: string
+          created_by: string | null
+          fleet_model: string
+          id: string
+          initial_vehicle_count: number
+          lejio_signature: string | null
+          lejio_signed_at: string | null
+          lejio_signer_name: string | null
+          lejio_signer_title: string | null
+          partner_address: string | null
+          partner_city: string | null
+          partner_company_name: string
+          partner_contact_name: string
+          partner_cvr: string
+          partner_email: string
+          partner_phone: string | null
+          partner_postal_code: string | null
+          partner_signature: string | null
+          partner_signed_at: string | null
+          partner_signer_name: string | null
+          partner_signer_title: string | null
+          pdf_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          binding_end_date: string
+          commission_rate: number
+          contract_number: string
+          contract_start_date: string
+          corporate_account_id: string
+          created_at?: string
+          created_by?: string | null
+          fleet_model: string
+          id?: string
+          initial_vehicle_count?: number
+          lejio_signature?: string | null
+          lejio_signed_at?: string | null
+          lejio_signer_name?: string | null
+          lejio_signer_title?: string | null
+          partner_address?: string | null
+          partner_city?: string | null
+          partner_company_name: string
+          partner_contact_name: string
+          partner_cvr: string
+          partner_email: string
+          partner_phone?: string | null
+          partner_postal_code?: string | null
+          partner_signature?: string | null
+          partner_signed_at?: string | null
+          partner_signer_name?: string | null
+          partner_signer_title?: string | null
+          pdf_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          binding_end_date?: string
+          commission_rate?: number
+          contract_number?: string
+          contract_start_date?: string
+          corporate_account_id?: string
+          created_at?: string
+          created_by?: string | null
+          fleet_model?: string
+          id?: string
+          initial_vehicle_count?: number
+          lejio_signature?: string | null
+          lejio_signed_at?: string | null
+          lejio_signer_name?: string | null
+          lejio_signer_title?: string | null
+          partner_address?: string | null
+          partner_city?: string | null
+          partner_company_name?: string
+          partner_contact_name?: string
+          partner_cvr?: string
+          partner_email?: string
+          partner_phone?: string | null
+          partner_postal_code?: string | null
+          partner_signature?: string | null
+          partner_signed_at?: string | null
+          partner_signer_name?: string | null
+          partner_signer_title?: string | null
+          pdf_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_partner_contracts_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -5961,6 +6071,7 @@ export type Database = {
       generate_contract_number: { Args: never; Returns: string }
       generate_corporate_invoice_number: { Args: never; Returns: string }
       generate_fleet_api_key: { Args: never; Returns: string }
+      generate_fleet_contract_number: { Args: never; Returns: string }
       generate_invoice_number: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_admin_users: {
