@@ -457,17 +457,17 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
 
   return (
     <div ref={ref} {...props}>
-      {/* Chat Button */}
+      {/* Chat Button - LEFT SIDE */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center ${isOpen ? 'hidden' : ''}`}
+        className={`fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center ${isOpen ? 'hidden' : ''}`}
       >
         <MessageCircle className="w-6 h-6" />
       </button>
 
-      {/* Chat Window */}
+      {/* Chat Window - LEFT SIDE */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 z-50 w-[380px] h-[550px] flex flex-col shadow-2xl border-2">
+        <Card className="fixed bottom-6 left-6 z-50 w-[380px] h-[550px] flex flex-col shadow-2xl border-2">
           <CardHeader className="bg-primary text-primary-foreground rounded-t-lg py-3 px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

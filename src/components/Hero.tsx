@@ -22,53 +22,53 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Premium dark background with mesh gradients */}
+    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20 pb-12">
+      {/* Light background with subtle mesh gradients */}
       <div className="absolute inset-0 bg-hero-gradient">
         {/* Mesh gradient overlay */}
-        <div className="absolute inset-0 bg-mesh opacity-80" />
+        <div className="absolute inset-0 bg-mesh opacity-60" />
         
-        {/* Animated glow orbs */}
+        {/* Subtle glow orbs for light theme */}
         <motion.div 
-          className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[150px]"
+          className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[150px]"
           animate={{ 
             scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2]
+            opacity: [0.08, 0.15, 0.08]
           }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-accent/15 rounded-full blur-[120px]"
+          className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-accent/6 rounded-full blur-[120px]"
           animate={{ 
             scale: [1.2, 1, 1.2],
-            opacity: [0.15, 0.25, 0.15]
+            opacity: [0.06, 0.12, 0.06]
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute -bottom-40 left-1/3 w-[700px] h-[700px] bg-mint/10 rounded-full blur-[180px]"
+          className="absolute -bottom-40 left-1/3 w-[700px] h-[700px] bg-mint/5 rounded-full blur-[180px]"
           animate={{ 
             scale: [1, 1.15, 1],
-            opacity: [0.1, 0.2, 0.1]
+            opacity: [0.05, 0.1, 0.05]
           }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         />
         
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-grid opacity-30" />
+        {/* Grid pattern - subtle for light theme */}
+        <div className="absolute inset-0 bg-grid opacity-20" />
         
         {/* Floating particles */}
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            className={`absolute w-1 h-1 rounded-full ${i % 2 === 0 ? 'bg-primary' : 'bg-accent'}`}
+            className={`absolute w-1 h-1 rounded-full ${i % 2 === 0 ? 'bg-primary/50' : 'bg-accent/50'}`}
             style={{
               left: `${15 + i * 15}%`,
               top: `${20 + (i % 3) * 25}%`,
             }}
             animate={{
               y: [-20, 20, -20],
-              opacity: [0.3, 0.8, 0.3],
+              opacity: [0.2, 0.5, 0.2],
             }}
             transition={{
               duration: 4 + i,
@@ -258,7 +258,24 @@ const Hero = () => {
       </div>
 
       {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/80 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/60 to-transparent" />
+
+      {/* === SLIDER PLACEHOLDER SECTION === */}
+      <div className="relative z-10 mt-16 w-full">
+        <div className="container mx-auto px-6">
+          <div className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-8 text-center shadow-lg">
+            <h3 className="font-display text-2xl font-semibold text-foreground mb-2">
+              Featured Slider
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Her kommer en slider med featured køretøjer, tilbud eller kampagner
+            </p>
+            <div className="h-48 bg-muted/50 rounded-xl border-2 border-dashed border-border flex items-center justify-center">
+              <span className="text-muted-foreground text-lg">Slider komponent placeholder</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
