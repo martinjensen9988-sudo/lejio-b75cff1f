@@ -28,7 +28,7 @@
     --card-foreground: 210 25% 96%;
 
     /* Popovers & Dropdowns */
-    --popover: 215 20.2247% 65.098%;
+    --popover: 220 20% 18%;
     --popover-foreground: 210 25% 96%;
 
     /* Primary - Electric Blue (Tech/Innovation) */
@@ -36,11 +36,11 @@
     --primary-foreground: 210 100% 98%;
 
     /* Secondary - Medium steel */
-    --secondary: 220 18% 28%;
+    --secondary: 213 26.8293% 83.9216%;
     --secondary-foreground: 210 25% 95%;
 
     /* Muted - Softer mid-tones */
-    --muted: 215 25% 26.6667%;
+    --muted: 220 18% 22%;
     --muted-foreground: 215 20% 65%;
 
     /* Accent - Warm copper/bronze */
@@ -60,7 +60,7 @@
     --destructive-foreground: 0 85% 97%;
 
     /* Borders & Inputs - More visible */
-    --border: 215 20.2247% 65.098%;
+    --border: 220 18% 25%;
     --input: 220 18% 22%;
     --ring: 210 100% 55%;
 
