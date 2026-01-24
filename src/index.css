@@ -35,7 +35,7 @@
     --primary-foreground: 210 100% 98%;
 
     /* Secondary - Medium steel */
-    --secondary: 221 31% 54%;
+    --secondary: 222 45% 65%;
     --secondary-foreground: 210 25% 95%;
 
     /* Muted - Softer mid-tones */
@@ -60,7 +60,7 @@
 
     /* Borders & Inputs - More visible */
     --border: 220 18% 25%;
-    --input: 220 18% 22%;
+    --input: 30 65% 68%;
     --ring: 210 100% 55%;
 
     --radius: 0.75rem;
