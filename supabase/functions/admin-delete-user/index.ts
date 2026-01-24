@@ -11,6 +11,11 @@ const logStep = (step: string, details?: any) => {
   console.log(`[ADMIN-DELETE-USER] ${step}${detailsStr}`);
 };
 
+// UUID validation helper
+const isValidUUID = (id: string): boolean => {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -19,10 +24,20 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { userId } = await req.json();
+    const body = await req.json();
+    const { userId } = body;
+    
+    // Validate userId is provided
     if (!userId) {
       throw new Error("userId is required");
     }
+    
+    // Validate userId is a valid UUID format
+    if (!isValidUUID(userId)) {
+      logStep("Invalid UUID format", { userId });
+      throw new Error("Invalid userId format - must be a valid UUID");
+    }
+    
     logStep("User ID to delete", { userId });
 
     // Create admin client with service role key
@@ -61,6 +76,30 @@ serve(async (req) => {
     }
 
     logStep("Super admin verified", { requesterId: userData.user.id });
+
+    // Prevent self-deletion
+    if (userId === userData.user.id) {
+      logStep("Self-deletion attempt blocked", { userId });
+      throw new Error("Cannot delete your own account");
+    }
+
+    // Verify user exists before proceeding with deletion
+    const { data: userExists, error: userExistsError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, full_name')
+      .eq('id', userId)
+      .single();
+
+    if (userExistsError || !userExists) {
+      logStep("User not found", { userId, error: userExistsError?.message });
+      throw new Error("User not found");
+    }
+
+    logStep("User found, proceeding with deletion", { 
+      userId, 
+      email: userExists.email,
+      fullName: userExists.full_name 
+    });
 
     // Step 1: Delete user's vehicles first (and related bookings, contracts, etc.)
     const { data: vehicles, error: vehiclesQueryError } = await supabaseAdmin
