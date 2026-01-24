@@ -57,6 +57,7 @@ const LessorTerms = lazy(() => import("./pages/LessorTerms"));
 const Forhandler = lazy(() => import("./pages/Forhandler"));
 const Contact = lazy(() => import("./pages/Contact"));
 const FleetDemo = lazy(() => import("./pages/FleetDemo"));
+const FleetWidgetDemo = lazy(() => import("./pages/FleetWidgetDemo"));
 
 // Dashboard sub-pages - lazy loaded
 const VehiclesPage = lazy(() => import("./pages/dashboard/Vehicles"));
@@ -220,6 +221,7 @@ const App = () => (
               <Route path="/search/booking/:vehicleId" element={<SearchBookingRedirect />} />
               <Route path="/booking/:vehicleId" element={<Booking />} />
               <Route path="/fleet-demo" element={<FleetDemo />} />
+              <Route path="/fleet-widget" element={<FleetWidgetDemo />} />
               <Route path="/my-rentals" element={<MyRentals />} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
