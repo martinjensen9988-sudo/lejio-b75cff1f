@@ -1157,7 +1157,7 @@ const AdminFleetManagement = () => {
             )}
           </div>
 
-          <div className="flex gap-3 justify-end">
+          <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateSettlement(false)}>
               Annuller
             </Button>
@@ -1168,7 +1168,7 @@ const AdminFleetManagement = () => {
               {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Opret opgørelse
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -1502,13 +1502,15 @@ const AdminFleetManagement = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuller</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteVehicle}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={isDeleting}
-            >
-              {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Slet køretøj
+            <AlertDialogAction asChild>
+              <Button
+                onClick={handleDeleteVehicle}
+                variant="destructive"
+                disabled={isDeleting}
+              >
+                {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Slet køretøj
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
