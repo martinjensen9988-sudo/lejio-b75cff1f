@@ -46,11 +46,13 @@ const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-24 relative overflow-hidden">
-      {/* Premium background with mesh gradient */}
-      <div className="absolute inset-0 bg-mesh" />
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary rounded-full blur-[180px] opacity-[0.08]" />
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-accent rounded-full blur-[150px] opacity-[0.06]" />
+    <section id="features" className="py-24 relative overflow-hidden" style={{
+      background: 'linear-gradient(180deg, hsl(180 35% 28%) 0%, hsl(180 40% 20%) 100%)'
+    }}>
+      {/* Subtle mesh overlay */}
+      <div className="absolute inset-0 opacity-30" style={{
+        background: 'radial-gradient(ellipse at 25% 30%, hsl(168 76% 42% / 0.12) 0%, transparent 50%), radial-gradient(ellipse at 75% 70%, hsl(174 72% 48% / 0.08) 0%, transparent 50%)'
+      }} />
 
       <div className="container mx-auto px-6 relative z-10">
         {/* Section Header */}
@@ -61,17 +63,17 @@ const Features = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/30 text-sm font-bold text-primary mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/40 text-sm font-bold text-primary mb-6">
             <CheckCircle2 className="w-4 h-4" />
             <span>For lejere</span>
           </div>
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6 text-white">
             Hvorfor leje hos{" "}
-            <span className="text-gradient">
+            <span className="text-primary">
               LEJIO?
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-white/70 max-w-2xl mx-auto">
             Vi gør det nemt, sikkert og gennemsigtigt at leje køretøjer fra lokale udlejere.
           </p>
         </motion.div>
@@ -83,7 +85,7 @@ const Features = () => {
             return (
               <motion.div 
                 key={i}
-                className="group glass-strong rounded-2xl p-6 border border-border/50 hover:border-primary/40 transition-all duration-300 hover-lift"
+                className="group bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-primary/50 transition-all duration-300 hover-lift"
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
@@ -92,8 +94,8 @@ const Features = () => {
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   <Icon className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="font-display text-lg font-bold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+                <h3 className="font-display text-lg font-bold text-white mb-2">{feature.title}</h3>
+                <p className="text-white/70 text-sm leading-relaxed">{feature.description}</p>
               </motion.div>
             );
           })}
@@ -120,32 +122,32 @@ const Features = () => {
 
         {/* Divider */}
         <div className="flex items-center gap-4 max-w-xl mx-auto mb-16">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-          <span className="text-muted-foreground text-sm font-medium px-4">Eller</span>
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          <span className="text-white/60 text-sm font-medium px-4">Eller</span>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
         </div>
 
         {/* Provider teaser */}
         <motion.div 
-          className="glass-strong rounded-3xl p-8 md:p-12 border border-accent/30 max-w-4xl mx-auto text-center glow-border"
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-white/20 max-w-4xl mx-auto text-center"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/40 text-sm font-bold text-accent mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 border border-accent/40 text-sm font-bold text-accent mb-6">
             <Sparkles className="w-4 h-4" />
             <span>For udlejere</span>
           </div>
           
-          <h3 className="font-display text-3xl md:text-4xl font-black mb-4">
+          <h3 className="font-display text-3xl md:text-4xl font-black mb-4 text-white">
             Har du et køretøj?{" "}
-            <span className="text-gradient-accent">
+            <span className="text-accent">
               Tjen penge på det
             </span>
           </h3>
           
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/70 mb-8 max-w-2xl mx-auto">
             Bliv udlejer på LEJIO og lad dit køretøj arbejde for dig. Vi håndterer kontrakter, booking og formidling – så du kan fokusere på udlejningen.
           </p>
 
@@ -155,9 +157,9 @@ const Features = () => {
               { icon: CheckCircle2, text: "Auto-kontrakter", color: "text-accent" },
               { icon: CheckCircle2, text: "Enkel afregning", color: "text-primary" },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 glass rounded-full px-4 py-2">
+              <div key={i} className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2">
                 <item.icon className={`w-4 h-4 ${item.color}`} />
-                <span className="text-sm font-medium">{item.text}</span>
+                <span className="text-sm font-medium text-white">{item.text}</span>
               </div>
             ))}
           </div>

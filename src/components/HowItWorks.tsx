@@ -19,11 +19,13 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-32 relative overflow-hidden">
-      {/* Premium background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />
-      <div className="absolute top-20 right-[10%] w-32 h-32 bg-mint rounded-full blur-[80px] opacity-20 animate-float" />
-      <div className="absolute bottom-20 left-[10%] w-40 h-40 bg-accent rounded-full blur-[100px] opacity-15 animate-float-slow" />
+    <section id="how-it-works" className="py-32 relative overflow-hidden" style={{
+      background: 'linear-gradient(180deg, hsl(180 40% 20%) 0%, hsl(180 45% 15%) 100%)'
+    }}>
+      {/* Subtle mesh overlay */}
+      <div className="absolute inset-0 opacity-30" style={{
+        background: 'radial-gradient(ellipse at 70% 20%, hsl(168 76% 42% / 0.12) 0%, transparent 50%), radial-gradient(ellipse at 30% 80%, hsl(174 72% 48% / 0.08) 0%, transparent 50%)'
+      }} />
 
       <div className="container mx-auto px-6 relative z-10">
         <motion.div 
@@ -33,18 +35,18 @@ const HowItWorks = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-mint/30 text-sm font-bold text-mint mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-mint/20 border border-mint/40 text-sm font-bold text-mint mb-6">
             <CheckCircle2 className="w-4 h-4" />
             <span>Super enkelt</span>
           </div>
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6 text-white">
             Så{" "}
-            <span className="text-gradient">
+            <span className="text-primary">
               nemt
             </span>{" "}
             er det
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-white/70 max-w-2xl mx-auto">
             Fra søgning til kørsel – på under 5 minutter.
           </p>
         </motion.div>
@@ -53,19 +55,19 @@ const HowItWorks = () => {
         <div className="grid lg:grid-cols-2 gap-10 max-w-6xl mx-auto">
           {/* Renters */}
           <motion.div 
-            className="glass-strong rounded-[2rem] p-8 border border-primary/20 hover-lift"
+            className="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 border border-white/20 hover-lift"
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
             <div className="flex items-center gap-4 mb-10">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg glow-primary">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
                 <Key className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h3 className="font-display text-2xl font-black text-foreground">For lejere</h3>
-                <p className="text-muted-foreground">Find og book dit drømmekøretøj</p>
+                <h3 className="font-display text-2xl font-black text-white">For lejere</h3>
+                <p className="text-white/70">Find og book dit drømmekøretøj</p>
               </div>
             </div>
 
@@ -85,13 +87,13 @@ const HowItWorks = () => {
                       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                         <Icon className="w-7 h-7 text-white" />
                       </div>
-                      <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-foreground text-background text-xs font-bold flex items-center justify-center">
+                      <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white text-gray-900 text-xs font-bold flex items-center justify-center">
                         {item.step}
                       </div>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-display text-lg font-bold text-foreground">{item.title}</h4>
-                      <p className="text-muted-foreground">{item.desc}</p>
+                      <h4 className="font-display text-lg font-bold text-white">{item.title}</h4>
+                      <p className="text-white/70">{item.desc}</p>
                     </div>
                   </motion.div>
                 );
@@ -111,19 +113,19 @@ const HowItWorks = () => {
 
           {/* Lessors */}
           <motion.div 
-            className="glass-strong rounded-[2rem] p-8 border border-accent/20 hover-lift"
+            className="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 border border-white/20 hover-lift"
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="flex items-center gap-4 mb-10">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg glow-accent">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg">
                 <Wallet className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h3 className="font-display text-2xl font-black text-foreground">For udlejere</h3>
-                <p className="text-muted-foreground">Tjen penge på dit køretøj</p>
+                <h3 className="font-display text-2xl font-black text-white">For udlejere</h3>
+                <p className="text-white/70">Tjen penge på dit køretøj</p>
               </div>
             </div>
 
@@ -143,13 +145,13 @@ const HowItWorks = () => {
                       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                         <Icon className="w-7 h-7 text-white" />
                       </div>
-                      <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-foreground text-background text-xs font-bold flex items-center justify-center">
+                      <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white text-gray-900 text-xs font-bold flex items-center justify-center">
                         {item.step}
                       </div>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-display text-lg font-bold text-foreground">{item.title}</h4>
-                      <p className="text-muted-foreground">{item.desc}</p>
+                      <h4 className="font-display text-lg font-bold text-white">{item.title}</h4>
+                      <p className="text-white/70">{item.desc}</p>
                     </div>
                   </motion.div>
                 );
