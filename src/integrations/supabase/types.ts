@@ -1315,6 +1315,60 @@ export type Database = {
           },
         ]
       }
+      crm_call_logs: {
+        Row: {
+          call_sid: string
+          created_at: string
+          deal_id: string | null
+          direction: string | null
+          duration_seconds: number | null
+          from_number: string | null
+          id: string
+          lead_id: string | null
+          status: string
+          to_number: string | null
+        }
+        Insert: {
+          call_sid: string
+          created_at?: string
+          deal_id?: string | null
+          direction?: string | null
+          duration_seconds?: number | null
+          from_number?: string | null
+          id?: string
+          lead_id?: string | null
+          status: string
+          to_number?: string | null
+        }
+        Update: {
+          call_sid?: string
+          created_at?: string
+          deal_id?: string | null
+          direction?: string | null
+          duration_seconds?: number | null
+          from_number?: string | null
+          id?: string
+          lead_id?: string | null
+          status?: string
+          to_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_call_logs_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_call_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "sales_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_deals: {
         Row: {
           actual_close_date: string | null
