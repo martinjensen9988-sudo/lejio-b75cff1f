@@ -20,7 +20,7 @@
     /* ===== TITANIUM MID - Balanced Design (Half Dark) ===== */
 
     /* Core backgrounds - Medium slate */
-    --background: 215 25% 26.6667%;
+    --background: 220 25% 12%;
     --foreground: 210 25% 96%;
 
     /* Cards - Slightly elevated surfaces */
@@ -28,7 +28,7 @@
     --card-foreground: 210 25% 96%;
 
     /* Popovers & Dropdowns */
-    --popover: 220 20% 18%;
+    --popover: 213 26.8293% 83.9216%;
     --popover-foreground: 210 25% 96%;
 
     /* Primary - Electric Blue (Tech/Innovation) */
@@ -36,11 +36,11 @@
     --primary-foreground: 210 100% 98%;
 
     /* Secondary - Medium steel */
-    --secondary: 213 26.8293% 83.9216%;
+    --secondary: 220 18% 28%;
     --secondary-foreground: 210 25% 95%;
 
     /* Muted - Softer mid-tones */
-    --muted: 220 18% 22%;
+    --muted: 215 19.3182% 34.5098%;
     --muted-foreground: 215 20% 65%;
 
     /* Accent - Warm copper/bronze */
