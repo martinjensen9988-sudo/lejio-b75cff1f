@@ -546,20 +546,18 @@ const Forhandler = () => {
             {/* Two Window Layout */}
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {/* Window 1 - Video */}
-              <Card className="border-border/50 hover:border-primary/40 transition-colors overflow-hidden">
-                <CardContent className="p-0">
-                  <video 
-                    className="w-full h-auto rounded-lg"
-                    controls
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  >
-                    <source src="/videos/forhandler-video.mp4" type="video/mp4" />
-                    Din browser understøtter ikke video.
-                  </video>
-                </CardContent>
+              <Card className="border-border/50 hover:border-primary/40 transition-colors overflow-hidden p-0">
+                <video 
+                  className="w-full h-full object-cover"
+                  controls
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                >
+                  <source src="/videos/forhandler-video.mp4" type="video/mp4" />
+                  Din browser understøtter ikke video.
+                </video>
               </Card>
               
               {/* Window 2 */}
