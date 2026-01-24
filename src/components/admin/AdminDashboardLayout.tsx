@@ -4,7 +4,7 @@ import {
   Shield, Users, Calendar, Receipt, Tag, Truck, AlertTriangle, Flag, 
   UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3,
   Menu, Camera, Building2, Facebook, UsersRound, LogOut, CheckCircle, Clock, Sparkles, HeadphonesIcon,
-  FileText, Key
+  FileText, Key, Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -37,6 +37,7 @@ const menuItems = [
   { value: 'corporate', icon: Building2, label: 'Virksomheder', path: '/admin/corporate' },
   { value: 'facebook', icon: Facebook, label: 'Facebook', path: '/admin/facebook' },
   { value: 'sales-ai', icon: Sparkles, label: 'Salgs AI', path: '/admin/sales-ai' },
+  { value: 'crm', icon: Briefcase, label: 'CRM', path: '/admin/crm' },
   { value: 'driver-licenses', icon: ShieldCheck, label: 'Kørekort', path: '/admin/driver-licenses' },
   { value: 'api-keys', icon: Key, label: 'API-nøgler', path: '/admin/api-keys' },
   { value: 'stats', icon: BarChart3, label: 'Statistik', path: '/admin/stats' },
