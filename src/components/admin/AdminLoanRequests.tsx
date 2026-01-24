@@ -165,6 +165,12 @@ Afdrag: ${monthlyInstallment.toLocaleString('da-DK')} kr/mdr over ${remainingMon
   const handleReviewRequest = async (action: 'approve' | 'reject') => {
     if (!selectedRequest || !user) return;
 
+    // Validate minimum amount (500 kr)
+    if (action === 'approve' && selectedRequest.requested_amount < 500) {
+      toast.error('Lånebeløb skal være minimum 500 kr');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const updateData: Record<string, unknown> = {
