@@ -393,17 +393,18 @@ const Search = () => {
       <Navigation />
       
       <main className="pt-20">
-        {/* Hero Header - More compact on mobile */}
+        {/* Hero Header with premium styling */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-mint/10" />
-          <div className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-primary rounded-full blur-[100px] opacity-10" />
-          <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-accent rounded-full blur-[80px] opacity-10" />
+          {/* Premium background effects */}
+          <div className="absolute inset-0 bg-mesh" />
+          <div className="absolute -top-20 -right-20 w-[500px] h-[500px] bg-primary rounded-full blur-[150px] opacity-[0.08]" />
+          <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-accent rounded-full blur-[120px] opacity-[0.06]" />
           
           <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-12 relative z-10">
             <div className="max-w-4xl">
               <h1 className="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-2 sm:mb-4 animate-slide-up">
                 Find dit{" "}
-                <span className="bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent">
+                <span className="text-gradient">
                   perfekte køretøj
                 </span>
               </h1>
@@ -411,11 +412,11 @@ const Search = () => {
                 {loading ? 'Henter køretøjer...' : `${filteredVehicles.length} ${getVehicleTypeLabel()} tilgængelige`}
               </p>
 
-              {/* Search Input - Full width on mobile */}
+              {/* Premium Search Input */}
               <div className="relative animate-scale-in" style={{ animationDelay: '0.2s' }}>
-                <div className="bg-card rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-xl border-2 border-primary/20">
+                <div className="glass-strong rounded-xl sm:rounded-2xl p-1.5 sm:p-2 border border-primary/30 glow-border">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-background">
+                    <div className="flex-1 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-muted/30">
                       <SearchIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
                       <input
                         type="text"
@@ -434,8 +435,9 @@ const Search = () => {
                       )}
                     </div>
                     <Button 
+                      variant="hero"
                       size="default" 
-                      className="bg-gradient-to-r from-primary to-primary/80 font-bold px-3 sm:px-6 shrink-0"
+                      className="font-bold px-3 sm:px-6 shrink-0"
                     >
                       <SearchIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span className="hidden sm:inline ml-2">Søg</span>
@@ -448,7 +450,7 @@ const Search = () => {
         </div>
 
         {/* Sticky Vehicle Type Tabs + Filter Pills */}
-        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-lg border-b border-border">
+        <div className="sticky top-16 z-30 glass-strong border-b border-border/50">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 gap-3 sm:gap-4">
               {/* Vehicle type tabs - scrollable on mobile */}
@@ -460,16 +462,16 @@ const Search = () => {
                     <button
                       key={type.value}
                       onClick={() => setFilters(prev => ({ ...prev, vehicleType: type.value }))}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-medium transition-all whitespace-nowrap text-sm ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-medium transition-all duration-300 whitespace-nowrap text-sm ${
                         isActive 
-                          ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' 
-                          : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                          ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg glow-primary' 
+                          : 'glass text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
                       <span className="hidden xs:inline sm:inline">{type.label}</span>
                       <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
-                        isActive ? 'bg-primary-foreground/20' : 'bg-background'
+                        isActive ? 'bg-primary-foreground/20' : 'bg-muted/50'
                       }`}>
                         {type.count}
                       </span>
@@ -481,7 +483,7 @@ const Search = () => {
               {/* Filter button */}
               <div className="flex items-center gap-2 shrink-0">
                 <Button
-                  variant="outline"
+                  variant="glass"
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
                   className={`flex-1 sm:flex-initial ${showFilters ? 'border-primary text-primary' : ''}`}
@@ -489,13 +491,13 @@ const Search = () => {
                   <Filter className="w-4 h-4 mr-2" />
                   Filtre
                   {hasActiveFilters && (
-                    <span className="ml-1 w-2 h-2 rounded-full bg-primary" />
+                    <span className="ml-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
                   )}
                 </Button>
               </div>
             </div>
 
-            {/* Active Filter Pills - Sticky horizontal bar */}
+            {/* Active Filter Pills */}
             {hasActiveFilters && (
               <div className="pb-4 -mt-1">
                 <ActiveFilterPills filters={filters} setFilters={setFilters} />
@@ -506,7 +508,7 @@ const Search = () => {
 
         {/* Filters Panel */}
         {showFilters && (
-          <div className="border-b border-border bg-muted/30 animate-fade-in">
+          <div className="border-b border-border/50 glass animate-fade-in">
             <SearchFilters filters={filters} setFilters={setFilters} />
           </div>
         )}
