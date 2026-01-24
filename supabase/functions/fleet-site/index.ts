@@ -24,7 +24,8 @@ interface FleetSiteResponse {
       year: number | null;
       registration: string;
       daily_price: number;
-      images: string[];
+      image_url: string | null;
+      fuel_type: string | null;
       vehicle_type: string;
       description: string | null;
     }>;
@@ -141,7 +142,7 @@ Deno.serve(async (req) => {
     // Fetch vehicles
     const { data: vehicles, error: vehiclesError } = await supabase
       .from('vehicles')
-      .select('id, make, model, year, registration, daily_price, images, vehicle_type, description')
+      .select('id, make, model, year, registration, daily_price, image_url, vehicle_type, description, fuel_type')
       .eq('owner_id', fleetOwnerId)
       .eq('is_available', true)
       .order('created_at', { ascending: false });
@@ -181,7 +182,8 @@ Deno.serve(async (req) => {
           year: v.year,
           registration: v.registration,
           daily_price: v.daily_price,
-          images: v.images || [],
+          image_url: v.image_url,
+          fuel_type: v.fuel_type,
           vehicle_type: v.vehicle_type,
           description: v.description,
         })),
