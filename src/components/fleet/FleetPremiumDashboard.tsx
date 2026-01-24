@@ -8,6 +8,8 @@ import { useFleetPremiumVehicles, getCommissionRate, FleetVehicleStats } from '@
 import { FleetExportButton } from './FleetExportButton';
 import { LoanModuleCard } from './LoanModuleCard';
 import { FleetDocumentsCard } from './FleetDocumentsCard';
+import { GuaranteeTrackerCard } from './GuaranteeTrackerCard';
+import { SettlementDownloadCard } from './SettlementDownloadCard';
 import { 
   Car, ChevronLeft, ChevronRight, Wrench, 
   Gauge, MapPin, Star, Calendar, Droplets, Home
@@ -26,6 +28,7 @@ export const FleetPremiumDashboard = () => {
     setSelectedYear,
     setSelectedMonth,
     refetch,
+    GUARANTEE_DAYS,
   } = useFleetPremiumVehicles();
 
   const [currentVehicleIndex, setCurrentVehicleIndex] = useState(0);
@@ -336,6 +339,15 @@ export const FleetPremiumDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Guarantee Tracker - User Story 4 */}
+      <GuaranteeTrackerCard 
+        vehicles={vehicles}
+        guaranteeDays={GUARANTEE_DAYS}
+      />
+
+      {/* Settlement Download - User Story 5 */}
+      <SettlementDownloadCard summary={summary} />
 
       {/* Loan Module Section */}
       {summary && (

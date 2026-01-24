@@ -69,6 +69,12 @@ export const LoanModuleCard = ({
       return;
     }
 
+    const amount = parseFloat(requestForm.requested_amount);
+    if (amount < 500) {
+      toast.error('Beløb skal være minimum 500 kr');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from('fleet_loan_requests').insert({
@@ -249,13 +255,17 @@ export const LoanModuleCard = ({
             </div>
 
             <div className="space-y-2">
-              <Label>Beløb *</Label>
+              <Label>Beløb * (minimum 500 kr)</Label>
               <Input
                 type="number"
+                min="500"
                 placeholder="F.eks. 5000"
                 value={requestForm.requested_amount}
                 onChange={(e) => setRequestForm(prev => ({ ...prev, requested_amount: e.target.value }))}
               />
+              {requestForm.requested_amount && parseFloat(requestForm.requested_amount) < 500 && (
+                <p className="text-sm text-destructive">Beløb skal være minimum 500 kr</p>
+              )}
             </div>
 
             <div className="space-y-2">

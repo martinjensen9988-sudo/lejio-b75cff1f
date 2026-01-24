@@ -109,14 +109,21 @@ export const AdminFleetFinance = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showConsolidationDialog, setShowConsolidationDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDebt | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isConsolidating, setIsConsolidating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [uploadForm, setUploadForm] = useState({
     vehicle_id: '',
     amount: '',
     workshop_name: '',
+    description: '',
+  });
+
+  const [consolidationForm, setConsolidationForm] = useState({
+    new_amount: '',
     description: '',
   });
 
@@ -230,6 +237,70 @@ export const AdminFleetFinance = () => {
     setShowUploadDialog(true);
   };
 
+  const handleOpenConsolidationDialog = (customer: CustomerDebt) => {
+    setSelectedCustomer(customer);
+    setConsolidationForm({
+      new_amount: '',
+      description: '',
+    });
+    setShowConsolidationDialog(true);
+  };
+
+  const handleConsolidateDebt = async () => {
+    if (!selectedCustomer || !consolidationForm.new_amount) return;
+
+    const newAmount = parseFloat(consolidationForm.new_amount);
+    if (newAmount < 500) {
+      toast.error('Beløb skal være minimum 500 kr');
+      return;
+    }
+
+    setIsConsolidating(true);
+    try {
+      // Calculate new consolidated loan
+      const existingDebt = selectedCustomer.totalDebt;
+      const setupFee = 300;
+      const totalNewDebt = existingDebt + newAmount + setupFee;
+      const contractMonths = selectedCustomer.fleet_contract_months || 12;
+      const remainingMonths = Math.max(3, contractMonths);
+      const newMonthlyInstallment = Math.ceil(totalNewDebt / remainingMonths);
+
+      // Mark all existing loans as cancelled
+      for (const loan of selectedCustomer.activeLoans) {
+        await supabase
+          .from('fleet_vehicle_loans')
+          .update({ status: 'cancelled' })
+          .eq('id', loan.id);
+      }
+
+      // Create new consolidated loan
+      const primaryVehicle = selectedCustomer.vehicles[0];
+      const { error: loanError } = await supabase.from('fleet_vehicle_loans').insert({
+        vehicle_id: primaryVehicle?.id || null,
+        lessor_id: selectedCustomer.id,
+        description: `Konsolideret gæld: ${consolidationForm.description || 'Ny reparation tilføjet eksisterende lån'}`,
+        original_amount: totalNewDebt - setupFee,
+        remaining_balance: totalNewDebt - setupFee,
+        monthly_installment: newMonthlyInstallment,
+        setup_fee: setupFee,
+        remaining_months: remainingMonths,
+        start_date: new Date().toISOString().split('T')[0],
+        status: 'active',
+      });
+
+      if (loanError) throw loanError;
+
+      toast.success(`Gæld konsolideret! Nyt afdrag: ${formatCurrency(newMonthlyInstallment)} kr/mdr`);
+      setShowConsolidationDialog(false);
+      fetchFinanceData();
+    } catch (error) {
+      console.error('Error consolidating debt:', error);
+      toast.error('Kunne ikke konsolidere gæld');
+    } finally {
+      setIsConsolidating(false);
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedCustomer) return;
@@ -246,6 +317,13 @@ export const AdminFleetFinance = () => {
 
     if (!uploadForm.vehicle_id || !uploadForm.amount) {
       toast.error('Vælg køretøj og angiv beløb');
+      return;
+    }
+
+    // Validate minimum amount (500 kr)
+    const amount = parseFloat(uploadForm.amount);
+    if (amount < 500) {
+      toast.error('Lånebeløb skal være minimum 500 kr');
       return;
     }
 
@@ -536,6 +614,16 @@ export const AdminFleetFinance = () => {
                         <Upload className="w-4 h-4 mr-1" />
                         Upload værkstedsfaktura
                       </Button>
+                      {customer.activeLoans.length > 0 && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOpenConsolidationDialog(customer)}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Konsolidér gæld
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </AccordionContent>
@@ -591,14 +679,18 @@ export const AdminFleetFinance = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Beløb (kr)</Label>
+              <Label>Beløb (kr) - minimum 500 kr</Label>
               <Input
                 type="number"
+                min="500"
                 placeholder="F.eks. 5000"
                 value={uploadForm.amount}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, amount: e.target.value }))}
               />
-              {uploadForm.amount && selectedCustomer && (
+              {uploadForm.amount && parseFloat(uploadForm.amount) < 500 && (
+                <p className="text-sm text-destructive">Beløb skal være minimum 500 kr</p>
+              )}
+              {uploadForm.amount && parseFloat(uploadForm.amount) >= 500 && selectedCustomer && (
                 <p className="text-sm text-muted-foreground">
                   + 300 kr oprettelsesgebyr = {formatCurrency(parseFloat(uploadForm.amount) + 300)} kr fordelt over{' '}
                   {Math.max(3, selectedCustomer.fleet_contract_months || 12)} måneder ={' '}
@@ -653,6 +745,93 @@ export const AdminFleetFinance = () => {
                 <>
                   <Upload className="w-4 h-4 mr-2" />
                   Vælg PDF og opret lån
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Consolidation Dialog */}
+      <Dialog open={showConsolidationDialog} onOpenChange={setShowConsolidationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konsolidér gæld</DialogTitle>
+            <DialogDescription>
+              Læg en ny reparation oveni eksisterende gæld. Der pålægges et nyt gebyr på 300 kr.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {selectedCustomer && (
+              <>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="font-medium">{selectedCustomer.company_name || selectedCustomer.full_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Nuværende restgæld: <span className="text-destructive font-semibold">{formatCurrency(selectedCustomer.totalDebt)} kr</span>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Nuværende månedlige afdrag: {formatCurrency(selectedCustomer.monthlyInstallments)} kr/mdr
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Nyt beløb at tilføje (kr) - minimum 500 kr</Label>
+                  <Input
+                    type="number"
+                    min="500"
+                    placeholder="F.eks. 3000"
+                    value={consolidationForm.new_amount}
+                    onChange={(e) => setConsolidationForm(prev => ({ ...prev, new_amount: e.target.value }))}
+                  />
+                  {consolidationForm.new_amount && parseFloat(consolidationForm.new_amount) < 500 && (
+                    <p className="text-sm text-destructive">Beløb skal være minimum 500 kr</p>
+                  )}
+                  {consolidationForm.new_amount && parseFloat(consolidationForm.new_amount) >= 500 && (
+                    <div className="p-3 bg-accent/30 rounded-lg text-sm space-y-1">
+                      <p>Ny reparation: {formatCurrency(parseFloat(consolidationForm.new_amount))} kr</p>
+                      <p>+ Eksisterende restgæld: {formatCurrency(selectedCustomer.totalDebt)} kr</p>
+                      <p>+ Nyt gebyr: 300 kr</p>
+                      <p className="font-semibold border-t pt-1 mt-1">
+                        = Ny samlet gæld: {formatCurrency(parseFloat(consolidationForm.new_amount) + selectedCustomer.totalDebt + 300)} kr
+                      </p>
+                      <p className="text-muted-foreground">
+                        Nyt afdrag: {formatCurrency(Math.ceil((parseFloat(consolidationForm.new_amount) + selectedCustomer.totalDebt + 300) / Math.max(3, selectedCustomer.fleet_contract_months || 12)))} kr/mdr
+                        over {Math.max(3, selectedCustomer.fleet_contract_months || 12)} måneder
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Beskrivelse af reparation</Label>
+                  <Textarea
+                    placeholder="Beskriv hvad den nye reparation dækker..."
+                    value={consolidationForm.description}
+                    onChange={(e) => setConsolidationForm(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConsolidationDialog(false)}>
+              Annuller
+            </Button>
+            <Button 
+              onClick={handleConsolidateDebt}
+              disabled={isConsolidating || !consolidationForm.new_amount || parseFloat(consolidationForm.new_amount) < 500}
+            >
+              {isConsolidating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Konsoliderer...
+                </>
+              ) : (
+                <>
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Konsolidér gæld
                 </>
               )}
             </Button>
