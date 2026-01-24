@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Search, ArrowRight, Sparkles, Car, Building2, Zap, Shield, Star, CheckCircle2 } from "lucide-react";
+import { MapPin, Calendar, Search, ArrowRight, Sparkles, Car, Shield, Star, CheckCircle2, Zap } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -22,56 +23,112 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Bold geometric background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-background to-mint/20" />
+      {/* Premium dark background with mesh gradients */}
+      <div className="absolute inset-0 bg-hero-gradient">
+        {/* Mesh gradient overlay */}
+        <div className="absolute inset-0 bg-mesh opacity-80" />
         
-        {/* Large geometric shapes */}
-        <div className="absolute -top-20 -left-20 w-[500px] h-[500px] bg-primary rounded-full blur-[100px] opacity-20 animate-float-slow" />
-        <div className="absolute top-1/4 -right-32 w-[400px] h-[400px] bg-accent rounded-full blur-[80px] opacity-25 animate-float" />
-        <div className="absolute -bottom-32 left-1/4 w-[600px] h-[600px] bg-mint rounded-full blur-[120px] opacity-15 animate-float-slow" style={{ animationDelay: '2s' }} />
+        {/* Animated glow orbs */}
+        <motion.div 
+          className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[150px]"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.3, 0.2]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-accent/15 rounded-full blur-[120px]"
+          animate={{ 
+            scale: [1.2, 1, 1.2],
+            opacity: [0.15, 0.25, 0.15]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute -bottom-40 left-1/3 w-[700px] h-[700px] bg-mint/10 rounded-full blur-[180px]"
+          animate={{ 
+            scale: [1, 1.15, 1],
+            opacity: [0.1, 0.2, 0.1]
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
         
-        {/* Decorative elements */}
-        <div className="absolute top-32 left-[15%] w-4 h-4 bg-secondary rounded-full animate-bounce-soft" />
-        <div className="absolute top-48 right-[20%] w-6 h-6 bg-accent rounded-lg rotate-45 animate-float" />
-        <div className="absolute bottom-40 left-[10%] w-3 h-3 bg-mint rounded-full animate-bounce-soft" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-60 right-[15%] w-5 h-5 bg-primary rounded-full animate-float" style={{ animationDelay: '0.5s' }} />
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-grid opacity-30" />
         
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
-          backgroundSize: '60px 60px'
-        }} />
+        {/* Floating particles */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className={`absolute w-1 h-1 rounded-full ${i % 2 === 0 ? 'bg-primary' : 'bg-accent'}`}
+            style={{
+              left: `${15 + i * 15}%`,
+              top: `${20 + (i % 3) * 25}%`,
+            }}
+            animate={{
+              y: [-20, 20, -20],
+              opacity: [0.3, 0.8, 0.3],
+            }}
+            transition={{
+              duration: 4 + i,
+              repeat: Infinity,
+              delay: i * 0.5,
+            }}
+          />
+        ))}
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Main content */}
           <div className="text-center mb-12">
-            {/* Badge - Lejer fokuseret */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/40 text-sm font-bold text-foreground mb-8 animate-scale-in">
-              <Car className="w-4 h-4 text-primary" />
-              <span>Find biler, MC, campingvogne & trailere</span>
-            </div>
+            {/* Badge */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border-primary/30 text-sm font-medium text-foreground mb-8"
+            >
+              <Zap className="w-4 h-4 text-primary" />
+              <span>Danmarks smarteste udlejningsplatform</span>
+            </motion.div>
 
-            {/* Bold headline - Lejer fokuseret - No animation delay for LCP */}
-            <h1 className="font-display text-5xl sm:text-7xl lg:text-[5.5rem] font-black leading-[0.9] mb-6">
+            {/* Bold headline */}
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="font-display text-5xl sm:text-7xl lg:text-[5.5rem] font-bold leading-[0.95] mb-6 tracking-tight"
+            >
               <span className="block text-foreground">LEJ DIT NÆSTE</span>
-              <span className="block bg-gradient-to-r from-primary via-accent to-mint bg-clip-text text-transparent py-2">
+              <span className="block text-gradient-premium py-2">
                 EVENTYR
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 font-medium">
-              Den nye, intelligente vej til leje af biler, trailere og campingvogne. Book hurtigt, få skarpe priser og kom afsted med det samme.
-            </p>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 font-medium"
+            >
+              Den nye, intelligente vej til leje af biler, trailere og campingvogne. 
+              Book hurtigt, få skarpe priser og kom afsted med det samme.
+            </motion.p>
 
-            {/* Search Box - Prominent for lejere */}
-            <div className="bg-card/90 backdrop-blur-xl rounded-[2rem] p-4 shadow-2xl border-2 border-primary/20 max-w-4xl mx-auto animate-scale-in" style={{ animationDelay: '0.2s' }}>
+            {/* Search Box - Premium glass design */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="glass-strong rounded-2xl p-4 shadow-2xl max-w-4xl mx-auto glow-border"
+            >
               <div className="flex flex-col lg:flex-row gap-3">
-                <div className="flex-1 flex items-center gap-3 px-6 py-5 rounded-2xl bg-background border-2 border-border hover:border-primary/50 transition-colors group">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <MapPin className="w-6 h-6 text-primary" />
+                {/* Location input */}
+                <div className="flex-1 flex items-center gap-3 px-5 py-4 rounded-xl bg-background/50 border border-border hover:border-primary/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <input 
                     type="text" 
@@ -81,11 +138,13 @@ const Hero = () => {
                     className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-lg"
                   />
                 </div>
+                
+                {/* Date picker */}
                 <Popover>
                   <PopoverTrigger asChild>
-                    <div className="flex items-center gap-3 px-6 py-5 rounded-2xl bg-background border-2 border-border lg:w-64 cursor-pointer hover:border-accent/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                        <Calendar className="w-6 h-6 text-accent" />
+                    <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-background/50 border border-border lg:w-60 cursor-pointer hover:border-accent/50 transition-all group">
+                      <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                        <Calendar className="w-5 h-5 text-accent" />
                       </div>
                       <span className={cn(
                         "flex-1 text-left text-lg",
@@ -95,47 +154,58 @@ const Hero = () => {
                       </span>
                     </div>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="center">
+                  <PopoverContent className="w-auto p-0 glass-strong" align="center">
                     <CalendarComponent
                       mode="single"
                       selected={startDate}
                       onSelect={setStartDate}
                       disabled={(date) => date < new Date()}
                       initialFocus
-                      className={cn("p-3 pointer-events-auto")}
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
+                
+                {/* Search button */}
                 <Button 
+                  variant="hero"
                   size="xl" 
-                  className="lg:px-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-xl font-bold rounded-2xl shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all" 
+                  className="lg:px-10" 
                   onClick={handleSearch}
                 >
-                  <Search className="w-6 h-6" />
+                  <Search className="w-5 h-5" />
                   <span>Søg køretøjer</span>
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Trust badges */}
-            <div className="flex flex-wrap justify-center gap-6 mt-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Shield className="w-5 h-5 text-mint" />
-                <span className="text-sm font-medium">Sikker betaling</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <CheckCircle2 className="w-5 h-5 text-accent" />
-                <span className="text-sm font-medium">Automatiske kontrakter</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Star className="w-5 h-5 text-secondary" />
-                <span className="text-sm font-medium">Verificerede udlejere</span>
-              </div>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="flex flex-wrap justify-center gap-8 mt-10"
+            >
+              {[
+                { icon: Shield, text: "Sikker betaling", color: "text-mint" },
+                { icon: CheckCircle2, text: "Automatiske kontrakter", color: "text-primary" },
+                { icon: Star, text: "Verificerede udlejere", color: "text-accent" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-muted-foreground">
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                  <span className="text-sm font-medium">{item.text}</span>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
-          {/* Vehicle categories for lejere - prominent */}
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-4xl mx-auto mt-12">
+          {/* Vehicle categories */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-4xl mx-auto mt-12"
+          >
             {[
               { emoji: "🚗", label: "Biler" },
               { emoji: "🏍️", label: "MC" },
@@ -144,47 +214,51 @@ const Hero = () => {
               { emoji: "🚐", label: "Autocampere" },
               { emoji: "🚚", label: "Trailere" },
             ].map((type, i) => (
-              <div 
+              <motion.div 
                 key={i}
-                className="text-center p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border hover:border-primary/50 hover:bg-card transition-all cursor-pointer group animate-scale-in"
-                style={{ animationDelay: `${0.3 + i * 0.05}s` }}
+                whileHover={{ scale: 1.05, y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                className="text-center p-4 rounded-xl glass border-border/50 hover:border-primary/40 cursor-pointer group"
                 onClick={() => navigate('/search')}
               >
-                <span className="text-3xl block mb-2 group-hover:scale-125 transition-transform">{type.emoji}</span>
-                <div className="font-display font-bold text-foreground text-sm">{type.label}</div>
-              </div>
+                <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">{type.emoji}</span>
+                <div className="font-display font-semibold text-foreground text-sm">{type.label}</div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          {/* Secondary CTA for udlejere - smaller, less prominent */}
-          <div className="mt-16 text-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          {/* Secondary CTA */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+            className="mt-16 text-center"
+          >
             <p className="text-muted-foreground mb-4">Har du et køretøj du vil leje ud?</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button 
-                variant="outline" 
+                variant="warm" 
                 size="lg"
-                className="font-bold border-accent/40 hover:bg-accent/10 hover:border-accent/60"
                 onClick={() => navigate('/auth')}
               >
-                <Sparkles className="w-5 h-5 text-accent" />
+                <Sparkles className="w-5 h-5" />
                 Bliv udlejer
               </Button>
               <Button 
-                variant="ghost" 
+                variant="glass" 
                 size="lg"
-                className="font-bold text-mint hover:text-mint/80"
                 onClick={() => navigate('/hvad-er-lejio')}
               >
                 Læs mere om Lejio
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/80 to-transparent" />
     </section>
   );
 };
