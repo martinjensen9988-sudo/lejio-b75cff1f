@@ -19,51 +19,49 @@ const Hero = () => {
     navigate(`/search?${params.toString()}`);
   };
   return <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20 pb-12">
-      {/* Premium gradient background - darker top for menu visibility */}
-      <div className="absolute inset-0" style={{
-      background: 'linear-gradient(180deg, hsl(195 30% 68%) 0%, hsl(192 28% 72%) 20%, hsl(195 28% 72%) 40%, hsl(200 30% 50%) 70%, hsl(180 35% 28%) 100%)'
-    }}>
-        {/* Subtle mesh overlay */}
-        <div className="absolute inset-0 opacity-40" style={{
-        background: 'radial-gradient(ellipse at 30% 20%, hsl(168 76% 42% / 0.08) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, hsl(174 72% 48% / 0.06) 0%, transparent 50%)'
-      }} />
+      {/* Clean light background with subtle gradient */}
+      <div className="absolute inset-0 bg-background">
+        {/* Subtle mesh overlay with pink tones */}
+        <div className="absolute inset-0 opacity-30" style={{
+          background: 'radial-gradient(ellipse at 30% 20%, hsl(330 70% 50% / 0.06) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, hsl(330 60% 55% / 0.04) 0%, transparent 50%)'
+        }} />
         
         {/* Soft floating orbs */}
-        <motion.div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[180px]" animate={{
-        scale: [1, 1.15, 1],
-        opacity: [0.1, 0.18, 0.1]
-      }} transition={{
-        duration: 8,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }} />
-        <motion.div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-accent/8 rounded-full blur-[150px]" animate={{
-        scale: [1.2, 1, 1.2],
-        opacity: [0.08, 0.14, 0.08]
-      }} transition={{
-        duration: 10,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }} />
+        <motion.div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" animate={{
+          scale: [1, 1.15, 1],
+          opacity: [0.06, 0.12, 0.06]
+        }} transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }} />
+        <motion.div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-primary/6 rounded-full blur-[150px]" animate={{
+          scale: [1.2, 1, 1.2],
+          opacity: [0.04, 0.10, 0.04]
+        }} transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }} />
         
         {/* Subtle grid overlay */}
-        <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: 'linear-gradient(hsl(220 20% 40% / 0.1) 1px, transparent 1px), linear-gradient(90deg, hsl(220 20% 40% / 0.1) 1px, transparent 1px)',
-        backgroundSize: '60px 60px'
-      }} />
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'linear-gradient(hsl(0 0% 50% / 0.15) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 50% / 0.15) 1px, transparent 1px)',
+          backgroundSize: '60px 60px'
+        }} />
         
         {/* Floating particles */}
-        {[...Array(6)].map((_, i) => <motion.div key={i} className={`absolute w-1.5 h-1.5 rounded-full ${i % 2 === 0 ? 'bg-primary/40' : 'bg-accent/40'}`} style={{
-        left: `${15 + i * 15}%`,
-        top: `${20 + i % 3 * 25}%`
-      }} animate={{
-        y: [-20, 20, -20],
-        opacity: [0.2, 0.5, 0.2]
-      }} transition={{
-        duration: 4 + i,
-        repeat: Infinity,
-        delay: i * 0.5
-      }} />)}
+        {[...Array(6)].map((_, i) => <motion.div key={i} className={`absolute w-1.5 h-1.5 rounded-full ${i % 2 === 0 ? 'bg-primary/30' : 'bg-primary/20'}`} style={{
+          left: `${15 + i * 15}%`,
+          top: `${20 + i % 3 * 25}%`
+        }} animate={{
+          y: [-20, 20, -20],
+          opacity: [0.15, 0.4, 0.15]
+        }} transition={{
+          duration: 4 + i,
+          repeat: Infinity,
+          delay: i * 0.5
+        }} />)}
       </div>
 
       <div className="container mx-auto px-6 relative z-10">

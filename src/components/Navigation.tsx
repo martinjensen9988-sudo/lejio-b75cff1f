@@ -60,15 +60,14 @@ const Navigation = () => {
     navigate("/");
   };
 
-  const navLinkClass = "text-white/80 hover:text-white font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full";
+  const navLinkClass = "text-foreground/80 hover:text-primary font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full";
 
   return (
     <motion.nav 
       initial={{ y: -100 }}
       animate={{ y: isVisible || isOpen ? 0 : -100 }}
       transition={{ duration: 0.3 }}
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 shadow-lg border-b border-white/10"
-      style={{ backgroundColor: 'hsl(170 45% 18%)' }}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 shadow-sm border-b border-border bg-card/95 backdrop-blur-md"
     >
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
@@ -119,15 +118,15 @@ const Navigation = () => {
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 hover:border-primary/40 transition-colors">
+                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border hover:border-primary/40 transition-colors">
                       <div className={`w-2 h-2 rounded-full ${profile?.user_type === 'professionel' ? 'bg-primary animate-pulse' : 'bg-accent'}`} />
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-foreground">
                         {profile?.full_name || user.email?.split('@')[0]}
                       </span>
                       {profile?.user_type === 'professionel' && (
                         <span className="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary font-medium">Pro</span>
                       )}
-                      <ChevronDown className="w-3.5 h-3.5 text-white/70" />
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 glass-strong border-border/50">
@@ -161,7 +160,7 @@ const Navigation = () => {
 
           {/* Mobile menu button */}
           <button 
-            className="lg:hidden text-white p-2.5 rounded-lg bg-white/10 border border-white/20 hover:border-primary/40 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" 
+            className="lg:hidden text-foreground p-2.5 rounded-lg bg-muted border border-border hover:border-primary/40 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" 
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
