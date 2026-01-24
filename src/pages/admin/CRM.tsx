@@ -25,7 +25,7 @@ import {
 import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
 import { AdminCRMPipeline } from '@/components/admin/AdminCRMPipeline';
 import { AdminCRMTable } from '@/components/admin/AdminCRMTable';
-import { CRMEmailDialog, CRMCallDialog } from '@/components/admin/CRMCommunicationDialogs';
+import { CRMEmailDialog, CRMCallDialog, CRMCallHistoryDialog } from '@/components/admin/CRMCommunicationDialogs';
 import { useCRM, CRMDeal, CRMTask, CRMActivity, CRM_STAGES, ACTIVITY_TYPES, TASK_PRIORITIES } from '@/hooks/useCRM';
 import { useSalesLeads, SalesLead } from '@/hooks/useSalesLeads';
 import { useCRMCommunication } from '@/hooks/useCRMCommunication';
@@ -83,6 +83,7 @@ const AdminCRMPage = () => {
   const [showConvertLeadDialog, setShowConvertLeadDialog] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showCallDialog, setShowCallDialog] = useState(false);
+  const [showCallHistoryDialog, setShowCallHistoryDialog] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<CRMDeal | null>(null);
   const [selectedLead, setSelectedLead] = useState<SalesLead | null>(null);
   const [communicationDeal, setCommunicationDeal] = useState<CRMDeal | null>(null);
@@ -250,6 +251,10 @@ const AdminCRMPage = () => {
             <p className="text-muted-foreground">Administrer deals, aktiviteter og opgaver</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setShowCallHistoryDialog(true)}>
+              <PhoneCall className="w-4 h-4 mr-2" />
+              Opkaldslog
+            </Button>
             <Button variant="outline" onClick={() => setShowConvertLeadDialog(true)}>
               <ArrowRight className="w-4 h-4 mr-2" />
               Konverter lead
@@ -1043,6 +1048,12 @@ const AdminCRMPage = () => {
         onOpenChange={setShowCallDialog}
         deal={communicationDeal}
         onSuccess={handleCommunicationSuccess}
+      />
+
+      {/* Call History Dialog */}
+      <CRMCallHistoryDialog
+        open={showCallHistoryDialog}
+        onOpenChange={setShowCallHistoryDialog}
       />
     </AdminDashboardLayout>
   );
