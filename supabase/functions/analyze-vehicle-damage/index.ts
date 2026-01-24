@@ -58,6 +58,26 @@ const ALLOWED_VEHICLE_AREAS = [
   'roof', 'interior-front', 'interior-rear', 'trunk'
 ];
 
+// Forbidden patterns for AI output validation
+const FORBIDDEN_OUTPUT_PATTERNS = [
+  /LOVABLE_API_KEY/i,
+  /SUPABASE_.*_KEY/i,
+  /Bearer\s+[A-Za-z0-9_-]{20,}/,
+  /sk_live_[A-Za-z0-9]+/,
+  /env\.[A-Z_]+/i,
+];
+
+// Validate AI output doesn't contain leaked secrets
+function validateAIOutput(output: string): boolean {
+  for (const pattern of FORBIDDEN_OUTPUT_PATTERNS) {
+    if (pattern.test(output)) {
+      console.warn('Potential sensitive data detected in AI output');
+      return false;
+    }
+  }
+  return true;
+}
+
 function validateInput(image: unknown, vehicleArea: unknown): { valid: boolean; error?: string } {
   if (!image || typeof image !== 'string') {
     return { valid: false, error: 'Image is required and must be a string' };
@@ -71,6 +91,12 @@ function validateInput(image: unknown, vehicleArea: unknown): { valid: boolean; 
   // Validate image format (should be data URL or valid URL)
   if (!image.startsWith('data:image/') && !image.startsWith('http://') && !image.startsWith('https://')) {
     return { valid: false, error: 'Invalid image format' };
+  }
+  
+  // Block potential malicious URLs
+  const lowerImage = image.toLowerCase();
+  if (lowerImage.includes('javascript:') || lowerImage.includes('data:text/html')) {
+    return { valid: false, error: 'Invalid image URL' };
   }
   
   // Validate vehicleArea if provided
@@ -204,6 +230,21 @@ Svar KUN med valid JSON-array, ingen anden tekst.`;
       throw new Error("No content in AI response");
     }
 
+    // Validate AI output for potential leaks
+    if (!validateAIOutput(content)) {
+      console.error("AI output contained potentially sensitive data, rejecting response");
+      return new Response(
+        JSON.stringify({ 
+          damages: [], 
+          analyzedAt: new Date().toISOString(),
+          totalDamages: 0,
+          hasSevereDamage: false,
+          summary: "Kunne ikke analysere billede sikkert"
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Parse JSON from response
     let damages: DamageItem[] = [];
     try {
@@ -215,10 +256,17 @@ Svar KUN med valid JSON-array, ingen anden tekst.`;
       }
       damages = JSON.parse(jsonContent);
       
-      // Validate structure
+      // Validate structure and sanitize descriptions
       if (!Array.isArray(damages)) {
         damages = [];
       }
+      
+      // Sanitize any user-visible text fields in the response
+      damages = damages.map(d => ({
+        ...d,
+        description: d.description?.substring(0, 200) || '',
+        damageType: d.damageType?.substring(0, 50) || 'ukendt',
+      }));
     } catch (parseError) {
       console.error("Failed to parse AI response:", content);
       damages = [];

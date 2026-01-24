@@ -31,14 +31,42 @@ function checkRateLimit(ip: string): boolean {
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 2000;
 
+// Forbidden patterns for AI output validation (detect potential leaks)
+const FORBIDDEN_OUTPUT_PATTERNS = [
+  /LOVABLE_API_KEY/i,
+  /SUPABASE_.*_KEY/i,
+  /Bearer\s+[A-Za-z0-9_-]{20,}/,
+  /sk_live_[A-Za-z0-9]+/,
+  /sk_test_[A-Za-z0-9]+/,
+  /password\s*[:=]\s*["'][^"']{8,}["']/i,
+];
+
+// Validate AI output doesn't contain leaked secrets
+function validateAIOutput(output: string): string {
+  let filtered = output;
+  for (const pattern of FORBIDDEN_OUTPUT_PATTERNS) {
+    if (pattern.test(filtered)) {
+      filtered = filtered.replace(pattern, '[REDACTED]');
+      console.warn('Potential sensitive data filtered from AI output');
+    }
+  }
+  return filtered;
+}
+
 // Sanitize message content to prevent prompt injection attempts
 function sanitizeMessageContent(content: string): string {
-  // Remove potential system prompt injection patterns
+  // Remove potential system prompt injection patterns - including unicode bypasses
   let sanitized = content
-    // Remove attempts to override system instructions
-    .replace(/\[SYSTEM\]/gi, '[filtered]')
-    .replace(/\[ADMIN\]/gi, '[filtered]')
-    .replace(/\[OVERRIDE\]/gi, '[filtered]')
+    // Normalize unicode characters that could bypass filters
+    .normalize('NFKC')
+    // Remove attempts to override system instructions (case insensitive + unicode resistant)
+    .replace(/\[\s*S\s*Y\s*S\s*T\s*E\s*M\s*\]/gi, '[filtered]')
+    .replace(/\[\s*A\s*D\s*M\s*I\s*N\s*\]/gi, '[filtered]')
+    .replace(/\[\s*O\s*V\s*E\s*R\s*R\s*I\s*D\s*E\s*\]/gi, '[filtered]')
+    .replace(/SYSTEM\s*:/gi, 'user:')
+    .replace(/IGNORE\s+(PREVIOUS|ABOVE|ALL)\s+INSTRUCTIONS/gi, '[filtered]')
+    .replace(/DISREGARD\s+(PREVIOUS|ABOVE|ALL)/gi, '[filtered]')
+    .replace(/NEW\s+INSTRUCTIONS?:/gi, '[filtered]')
     // Remove control characters except newlines and tabs
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     // Limit consecutive whitespace

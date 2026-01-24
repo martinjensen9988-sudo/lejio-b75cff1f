@@ -5896,6 +5896,15 @@ export type Database = {
         Args: { vehicle_id: string }
         Returns: boolean
       }
+      check_renter_warnings: {
+        Args: { p_email?: string; p_license_number?: string; p_phone?: string }
+        Returns: {
+          has_warnings: boolean
+          max_severity: number
+          reasons: string[]
+          warning_count: number
+        }[]
+      }
       check_vehicle_availability: {
         Args: {
           p_end_date: string
@@ -5925,6 +5934,18 @@ export type Database = {
         Returns: {
           average_rating: number
           total_ratings: number
+        }[]
+      }
+      get_renter_warning_details: {
+        Args: { p_renter_email: string }
+        Returns: {
+          created_at: string
+          damage_amount: number
+          description: string
+          id: string
+          reason: string
+          severity: number
+          unpaid_amount: number
         }[]
       }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
