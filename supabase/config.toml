@@ -185,3 +185,6 @@ verify_jwt = false
 
 [functions.generate-settlement-pdf]
 verify_jwt = true
+
+[functions.generate-fleet-partner-contract]
+verify_jwt = true
