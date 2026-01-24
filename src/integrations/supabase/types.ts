@@ -3561,6 +3561,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          identifier: string
+          request_count: number
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          identifier: string
+          request_count?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          identifier?: string
+          request_count?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       recurring_rentals: {
         Row: {
           billing_day: number
@@ -5896,6 +5926,19 @@ export type Database = {
         Args: { vehicle_id: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_identifier: string
+          p_max_requests?: number
+          p_window_minutes?: number
+        }
+        Returns: {
+          allowed: boolean
+          current_count: number
+          retry_after_seconds: number
+        }[]
+      }
       check_renter_warnings: {
         Args: { p_email?: string; p_license_number?: string; p_phone?: string }
         Returns: {
@@ -5914,6 +5957,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_rate_limits: { Args: never; Returns: number }
       generate_contract_number: { Args: never; Returns: string }
       generate_corporate_invoice_number: { Args: never; Returns: string }
       generate_fleet_api_key: { Args: never; Returns: string }

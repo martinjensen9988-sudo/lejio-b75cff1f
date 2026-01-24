@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,38 +7,54 @@ const corsHeaders = {
 };
 
 // Rate limiting configuration
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 15;
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 15; // requests per window
+const RATE_WINDOW_MINUTES = 1; // 1 minute window
+
+// Database-backed rate limiting using Supabase RPC
+async function checkRateLimitDB(identifier: string): Promise<{ allowed: boolean; retryAfter?: number }> {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.warn("Rate limit DB not configured, falling back to allow");
+      return { allowed: true };
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { data, error } = await supabase.rpc('check_rate_limit', {
+      p_identifier: identifier,
+      p_endpoint: 'analyze-vehicle-damage',
+      p_max_requests: RATE_LIMIT,
+      p_window_minutes: RATE_WINDOW_MINUTES
+    });
+    
+    if (error) {
+      console.error("Rate limit check error:", error);
+      return { allowed: true };
+    }
+    
+    if (data && data.length > 0) {
+      const result = data[0];
+      return { 
+        allowed: result.allowed, 
+        retryAfter: result.retry_after_seconds > 0 ? result.retry_after_seconds : undefined 
+      };
+    }
+    
+    return { allowed: true };
+  } catch (err) {
+    console.error("Rate limit exception:", err);
+    return { allowed: true };
+  }
+}
 
 function getClientIP(req: Request): string {
   return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
          req.headers.get('x-real-ip') ||
          req.headers.get('cf-connecting-ip') ||
          'unknown';
-}
-
-function checkRateLimit(clientIP: string): { allowed: boolean; retryAfter?: number } {
-  const now = Date.now();
-  const record = rateLimitStore.get(clientIP);
-
-  if (record && now > record.resetTime) {
-    rateLimitStore.delete(clientIP);
-  }
-
-  const currentRecord = rateLimitStore.get(clientIP);
-
-  if (!currentRecord) {
-    rateLimitStore.set(clientIP, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true };
-  }
-
-  if (currentRecord.count >= MAX_REQUESTS_PER_WINDOW) {
-    return { allowed: false, retryAfter: Math.ceil((currentRecord.resetTime - now) / 1000) };
-  }
-
-  currentRecord.count++;
-  return { allowed: true };
 }
 
 interface DamageItem {
@@ -120,9 +137,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Rate limiting
+  // Rate limiting using database-backed persistent storage
   const clientIP = getClientIP(req);
-  const rateLimitResult = checkRateLimit(clientIP);
+  const rateLimitResult = await checkRateLimitDB(clientIP);
   if (!rateLimitResult.allowed) {
     return new Response(
       JSON.stringify({ error: "For mange forespørgsler. Prøv igen senere." }),
