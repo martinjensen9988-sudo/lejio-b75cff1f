@@ -16,7 +16,8 @@ import {
   Building2, 
   DollarSign,
   GripVertical,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -27,6 +28,9 @@ interface AdminCRMPipelineProps {
   onEditDeal: (deal: CRMDeal) => void;
   onDeleteDeal: (dealId: string) => Promise<void>;
   onViewDeal: (deal: CRMDeal) => void;
+  onCallDeal?: (deal: CRMDeal) => void;
+  onEmailDeal?: (deal: CRMDeal) => void;
+  isCallingInProgress?: boolean;
 }
 
 export const AdminCRMPipeline = ({
@@ -35,6 +39,9 @@ export const AdminCRMPipeline = ({
   onEditDeal,
   onDeleteDeal,
   onViewDeal,
+  onCallDeal,
+  onEmailDeal,
+  isCallingInProgress,
 }: AdminCRMPipelineProps) => {
   const [draggedDeal, setDraggedDeal] = useState<string | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
@@ -169,16 +176,40 @@ export const AdminCRMPipeline = ({
                     </p>
                   )}
 
+                  {/* Communication buttons */}
                   <div className="flex items-center gap-2 mt-2">
-                    {deal.contact_phone && (
-                      <a href={`tel:${deal.contact_phone}`} className="text-muted-foreground hover:text-primary">
-                        <Phone className="w-3 h-3" />
-                      </a>
+                    {deal.contact_phone && onCallDeal && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCallDeal(deal);
+                        }}
+                        disabled={isCallingInProgress}
+                        title="Ring op"
+                      >
+                        {isCallingInProgress ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Phone className="w-3 h-3 text-green-600" />
+                        )}
+                      </Button>
                     )}
-                    {deal.contact_email && (
-                      <a href={`mailto:${deal.contact_email}`} className="text-muted-foreground hover:text-primary">
-                        <Mail className="w-3 h-3" />
-                      </a>
+                    {deal.contact_email && onEmailDeal && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEmailDeal(deal);
+                        }}
+                        title="Send email"
+                      >
+                        <Mail className="w-3 h-3 text-blue-600" />
+                      </Button>
                     )}
                     {deal.probability > 0 && (
                       <Badge variant="outline" className="text-xs ml-auto">

@@ -148,13 +148,29 @@ export const useCRM = () => {
 
       if (error) throw error;
 
-      setDeals((prev) => [data as unknown as CRMDeal, ...prev]);
+      const newDealData = data as unknown as CRMDeal;
+      setDeals((prev) => [newDealData, ...prev]);
+      
+      // Auto-create follow-up task for new deals
+      const followUpDate = new Date();
+      followUpDate.setDate(followUpDate.getDate() + 1); // Tomorrow
+      
+      await supabase.from('crm_tasks').insert({
+        deal_id: newDealData.id,
+        title: `Opfølgning: ${deal.title}`,
+        description: 'Automatisk oprettet opgave - kontakt kunden',
+        priority: 'medium',
+        status: 'pending',
+        due_date: followUpDate.toISOString(),
+        created_by: userData.user?.id || null,
+      });
+      
       toast({
         title: 'Deal oprettet',
-        description: `${deal.title} er tilføjet`,
+        description: `${deal.title} er tilføjet med opfølgningsopgave`,
       });
 
-      return data as unknown as CRMDeal;
+      return newDealData;
     } catch (error: any) {
       console.error('Error adding deal:', error);
       toast({

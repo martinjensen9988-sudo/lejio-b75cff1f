@@ -25,8 +25,10 @@ import {
 import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
 import { AdminCRMPipeline } from '@/components/admin/AdminCRMPipeline';
 import { AdminCRMTable } from '@/components/admin/AdminCRMTable';
+import { CRMEmailDialog, CRMCallDialog } from '@/components/admin/CRMCommunicationDialogs';
 import { useCRM, CRMDeal, CRMTask, CRMActivity, CRM_STAGES, ACTIVITY_TYPES, TASK_PRIORITIES } from '@/hooks/useCRM';
 import { useSalesLeads, SalesLead } from '@/hooks/useSalesLeads';
+import { useCRMCommunication } from '@/hooks/useCRMCommunication';
 import { 
   Plus, 
   Kanban, 
@@ -43,7 +45,8 @@ import {
   Calendar,
   FileText,
   Loader2,
-  ArrowRight
+  ArrowRight,
+  PhoneCall
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -78,9 +81,14 @@ const AdminCRMPage = () => {
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
   const [showNewActivityDialog, setShowNewActivityDialog] = useState(false);
   const [showConvertLeadDialog, setShowConvertLeadDialog] = useState(false);
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [showCallDialog, setShowCallDialog] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<CRMDeal | null>(null);
   const [selectedLead, setSelectedLead] = useState<SalesLead | null>(null);
+  const [communicationDeal, setCommunicationDeal] = useState<CRMDeal | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { isCallingInProgress } = useCRMCommunication();
 
   // Form states
   const [newDeal, setNewDeal] = useState<Partial<CRMDeal>>({
@@ -199,6 +207,22 @@ const AdminCRMPage = () => {
   const handleCompleteTask = async (task: CRMTask) => {
     await updateTask(task.id, { status: 'completed' });
     fetchTasks();
+  };
+
+  const handleCallDeal = (deal: CRMDeal) => {
+    setCommunicationDeal(deal);
+    setShowCallDialog(true);
+  };
+
+  const handleEmailDeal = (deal: CRMDeal) => {
+    setCommunicationDeal(deal);
+    setShowEmailDialog(true);
+  };
+
+  const handleCommunicationSuccess = () => {
+    if (selectedDeal) {
+      fetchActivities(selectedDeal.id);
+    }
   };
 
   // Filter unconverted leads (not yet linked to a deal)
@@ -342,6 +366,9 @@ const AdminCRMPage = () => {
                 onEditDeal={handleEditDeal}
                 onDeleteDeal={handleDeleteDeal}
                 onViewDeal={handleViewDeal}
+                onCallDeal={handleCallDeal}
+                onEmailDeal={handleEmailDeal}
+                isCallingInProgress={isCallingInProgress}
               />
             ) : (
               <AdminCRMTable
@@ -1001,6 +1028,22 @@ const AdminCRMPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Email Dialog */}
+      <CRMEmailDialog
+        open={showEmailDialog}
+        onOpenChange={setShowEmailDialog}
+        deal={communicationDeal}
+        onSuccess={handleCommunicationSuccess}
+      />
+
+      {/* Call Dialog */}
+      <CRMCallDialog
+        open={showCallDialog}
+        onOpenChange={setShowCallDialog}
+        deal={communicationDeal}
+        onSuccess={handleCommunicationSuccess}
+      />
     </AdminDashboardLayout>
   );
 };
