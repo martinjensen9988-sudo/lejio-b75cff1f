@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useSalesLeads, SalesLead } from '@/hooks/useSalesLeads';
+import { AILeadFinderCard } from './AILeadFinderCard';
 import { 
   Plus, 
   Search, 
@@ -17,6 +18,7 @@ import {
   Sparkles,
   Loader2,
   Trash2,
+  Brain,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -73,12 +75,19 @@ export default function AdminSalesAI() {
     return matchesSearch && matchesStatus;
   });
 
+  const handleAISearchClick = (query: string, location?: string) => {
+    navigate(`/admin/sales-ai/company-search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location || '')}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Salgs AI</h2>
-          <p className="text-muted-foreground">Find nye kunder og generer personlige emails</p>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Brain className="w-7 h-7 text-primary" />
+            Salgs AI
+          </h2>
+          <p className="text-muted-foreground">AI-drevet lead-finding og personlig outreach</p>
         </div>
         
         <div className="flex gap-2">
@@ -100,9 +109,16 @@ export default function AdminSalesAI() {
           </Button>
         </div>
       </div>
+
+      {/* AI Lead Finder Card */}
+      <AILeadFinderCard 
+        existingLeads={leads} 
+        onSearchClick={handleAISearchClick}
+      />
       
       <Card>
         <CardHeader>
+          <CardTitle className="text-lg mb-4">Dine Leads</CardTitle>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative">

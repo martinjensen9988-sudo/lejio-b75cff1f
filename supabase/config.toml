@@ -200,3 +200,6 @@ verify_jwt = false
 
 [functions.twilio-incoming-call]
 verify_jwt = false
+
+[functions.ai-find-leads]
+verify_jwt = true
