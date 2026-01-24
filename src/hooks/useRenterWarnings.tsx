@@ -129,66 +129,117 @@ export const useRenterWarnings = () => {
     }
   };
 
+  // Secure check using RPC function - returns summary without exposing PII
+  const checkRenterSummary = async (
+    email?: string,
+    phone?: string,
+    licenseNumber?: string
+  ): Promise<{ hasWarnings: boolean; warningCount: number; maxSeverity: number; reasons: string[] } | null> => {
+    if (!email && !phone && !licenseNumber) return null;
+
+    try {
+      const { data, error } = await supabase.rpc('check_renter_warnings', {
+        p_email: email || null,
+        p_phone: phone || null,
+        p_license_number: licenseNumber || null,
+      });
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        return {
+          hasWarnings: data[0].has_warnings,
+          warningCount: data[0].warning_count,
+          maxSeverity: data[0].max_severity,
+          reasons: data[0].reasons || [],
+        };
+      }
+      return { hasWarnings: false, warningCount: 0, maxSeverity: 0, reasons: [] };
+    } catch (err) {
+      console.error('Error checking renter:', err);
+      return null;
+    }
+  };
+
+  // Get detailed warnings for a renter (only works if lessor has an active booking with them)
+  const getRenterWarningDetails = async (
+    renterEmail: string
+  ): Promise<RenterWarning[]> => {
+    if (!renterEmail) return [];
+
+    try {
+      const { data, error } = await supabase.rpc('get_renter_warning_details', {
+        p_renter_email: renterEmail,
+      });
+
+      if (error) {
+        // Access denied is expected if no booking relationship exists
+        if (error.message.includes('Access denied')) {
+          console.log('No booking relationship with renter, cannot view details');
+          return [];
+        }
+        throw error;
+      }
+      
+      // Map RPC result to RenterWarning format (partial data)
+      return (data || []).map((d: any) => ({
+        id: d.id,
+        renter_email: renterEmail,
+        renter_phone: null,
+        renter_license_number: null,
+        renter_name: null,
+        reported_by: '',
+        booking_id: null,
+        reason: d.reason as WarningReason,
+        description: d.description,
+        severity: d.severity,
+        damage_amount: d.damage_amount || 0,
+        unpaid_amount: d.unpaid_amount || 0,
+        status: 'active' as WarningStatus,
+        expires_at: '',
+        created_at: d.created_at,
+      }));
+    } catch (err) {
+      console.error('Error getting renter warning details:', err);
+      return [];
+    }
+  };
+
+  // Legacy checkRenter that uses the summary for compatibility
   const checkRenter = async (
     email?: string,
     phone?: string,
     licenseNumber?: string
   ): Promise<RenterWarning[]> => {
-    if (!email && !phone && !licenseNumber) return [];
-
-    try {
-      let query = supabase
-        .from('renter_warnings')
-        .select('*')
-        .eq('status', 'active')
-        .gt('expires_at', new Date().toISOString());
-
-      // Build OR conditions
-      const conditions: string[] = [];
-      if (email) conditions.push(`renter_email.ilike.${email}`);
-      if (phone) conditions.push(`renter_phone.eq.${phone}`);
-      if (licenseNumber) conditions.push(`renter_license_number.ilike.${licenseNumber}`);
-
-      // Use separate queries and merge results
-      const results: RenterWarning[] = [];
-      
-      if (email) {
-        const { data } = await supabase
-          .from('renter_warnings')
-          .select('*')
-          .eq('status', 'active')
-          .gt('expires_at', new Date().toISOString())
-          .ilike('renter_email', email);
-        if (data) results.push(...(data as RenterWarning[]));
-      }
-      
-      if (phone) {
-        const { data } = await supabase
-          .from('renter_warnings')
-          .select('*')
-          .eq('status', 'active')
-          .gt('expires_at', new Date().toISOString())
-          .eq('renter_phone', phone);
-        if (data) results.push(...(data as RenterWarning[]));
-      }
-      
-      if (licenseNumber) {
-        const { data } = await supabase
-          .from('renter_warnings')
-          .select('*')
-          .eq('status', 'active')
-          .gt('expires_at', new Date().toISOString())
-          .ilike('renter_license_number', licenseNumber);
-        if (data) results.push(...(data as RenterWarning[]));
-      }
-
-      // Deduplicate by id
-      const unique = results.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-      return unique;
-    } catch (err) {
-      console.error('Error checking renter:', err);
-      return [];
+    // For backwards compatibility, use the secure summary first
+    const summary = await checkRenterSummary(email, phone, licenseNumber);
+    
+    if (!summary || !summary.hasWarnings) return [];
+    
+    // Try to get details if we have a booking relationship
+    if (email) {
+      const details = await getRenterWarningDetails(email);
+      if (details.length > 0) return details;
     }
+    
+    // Return a synthetic warning with summary info if no details available
+    return [{
+      id: 'summary',
+      renter_email: email || '',
+      renter_phone: phone || null,
+      renter_license_number: licenseNumber || null,
+      renter_name: null,
+      reported_by: '',
+      booking_id: null,
+      reason: (summary.reasons[0] as WarningReason) || 'other',
+      description: `Denne lejer har ${summary.warningCount} aktiv(e) advarsel(er). Kontakt LEJIO support for detaljer.`,
+      severity: summary.maxSeverity,
+      damage_amount: 0,
+      unpaid_amount: 0,
+      status: 'active' as WarningStatus,
+      expires_at: '',
+      created_at: new Date().toISOString(),
+    }];
   };
 
   const createWarning = async (input: CreateWarningInput): Promise<RenterWarning | null> => {
@@ -249,6 +300,8 @@ export const useRenterWarnings = () => {
     isLoading,
     createWarning,
     checkRenter,
+    checkRenterSummary,
+    getRenterWarningDetails,
     refetch: fetchWarnings,
   };
 };
