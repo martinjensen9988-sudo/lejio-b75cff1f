@@ -23,9 +23,9 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20 pb-12">
-      {/* Premium gradient background - subtle teal-gray to dark transition */}
+      {/* Premium gradient background - darker top for menu visibility */}
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(180deg, hsl(190 25% 82%) 0%, hsl(195 28% 72%) 30%, hsl(200 30% 50%) 70%, hsl(180 35% 28%) 100%)'
+        background: 'linear-gradient(180deg, hsl(195 30% 68%) 0%, hsl(192 28% 72%) 20%, hsl(195 28% 72%) 40%, hsl(200 30% 50%) 70%, hsl(180 35% 28%) 100%)'
       }}>
         {/* Subtle mesh overlay */}
         <div className="absolute inset-0 opacity-40" style={{
