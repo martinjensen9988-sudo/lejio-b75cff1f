@@ -6,78 +6,78 @@
 
 @layer base {
   :root {
-    /* ===== DARK TITANIUM - Premium Automotive Design ===== */
+    /* ===== TITANIUM SLATE - Premium Automotive Design (Softer) ===== */
     
-    /* Core backgrounds - Deep charcoal with subtle warmth */
-    --background: 220 20% 6%;
-    --foreground: 210 20% 95%;
+    /* Core backgrounds - Softer slate with blue undertone */
+    --background: 220 25% 12%;
+    --foreground: 210 25% 96%;
 
-    /* Cards - Elevated surfaces with glass effect */
-    --card: 220 18% 10%;
-    --card-foreground: 210 20% 95%;
+    /* Cards - Elevated surfaces with subtle warmth */
+    --card: 220 20% 16%;
+    --card-foreground: 210 25% 96%;
 
     /* Popovers & Dropdowns */
-    --popover: 220 18% 12%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 220 20% 18%;
+    --popover-foreground: 210 25% 96%;
 
     /* Primary - Electric Blue (Tech/Innovation) */
-    --primary: 210 100% 50%;
+    --primary: 210 100% 55%;
     --primary-foreground: 210 100% 98%;
 
-    /* Secondary - Muted steel for subtle elements */
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 210 20% 90%;
+    /* Secondary - Soft steel */
+    --secondary: 220 18% 28%;
+    --secondary-foreground: 210 25% 95%;
 
-    /* Muted - Subdued backgrounds */
-    --muted: 220 15% 15%;
-    --muted-foreground: 215 15% 60%;
+    /* Muted - Softer backgrounds */
+    --muted: 220 18% 22%;
+    --muted-foreground: 215 20% 65%;
 
-    /* Accent - Copper/Bronze metallic for premium feel */
-    --accent: 25 80% 55%;
+    /* Accent - Warm copper/bronze */
+    --accent: 25 85% 58%;
     --accent-foreground: 25 10% 98%;
 
-    /* Mint/Success - Neon Cyan for futuristic success states */
-    --mint: 180 100% 45%;
-    --mint-foreground: 180 100% 10%;
+    /* Mint/Success - Softer cyan */
+    --mint: 175 80% 45%;
+    --mint-foreground: 175 100% 10%;
 
-    /* Lavender - Soft purple for secondary highlights */
-    --lavender: 262 60% 65%;
+    /* Lavender - Soft purple */
+    --lavender: 262 55% 68%;
     --lavender-foreground: 262 20% 98%;
 
-    /* Destructive - Warm red */
-    --destructive: 0 72% 50%;
+    /* Destructive */
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 85% 97%;
 
-    /* Borders & Inputs */
-    --border: 220 15% 18%;
-    --input: 220 15% 15%;
-    --ring: 210 100% 50%;
+    /* Borders & Inputs - More visible */
+    --border: 220 18% 25%;
+    --input: 220 18% 22%;
+    --ring: 210 100% 55%;
 
     --radius: 0.75rem;
 
     /* ===== PREMIUM GRADIENTS ===== */
-    --gradient-hero: linear-gradient(135deg, hsl(220 20% 6%) 0%, hsl(220 25% 12%) 50%, hsl(210 30% 8%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(220 18% 12%) 0%, hsl(220 18% 8%) 100%);
-    --gradient-glow: linear-gradient(135deg, hsl(210 100% 50% / 0.2) 0%, hsl(180 100% 45% / 0.1) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(25 80% 55%) 0%, hsl(35 90% 60%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 50%) 0%, hsl(200 100% 55%) 100%);
-    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(210 100% 50% / 0.15) 0%, transparent 50%),
-                     radial-gradient(ellipse at 80% 100%, hsl(25 80% 55% / 0.1) 0%, transparent 50%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 25% 12%) 0%, hsl(220 28% 18%) 50%, hsl(215 25% 14%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 20% 18%) 0%, hsl(220 20% 14%) 100%);
+    --gradient-glow: linear-gradient(135deg, hsl(210 100% 55% / 0.15) 0%, hsl(175 80% 45% / 0.08) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(25 85% 58%) 0%, hsl(35 90% 62%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(210 100% 55%) 0%, hsl(200 100% 58%) 100%);
+    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(210 100% 55% / 0.12) 0%, transparent 50%),
+                     radial-gradient(ellipse at 80% 100%, hsl(25 85% 58% / 0.08) 0%, transparent 50%);
 
     /* ===== PREMIUM SHADOWS ===== */
-    --shadow-2xs: 0 1px 2px hsl(0 0% 0% / 0.3);
-    --shadow-xs: 0 1px 3px hsl(0 0% 0% / 0.4);
-    --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.4);
-    --shadow: 0 4px 16px hsl(0 0% 0% / 0.4);
-    --shadow-md: 0 6px 24px hsl(0 0% 0% / 0.5);
-    --shadow-lg: 0 12px 40px hsl(0 0% 0% / 0.5);
-    --shadow-xl: 0 20px 60px hsl(0 0% 0% / 0.6);
-    --shadow-2xl: 0 30px 80px hsl(0 0% 0% / 0.7);
+    --shadow-2xs: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-xs: 0 1px 3px hsl(0 0% 0% / 0.25);
+    --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.3);
+    --shadow: 0 4px 16px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 6px 24px hsl(0 0% 0% / 0.35);
+    --shadow-lg: 0 12px 40px hsl(0 0% 0% / 0.4);
+    --shadow-xl: 0 20px 60px hsl(0 0% 0% / 0.45);
+    --shadow-2xl: 0 30px 80px hsl(0 0% 0% / 0.5);
 
-    /* Glow effects */
-    --shadow-glow-primary: 0 0 40px hsl(210 100% 50% / 0.4);
-    --shadow-glow-accent: 0 0 40px hsl(25 80% 55% / 0.3);
-    --shadow-glow-mint: 0 0 40px hsl(180 100% 45% / 0.3);
+    /* Glow effects - Softer */
+    --shadow-glow-primary: 0 0 30px hsl(210 100% 55% / 0.35);
+    --shadow-glow-accent: 0 0 30px hsl(25 85% 58% / 0.25);
+    --shadow-glow-mint: 0 0 30px hsl(175 80% 45% / 0.25);
 
     /* ===== TYPOGRAPHY ===== */
     --font-display: 'Space Grotesk', system-ui, sans-serif;

@@ -1,27 +1,61 @@
 import { forwardRef } from "react";
 import { MapPin, Mail, Heart, ArrowRight, Phone } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import LejioLogo from "./LejioLogo";
 
 const Footer = forwardRef<HTMLElement>((props, ref) => {
   const navigate = useNavigate();
 
   return (
     <footer ref={ref} className="relative overflow-hidden" {...props}>
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 py-20">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-primary-foreground mb-6">
+      {/* CTA Section - Premium gradient */}
+      <div className="relative py-24 overflow-hidden">
+        {/* Background with mesh gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent/80" />
+        <div className="absolute inset-0 bg-mesh opacity-50" />
+        
+        {/* Glow orbs */}
+        <motion.div 
+          className="absolute -top-20 -left-20 w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px]"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+        <motion.div 
+          className="absolute -bottom-20 -right-20 w-[300px] h-[300px] bg-accent/30 rounded-full blur-[80px]"
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.3, 0.2] }}
+          transition={{ duration: 10, repeat: Infinity }}
+        />
+        
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground mb-6"
+          >
             Klar til at komme i gang?
-          </h2>
-          <p className="text-primary-foreground/80 text-lg max-w-xl mx-auto mb-10">
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-primary-foreground/80 text-lg max-w-xl mx-auto mb-10"
+          >
             Opret en konto og begynd at leje ud eller find dit næste køretøj i dag.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
             <Button 
               size="xl" 
-              variant="secondary" 
-              className="font-bold text-lg shadow-lg"
+              className="bg-background text-foreground font-bold text-lg shadow-xl hover:bg-background/90 hover:-translate-y-1 transition-all"
               onClick={() => navigate('/auth')}
             >
               Opret konto
@@ -30,39 +64,36 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             <Button 
               size="xl" 
               variant="outline" 
-              className="font-bold text-lg border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+              className="font-bold text-lg border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm"
               onClick={() => navigate('/search')}
             >
               Udforsk køretøjer
             </Button>
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Main Footer */}
-      <div className="bg-foreground text-background py-16">
+      {/* Main Footer - Premium dark */}
+      <div className="bg-background border-t border-border py-16">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-1">
               {/* Logo */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-black text-xl">🚗</span>
-                </div>
-                <span className="font-display font-black text-3xl text-background">LEJIO</span>
+              <div className="mb-6">
+                <LejioLogo size="lg" />
               </div>
-              <p className="text-background/70 max-w-xs mb-6">
+              <p className="text-muted-foreground max-w-xs mb-6">
                 Danmarks smarteste platform til køretøjsudlejning. Private og forhandlere – alt samlet ét sted.
               </p>
-              <div className="flex items-center gap-2 text-sm text-background/60">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4" />
                 <span>Danmark 🇩🇰</span>
               </div>
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-background text-lg mb-6">For lejere</h4>
-              <ul className="space-y-4 text-background/70">
+              <h4 className="font-display font-bold text-foreground text-lg mb-6">For lejere</h4>
+              <ul className="space-y-4 text-muted-foreground">
                 <li><a href="/search" className="hover:text-primary transition-colors">Søg køretøjer</a></li>
                 <li><a href="#how-it-works" className="hover:text-primary transition-colors">Hvordan det virker</a></li>
                 <li><a href="/faq" className="hover:text-primary transition-colors">FAQ</a></li>
@@ -70,8 +101,8 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-background text-lg mb-6">For udlejere</h4>
-              <ul className="space-y-4 text-background/70">
+              <h4 className="font-display font-bold text-foreground text-lg mb-6">For udlejere</h4>
+              <ul className="space-y-4 text-muted-foreground">
                 <li><a href="/funktioner" className="hover:text-primary transition-colors">Alle funktioner</a></li>
                 <li><a href="/bliv-udlejer" className="hover:text-primary transition-colors">Bliv privat udlejer</a></li>
                 <li><a href="/forhandler" className="hover:text-primary transition-colors">For forhandlere</a></li>
@@ -81,29 +112,29 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-background text-lg mb-6">Kontakt os direkte</h4>
-              <p className="text-background/70 text-sm mb-4">
+              <h4 className="font-display font-bold text-foreground text-lg mb-6">Kontakt os direkte</h4>
+              <p className="text-muted-foreground text-sm mb-4">
                 Vi sidder klar til at hjælpe 🙌
               </p>
-              <div className="flex items-center gap-3 text-background/70 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-background/10 flex items-center justify-center">
-                  <Phone className="w-5 h-5" />
+              <div className="flex items-center gap-3 text-muted-foreground mb-3">
+                <div className="w-10 h-10 rounded-lg glass flex items-center justify-center">
+                  <Phone className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <a href="tel:+4591998929" className="hover:text-primary transition-colors">+45 91 99 89 29</a>
-                  <p className="text-xs text-background/50">Hverdage 09:00 - 16:00</p>
+                  <p className="text-xs text-muted-foreground">Hverdage 09:00 - 16:00</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-background/70 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-background/10 flex items-center justify-center">
-                  <Mail className="w-5 h-5" />
+              <div className="flex items-center gap-3 text-muted-foreground mb-6">
+                <div className="w-10 h-10 rounded-lg glass flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-accent" />
                 </div>
                 <a href="mailto:hej@lejio.dk" className="hover:text-primary transition-colors">hej@lejio.dk</a>
               </div>
               
               {/* Company info */}
-              <div className="text-sm text-background/50 space-y-1 mb-6">
-                <p className="font-semibold text-background/70">LEJIO</p>
+              <div className="text-sm text-muted-foreground space-y-1 mb-6">
+                <p className="font-semibold text-foreground/70">LEJIO</p>
                 <p>Erantisvej 2, st. 103</p>
                 <p>8800 Viborg</p>
                 <p>CVR: 44691507</p>
@@ -115,14 +146,14 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
                   href="https://www.facebook.com/profile.php?id=61584959161176" 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-xl bg-background/10 hover:bg-primary flex items-center justify-center text-xl transition-all hover:scale-110"
+                  className="w-11 h-11 rounded-lg glass hover:bg-primary/20 hover:border-primary/40 flex items-center justify-center text-lg transition-all hover:scale-110"
                   aria-label="Facebook"
                 >
                   📘
                 </a>
                 <a 
                   href="#" 
-                  className="w-12 h-12 rounded-xl bg-background/10 hover:bg-primary flex items-center justify-center text-xl transition-all hover:scale-110"
+                  className="w-11 h-11 rounded-lg glass hover:bg-accent/20 hover:border-accent/40 flex items-center justify-center text-lg transition-all hover:scale-110"
                   aria-label="Instagram"
                 >
                   📸
@@ -131,11 +162,11 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             </div>
           </div>
 
-          <div className="pt-10 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-sm text-background/50 flex items-center gap-2">
+          <div className="pt-10 border-t border-border flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
               © {new Date().getFullYear()} LEJIO. Lavet med <Heart className="w-4 h-4 text-accent" /> i Danmark
             </p>
-            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-background/50">
+            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground">
               <a href="/om-os" className="hover:text-primary transition-colors">Om os</a>
               <a href="/privatlivspolitik" className="hover:text-primary transition-colors">Privatlivspolitik</a>
               <a href="/handelsbetingelser" className="hover:text-primary transition-colors">Handelsbetingelser</a>
