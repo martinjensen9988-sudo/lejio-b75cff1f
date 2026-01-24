@@ -197,3 +197,6 @@ verify_jwt = false
 
 [functions.crm-send-email]
 verify_jwt = false
+
+[functions.twilio-incoming-call]
+verify_jwt = false
