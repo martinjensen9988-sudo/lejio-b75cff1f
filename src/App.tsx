@@ -263,6 +263,7 @@ const App = () => (
               <Route path="/admin/stats" element={<AdminAuthProvider><AdminStatsPage /></AdminAuthProvider>} />
               <Route path="/admin/driver-licenses" element={<AdminAuthProvider><DriverLicenseReviewPage /></AdminAuthProvider>} />
               <Route path="/admin/audit-log" element={<AdminAuthProvider><AdminAuditLogPage /></AdminAuthProvider>} />
+              <Route path="/admin/crm" element={<AdminAuthProvider><AdminCRMPage /></AdminAuthProvider>} />
               <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
               <Route path="/handelsbetingelser" element={<Terms />} />
               <Route path="/faq" element={<FAQ />} />
