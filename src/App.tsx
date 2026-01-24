@@ -146,6 +146,7 @@ const UserEditPage = lazy(() => import("./pages/admin/UserEdit"));
 const FleetVehicleEditPage = lazy(() => import("./pages/admin/FleetVehicleEdit"));
 const DriverLicenseReviewPage = lazy(() => import("./pages/admin/DriverLicenseReview"));
 const AdminAuditLogPage = lazy(() => import("./pages/admin/AuditLog"));
+const AdminCRMPage = lazy(() => import("./pages/admin/CRM"));
 
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
