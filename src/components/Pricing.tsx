@@ -9,11 +9,13 @@ const Pricing = () => {
   const [activeTab, setActiveTab] = useState<"privat" | "erhverv">("privat");
 
   return (
-    <section id="pricing" className="py-32 relative overflow-hidden">
-      {/* Premium background */}
-      <div className="absolute inset-0 bg-mesh" />
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary rounded-full blur-[180px] opacity-[0.06]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-mint rounded-full blur-[150px] opacity-[0.05]" />
+    <section id="pricing" className="py-32 relative overflow-hidden" style={{
+      background: 'linear-gradient(180deg, hsl(180 45% 15%) 0%, hsl(180 50% 10%) 100%)'
+    }}>
+      {/* Subtle mesh overlay */}
+      <div className="absolute inset-0 opacity-30" style={{
+        background: 'radial-gradient(ellipse at 40% 30%, hsl(168 76% 42% / 0.12) 0%, transparent 50%), radial-gradient(ellipse at 60% 70%, hsl(174 72% 48% / 0.08) 0%, transparent 50%)'
+      }} />
 
       <div className="container mx-auto px-6 relative z-10">
         <motion.div 
@@ -23,30 +25,30 @@ const Pricing = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-accent/30 text-sm font-bold text-accent mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 border border-accent/40 text-sm font-bold text-accent mb-6">
             <Crown className="w-4 h-4" />
             <span>Gennemsigtige priser</span>
           </div>
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6 text-white">
             Vælg den plan der{" "}
-            <span className="text-gradient">
+            <span className="text-primary">
               passer dig
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-white/70 max-w-2xl mx-auto">
             Ingen skjulte gebyrer. Gennemsigtig prissætning fra dag ét.
           </p>
         </motion.div>
 
         {/* Tab toggle */}
         <div className="flex justify-center mb-12">
-          <div className="inline-flex p-1.5 rounded-full glass border border-border/50">
+          <div className="inline-flex p-1.5 rounded-full bg-white/10 border border-white/20">
             <button
               onClick={() => setActiveTab("privat")}
               className={`px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
                 activeTab === "privat"
-                  ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg glow-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg"
+                  : "text-white/60 hover:text-white"
               }`}
             >
               <span className="flex items-center gap-2">
@@ -58,8 +60,8 @@ const Pricing = () => {
               onClick={() => setActiveTab("erhverv")}
               className={`px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
                 activeTab === "erhverv"
-                  ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg glow-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg"
+                  : "text-white/60 hover:text-white"
               }`}
             >
               <span className="flex items-center gap-2">
@@ -79,18 +81,18 @@ const Pricing = () => {
             transition={{ duration: 0.5 }}
           >
             {/* Privat Udlejer */}
-            <div className="glass-strong rounded-[2rem] p-8 border border-accent/20 hover:border-accent/50 transition-all duration-300 hover-lift">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center mb-8 shadow-lg glow-accent">
+            <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 border border-white/20 hover:border-accent/50 transition-all duration-300 hover-lift">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center mb-8 shadow-lg">
                 <User className="w-8 h-8 text-white" />
               </div>
 
-              <h3 className="font-display text-2xl font-black text-foreground mb-2">Privat Udlejer</h3>
-              <p className="text-muted-foreground mb-8">Gør det selv – fuld kontrol over din udlejning</p>
+              <h3 className="font-display text-2xl font-black text-white mb-2">Privat Udlejer</h3>
+              <p className="text-white/70 mb-8">Gør det selv – fuld kontrol over din udlejning</p>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display text-6xl font-black text-foreground">0</span>
-                  <span className="text-muted-foreground text-lg">kr/md</span>
+                  <span className="font-display text-6xl font-black text-white">0</span>
+                  <span className="text-white/70 text-lg">kr/md</span>
                 </div>
                 <p className="text-accent font-bold mt-2 text-lg">+ 59 kr per booking</p>
               </div>
@@ -98,10 +100,10 @@ const Pricing = () => {
               <ul className="space-y-4 mb-10">
                 {["Ingen månedlig betaling", "Automatisk kontrakt", "Kalender & booking", "Direkte kundekontakt", "Du styrer alt selv"].map((f, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
                       <Check className="w-4 h-4 text-accent" />
                     </div>
-                    <span className="text-muted-foreground">{f}</span>
+                    <span className="text-white/80">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -113,23 +115,23 @@ const Pricing = () => {
             </div>
 
             {/* Privat Fleet - Featured */}
-            <div className="glass-strong rounded-[2rem] p-8 border border-mint/50 hover:border-mint transition-all duration-300 relative hover-lift glow-border">
+            <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 border border-mint/50 hover:border-mint transition-all duration-300 relative hover-lift">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-gradient-to-r from-mint to-accent text-white text-sm font-bold shadow-lg flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Populær
               </div>
 
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-mint to-accent flex items-center justify-center mb-8 shadow-lg glow-mint">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-mint to-accent flex items-center justify-center mb-8 shadow-lg">
                 <User className="w-8 h-8 text-white" />
               </div>
 
-              <h3 className="font-display text-2xl font-black text-foreground mb-2">Privat Fleet</h3>
-              <p className="text-muted-foreground mb-8">Vi driver udlejningen for dig – ingen besvær</p>
+              <h3 className="font-display text-2xl font-black text-white mb-2">Privat Fleet</h3>
+              <p className="text-white/70 mb-8">Vi driver udlejningen for dig – ingen besvær</p>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display text-6xl font-black text-foreground">30</span>
-                  <span className="text-muted-foreground text-lg">%</span>
+                  <span className="font-display text-6xl font-black text-white">30</span>
+                  <span className="text-white/70 text-lg">%</span>
                 </div>
                 <p className="text-mint font-bold mt-2 text-lg">Du beholder 70% af omsætningen</p>
               </div>
@@ -137,10 +139,10 @@ const Pricing = () => {
               <ul className="space-y-4 mb-10">
                 {["LEJIO håndterer alt for dig", "Min. 30 dages abonnement", "70% udbetalt direkte til dig", "Ingen bekymringer", "Perfekt til privatbiler"].map((f, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-mint/10 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-mint/20 flex items-center justify-center">
                       <Check className="w-4 h-4 text-mint" />
                     </div>
-                    <span className="text-muted-foreground">{f}</span>
+                    <span className="text-white/80">{f}</span>
                   </li>
                 ))}
               </ul>

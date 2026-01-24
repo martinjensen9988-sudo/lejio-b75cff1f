@@ -73,8 +73,8 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
         </div>
       </div>
 
-      {/* Main Footer - Premium dark */}
-      <div className="bg-background border-t border-border py-16">
+      {/* Main Footer - Premium dark teal */}
+      <div className="py-16" style={{ background: 'hsl(180 50% 8%)' }}>
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-1">
@@ -82,18 +82,18 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
               <div className="mb-6">
                 <LejioLogo size="lg" />
               </div>
-              <p className="text-muted-foreground max-w-xs mb-6">
+              <p className="text-white/60 max-w-xs mb-6">
                 Danmarks smarteste platform til køretøjsudlejning. Private og forhandlere – alt samlet ét sted.
               </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-white/50">
                 <MapPin className="w-4 h-4" />
                 <span>Danmark 🇩🇰</span>
               </div>
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-foreground text-lg mb-6">For lejere</h4>
-              <ul className="space-y-4 text-muted-foreground">
+              <h4 className="font-display font-bold text-white text-lg mb-6">For lejere</h4>
+              <ul className="space-y-4 text-white/60">
                 <li><a href="/search" className="hover:text-primary transition-colors">Søg køretøjer</a></li>
                 <li><a href="#how-it-works" className="hover:text-primary transition-colors">Hvordan det virker</a></li>
                 <li><a href="/faq" className="hover:text-primary transition-colors">FAQ</a></li>
@@ -101,8 +101,8 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-foreground text-lg mb-6">For udlejere</h4>
-              <ul className="space-y-4 text-muted-foreground">
+              <h4 className="font-display font-bold text-white text-lg mb-6">For udlejere</h4>
+              <ul className="space-y-4 text-white/60">
                 <li><a href="/funktioner" className="hover:text-primary transition-colors">Alle funktioner</a></li>
                 <li><a href="/bliv-udlejer" className="hover:text-primary transition-colors">Bliv privat udlejer</a></li>
                 <li><a href="/forhandler" className="hover:text-primary transition-colors">For forhandlere</a></li>
@@ -112,29 +112,29 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-foreground text-lg mb-6">Kontakt os direkte</h4>
-              <p className="text-muted-foreground text-sm mb-4">
+              <h4 className="font-display font-bold text-white text-lg mb-6">Kontakt os direkte</h4>
+              <p className="text-white/60 text-sm mb-4">
                 Vi sidder klar til at hjælpe 🙌
               </p>
-              <div className="flex items-center gap-3 text-muted-foreground mb-3">
-                <div className="w-10 h-10 rounded-lg glass flex items-center justify-center">
+              <div className="flex items-center gap-3 text-white/60 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
                   <Phone className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <a href="tel:+4591998929" className="hover:text-primary transition-colors">+45 91 99 89 29</a>
-                  <p className="text-xs text-muted-foreground">Hverdage 09:00 - 16:00</p>
+                  <p className="text-xs text-white/40">Hverdage 09:00 - 16:00</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-muted-foreground mb-6">
-                <div className="w-10 h-10 rounded-lg glass flex items-center justify-center">
+              <div className="flex items-center gap-3 text-white/60 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
                   <Mail className="w-5 h-5 text-accent" />
                 </div>
                 <a href="mailto:hej@lejio.dk" className="hover:text-primary transition-colors">hej@lejio.dk</a>
               </div>
               
               {/* Company info */}
-              <div className="text-sm text-muted-foreground space-y-1 mb-6">
-                <p className="font-semibold text-foreground/70">LEJIO</p>
+              <div className="text-sm text-white/50 space-y-1 mb-6">
+                <p className="font-semibold text-white/70">LEJIO</p>
                 <p>Erantisvej 2, st. 103</p>
                 <p>8800 Viborg</p>
                 <p>CVR: 44691507</p>
@@ -146,14 +146,14 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
                   href="https://www.facebook.com/profile.php?id=61584959161176" 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-lg glass hover:bg-primary/20 hover:border-primary/40 flex items-center justify-center text-lg transition-all hover:scale-110"
+                  className="w-11 h-11 rounded-lg bg-white/10 hover:bg-primary/30 flex items-center justify-center text-lg transition-all hover:scale-110"
                   aria-label="Facebook"
                 >
                   📘
                 </a>
                 <a 
                   href="#" 
-                  className="w-11 h-11 rounded-lg glass hover:bg-accent/20 hover:border-accent/40 flex items-center justify-center text-lg transition-all hover:scale-110"
+                  className="w-11 h-11 rounded-lg bg-white/10 hover:bg-accent/30 flex items-center justify-center text-lg transition-all hover:scale-110"
                   aria-label="Instagram"
                 >
                   📸
@@ -162,11 +162,11 @@ const Footer = forwardRef<HTMLElement>((props, ref) => {
             </div>
           </div>
 
-          <div className="pt-10 border-t border-border flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-sm text-muted-foreground flex items-center gap-2">
+          <div className="pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-sm text-white/50 flex items-center gap-2">
               © {new Date().getFullYear()} LEJIO. Lavet med <Heart className="w-4 h-4 text-accent" /> i Danmark
             </p>
-            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-white/50">
               <a href="/om-os" className="hover:text-primary transition-colors">Om os</a>
               <a href="/privatlivspolitik" className="hover:text-primary transition-colors">Privatlivspolitik</a>
               <a href="/handelsbetingelser" className="hover:text-primary transition-colors">Handelsbetingelser</a>
