@@ -1520,6 +1520,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "dealer_locations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "public_lessor_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       deductible_insurance: {
@@ -5598,6 +5605,48 @@ export type Database = {
       }
     }
     Views: {
+      public_lessor_profiles: {
+        Row: {
+          accepted_payment_methods: string[] | null
+          avatar_url: string | null
+          city: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          full_name: string | null
+          id: string | null
+          lessor_status: Database["public"]["Enums"]["lessor_status"] | null
+          roadside_assistance_provider: string | null
+          total_rating_count: number | null
+          total_rating_sum: number | null
+        }
+        Insert: {
+          accepted_payment_methods?: string[] | null
+          avatar_url?: string | null
+          city?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          full_name?: string | null
+          id?: string | null
+          lessor_status?: Database["public"]["Enums"]["lessor_status"] | null
+          roadside_assistance_provider?: string | null
+          total_rating_count?: number | null
+          total_rating_sum?: number | null
+        }
+        Update: {
+          accepted_payment_methods?: string[] | null
+          avatar_url?: string | null
+          city?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          full_name?: string | null
+          id?: string | null
+          lessor_status?: Database["public"]["Enums"]["lessor_status"] | null
+          roadside_assistance_provider?: string | null
+          total_rating_count?: number | null
+          total_rating_sum?: number | null
+        }
+        Relationships: []
+      }
       vehicles_public: {
         Row: {
           adult_sleeping_capacity: number | null
