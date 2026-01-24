@@ -19,7 +19,7 @@
     /* ===== TITANIUM MID - Balanced Design (Half Dark) ===== */
 
     /* Core backgrounds - Medium slate */
-    --background: 0 40% 41%;
+    --background: 16 10% 8%;
     --foreground: 210 25% 96%;
 
     /* Cards - Slightly elevated surfaces */
@@ -35,11 +35,11 @@
     --primary-foreground: 210 100% 98%;
 
     /* Secondary - Medium steel */
-    --secondary: 14 49% 66%;
+    --secondary: 220 18% 28%;
     --secondary-foreground: 210 25% 95%;
 
     /* Muted - Softer mid-tones */
-    --muted: 220 18% 22%;
+    --muted: 29 18% 22%;
     --muted-foreground: 215 20% 65%;
 
     /* Accent - Warm copper/bronze */
