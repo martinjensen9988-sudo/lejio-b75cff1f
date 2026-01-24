@@ -546,9 +546,9 @@ const Forhandler = () => {
             {/* Two Window Layout */}
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {/* Window 1 - Video */}
-              <Card className="border-border/50 hover:border-primary/40 transition-colors overflow-hidden p-0">
+              <Card className="border-border/50 hover:border-primary/40 transition-colors overflow-hidden p-1">
                 <video 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-sm"
                   controls
                   autoPlay
                   muted
