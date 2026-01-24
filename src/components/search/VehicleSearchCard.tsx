@@ -102,10 +102,10 @@ const VehicleSearchCard = ({
   if (viewMode === 'list') {
     return (
       <div
-        className={`group bg-card rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-1 ${
+        className={`group glass-strong rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden hover-lift ${
           isSelected
-            ? "border-primary shadow-xl shadow-primary/10"
-            : "border-border hover:border-primary/30 hover:shadow-lg"
+            ? "border-primary glow-primary"
+            : "border-border/50 hover:border-primary/40"
         }`}
         onClick={onSelect}
       >
@@ -258,10 +258,10 @@ const VehicleSearchCard = ({
   // Grid view (default) - Modern card with carousel
   return (
     <div
-      className={`group bg-card rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-2 hover:shadow-2xl ${
+      className={`group glass-strong rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden hover-lift ${
         isSelected
-          ? "border-primary shadow-xl shadow-primary/10"
-          : "border-border hover:border-primary/30"
+          ? "border-primary glow-primary"
+          : "border-border/50 hover:border-primary/40"
       }`}
       onClick={onSelect}
     >

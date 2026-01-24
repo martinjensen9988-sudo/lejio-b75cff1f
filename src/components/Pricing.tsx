@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowRight, User, Building2, Shield, Sparkles, Check, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -9,37 +10,42 @@ const Pricing = () => {
 
   return (
     <section id="pricing" className="py-32 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary rounded-full blur-[150px] opacity-5" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-mint rounded-full blur-[120px] opacity-5" />
-      </div>
+      {/* Premium background */}
+      <div className="absolute inset-0 bg-mesh" />
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary rounded-full blur-[180px] opacity-[0.06]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-mint rounded-full blur-[150px] opacity-[0.05]" />
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="text-center mb-12 animate-slide-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-sm font-bold text-accent mb-6">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-accent/30 text-sm font-bold text-accent mb-6">
             <Crown className="w-4 h-4" />
             <span>Gennemsigtige priser</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
             Vælg den plan der{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-gradient">
               passer dig
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Ingen skjulte gebyrer. Gennemsigtig prissætning fra dag ét.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Toggle between Privat and Erhverv */}
+        {/* Tab toggle */}
         <div className="flex justify-center mb-12">
-          <div className="inline-flex p-1.5 rounded-full bg-muted/50 border border-border">
+          <div className="inline-flex p-1.5 rounded-full glass border border-border/50">
             <button
               onClick={() => setActiveTab("privat")}
-              className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${
+              className={`px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
                 activeTab === "privat"
-                  ? "bg-primary text-primary-foreground shadow-lg"
+                  ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg glow-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -50,9 +56,9 @@ const Pricing = () => {
             </button>
             <button
               onClick={() => setActiveTab("erhverv")}
-              className={`px-8 py-3 rounded-full font-bold text-sm transition-all ${
+              className={`px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
                 activeTab === "erhverv"
-                  ? "bg-primary text-primary-foreground shadow-lg"
+                  ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg glow-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -66,10 +72,15 @@ const Pricing = () => {
 
         {/* Privat pricing cards */}
         {activeTab === "privat" && (
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto animate-fade-in">
+          <motion.div 
+            className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             {/* Privat Udlejer */}
-            <div className="rounded-[2rem] bg-card border-2 border-accent/20 p-8 hover:shadow-2xl hover:border-accent/50 transition-all group hover:-translate-y-2">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center mb-8 shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform">
+            <div className="glass-strong rounded-[2rem] p-8 border border-accent/20 hover:border-accent/50 transition-all duration-300 hover-lift">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center mb-8 shadow-lg glow-accent">
                 <User className="w-8 h-8 text-white" />
               </div>
 
@@ -85,13 +96,7 @@ const Pricing = () => {
               </div>
 
               <ul className="space-y-4 mb-10">
-                {[
-                  "Ingen månedlig betaling",
-                  "Automatisk kontrakt",
-                  "Kalender & booking",
-                  "Direkte kundekontakt",
-                  "Du styrer alt selv"
-                ].map((f, i) => (
+                {["Ingen månedlig betaling", "Automatisk kontrakt", "Kalender & booking", "Direkte kundekontakt", "Du styrer alt selv"].map((f, i) => (
                   <li key={i} className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
                       <Check className="w-4 h-4 text-accent" />
@@ -108,13 +113,13 @@ const Pricing = () => {
             </div>
 
             {/* Privat Fleet - Featured */}
-            <div className="rounded-[2rem] bg-gradient-to-br from-mint/10 via-card to-accent/10 border-2 border-mint/50 p-8 hover:shadow-2xl transition-all relative hover:-translate-y-2">
+            <div className="glass-strong rounded-[2rem] p-8 border border-mint/50 hover:border-mint transition-all duration-300 relative hover-lift glow-border">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-gradient-to-r from-mint to-accent text-white text-sm font-bold shadow-lg flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Populær
               </div>
 
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-mint to-accent flex items-center justify-center mb-8 shadow-lg shadow-mint/30">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-mint to-accent flex items-center justify-center mb-8 shadow-lg glow-mint">
                 <User className="w-8 h-8 text-white" />
               </div>
 
@@ -130,13 +135,7 @@ const Pricing = () => {
               </div>
 
               <ul className="space-y-4 mb-10">
-                {[
-                  "LEJIO håndterer alt for dig",
-                  "Min. 30 dages abonnement",
-                  "70% udbetalt direkte til dig",
-                  "Ingen bekymringer",
-                  "Perfekt til privatbiler"
-                ].map((f, i) => (
+                {["LEJIO håndterer alt for dig", "Min. 30 dages abonnement", "70% udbetalt direkte til dig", "Ingen bekymringer", "Perfekt til privatbiler"].map((f, i) => (
                   <li key={i} className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-mint/10 flex items-center justify-center">
                       <Check className="w-4 h-4 text-mint" />
@@ -147,7 +146,7 @@ const Pricing = () => {
               </ul>
 
               <div className="space-y-3">
-                <Button size="lg" className="w-full font-bold text-lg py-6 bg-gradient-to-r from-mint to-accent hover:opacity-90 shadow-lg shadow-mint/30" onClick={() => navigate('/auth')}>
+                <Button variant="mint" size="lg" className="w-full font-bold text-lg py-6" onClick={() => navigate('/auth')}>
                   Kom i gang
                   <ArrowRight className="w-5 h-5" />
                 </Button>
@@ -156,16 +155,20 @@ const Pricing = () => {
                 </Button>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Erhverv pricing cards */}
         {activeTab === "erhverv" && (
-          <div className="animate-fade-in">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             {/* Three tier pricing */}
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
               {/* Starter */}
-              <div className="rounded-[2rem] bg-card border-2 border-primary/20 p-8 hover:shadow-2xl hover:border-primary/50 transition-all relative hover:-translate-y-2">
+              <div className="glass-strong rounded-[2rem] p-8 border border-primary/20 hover:border-primary/50 transition-all duration-300 relative hover-lift">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-white text-sm font-bold shadow-lg flex items-center gap-2">
                   <Sparkles className="w-4 h-4" />
                   Anbefalet
@@ -183,12 +186,7 @@ const Pricing = () => {
                 </div>
 
                 <ul className="space-y-3 mb-8">
-                  {[
-                    "Op til 5 køretøjer",
-                    "Ubegrænsede bookinger",
-                    "Digitale kontrakter",
-                    "Dashboard & statistik"
-                  ].map((f, i) => (
+                  {["Op til 5 køretøjer", "Ubegrænsede bookinger", "Digitale kontrakter", "Dashboard & statistik"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-primary" />
                       <span className="text-muted-foreground text-sm">{f}</span>
@@ -196,13 +194,13 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                <Button size="lg" className="w-full font-bold shadow-lg shadow-primary/20" onClick={() => navigate('/auth')}>
+                <Button variant="hero" size="lg" className="w-full font-bold" onClick={() => navigate('/auth')}>
                   Vælg Starter
                 </Button>
               </div>
 
               {/* Standard */}
-              <div className="rounded-[2rem] bg-card border-2 border-border p-8 hover:shadow-2xl hover:border-primary/30 transition-all hover:-translate-y-2">
+              <div className="glass-strong rounded-[2rem] p-8 border border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift">
                 <h3 className="font-display text-2xl font-black text-foreground mb-1">Standard</h3>
                 <p className="text-muted-foreground text-sm mb-6">6-15 biler</p>
 
@@ -215,13 +213,7 @@ const Pricing = () => {
                 </div>
 
                 <ul className="space-y-3 mb-8">
-                  {[
-                    "Op til 15 køretøjer",
-                    "Ubegrænsede bookinger",
-                    "Digitale kontrakter",
-                    "Dashboard & statistik",
-                    "Prioriteret support"
-                  ].map((f, i) => (
+                  {["Op til 15 køretøjer", "Ubegrænsede bookinger", "Digitale kontrakter", "Dashboard & statistik", "Prioriteret support"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-primary" />
                       <span className="text-muted-foreground text-sm">{f}</span>
@@ -229,13 +221,13 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                <Button variant="outline" size="lg" className="w-full font-bold" onClick={() => navigate('/auth')}>
+                <Button variant="glass" size="lg" className="w-full font-bold" onClick={() => navigate('/auth')}>
                   Vælg Standard
                 </Button>
               </div>
 
               {/* Enterprise */}
-              <div className="rounded-[2rem] bg-card border-2 border-border p-8 hover:shadow-2xl hover:border-primary/30 transition-all hover:-translate-y-2">
+              <div className="glass-strong rounded-[2rem] p-8 border border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift">
                 <h3 className="font-display text-2xl font-black text-foreground mb-1">Enterprise</h3>
                 <p className="text-muted-foreground text-sm mb-6">16-35 biler</p>
 
@@ -248,14 +240,7 @@ const Pricing = () => {
                 </div>
 
                 <ul className="space-y-3 mb-6">
-                  {[
-                    "Op til 35 køretøjer",
-                    "Ubegrænsede bookinger",
-                    "Digitale kontrakter",
-                    "Dashboard & statistik",
-                    "Dedikeret support",
-                    "API adgang"
-                  ].map((f, i) => (
+                  {["Op til 35 køretøjer", "Ubegrænsede bookinger", "Digitale kontrakter", "Dashboard & statistik", "Dedikeret support", "API adgang"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-primary" />
                       <span className="text-muted-foreground text-sm">{f}</span>
@@ -263,7 +248,7 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                <Button variant="outline" size="lg" className="w-full font-bold mb-4" onClick={() => navigate('/auth')}>
+                <Button variant="glass" size="lg" className="w-full font-bold mb-4" onClick={() => navigate('/auth')}>
                   Vælg Enterprise
                 </Button>
                 
@@ -279,8 +264,8 @@ const Pricing = () => {
               </div>
             </div>
 
-            {/* Fleet plans for dealers */}
-            <div id="fleet-plans" className="bg-card rounded-[2.5rem] p-10 border-2 border-border max-w-5xl mx-auto scroll-mt-24">
+            {/* Fleet plans */}
+            <div id="fleet-plans" className="glass-strong rounded-[2.5rem] p-10 border border-border/50 max-w-5xl mx-auto scroll-mt-24">
               <div className="text-center mb-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lavender/10 border border-lavender/20 text-sm font-bold text-lavender mb-4">
                   <Shield className="w-4 h-4" />
@@ -292,7 +277,7 @@ const Pricing = () => {
 
               <div className="grid md:grid-cols-3 gap-6">
                 {/* Partner Starter */}
-                <div className="rounded-2xl bg-accent/5 border-2 border-accent/30 p-6 hover:shadow-xl hover:border-accent/50 transition-all">
+                <div className="rounded-2xl glass border border-accent/30 p-6 hover:border-accent/50 transition-all duration-300 hover-lift">
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg">
                       <Building2 className="w-6 h-6 text-white" />
@@ -317,13 +302,13 @@ const Pricing = () => {
                     ))}
                   </ul>
 
-                  <Button variant="outline" size="sm" className="w-full border-accent/40 hover:bg-accent/10 hover:border-accent/60" onClick={() => navigate('/kontakt')}>
+                  <Button variant="glass" size="sm" className="w-full" onClick={() => navigate('/kontakt')}>
                     Kontakt os
                   </Button>
                 </div>
 
                 {/* Fleet Basic */}
-                <div className="rounded-2xl bg-lavender/5 border-2 border-lavender/30 p-6 hover:shadow-xl hover:border-lavender/50 transition-all">
+                <div className="rounded-2xl glass border border-lavender/30 p-6 hover:border-lavender/50 transition-all duration-300 hover-lift">
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lavender to-lavender/60 flex items-center justify-center shadow-lg">
                       <Shield className="w-6 h-6 text-white" />
@@ -348,49 +333,48 @@ const Pricing = () => {
                     ))}
                   </ul>
 
-                  <Button variant="outline" size="sm" className="w-full border-lavender/40 hover:bg-lavender/10 hover:border-lavender/60" onClick={() => navigate('/kontakt')}>
+                  <Button variant="glass" size="sm" className="w-full" onClick={() => navigate('/kontakt')}>
                     Kontakt os
                   </Button>
                 </div>
 
                 {/* Fleet Premium */}
-                <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-lavender/5 border-2 border-primary/30 p-6 hover:shadow-xl hover:border-primary/50 transition-all relative">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-primary to-lavender text-white text-xs font-bold shadow-lg flex items-center gap-1">
-                    <Crown className="w-3 h-3" />
+                <div className="rounded-2xl glass border border-mint/30 p-6 hover:border-mint/50 transition-all duration-300 hover-lift relative">
+                  <div className="absolute -top-3 right-4 px-3 py-1 rounded-full bg-gradient-to-r from-mint to-accent text-white text-xs font-bold">
                     Premium
                   </div>
-
-                  <div className="flex items-center gap-3 mb-5 mt-2">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-lavender flex items-center justify-center shadow-lg">
-                      <Shield className="w-6 h-6 text-white" />
+                  
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-mint to-accent flex items-center justify-center shadow-lg">
+                      <Sparkles className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h4 className="font-display text-lg font-black text-foreground">Fleet Premium</h4>
-                      <p className="text-xs text-muted-foreground">Fuld service løsning</p>
+                      <p className="text-xs text-muted-foreground">Full-service løsning</p>
                     </div>
                   </div>
 
                   <div className="flex items-baseline gap-2 mb-5">
-                    <span className="font-display text-4xl font-black text-foreground">35%</span>
-                    <span className="text-primary font-bold text-sm">af omsætningen</span>
+                    <span className="font-display text-4xl font-black text-foreground">30%</span>
+                    <span className="text-mint font-bold text-sm">af omsætningen</span>
                   </div>
 
                   <ul className="space-y-2 mb-6 text-sm">
-                    {["Alt fra Basic", "Prioriteret synlighed", "Dedikeret kontaktperson"].map((f, i) => (
+                    {["Alt i Fleet Basic", "Inkl. GPS-tracking", "Garanteret min. udlejning"].map((f, i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-primary" />
+                        <Check className="w-4 h-4 text-mint" />
                         <span className="text-muted-foreground">{f}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <Button size="sm" className="w-full bg-gradient-to-r from-primary to-lavender hover:opacity-90" onClick={() => navigate('/kontakt')}>
+                  <Button variant="mint" size="sm" className="w-full" onClick={() => navigate('/kontakt')}>
                     Kontakt os
                   </Button>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </section>

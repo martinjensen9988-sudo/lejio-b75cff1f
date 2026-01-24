@@ -10,6 +10,7 @@ import LejioLogo from "@/components/LejioLogo";
 import { toast } from "sonner";
 import { z } from "zod";
 import { User, Building2, ArrowLeft, ArrowRight, Check, Mail, Lock, Phone, MapPin, Loader2, CheckCircle, XCircle, Calendar, Briefcase } from "lucide-react";
+import { motion } from "framer-motion";
 
 // Validation schemas
 const emailSchema = z.string().email("Ugyldig email adresse").max(255);
@@ -51,7 +52,6 @@ const Auth = () => {
     const refCode = searchParams.get('ref');
     if (refCode) {
       setReferralCodeFromUrl(refCode.toUpperCase());
-      // Switch to signup mode if coming from referral link
       setMode('signup');
     }
   }, [searchParams]);
@@ -65,14 +65,10 @@ const Auth = () => {
       lookupCVR(cleanCvr).then((result) => {
         if (result?.companyName && result.isActive) {
           setCompanyName(result.companyName);
-          toast.success('Virksomhed fundet!', {
-            description: result.companyName,
-          });
+          toast.success('Virksomhed fundet!', { description: result.companyName });
         } else if (result?.companyName && !result.isActive) {
           setCompanyName(result.companyName);
-          toast.error('Virksomheden er ikke aktiv', {
-            description: 'Kun aktive virksomheder kan registreres.',
-          });
+          toast.error('Virksomheden er ikke aktiv', { description: 'Kun aktive virksomheder kan registreres.' });
         }
       });
     }
@@ -88,24 +84,14 @@ const Auth = () => {
   const validateField = (field: string, value: string): string | null => {
     try {
       switch (field) {
-        case "email":
-          emailSchema.parse(value);
-          break;
-        case "password":
-          passwordSchema.parse(value);
-          break;
-        case "fullName":
-          nameSchema.parse(value);
-          break;
-        case "cvrNumber":
-          if (value) cvrSchema.parse(value);
-          break;
+        case "email": emailSchema.parse(value); break;
+        case "password": passwordSchema.parse(value); break;
+        case "fullName": nameSchema.parse(value); break;
+        case "cvrNumber": if (value) cvrSchema.parse(value); break;
       }
       return null;
     } catch (e) {
-      if (e instanceof z.ZodError) {
-        return e.errors[0].message;
-      }
+      if (e instanceof z.ZodError) return e.errors[0].message;
       return "Ugyldig værdi";
     }
   };
@@ -142,7 +128,6 @@ const Auth = () => {
     e.preventDefault();
     setErrors({});
 
-    // Validate all fields
     const emailError = validateField("email", email);
     const passwordError = validateField("password", password);
     const nameError = validateField("fullName", fullName);
@@ -154,40 +139,22 @@ const Auth = () => {
     }
 
     if (emailError || passwordError || nameError || cvrValidationError) {
-      setErrors({
-        email: emailError || "",
-        password: passwordError || "",
-        fullName: nameError || "",
-        cvrNumber: cvrValidationError || "",
-      });
+      setErrors({ email: emailError || "", password: passwordError || "", fullName: nameError || "", cvrNumber: cvrValidationError || "" });
       return;
     }
 
-    // Check if company is active for professional users
     if (userType === "professionel" && cvrData && !cvrData.isActive) {
-      toast.error('Virksomheden er ikke aktiv', {
-        description: 'Kun aktive virksomheder kan registreres på platformen.',
-      });
+      toast.error('Virksomheden er ikke aktiv', { description: 'Kun aktive virksomheder kan registreres på platformen.' });
       return;
     }
 
-    // Check if terms are accepted
     if (!acceptedTerms) {
-      toast.error('Du skal acceptere udlejervilkårene', {
-        description: 'Marker boksen for at fortsætte.',
-      });
+      toast.error('Du skal acceptere udlejervilkårene', { description: 'Marker boksen for at fortsætte.' });
       return;
     }
 
     setIsSubmitting(true);
-    const { error } = await signUp(
-      email, 
-      password, 
-      fullName, 
-      userType,
-      userType === "professionel" ? cvrNumber : undefined,
-      userType === "professionel" ? companyName : undefined
-    );
+    const { error } = await signUp(email, password, fullName, userType, userType === "professionel" ? cvrNumber : undefined, userType === "professionel" ? companyName : undefined);
     setIsSubmitting(false);
 
     if (error) {
@@ -197,9 +164,7 @@ const Auth = () => {
         toast.error(error.message);
       }
     } else {
-      // Apply referral code if present
       if (referralCodeFromUrl) {
-        // Small delay to ensure user is fully registered
         setTimeout(async () => {
           const result = await applyReferralCode(referralCodeFromUrl);
           if (result.success) {
@@ -213,16 +178,10 @@ const Auth = () => {
   };
 
   const resetForm = () => {
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setFullName("");
-    setPhone("");
-    setCvrNumber("");
-    setCompanyName("");
-    setAcceptedTerms(false);
-    setErrors({});
-    setSignupStep("choose-type");
+    setEmail(""); setPassword(""); setConfirmPassword("");
+    setFullName(""); setPhone(""); setCvrNumber("");
+    setCompanyName(""); setAcceptedTerms(false);
+    setErrors({}); setSignupStep("choose-type");
   };
 
   const switchMode = (newMode: AuthMode) => {
@@ -232,19 +191,29 @@ const Auth = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-hero-gradient">
-        <div className="animate-pulse text-primary text-xl">Indlæser...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center gap-3 text-primary">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span className="text-xl font-medium">Indlæser...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-hero-gradient p-4">
-      {/* Organic blobs */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-accent/20 blob animate-blob animate-float-slow" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-lavender/20 blob-2 animate-blob animate-float" />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Premium background effects */}
+      <div className="absolute inset-0 bg-mesh" />
+      <div className="absolute top-20 left-10 w-72 h-72 bg-accent/20 rounded-full blur-[120px] animate-float-slow" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/15 rounded-full blur-[150px] animate-float" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-lavender/10 rounded-full blur-[200px]" />
 
-      <div className="w-full max-w-md relative z-10">
+      <motion.div 
+        className="w-full max-w-md relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-block cursor-pointer" onClick={() => navigate("/")}>
@@ -257,25 +226,24 @@ const Auth = () => {
 
         {/* Referral Code Banner */}
         {referralCodeFromUrl && mode === 'signup' && (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-              <Check className="w-5 h-5 text-green-600" />
+          <motion.div 
+            className="glass border border-mint/40 rounded-xl p-4 mb-4 flex items-center gap-3"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <div className="w-10 h-10 bg-mint/20 rounded-full flex items-center justify-center">
+              <Check className="w-5 h-5 text-mint" />
             </div>
             <div>
-              <p className="font-semibold text-green-700 dark:text-green-400">
-                Henvisningskode aktiveret!
-              </p>
-              <p className="text-sm text-green-600 dark:text-green-500">
-                Du får 500 kr. rabat på din første månedsleasing
-              </p>
+              <p className="font-semibold text-mint">Henvisningskode aktiveret!</p>
+              <p className="text-sm text-muted-foreground">Du får 500 kr. rabat på din første månedsleasing</p>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Auth Card */}
-        <div className="bg-card rounded-3xl p-8 shadow-lg border-2 border-border">
+        <div className="glass-strong rounded-3xl p-8 border border-border/50 glow-border">
           {mode === "login" ? (
-            // LOGIN FORM
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
@@ -288,7 +256,7 @@ const Auth = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="din@email.dk"
-                  className="rounded-xl"
+                  className="rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
                   required
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
@@ -306,71 +274,45 @@ const Auth = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="rounded-xl"
+                  className="rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
                   required
                 />
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
-              <Button 
-                type="submit" 
-                variant="hero" 
-                size="lg" 
-                className="w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Logger ind..." : "Log ind"}
+              <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Logger ind...</> : "Log ind"}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
                 Har du ikke en konto?{" "}
-                <button
-                  type="button"
-                  onClick={() => switchMode("signup")}
-                  className="text-primary font-semibold hover:underline"
-                >
+                <button type="button" onClick={() => switchMode("signup")} className="text-primary font-semibold hover:underline">
                   Opret konto
                 </button>
               </p>
             </form>
           ) : (
-            // SIGNUP FLOW
             <>
               {signupStep === "choose-type" && (
-                // STEP 1: Choose user type (The Fork)
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-display font-bold text-foreground mb-2">
-                      Vælg din profil
-                    </h2>
-                    <p className="text-muted-foreground text-sm">
-                      Hvad beskriver dig bedst?
-                    </p>
+                    <h2 className="text-2xl font-display font-bold text-foreground mb-2">Vælg din profil</h2>
+                    <p className="text-muted-foreground text-sm">Hvad beskriver dig bedst?</p>
                   </div>
 
                   <div className="grid gap-4">
-                    {/* Private option */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setUserType("privat");
-                        setSignupStep("credentials");
-                      }}
-                      className={`p-6 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] ${
-                        userType === "privat" 
-                          ? "border-accent bg-accent/10" 
-                          : "border-border hover:border-accent/50"
-                      }`}
+                      onClick={() => { setUserType("privat"); setSignupStep("credentials"); }}
+                      className="p-6 rounded-2xl glass border border-accent/30 text-left transition-all duration-300 hover:scale-[1.02] hover:border-accent/60 hover:shadow-lg"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
-                          <User className="w-6 h-6 text-accent" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shrink-0 shadow-lg">
+                          <User className="w-6 h-6 text-white" />
                         </div>
                         <div>
                           <h3 className="font-bold text-lg text-foreground">Privat udlejer</h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Jeg vil udleje min private bil og tjene penge, når jeg ikke bruger den.
-                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">Jeg vil udleje min private bil og tjene penge, når jeg ikke bruger den.</p>
                           <div className="flex items-center gap-2 mt-3 text-xs text-accent font-medium">
                             <Check className="w-4 h-4" />
                             <span>59 kr pr. booking • Ingen binding</span>
@@ -379,28 +321,18 @@ const Auth = () => {
                       </div>
                     </button>
 
-                    {/* Professional option */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setUserType("professionel");
-                        setSignupStep("credentials");
-                      }}
-                      className={`p-6 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] ${
-                        userType === "professionel" 
-                          ? "border-primary bg-primary/10" 
-                          : "border-border hover:border-primary/50"
-                      }`}
+                      onClick={() => { setUserType("professionel"); setSignupStep("credentials"); }}
+                      className="p-6 rounded-2xl glass border border-primary/30 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/60 hover:shadow-lg"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-                          <Building2 className="w-6 h-6 text-primary" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-lg">
+                          <Building2 className="w-6 h-6 text-white" />
                         </div>
                         <div>
                           <h3 className="font-bold text-lg text-foreground">Forhandler</h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Jeg har et CVR-nummer og driver en udlejningsforretning.
-                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">Jeg har et CVR-nummer og driver en udlejningsforretning.</p>
                           <div className="flex items-center gap-2 mt-3 text-xs text-primary font-medium">
                             <Check className="w-4 h-4" />
                             <span>Egen betalingsløsning • 299 kr/md</span>
@@ -412,11 +344,7 @@ const Auth = () => {
 
                   <p className="text-center text-sm text-muted-foreground">
                     Har du allerede en konto?{" "}
-                    <button
-                      type="button"
-                      onClick={() => switchMode("login")}
-                      className="text-primary font-semibold hover:underline"
-                    >
+                    <button type="button" onClick={() => switchMode("login")} className="text-primary font-semibold hover:underline">
                       Log ind
                     </button>
                   </p>
@@ -424,20 +352,13 @@ const Auth = () => {
               )}
 
               {signupStep === "credentials" && (
-                // STEP 2: Email & Password
                 <form onSubmit={(e) => { e.preventDefault(); setSignupStep("profile"); }} className="space-y-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <button
-                      type="button"
-                      onClick={() => setSignupStep("choose-type")}
-                      className="p-2 rounded-xl hover:bg-muted transition-colors"
-                    >
+                    <button type="button" onClick={() => setSignupStep("choose-type")} className="p-2 rounded-xl hover:bg-muted/50 transition-colors">
                       <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                      <h2 className="text-xl font-display font-bold text-foreground">
-                        {userType === "privat" ? "Privat udlejer" : "Forhandler"}
-                      </h2>
+                      <h2 className="text-xl font-display font-bold text-foreground">{userType === "privat" ? "Privat udlejer" : "Forhandler"}</h2>
                       <p className="text-sm text-muted-foreground">Trin 1 af 2 - Login oplysninger</p>
                     </div>
                   </div>
@@ -447,15 +368,7 @@ const Auth = () => {
                       <Mail className="w-4 h-4 text-primary" />
                       Email
                     </Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="din@email.dk"
-                      className="rounded-xl"
-                      required
-                    />
+                    <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="din@email.dk" className="rounded-xl bg-muted/30 border-border/50" required />
                     {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                   </div>
 
@@ -464,16 +377,7 @@ const Auth = () => {
                       <Lock className="w-4 h-4 text-primary" />
                       Adgangskode
                     </Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      autoComplete="new-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Mindst 8 tegn"
-                      className="rounded-xl"
-                      required
-                    />
+                    <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mindst 8 tegn" className="rounded-xl bg-muted/30 border-border/50" required />
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                   </div>
 
@@ -482,234 +386,81 @@ const Auth = () => {
                       <Lock className="w-4 h-4 text-primary" />
                       Bekræft adgangskode
                     </Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      autoComplete="new-password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Gentag adgangskode"
-                      className="rounded-xl"
-                      required
-                    />
+                    <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Gentag adgangskode" className="rounded-xl bg-muted/30 border-border/50" required />
                     {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    variant={userType === "privat" ? "warm" : "hero"}
-                    size="lg" 
-                    className="w-full"
-                  >
+                  <Button type="submit" variant="hero" size="lg" className="w-full">
                     Fortsæt
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-4 h-4" />
                   </Button>
                 </form>
               )}
 
               {signupStep === "profile" && (
-                // STEP 3: Profile info
                 <form onSubmit={handleSignup} className="space-y-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <button
-                      type="button"
-                      onClick={() => setSignupStep("credentials")}
-                      className="p-2 rounded-xl hover:bg-muted transition-colors"
-                    >
+                    <button type="button" onClick={() => setSignupStep("credentials")} className="p-2 rounded-xl hover:bg-muted/50 transition-colors">
                       <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                      <h2 className="text-xl font-display font-bold text-foreground">
-                        {userType === "privat" ? "Privat udlejer" : "Professionel udlejer"}
-                      </h2>
+                      <h2 className="text-xl font-display font-bold text-foreground">{userType === "privat" ? "Privat udlejer" : "Forhandler"}</h2>
                       <p className="text-sm text-muted-foreground">Trin 2 af 2 - Profiloplysninger</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="full-name" className="flex items-center gap-2">
+                    <Label htmlFor="fullName" className="flex items-center gap-2">
                       <User className="w-4 h-4 text-primary" />
                       Fulde navn
                     </Label>
-                    <Input
-                      id="full-name"
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Dit fulde navn"
-                      className="rounded-xl"
-                      required
-                    />
+                    <Input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Dit fulde navn" className="rounded-xl bg-muted/30 border-border/50" required />
                     {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-primary" />
-                      Telefon (valgfrit)
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+45 12 34 56 78"
-                      className="rounded-xl"
-                    />
                   </div>
 
                   {userType === "professionel" && (
                     <>
                       <div className="space-y-2">
-                        <Label htmlFor="cvr-number" className="flex items-center gap-2">
+                        <Label htmlFor="cvrNumber" className="flex items-center gap-2">
                           <Building2 className="w-4 h-4 text-primary" />
                           CVR-nummer
                         </Label>
                         <div className="relative">
-                          <Input
-                            id="cvr-number"
-                            type="text"
-                            value={cvrNumber}
-                            onChange={(e) => setCvrNumber(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                            placeholder="12345678"
-                            className="rounded-xl pr-10"
-                            maxLength={8}
-                            required
-                          />
-                          {cvrLoading && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                            </div>
-                          )}
-                          {!cvrLoading && cvrData?.isActive && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                            </div>
-                          )}
-                          {!cvrLoading && cvrData && !cvrData.isActive && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <XCircle className="w-4 h-4 text-destructive" />
-                            </div>
-                          )}
+                          <Input id="cvrNumber" type="text" value={cvrNumber} onChange={(e) => setCvrNumber(e.target.value.replace(/\D/g, '').slice(0, 8))} placeholder="12345678" className="rounded-xl bg-muted/30 border-border/50 pr-10" maxLength={8} />
+                          {cvrLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-primary" />}
+                          {cvrData && cvrData.isActive && <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mint" />}
+                          {cvrData && !cvrData.isActive && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />}
                         </div>
-                        {cvrError && <p className="text-sm text-destructive">{cvrError}</p>}
                         {errors.cvrNumber && <p className="text-sm text-destructive">{errors.cvrNumber}</p>}
-                        <p className="text-xs text-muted-foreground">
-                          Indtast 8 cifre for automatisk virksomhedsopslag
-                        </p>
-                      </div>
-
-                      {/* Company Info Display */}
-                      {cvrData && (
-                        <div className={`p-3 rounded-xl border ${cvrData.isActive ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800' : 'bg-destructive/10 border-destructive/30'}`}>
-                          <div className="flex items-center gap-2 mb-2">
-                            {cvrData.isActive ? (
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <XCircle className="w-4 h-4 text-destructive" />
-                            )}
-                            <span className={`text-sm font-semibold ${cvrData.isActive ? 'text-green-700 dark:text-green-400' : 'text-destructive'}`}>
-                              {cvrData.isActive ? 'Aktiv virksomhed' : 'Inaktiv virksomhed'}
-                            </span>
+                        {cvrData && (
+                          <div className={`text-sm p-3 rounded-lg ${cvrData.isActive ? 'bg-mint/10 text-mint border border-mint/30' : 'bg-destructive/10 text-destructive border border-destructive/30'}`}>
+                            <p className="font-medium">{cvrData.companyName}</p>
+                            <p className="text-xs opacity-80">{cvrData.isActive ? 'Aktiv virksomhed' : 'Inaktiv virksomhed - kan ikke registreres'}</p>
                           </div>
-                          
-                          <div className="space-y-1 text-xs">
-                            <div className="flex items-start gap-2">
-                              <Building2 className="w-3 h-3 text-muted-foreground mt-0.5" />
-                              <div>
-                                <p className="font-medium">{cvrData.companyName}</p>
-                                {cvrData.companyType && (
-                                  <p className="text-muted-foreground">{cvrData.companyType}</p>
-                                )}
-                              </div>
-                            </div>
-                            
-                            {(cvrData.address || cvrData.city) && (
-                              <div className="flex items-start gap-2">
-                                <MapPin className="w-3 h-3 text-muted-foreground mt-0.5" />
-                                <p>
-                                  {cvrData.address}
-                                  {cvrData.postalCode && cvrData.city && `, ${cvrData.postalCode} ${cvrData.city}`}
-                                </p>
-                              </div>
-                            )}
-                            
-                            {cvrData.industry && (
-                              <div className="flex items-start gap-2">
-                                <Briefcase className="w-3 h-3 text-muted-foreground mt-0.5" />
-                                <p>{cvrData.industry}</p>
-                              </div>
-                            )}
-                            
-                            {cvrData.startDate && (
-                              <div className="flex items-start gap-2">
-                                <Calendar className="w-3 h-3 text-muted-foreground mt-0.5" />
-                                <p>Stiftet: {cvrData.startDate}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="space-y-2">
-                        <Label htmlFor="company-name" className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-primary" />
-                          Firmanavn
-                        </Label>
-                        <Input
-                          id="company-name"
-                          type="text"
-                          value={companyName}
-                          onChange={(e) => setCompanyName(e.target.value)}
-                          placeholder="Dit firma ApS"
-                          className="rounded-xl"
-                          required
-                          disabled={cvrLoading}
-                        />
+                        )}
                       </div>
                     </>
                   )}
 
-                  {/* Terms acceptance checkbox */}
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border">
-                    <input
-                      type="checkbox"
-                      id="accept-terms"
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                    />
-                    <label htmlFor="accept-terms" className="text-sm text-muted-foreground cursor-pointer">
-                      Jeg accepterer LEJIOs{" "}
-                      <a href="/udlejervilkaar" target="_blank" className="text-primary hover:underline font-medium">
-                        Udlejervilkår
-                      </a>
-                      ,{" "}
-                      <a href="/handelsbetingelser" target="_blank" className="text-primary hover:underline font-medium">
-                        Handelsbetingelser
-                      </a>{" "}
-                      og{" "}
-                      <a href="/privatlivspolitik" target="_blank" className="text-primary hover:underline font-medium">
-                        Privatlivspolitik
-                      </a>
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border/50">
+                    <input type="checkbox" id="terms" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-1 w-4 h-4 rounded border-border bg-muted accent-primary" />
+                    <label htmlFor="terms" className="text-sm text-muted-foreground">
+                      Jeg accepterer{' '}
+                      <a href="/udlejervilkaar" target="_blank" className="text-primary hover:underline">udlejervilkårene</a>
+                      {' '}og{' '}
+                      <a href="/privatlivspolitik" target="_blank" className="text-primary hover:underline">privatlivspolitikken</a>
                     </label>
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    variant={userType === "privat" ? "warm" : "hero"}
-                    size="lg" 
-                    className="w-full"
-                    disabled={isSubmitting || !acceptedTerms || (userType === "professionel" && cvrData && !cvrData.isActive)}
-                  >
-                    {isSubmitting ? "Opretter konto..." : "Opret konto 🎉"}
+                  <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Opretter konto...</> : <>Opret konto <ArrowRight className="w-4 h-4" /></>}
                   </Button>
                 </form>
               )}
             </>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
