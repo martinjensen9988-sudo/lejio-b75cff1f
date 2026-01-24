@@ -9,8 +9,10 @@ import { AdminLoanRequests } from '@/components/admin/AdminLoanRequests';
 import { AdminCoverageShortfalls } from '@/components/admin/AdminCoverageShortfalls';
 import { AdminPartnerAlerts } from '@/components/admin/AdminPartnerAlerts';
 import { AdminFleetRiskOverview } from '@/components/admin/AdminFleetRiskOverview';
+import { AdminFleetFinance } from '@/components/admin/AdminFleetFinance';
+import { AdminRedZoneVehicles } from '@/components/admin/AdminRedZoneVehicles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, BarChart3, Settings, Wrench, Wallet, AlertTriangle } from 'lucide-react';
+import { Loader2, BarChart3, Settings, Wrench, Wallet, AlertTriangle, TrendingDown, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminFleetPage = () => {
@@ -61,22 +63,26 @@ const AdminFleetPage = () => {
         <p className="text-muted-foreground mb-6">Oversigt over alle fleet-kunder og deres køretøjer</p>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap h-auto gap-1">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="management" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Administration
+            <TabsTrigger value="finance" className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4" />
+              Finans & Lån
+            </TabsTrigger>
+            <TabsTrigger value="redzone" className="flex items-center gap-2">
+              <TrendingDown className="w-4 h-4" />
+              Rød Zone
             </TabsTrigger>
             <TabsTrigger value="service" className="flex items-center gap-2">
               <Wrench className="w-4 h-4" />
               Servicekø
             </TabsTrigger>
-            <TabsTrigger value="loans" className="flex items-center gap-2">
-              <Wallet className="w-4 h-4" />
-              Lån
+            <TabsTrigger value="management" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Administration
             </TabsTrigger>
             <TabsTrigger value="alerts" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
@@ -88,20 +94,25 @@ const AdminFleetPage = () => {
             <AdminFleetPremiumDashboard />
           </TabsContent>
 
-          <TabsContent value="management">
-            <AdminFleetManagement />
+          <TabsContent value="finance">
+            <div className="space-y-6">
+              <AdminFleetRiskOverview />
+              <AdminFleetFinance />
+              <AdminLoanRequests />
+              <AdminCoverageShortfalls />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="redzone">
+            <AdminRedZoneVehicles />
           </TabsContent>
 
           <TabsContent value="service">
             <AdminServiceQueue fleetVehicles={fleetVehicles} />
           </TabsContent>
 
-          <TabsContent value="loans">
-            <div className="space-y-6">
-              <AdminFleetRiskOverview />
-              <AdminLoanRequests />
-              <AdminCoverageShortfalls />
-            </div>
+          <TabsContent value="management">
+            <AdminFleetManagement />
           </TabsContent>
 
           <TabsContent value="alerts">

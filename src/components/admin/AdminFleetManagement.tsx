@@ -48,7 +48,7 @@ import {
   Truck, Search, MoreHorizontal, Plus, 
   Loader2, CheckCircle, DollarSign, TrendingUp,
   Building2, Calendar, Car, UserPlus, Trash2, Pencil,
-  ClipboardList, XCircle, Clock, Eye
+  ClipboardList, XCircle, Clock, Eye, FileText
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -438,6 +438,38 @@ const AdminFleetManagement = () => {
     } else {
       toast.success('Opgørelse markeret som betalt');
       fetchData();
+    }
+  };
+
+  const handleGenerateSettlementPDF = async (settlement: FleetSettlement) => {
+    try {
+      toast.loading('Genererer opgørelse...', { id: 'settlement-pdf' });
+      
+      const settlementMonth = new Date(settlement.settlement_month);
+      const { data, error } = await supabase.functions.invoke('generate-settlement-pdf', {
+        body: {
+          lessor_id: settlement.lessor_id,
+          month: String(settlementMonth.getMonth() + 1).padStart(2, '0'),
+          year: settlementMonth.getFullYear(),
+        }
+      });
+
+      if (error) throw error;
+
+      // Open HTML in new tab for printing
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(data.html);
+        printWindow.document.close();
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+
+      toast.success('Opgørelse genereret!', { id: 'settlement-pdf' });
+    } catch (error) {
+      console.error('Error generating settlement PDF:', error);
+      toast.error('Kunne ikke generere opgørelse', { id: 'settlement-pdf' });
     }
   };
 
@@ -1059,16 +1091,26 @@ const AdminFleetManagement = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {settlement.status !== 'paid' && (
+                        <div className="flex items-center gap-2">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={() => handleMarkAsPaid(settlement.id)}
+                            onClick={() => handleGenerateSettlementPDF(settlement)}
                           >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Marker betalt
+                            <FileText className="w-4 h-4 mr-1" />
+                            PDF
                           </Button>
-                        )}
+                          {settlement.status !== 'paid' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMarkAsPaid(settlement.id)}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Marker betalt
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
