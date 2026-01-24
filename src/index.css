@@ -20,7 +20,7 @@
     /* ===== TITANIUM MID - Balanced Design (Half Dark) ===== */
 
     /* Core backgrounds - Medium slate */
-    --background: 220 25% 12%;
+    --background: 215 25% 26.6667%;
     --foreground: 210 25% 96%;
 
     /* Cards - Slightly elevated surfaces */
@@ -28,7 +28,7 @@
     --card-foreground: 210 25% 96%;
 
     /* Popovers & Dropdowns */
-    --popover: 220 20% 18%;
+    --popover: 215 20.2247% 65.098%;
     --popover-foreground: 210 25% 96%;
 
     /* Primary - Electric Blue (Tech/Innovation) */
@@ -40,11 +40,11 @@
     --secondary-foreground: 210 25% 95%;
 
     /* Muted - Softer mid-tones */
-    --muted: 220 18% 22%;
+    --muted: 215 25% 26.6667%;
     --muted-foreground: 215 20% 65%;
 
     /* Accent - Warm copper/bronze */
-    --accent: 215 25% 26.6667%;
+    --accent: 25 85% 58%;
     --accent-foreground: 25 10% 98%;
 
     /* Mint/Success - Softer cyan */
@@ -60,7 +60,7 @@
     --destructive-foreground: 0 85% 97%;
 
     /* Borders & Inputs - More visible */
-    --border: 220 18% 25%;
+    --border: 215 20.2247% 65.098%;
     --input: 220 18% 22%;
     --ring: 210 100% 55%;
 
@@ -108,11 +108,11 @@
     --sidebar: 220 20% 8%;
 
     /* ===== CHARTS ===== */
-    --chart-1: 210 40% 98.0392%;
-    --chart-2: 210 40% 98.0392%;
-    --chart-3: 210 40% 98.0392%;
-    --chart-4: 210 40% 98.0392%;
-    --chart-5: 210 40% 98.0392%;
+    --chart-1: 210 100% 50%;
+    --chart-2: 180 100% 45%;
+    --chart-3: 25 80% 55%;
+    --chart-4: 262 60% 65%;
+    --chart-5: 220 15% 40%;
     --font-serif: "Crimson Text", ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
     --tracking-normal: 0em;
     --spacing: 0.25rem;
