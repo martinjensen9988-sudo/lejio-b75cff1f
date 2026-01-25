@@ -286,10 +286,11 @@ Forhandler ønsker at blive kontaktet (Hurtig kontakt):
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-mint/20 flex items-center justify-center">
               <CheckCircle2 className="w-10 h-10 text-mint" />
             </div>
-            <h1 className="text-3xl font-bold mb-4">Tak for din henvendelse!</h1>
+            <h1 className="text-3xl font-bold mb-4">Tak for din ansøgning!</h1>
             <p className="text-muted-foreground mb-8">
-              Vi har modtaget dine oplysninger og kontakter dig inden for 1-2 hverdage 
-              for at tale om den bedste løsning til din forretning.
+              Vi har modtaget dine oplysninger og gennemgår din ansøgning. 
+              Du hører fra os inden for 1-2 hverdage, hvor vi kontakter dig 
+              for at færdiggøre din partneroprettelse.
             </p>
             <Button onClick={() => navigate("/")} size="lg">
               Tilbage til forsiden
@@ -311,14 +312,20 @@ Forhandler ønsker at blive kontaktet (Hurtig kontakt):
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4 px-4 py-2 border-primary/30 bg-primary/5">
               <Building2 className="w-4 h-4 mr-2 text-primary" />
-              Forhandler-registrering
+              Forhandler-ansøgning
             </Badge>
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              Bliv partner hos LEJIO
+              Ansøg om partnerskab hos LEJIO
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Digitaliser din udlejningsforretning med automatiske kontrakter, 
-              check-in/out og fuld skadesdokumentation.
+              Som forhandler gennemgår vi din ansøgning og kontakter dig inden for 1-2 hverdage 
+              for at oprette dit partnerskab.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Er du privat udlejer?{" "}
+              <a href="/auth" className="text-primary font-semibold hover:underline">
+                Opret konto direkte her →
+              </a>
             </p>
           </div>
 

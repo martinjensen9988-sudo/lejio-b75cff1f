@@ -323,7 +323,7 @@ const Auth = () => {
 
                     <button
                       type="button"
-                      onClick={() => { setUserType("professionel"); setSignupStep("credentials"); }}
+                      onClick={() => navigate("/forhandler-opret")}
                       className="p-6 rounded-2xl glass border border-primary/30 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/60 hover:shadow-lg"
                     >
                       <div className="flex items-start gap-4">
@@ -334,8 +334,8 @@ const Auth = () => {
                           <h3 className="font-bold text-lg text-foreground">Forhandler</h3>
                           <p className="text-sm text-muted-foreground mt-1">Jeg har et CVR-nummer og driver en udlejningsforretning.</p>
                           <div className="flex items-center gap-2 mt-3 text-xs text-primary font-medium">
-                            <Check className="w-4 h-4" />
-                            <span>Egen betalingsløsning • 299 kr/md</span>
+                            <ArrowRight className="w-4 h-4" />
+                            <span>Ansøg om partnerskab</span>
                           </div>
                         </div>
                       </div>
