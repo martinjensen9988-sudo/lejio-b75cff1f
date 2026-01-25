@@ -199,8 +199,8 @@ const Forhandler = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="text-lg px-8" onClick={() => navigate("/auth")}>
-                  Opret gratis konto
+                <Button size="lg" className="text-lg px-8" onClick={() => navigate("/forhandler-opret")}>
+                  Bliv partner
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 <Button size="lg" variant="outline" className="text-lg px-8" onClick={() => navigate("/kontakt")}>
