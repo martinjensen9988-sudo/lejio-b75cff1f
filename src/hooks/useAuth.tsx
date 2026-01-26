@@ -20,6 +20,7 @@ interface Profile {
   insurance_policy_number: string | null;
   trial_ends_at: string | null;
   subscription_status: string;
+  feature_flags?: Record<string, boolean>;
 }
 
 export interface PaymentSettings {
