@@ -39,6 +39,7 @@ const ConditionalLiveChat = () => {
 // Critical path - loaded immediately for homepage
 import Index from "./pages/Index";
 import GlobalPage from "./pages/GlobalPage";
+import DealerProfile from "./pages/DealerProfile";
 const AdminGlobalPages = lazy(() => import("./pages/admin/GlobalPages"));
 import NotFound from "./pages/NotFound";
 const Search = lazy(() => import("./pages/Search"));
