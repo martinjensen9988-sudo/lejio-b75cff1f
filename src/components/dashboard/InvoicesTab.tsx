@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useAuth } from '@/hooks/useAuth';
+import { useDunningManagement } from '@/hooks/useDunningManagement';
+import { useSubscriptionBilling } from '@/hooks/useSubscriptionBilling';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PaymentReminder } from '@/components/invoices/PaymentReminder';
+import { SubscriptionManager } from '@/components/invoices/SubscriptionManager';
 import { 
   FileText, 
   Download, 
@@ -37,7 +41,9 @@ import {
   Clock,
   AlertTriangle,
   Plus,
-  Car
+  Car,
+  Bell,
+  TrendingUp
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -388,92 +394,154 @@ const InvoicesTab = () => {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{invoices.length}</p>
-                <p className="text-sm text-muted-foreground">Total</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{unpaidInvoices.length}</p>
-                <p className="text-sm text-muted-foreground">Afventer</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{paidInvoices.length}</p>
-                <p className="text-sm text-muted-foreground">Betalt</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-destructive" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{overdueInvoices.length}</p>
-                <p className="text-sm text-muted-foreground">Forfaldne</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Invoice Tabs */}
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">Alle ({invoices.length})</TabsTrigger>
-          <TabsTrigger value="unpaid">Afventer ({unpaidInvoices.length})</TabsTrigger>
-          <TabsTrigger value="paid">Betalt ({paidInvoices.length})</TabsTrigger>
-          {overdueInvoices.length > 0 && (
-            <TabsTrigger value="overdue" className="text-destructive">
-              Forfaldne ({overdueInvoices.length})
-            </TabsTrigger>
-          )}
+      <Tabs defaultValue="invoices" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="invoices">Fakturaer</TabsTrigger>
+          <TabsTrigger value="dunning">Påmindelser</TabsTrigger>
+          <TabsTrigger value="subscriptions">Abonnementer</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="all">
-          <InvoiceTable invoiceList={invoices} />
+        {/* Invoices Tab */}
+        <TabsContent value="invoices" className="space-y-4">
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{invoices.length}</p>
+                    <p className="text-sm text-muted-foreground">Total</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{unpaidInvoices.length}</p>
+                    <p className="text-sm text-muted-foreground">Afventer</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{paidInvoices.length}</p>
+                    <p className="text-sm text-muted-foreground">Betalt</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{overdueInvoices.length}</p>
+                    <p className="text-sm text-muted-foreground">Forfaldne</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Invoice Tabs */}
+          <Tabs defaultValue="all" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="all">Alle ({invoices.length})</TabsTrigger>
+              <TabsTrigger value="unpaid">Afventer ({unpaidInvoices.length})</TabsTrigger>
+              <TabsTrigger value="paid">Betalt ({paidInvoices.length})</TabsTrigger>
+              {overdueInvoices.length > 0 && (
+                <TabsTrigger value="overdue" className="text-destructive">
+                  Forfaldne ({overdueInvoices.length})
+                </TabsTrigger>
+              )}
+            </TabsList>
+
+            <TabsContent value="all">
+              <InvoiceTable invoiceList={invoices} />
+            </TabsContent>
+            
+            <TabsContent value="unpaid">
+              <InvoiceTable invoiceList={unpaidInvoices} />
+            </TabsContent>
+            
+            <TabsContent value="paid">
+              <InvoiceTable invoiceList={paidInvoices} showActions={false} />
+            </TabsContent>
+            
+            <TabsContent value="overdue">
+              <InvoiceTable invoiceList={overdueInvoices} />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
-        
-        <TabsContent value="unpaid">
-          <InvoiceTable invoiceList={unpaidInvoices} />
+
+        {/* Dunning/Reminders Tab */}
+        <TabsContent value="dunning">
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="w-5 h-5" />
+                  Betalingspåmindelser
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Administrer automatiske betalingspåmindelser og dunning-sekvenser
+                </p>
+                {unpaidInvoices.length > 0 ? (
+                  <div className="space-y-3">
+                    {unpaidInvoices.map((invoice) => (
+                      <PaymentReminder
+                        key={invoice.id}
+                        invoiceId={invoice.id}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Ingen ventende fakturaer</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
-        
-        <TabsContent value="paid">
-          <InvoiceTable invoiceList={paidInvoices} showActions={false} />
-        </TabsContent>
-        
-        <TabsContent value="overdue">
-          <InvoiceTable invoiceList={overdueInvoices} />
+
+        {/* Subscriptions Tab */}
+        <TabsContent value="subscriptions">
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Tilbagevendende Leasinger
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SubscriptionManager renterId={user?.id} vehicleId="" />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
