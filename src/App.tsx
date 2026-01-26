@@ -129,7 +129,7 @@ const AdminCheckInOutPage = lazy(() => import("./pages/admin/CheckInOut"));
 const AdminCorporatePage = lazy(() => import("./pages/admin/Corporate"));
 const AdminFacebookPage = lazy(() => import("./pages/admin/Facebook"));
 const AdminStatsPage = lazy(() => import("./pages/admin/Stats"));
-const AdminSalesAIPage = lazy(() => import("./pages/admin/SalesAI"));
+// AdminSalesAIPage removed - functionality merged into CRM
 const SalesAIAddLeadPage = lazy(() => import("./pages/admin/SalesAIAddLead"));
 const SalesAIImportPage = lazy(() => import("./pages/admin/SalesAIImport"));
 const SalesAIEmailPage = lazy(() => import("./pages/admin/SalesAIEmail"));
@@ -254,7 +254,7 @@ const App = () => (
               <Route path="/admin/corporate" element={<AdminAuthProvider><AdminCorporatePage /></AdminAuthProvider>} />
               <Route path="/admin/facebook" element={<AdminAuthProvider><AdminFacebookPage /></AdminAuthProvider>} />
               <Route path="/admin/api-keys" element={<AdminAuthProvider><AdminApiKeysPage /></AdminAuthProvider>} />
-              <Route path="/admin/sales-ai" element={<AdminAuthProvider><AdminSalesAIPage /></AdminAuthProvider>} />
+              <Route path="/admin/sales-ai" element={<Navigate to="/admin/crm" replace />} />
               <Route path="/admin/sales-ai/add" element={<AdminAuthProvider><SalesAIAddLeadPage /></AdminAuthProvider>} />
               <Route path="/admin/sales-ai/import" element={<AdminAuthProvider><SalesAIImportPage /></AdminAuthProvider>} />
               <Route path="/admin/sales-ai/email/:id" element={<AdminAuthProvider><SalesAIEmailPage /></AdminAuthProvider>} />

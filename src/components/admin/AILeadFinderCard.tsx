@@ -214,7 +214,7 @@ export function AILeadFinderCard({ existingLeads, onSearchClick }: AILeadFinderC
               </Button>
               <Button 
                 className="flex-1"
-                onClick={() => navigate('/admin/sales-ai')}
+                onClick={() => navigate('/admin/crm')}
               >
                 Se alle leads
                 <ArrowRight className="w-4 h-4 ml-2" />

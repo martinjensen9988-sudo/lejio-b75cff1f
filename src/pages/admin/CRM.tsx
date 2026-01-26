@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ import { AdminDashboardLayout } from '@/components/admin/AdminDashboardLayout';
 import { AdminCRMPipeline } from '@/components/admin/AdminCRMPipeline';
 import { AdminCRMTable } from '@/components/admin/AdminCRMTable';
 import { CRMEmailDialog, CRMCallDialog, CRMCallHistoryDialog } from '@/components/admin/CRMCommunicationDialogs';
+import { AILeadFinderCard } from '@/components/admin/AILeadFinderCard';
 import { useCRM, CRMDeal, CRMTask, CRMActivity, CRM_STAGES, ACTIVITY_TYPES, TASK_PRIORITIES } from '@/hooks/useCRM';
 import { useSalesLeads, SalesLead } from '@/hooks/useSalesLeads';
 import { useCRMCommunication } from '@/hooks/useCRMCommunication';
@@ -46,10 +48,40 @@ import {
   FileText,
   Loader2,
   ArrowRight,
-  PhoneCall
+  PhoneCall,
+  Search,
+  Upload,
+  Sparkles,
+  Trash2,
+  Brain,
+  Building2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
+
+const statusColors: Record<string, string> = {
+  new: 'bg-blue-100 text-blue-800',
+  contacted: 'bg-yellow-100 text-yellow-800',
+  interested: 'bg-green-100 text-green-800',
+  not_interested: 'bg-red-100 text-red-800',
+  converted: 'bg-purple-100 text-purple-800',
+};
+
+const statusLabels: Record<string, string> = {
+  new: 'Ny',
+  contacted: 'Kontaktet',
+  interested: 'Interesseret',
+  not_interested: 'Ikke interesseret',
+  converted: 'Konverteret',
+};
+
+const sourceLabels: Record<string, string> = {
+  manual: 'Manuel',
+  cvr: 'CVR-opslag',
+  cvr_search: 'CVR-søgning',
+  facebook: 'Facebook',
+  csv: 'CSV-import',
+};
 
 const AdminCRMPage = () => {
   const navigate = useNavigate();
@@ -73,7 +105,7 @@ const AdminCRMPage = () => {
     getStats,
   } = useCRM();
   
-  const { leads, fetchLeads } = useSalesLeads();
+  const { leads, fetchLeads, updateLead, deleteLead, isLoading: leadsLoading } = useSalesLeads();
 
   const [viewMode, setViewMode] = useState<'pipeline' | 'table'>('pipeline');
   const [showNewDealDialog, setShowNewDealDialog] = useState(false);
@@ -88,6 +120,10 @@ const AdminCRMPage = () => {
   const [selectedLead, setSelectedLead] = useState<SalesLead | null>(null);
   const [communicationDeal, setCommunicationDeal] = useState<CRMDeal | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Lead search & filter
+  const [leadSearchTerm, setLeadSearchTerm] = useState('');
+  const [leadStatusFilter, setLeadStatusFilter] = useState<string>('all');
 
   const { isCallingInProgress } = useCRMCommunication();
 
@@ -230,6 +266,22 @@ const AdminCRMPage = () => {
   const unconvertedLeads = leads.filter(lead => 
     !deals.some(deal => deal.lead_id === lead.id)
   );
+  
+  // Filtered leads based on search and status
+  const filteredLeads = leads.filter(lead => {
+    const matchesSearch = 
+      lead.company_name.toLowerCase().includes(leadSearchTerm.toLowerCase()) ||
+      lead.contact_name?.toLowerCase().includes(leadSearchTerm.toLowerCase()) ||
+      lead.cvr_number?.includes(leadSearchTerm);
+    
+    const matchesStatus = leadStatusFilter === 'all' || lead.status === leadStatusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleAISearchClick = (query: string, location?: string) => {
+    navigate(`/admin/sales-ai/company-search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location || '')}`);
+  };
 
   if (isLoading) {
     return (
@@ -247,17 +299,24 @@ const AdminCRMPage = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold">CRM</h2>
-            <p className="text-muted-foreground">Administrer deals, aktiviteter og opgaver</p>
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Brain className="w-7 h-7 text-primary" />
+              Salg & CRM
+            </h2>
+            <p className="text-muted-foreground">AI-drevet lead-finding, deals og aktiviteter</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setShowCallHistoryDialog(true)}>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/sales-ai/company-search')}>
+              <Search className="w-4 h-4 mr-2" />
+              Find firmaer
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/sales-ai/car-ad')}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Bilannonce AI
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowCallHistoryDialog(true)}>
               <PhoneCall className="w-4 h-4 mr-2" />
               Opkaldslog
-            </Button>
-            <Button variant="outline" onClick={() => setShowConvertLeadDialog(true)}>
-              <ArrowRight className="w-4 h-4 mr-2" />
-              Konverter lead
             </Button>
             <Button onClick={() => {
               setNewDeal({ stage: 'new', value: 0, probability: 10 });
@@ -338,8 +397,9 @@ const AdminCRMPage = () => {
         <Tabs defaultValue="deals" className="space-y-4">
           <TabsList>
             <TabsTrigger value="deals">Deals</TabsTrigger>
+            <TabsTrigger value="leads">Leads ({leads.length})</TabsTrigger>
+            <TabsTrigger value="ai-finder">AI Lead Finder</TabsTrigger>
             <TabsTrigger value="tasks">Opgaver</TabsTrigger>
-            <TabsTrigger value="leads">Leads ({unconvertedLeads.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="deals" className="space-y-4">
@@ -464,62 +524,178 @@ const AdminCRMPage = () => {
           </TabsContent>
 
           <TabsContent value="leads" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Ukonverterede leads</h3>
-              <Button size="sm" onClick={() => navigate('/admin/sales-ai')}>
-                Gå til Sales AI
-              </Button>
-            </div>
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <CardTitle className="text-lg">Alle Leads</CardTitle>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button variant="outline" size="sm" onClick={() => navigate('/admin/sales-ai/import')}>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Import
+                    </Button>
+                    <Button size="sm" onClick={() => navigate('/admin/sales-ai/add')}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Tilføj lead
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="relative flex-1 max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      value={leadSearchTerm}
+                      onChange={(e) => setLeadSearchTerm(e.target.value)}
+                      placeholder="Søg i leads..."
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={leadStatusFilter} onValueChange={setLeadStatusFilter}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle</SelectItem>
+                      <SelectItem value="new">Nye</SelectItem>
+                      <SelectItem value="contacted">Kontaktet</SelectItem>
+                      <SelectItem value="interested">Interesseret</SelectItem>
+                      <SelectItem value="not_interested">Ikke interesseret</SelectItem>
+                      <SelectItem value="converted">Konverteret</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Badge variant="secondary">{filteredLeads.length} leads</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {leadsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : filteredLeads.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Ingen leads fundet</p>
+                    <p className="text-sm">Tilføj leads manuelt, via CVR-opslag, eller importer fra fil</p>
+                    <div className="flex gap-2 justify-center mt-4">
+                      <Button variant="outline" onClick={() => navigate('/admin/sales-ai/import')}>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Importer
+                      </Button>
+                      <Button onClick={() => navigate('/admin/sales-ai/add')}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Tilføj lead
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Virksomhed</TableHead>
+                        <TableHead>Kontakt</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Kilde</TableHead>
+                        <TableHead>Tilføjet</TableHead>
+                        <TableHead className="text-right">Handlinger</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredLeads.map((lead) => (
+                        <TableRow key={lead.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{lead.company_name}</p>
+                              {lead.cvr_number && (
+                                <p className="text-sm text-muted-foreground">CVR: {lead.cvr_number}</p>
+                              )}
+                              {lead.city && (
+                                <p className="text-sm text-muted-foreground">{lead.city}</p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {lead.contact_name && <p>{lead.contact_name}</p>}
+                              {lead.contact_email && (
+                                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Mail className="w-3 h-3" /> {lead.contact_email}
+                                </p>
+                              )}
+                              {lead.contact_phone && (
+                                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Phone className="w-3 h-3" /> {lead.contact_phone}
+                                </p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={lead.status}
+                              onValueChange={(value) => updateLead(lead.id, { status: value })}
+                            >
+                              <SelectTrigger className="w-32">
+                                <Badge className={statusColors[lead.status]}>
+                                  {statusLabels[lead.status]}
+                                </Badge>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.entries(statusLabels).map(([value, label]) => (
+                                  <SelectItem key={value} value={value}>
+                                    {label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{sourceLabels[lead.source] || lead.source}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {format(new Date(lead.created_at), 'd. MMM yyyy', { locale: da })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => navigate(`/admin/sales-ai/outreach/${lead.id}`)}
+                              >
+                                <Phone className="w-4 h-4 mr-1" />
+                                Outreach
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedLead(lead);
+                                  setShowConvertLeadDialog(true);
+                                }}
+                              >
+                                <ArrowRight className="w-4 h-4 mr-1" />
+                                Til deal
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteLead(lead.id)}
+                              >
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            {unconvertedLeads.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Alle leads er konverteret til deals
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {unconvertedLeads.slice(0, 12).map(lead => (
-                  <Card key={lead.id}>
-                    <CardContent className="pt-4">
-                      <h4 className="font-medium">{lead.company_name}</h4>
-                      {lead.contact_name && (
-                        <p className="text-sm text-muted-foreground">{lead.contact_name}</p>
-                      )}
-                      {lead.industry && (
-                        <Badge variant="secondary" className="mt-2 text-xs">
-                          {lead.industry}
-                        </Badge>
-                      )}
-                      <div className="flex items-center gap-2 mt-3">
-                        {lead.contact_phone && (
-                          <a href={`tel:${lead.contact_phone}`} className="text-muted-foreground hover:text-primary">
-                            <Phone className="w-4 h-4" />
-                          </a>
-                        )}
-                        {lead.contact_email && (
-                          <a href={`mailto:${lead.contact_email}`} className="text-muted-foreground hover:text-primary">
-                            <Mail className="w-4 h-4" />
-                          </a>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-auto"
-                          onClick={() => {
-                            setSelectedLead(lead);
-                            setShowConvertLeadDialog(true);
-                          }}
-                        >
-                          <ArrowRight className="w-3 h-3 mr-1" />
-                          Konverter
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+          <TabsContent value="ai-finder" className="space-y-4">
+            <AILeadFinderCard 
+              existingLeads={leads} 
+              onSearchClick={handleAISearchClick}
+            />
           </TabsContent>
         </Tabs>
       </div>
