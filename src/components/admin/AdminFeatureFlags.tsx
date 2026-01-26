@@ -188,6 +188,41 @@ export const AdminFeatureFlags = () => {
       </CardHeader>
       <CardContent>
         {/* Show each customer as a section, with modules as cards/grids like /funktioner */}
+        {/* Show all modules/features by default, only show customer features after selection */}
+        <div className="mb-8">
+          <div className="font-bold text-lg mb-1">Admin oversigt</div>
+          <div className="text-sm text-muted-foreground mb-4">Her ser du alle moduler og features. Vælg en kunde for at redigere deres features.</div>
+          <div className="space-y-10">
+            {featureCategories.map((category, idx) => {
+              const CategoryIcon = category.icon;
+              return (
+                <div key={category.id} className="">
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md`}>
+                      {CategoryIcon && <CategoryIcon className="w-6 h-6 text-white" />}
+                    </div>
+                    <h2 className="font-display text-xl font-bold">{category.title}</h2>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${tierColors[category.tier]}`}>{category.tier.charAt(0).toUpperCase() + category.tier.slice(1)}</span>
+                  </div>
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+                    {FEATURES.filter(f => f.key && PACKAGE_FEATURES[category.tier].includes(category.id)).map(feature => {
+                      const isStandard = STANDARD_FEATURES.includes(feature.key);
+                      return (
+                        <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tierColors[category.tier]}`}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm">{feature.label}</span>
+                            {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {/* Customer selection and feature editing */}
         {customers
           .filter(customer => {
             const q = search.toLowerCase();
