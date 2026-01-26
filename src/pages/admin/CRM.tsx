@@ -28,9 +28,19 @@ import { AdminCRMPipeline } from '@/components/admin/AdminCRMPipeline';
 import { AdminCRMTable } from '@/components/admin/AdminCRMTable';
 import { CRMEmailDialog, CRMCallDialog, CRMCallHistoryDialog } from '@/components/admin/CRMCommunicationDialogs';
 import { AILeadFinderCard } from '@/components/admin/AILeadFinderCard';
+import { CRMDashboardWidget } from '@/components/admin/CRMDashboardWidget';
+import { CRMBulkActions } from '@/components/admin/CRMBulkActions';
+import { DealTimeline } from '@/components/admin/DealTimeline';
+import { CRMAnalytics } from '@/components/admin/CRMAnalytics';
+import { TeamCollaboration } from '@/components/admin/TeamCollaboration';
 import { useCRM, CRMDeal, CRMTask, CRMActivity, CRM_STAGES, ACTIVITY_TYPES, TASK_PRIORITIES } from '@/hooks/useCRM';
 import { useSalesLeads, SalesLead } from '@/hooks/useSalesLeads';
 import { useCRMCommunication } from '@/hooks/useCRMCommunication';
+import { useLeadDeduplication } from '@/hooks/useLeadDeduplication';
+import { useSavedSearches, applyFilters } from '@/hooks/useSavedSearches';
+import { useEmailCampaigns } from '@/hooks/useEmailCampaigns';
+import { useCalendarIntegration } from '@/hooks/useCalendarIntegration';
+import { calculateLeadScore } from '@/components/admin/CRMDashboardWidget';
 import { 
   Plus, 
   Kanban, 
@@ -125,7 +135,20 @@ const AdminCRMPage = () => {
   const [leadSearchTerm, setLeadSearchTerm] = useState('');
   const [leadStatusFilter, setLeadStatusFilter] = useState<string>('all');
 
+  // New features state
+  const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [showCollaboration, setShowCollaboration] = useState(false);
+
   const { isCallingInProgress } = useCRMCommunication();
+
+  // Initialize new feature hooks
+  const { findDuplicates, mergeLeads } = useLeadDeduplication();
+  const { savedSearches, fetchSavedSearches, saveSearch, deleteSearch, getQuickFilter } = useSavedSearches();
+  const { campaigns, fetchCampaigns, sendCampaign, getCampaignStats } = useEmailCampaigns();
+  const { connectGoogleCalendar, syncDealReminder } = useCalendarIntegration();
 
   // Form states
   const [newDeal, setNewDeal] = useState<Partial<CRMDeal>>({
@@ -145,7 +168,9 @@ const AdminCRMPage = () => {
     fetchDeals();
     fetchLeads();
     fetchTasks();
-  }, [fetchDeals, fetchLeads, fetchTasks]);
+    fetchSavedSearches();
+    fetchCampaigns();
+  }, [fetchDeals, fetchLeads, fetchTasks, fetchSavedSearches, fetchCampaigns]);
 
   useEffect(() => {
     if (selectedDeal) {
@@ -172,6 +197,70 @@ const AdminCRMPage = () => {
       setShowNewDealDialog(false);
       setNewDeal({ stage: 'new', value: 0, probability: 10 });
     }
+  };
+
+  // Bulk action handlers
+  const handleBulkStatusChange = async (status: string) => {
+    setBulkActionLoading(true);
+    try {
+      const leadIds = Array.from(selectedLeads);
+      for (const leadId of leadIds) {
+        await updateLead(leadId, { status });
+      }
+      setSelectedLeads(new Set());
+      await fetchLeads();
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setBulkActionLoading(true);
+    try {
+      const leadIds = Array.from(selectedLeads);
+      for (const leadId of leadIds) {
+        await deleteLead(leadId);
+      }
+      setSelectedLeads(new Set());
+      await fetchLeads();
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleExportLeads = () => {
+    const leadIds = Array.from(selectedLeads);
+    const leadsToExport = leads.filter(l => leadIds.includes(l.id));
+    
+    const csv = [
+      ['Firmanavn', 'CVR', 'Kontakt', 'Email', 'Telefon', 'Status', 'Kilde'].join(','),
+      ...leadsToExport.map(l => [
+        l.company_name,
+        l.cvr_number || '',
+        l.contact_name || '',
+        l.contact_email || '',
+        l.contact_phone || '',
+        l.status,
+        l.source,
+      ].map(v => `"${v}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lejio-leads-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
+  const handleSelectLead = (leadId: string) => {
+    const newSelected = new Set(selectedLeads);
+    if (newSelected.has(leadId)) {
+      newSelected.delete(leadId);
+    } else {
+      newSelected.add(leadId);
+    }
+    setSelectedLeads(newSelected);
   };
 
   const handleUpdateStage = async (dealId: string, stage: string) => {
@@ -327,6 +416,48 @@ const AdminCRMPage = () => {
             </Button>
           </div>
         </div>
+
+        {/* New Dashboard Widget - Feature 1 & 2 */}
+        <CRMDashboardWidget leads={leads} deals={deals} />
+
+        {/* Analytics Toggle Buttons */}
+        <div className="flex gap-2 flex-wrap">
+          <Button 
+            variant={showAnalytics ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setShowAnalytics(!showAnalytics)}
+          >
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Analytics
+          </Button>
+          <Button 
+            variant={showTimeline ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setShowTimeline(!showTimeline)}
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Timeline
+          </Button>
+        </div>
+
+        {/* Analytics Section - Feature 10 */}
+        {showAnalytics && (
+          <CRMAnalytics leads={leads} deals={deals} />
+        )}
+
+        {/* Timeline Section - Feature 7 */}
+        {showTimeline && (
+          <DealTimeline deals={deals} />
+        )}
+
+        {/* Bulk Actions - Feature 3 */}
+        <CRMBulkActions
+          selectedLeads={leads.filter(l => selectedLeads.has(l.id))}
+          onStatusChange={handleBulkStatusChange}
+          onDelete={handleBulkDelete}
+          onExport={handleExportLeads}
+          isLoading={bulkActionLoading}
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -914,10 +1045,11 @@ const AdminCRMPage = () => {
               </DialogHeader>
 
               <Tabs defaultValue="overview" className="mt-4">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="overview">Overblik</TabsTrigger>
                   <TabsTrigger value="activities">Aktiviteter</TabsTrigger>
                   <TabsTrigger value="tasks">Opgaver</TabsTrigger>
+                  <TabsTrigger value="collaboration">Team</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-4 mt-4">
@@ -1064,6 +1196,13 @@ const AdminCRMPage = () => {
                   )}
                 </TabsContent>
               </Tabs>
+
+              {/* Team Collaboration - Feature 9 */}
+              {selectedDeal && (
+                <div className="mt-4">
+                  <TeamCollaboration dealId={selectedDeal.id} />
+                </div>
+              )}
 
               <DialogFooter className="mt-6">
                 <Button variant="outline" onClick={() => handleEditDeal(selectedDeal)}>

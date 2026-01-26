@@ -41,163 +41,265 @@ import {
   Globe,
   Zap,
   TrendingDown,
-  ArrowRight
+  ArrowRight,
+  Play,
+  Check,
+  Lock
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
 
 const Features = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedFeatures, setSelectedFeatures] = useState<Set<string>>(new Set());
 
   const featureCategories = [
     {
       title: "Booking & Kalender",
+      id: "booking",
       icon: Calendar,
       color: "from-primary to-primary/60",
+      tier: "starter",
       features: [
-        { title: "Smart Booking-kalender", description: "Visuel oversigt over alle dine bookinger med drag-and-drop funktionalitet.", icon: Calendar },
-        { title: "Automatisk tilgængelighed", description: "Systemet blokerer automatisk datoer ved nye bookinger.", icon: Clock },
-        { title: "Abonnementsudlejning", description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.", icon: Repeat },
-        { title: "AI-prissætning", description: "Få intelligente prisforslag baseret på marked, sæson og efterspørgsel.", icon: Brain, badge: "Ny" },
-        { title: "Sæsonpriser", description: "Indstil forskellige priser for høj- og lavsæson automatisk.", icon: CalendarClock, badge: "Ny" },
+        { title: "Smart Booking-kalender", description: "Visuel oversigt over alle dine bookinger med drag-and-drop funktionalitet.", icon: Calendar, status: "Fuldt implementeret" },
+        { title: "Automatisk tilgængelighed", description: "Systemet blokerer automatisk datoer ved nye bookinger.", icon: Clock, status: "Fuldt implementeret" },
+        { title: "Abonnementsudlejning", description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.", icon: Repeat, status: "Beta", demoUrl: "https://yourdomain.com/demo/subscription" },
+        { title: "AI-prissætning", description: "Få intelligente prisforslag baseret på marked, sæson og efterspørgsel.", icon: Brain, badge: "Ny", status: "Planlagt", tier: "pro" },
+        { title: "Sæsonpriser", description: "Indstil forskellige priser for høj- og lavsæson automatisk.", icon: CalendarClock, badge: "Ny", status: "Fuldt implementeret", tier: "pro" },
       ],
     },
     {
       title: "Lokationer & Afdelinger",
+      id: "locations",
       icon: Store,
       color: "from-emerald-500 to-emerald-500/60",
+      tier: "pro",
       features: [
-        { title: "Multi-lokation support", description: "Administrer flere udlejningslokationer fra ét dashboard.", icon: Store, badge: "Ny" },
-        { title: "Åbningstider pr. lokation", description: "Indstil individuelle åbningstider for hver lokation.", icon: Clock, badge: "Ny" },
-        { title: "Særlige lukkedage", description: "Tilføj helligdage og særlige lukkedage pr. lokation.", icon: CalendarClock, badge: "Ny" },
-        { title: "Forberedelsestid", description: "Indstil hvor lang tid der skal bruges til klargøring mellem bookinger.", icon: Wrench, badge: "Ny" },
-        { title: "Lokation på køretøj", description: "Tildel køretøjer til specifikke lokationer for bedre overblik.", icon: MapPin, badge: "Ny" },
+        { title: "Multi-lokation support", description: "Administrer flere udlejningslokationer fra ét dashboard.", icon: Store, badge: "Ny", status: "Fuldt implementeret" },
+        { title: "Åbningstider pr. lokation", description: "Indstil individuelle åbningstider for hver lokation.", icon: Clock, badge: "Ny", status: "Fuldt implementeret" },
+        { title: "Særlige lukkedage", description: "Tilføj helligdage og særlige lukkedage pr. lokation.", icon: CalendarClock, badge: "Ny", status: "Fuldt implementeret" },
+        { title: "Forberedelsestid", description: "Indstil hvor lang tid der skal bruges til klargøring mellem bookinger.", icon: Wrench, badge: "Ny", status: "Beta" },
+        { title: "Lokation på køretøj", description: "Tildel køretøjer til specifikke lokationer for bedre overblik.", icon: MapPin, badge: "Ny", status: "Fuldt implementeret" },
       ],
     },
     {
       title: "Kontrakter & Dokumentation",
+      id: "contracts",
       icon: FileText,
       color: "from-accent to-accent/60",
+      tier: "starter",
       features: [
-        { title: "Automatisk kontraktgenerering", description: "Juridisk korrekte lejekontrakter genereres automatisk med alle detaljer.", icon: FileText },
-        { title: "Digital underskrift", description: "Både udlejer og lejer underskriver digitalt direkte i systemet.", icon: FileCheck },
-        { title: "PDF-download & Email", description: "Kontrakter sendes automatisk til begge parter som PDF.", icon: Smartphone },
-        { title: "Skaderapporter med AI", description: "Dokumentér bilens stand med AI-analyse af fotos og skader.", icon: Scan },
-        { title: "Lokationsinfo i kontrakt", description: "Afhentningslokation med adresse og telefonnummer inkluderes automatisk.", icon: Store, badge: "Ny" },
+        { title: "Automatisk kontraktgenerering", description: "Juridisk korrekte lejekontrakter genereres automatisk med alle detaljer.", icon: FileText, status: "Fuldt implementeret", demoUrl: "https://yourdomain.com/demo/contracts" },
+        { title: "Digital underskrift", description: "Både udlejer og lejer underskriver digitalt direkte i systemet.", icon: FileCheck, status: "Fuldt implementeret" },
+        { title: "PDF-download & Email", description: "Kontrakter sendes automatisk til begge parter som PDF.", icon: Smartphone, status: "Fuldt implementeret" },
+        { title: "Skaderapporter med AI", description: "Dokumentér bilens stand med AI-analyse af fotos og skader.", icon: Scan, status: "Beta", demoUrl: "https://yourdomain.com/demo/damage" },
+        { title: "Lokationsinfo i kontrakt", description: "Afhentningslokation med adresse og telefonnummer inkluderes automatisk.", icon: Store, badge: "Ny", status: "Fuldt implementeret" },
       ],
     },
     {
       title: "Check-in & Check-out",
+      id: "checkin",
       icon: Camera,
       color: "from-teal-500 to-teal-500/60",
+      tier: "starter",
       features: [
-        { title: "Nummerplade-scanning", description: "Scan nummerpladen ved udlevering og aflevering for automatisk verifikation.", icon: Scan },
-        { title: "Dashboard-foto med AI", description: "Tag foto af instrumentbrættet – AI aflæser km-stand og brændstofniveau.", icon: Camera },
-        { title: "GPS-lokationsverifikation", description: "Bekræft at bilen afleveres det rigtige sted med GPS-tjek.", icon: MapPin },
-        { title: "Automatisk opgørelse", description: "Systemet beregner km-overskridelse og brændstofgebyr automatisk.", icon: Receipt },
-        { title: "QR-kode check-in", description: "Generér QR-koder til hurtig selv-check-in for lejere.", icon: QrCode, badge: "Ny" },
+        { title: "Nummerplade-scanning", description: "Scan nummerpladen ved udlevering og aflevering for automatisk verifikation.", icon: Scan, status: "Fuldt implementeret" },
+        { title: "Dashboard-foto med AI", description: "Tag foto af instrumentbrættet – AI aflæser km-stand og brændstofniveau.", icon: Camera, status: "Beta", demoUrl: "https://yourdomain.com/demo/dashboard-photo" },
+        { title: "GPS-lokationsverifikation", description: "Bekræft at bilen afleveres det rigtige sted med GPS-tjek.", icon: MapPin, status: "Fuldt implementeret" },
+        { title: "Automatisk opgørelse", description: "Systemet beregner km-overskridelse og brændstofgebyr automatisk.", icon: Receipt, status: "Fuldt implementeret" },
+        { title: "QR-kode check-in", description: "Generér QR-koder til hurtig selv-check-in for lejere.", icon: QrCode, badge: "Ny", status: "Planlagt", tier: "pro" },
       ],
     },
     {
       title: "Betaling & Økonomi",
+      id: "payment",
       icon: CreditCard,
       color: "from-secondary to-secondary/60",
+      tier: "starter",
       features: [
-        { title: "Flere betalingsmetoder", description: "Modtag betaling via kort, MobilePay, bankoverførsel eller kontant.", icon: CreditCard },
-        { title: "Automatisk abonnementsbetaling", description: "Ved månedlig leje trækkes beløbet automatisk fra lejerens kort.", icon: Repeat },
-        { title: "Depositumhåndtering", description: "Administrer depositum og frigivelse sikkert gennem systemet.", icon: Shield },
-        { title: "Selvrisiko-forsikring", description: "Tilbyd lejere at reducere selvrisiko til 0 kr. for kun 49 kr./dag.", icon: ShieldCheck },
-        { title: "Brændstofpolitik", description: "Automatisk beregning af brændstofgebyr ved manglende tank.", icon: Gauge },
-        { title: "Platformgebyr-betaling", description: "Administrer og betal platformgebyrer direkte i systemet.", icon: Wallet, badge: "Ny" },
+        { title: "Flere betalingsmetoder", description: "Modtag betaling via kort, MobilePay, bankoverførsel eller kontant.", icon: CreditCard, status: "Fuldt implementeret" },
+        { title: "Automatisk abonnementsbetaling", description: "Ved månedlig leje trækkes beløbet automatisk fra lejerens kort.", icon: Repeat, status: "Fuldt implementeret" },
+        { title: "Depositumhåndtering", description: "Administrer depositum og frigivelse sikkert gennem systemet.", icon: Shield, status: "Fuldt implementeret" },
+        { title: "Selvrisiko-forsikring", description: "Tilbyd lejere at reducere selvrisiko til 0 kr. for kun 49 kr./dag.", icon: ShieldCheck, status: "Beta" },
+        { title: "Brændstofpolitik", description: "Automatisk beregning af brændstofgebyr ved manglende tank.", icon: Gauge, status: "Fuldt implementeret" },
+        { title: "Platformgebyr-betaling", description: "Administrer og betal platformgebyrer direkte i systemet.", icon: Wallet, badge: "Ny", status: "Planlagt", tier: "enterprise" },
       ],
     },
     {
       title: "GPS & Flådestyring",
+      id: "gps",
       icon: MapPin,
       color: "from-green-500 to-green-500/60",
+      tier: "pro",
       features: [
-        { title: "GPS-sikkerhed", description: "Få besked ved uautoriseret brug eller hvis køretøjet forlader aftalte zoner.", icon: MapPin },
-        { title: "Geofencing-alarmer", description: "Få besked når en bil forlader et defineret område.", icon: CircleDot },
-        { title: "Kilometerregistrering", description: "Automatisk opdatering af kilometertal via GPS-tracker.", icon: Gauge },
-        { title: "Webhook-integration", description: "Modtag GPS-data fra alle førende GPS-udbydere via webhook.", icon: Zap, badge: "Ny" },
+        { title: "GPS-sikkerhed", description: "Få besked ved uautoriseret brug eller hvis køretøjet forlader aftalte zoner.", icon: MapPin, status: "Fuldt implementeret", demoUrl: "https://yourdomain.com/demo/gps" },
+        { title: "Geofencing-alarmer", description: "Få besked når en bil forlader et defineret område.", icon: CircleDot, status: "Fuldt implementeret" },
+        { title: "Kilometerregistrering", description: "Automatisk opdatering af kilometertal via GPS-tracker.", icon: Gauge, status: "Fuldt implementeret" },
+        { title: "Webhook-integration", description: "Modtag GPS-data fra alle førende GPS-udbydere via webhook.", icon: Zap, badge: "Ny", status: "Beta" },
       ],
     },
     {
       title: "Motorcykel & Scooter",
+      id: "motorcycle",
       icon: Bike,
       color: "from-yellow-500 to-yellow-500/60",
+      tier: "pro",
       features: [
-        { title: "MC-kørekort validering", description: "Automatisk tjek af kørekortstype (A1, A2, A) mod motorcyklens effekt.", icon: BadgeCheck, badge: "Ny" },
-        { title: "MC-specifik vedligeholdelse", description: "Spor kædeservice, dækslid og andre MC-specifikke serviceintervaller.", icon: Wrench, badge: "Ny" },
-        { title: "Sæson-tjekliste", description: "Automatiske påmindelser om forårsgøring og vinterklargøring.", icon: Thermometer, badge: "Ny" },
-        { title: "MC Check-in guide", description: "Specialiseret check-in flow med MC-specifikke kontrolpunkter.", icon: FileCheck, badge: "Ny" },
+        { title: "MC-kørekort validering", description: "Automatisk tjek af kørekortstype (A1, A2, A) mod motorcyklens effekt.", icon: BadgeCheck, badge: "Ny", status: "Planlagt" },
+        { title: "MC-specifik vedligeholdelse", description: "Spor kædeservice, dækslid og andre MC-specifikke serviceintervaller.", icon: Wrench, badge: "Ny", status: "Beta" },
+        { title: "Sæson-tjekliste", description: "Automatiske påmindelser om forårsgøring og vinterklargøring.", icon: Thermometer, badge: "Ny", status: "Planlagt" },
+        { title: "MC Check-in guide", description: "Specialiseret check-in flow med MC-specifikke kontrolpunkter.", icon: FileCheck, badge: "Ny", status: "Beta" },
       ],
     },
     {
       title: "Værksted & Service",
+      id: "service",
       icon: Wrench,
       color: "from-orange-500 to-orange-500/60",
+      tier: "pro",
       features: [
-        { title: "Smart Service hos LEJIO", description: "Book værkstedstider direkte i systemet – vi klarer servicen for dig.", icon: Wrench },
-        { title: "Syns-påmindelser", description: "Automatisk påmindelse når syn nærmer sig.", icon: Bell },
-        { title: "Dækstyring", description: "Administrer sommer/vinterdæk og dækhotel-lokationer.", icon: CircleDot },
-        { title: "Byttebil-funktion", description: "Udskift køretøj midt i lejeperiode ved service eller nedbrud.", icon: Truck },
-        { title: "Service-booking", description: "Book og administrer service- og værkstedsaftaler direkte i systemet.", icon: CalendarClock, badge: "Ny" },
+        { title: "Smart Service hos LEJIO", description: "Book værkstedstider direkte i systemet – vi klarer servicen for dig.", icon: Wrench, status: "Fuldt implementeret" },
+        { title: "Syns-påmindelser", description: "Automatisk påmindelse når syn nærmer sig.", icon: Bell, status: "Fuldt implementeret" },
+        { title: "Dækstyring", description: "Administrer sommer/vinterdæk og dækhotel-lokationer.", icon: CircleDot, status: "Beta" },
+        { title: "Byttebil-funktion", description: "Udskift køretøj midt i lejeperiode ved service eller nedbrud.", icon: Truck, status: "Fuldt implementeret" },
+        { title: "Service-booking", description: "Book og administrer service- og værkstedsaftaler direkte i systemet.", icon: CalendarClock, badge: "Ny", status: "Beta" },
       ],
     },
     {
       title: "AI-funktioner",
+      id: "ai",
       icon: Brain,
       color: "from-purple-500 to-purple-500/60",
+      tier: "pro",
       features: [
-        { title: "Auto-Dispatch AI", description: "AI-drevet flådefordeling baseret på efterspørgsel og søgemønstre.", icon: Brain, badge: "AI" },
-        { title: "AI-prissætning", description: "Intelligente prisforslag baseret på marked og konkurrence.", icon: TrendingDown, badge: "AI" },
-        { title: "Dashboard-analyse", description: "AI analyserer dine data og giver personlige anbefalinger.", icon: BarChart3, badge: "AI" },
-        { title: "Skade-AI", description: "Automatisk analyse og kategorisering af skadebilleder.", icon: Camera, badge: "AI" },
-        { title: "AI-oversættelse", description: "Automatisk oversættelse af beskeder mellem sprog.", icon: Globe, badge: "AI" },
+        { title: "Auto-Dispatch AI", description: "AI-drevet flådefordeling baseret på efterspørgsel og søgemønstre.", icon: Brain, badge: "AI", status: "Beta", demoUrl: "https://yourdomain.com/demo/auto-dispatch" },
+        { title: "AI-prissætning", description: "Intelligente prisforslag baseret på marked og konkurrence.", icon: TrendingDown, badge: "AI", status: "Beta", demoUrl: "https://yourdomain.com/demo/pricing-ai" },
+        { title: "Dashboard-analyse", description: "AI analyserer dine data og giver personlige anbefalinger.", icon: BarChart3, badge: "AI", status: "Planlagt" },
+        { title: "Skade-AI", description: "Automatisk analyse og kategorisering af skadebilleder.", icon: Camera, badge: "AI", status: "Beta" },
+        { title: "AI-oversættelse", description: "Automatisk oversættelse af beskeder mellem sprog.", icon: Globe, badge: "AI", status: "Planlagt" },
       ],
     },
     {
       title: "Kommunikation",
+      id: "communication",
       icon: MessageSquare,
       color: "from-indigo-500 to-indigo-500/60",
+      tier: "starter",
       features: [
-        { title: "Indbygget beskedsystem", description: "Kommuniker direkte med lejere gennem platformen.", icon: MessageSquare },
-        { title: "Push-notifikationer", description: "Få besked på telefonen ved nye bookinger og beskeder.", icon: Bell },
-        { title: "Automatiske emails", description: "Bookingbekræftelser og påmindelser sendes automatisk.", icon: Smartphone },
-        { title: "Live Chat Support", description: "AI-assisteret kundesupport direkte i appen.", icon: MessageSquare },
-        { title: "Ulæste beskeder", description: "Se altid hvor mange ulæste beskeder du har i menuen.", icon: Bell, badge: "Ny" },
+        { title: "Indbygget beskedsystem", description: "Kommuniker direkte med lejere gennem platformen.", icon: MessageSquare, status: "Fuldt implementeret" },
+        { title: "Push-notifikationer", description: "Få besked på telefonen ved nye bookinger og beskeder.", icon: Bell, status: "Fuldt implementeret" },
+        { title: "Automatiske emails", description: "Bookingbekræftelser og påmindelser sendes automatisk.", icon: Smartphone, status: "Fuldt implementeret" },
+        { title: "Live Chat Support", description: "AI-assisteret kundesupport direkte i appen.", icon: MessageSquare, status: "Fuldt implementeret" },
+        { title: "Ulæste beskeder", description: "Se altid hvor mange ulæste beskeder du har i menuen.", icon: Bell, badge: "Ny", status: "Fuldt implementeret" },
       ],
     },
     {
       title: "Lejer-administration",
+      id: "renter",
       icon: Users,
       color: "from-blue-500 to-blue-500/60",
+      tier: "starter",
       features: [
-        { title: "Kørekortsverifikation", description: "AI-verificerer kørekort med foto-upload og automatisk godkendelse.", icon: BadgeCheck },
-        { title: "Lejerhistorik", description: "Se alle tidligere bookinger og interaktioner med hver lejer.", icon: Users },
-        { title: "Lejer-rating", description: "Bedøm lejere og se deres gennemsnitlige rating.", icon: Star },
-        { title: "Advarselsregister", description: "Se advarsler på problematiske lejere på tværs af platformen.", icon: AlertTriangle },
-        { title: "Kundesegmenter", description: "Opdel dine lejere i segmenter baseret på adfærd og værdi.", icon: Users, badge: "Ny" },
-        { title: "Favorit-lejere", description: "Gem dine bedste lejere som favoritter for hurtig adgang.", icon: Star, badge: "Ny" },
+        { title: "Kørekortsverifikation", description: "AI-verificerer kørekort med foto-upload og automatisk godkendelse.", icon: BadgeCheck, status: "Fuldt implementeret", demoUrl: "https://yourdomain.com/demo/license-verification" },
+        { title: "Lejerhistorik", description: "Se alle tidligere bookinger og interaktioner med hver lejer.", icon: Users, status: "Fuldt implementeret" },
+        { title: "Lejer-rating", description: "Bedøm lejere og se deres gennemsnitlige rating.", icon: Star, status: "Fuldt implementeret" },
+        { title: "Advarselsregister", description: "Se advarsler på problematiske lejere på tværs af platformen.", icon: AlertTriangle, status: "Beta" },
+        { title: "Kundesegmenter", description: "Opdel dine lejere i segmenter baseret på adfærd og værdi.", icon: Users, badge: "Ny", status: "Planlagt", tier: "pro" },
+        { title: "Favorit-lejere", description: "Gem dine bedste lejere som favoritter for hurtig adgang.", icon: Star, badge: "Ny", status: "Fuldt implementeret" },
       ],
     },
     {
       title: "Erhverv & Flåde",
+      id: "corporate",
       icon: Building2,
       color: "from-slate-500 to-slate-500/60",
+      tier: "enterprise",
       features: [
-        { title: "Erhvervskonti", description: "Særlige vilkår og fakturering for erhvervskunder med EAN-nummer.", icon: Building2 },
-        { title: "Afdelingsbudgetter", description: "Fordel kørsel på afdelinger med separate budgetter og rapporter.", icon: BarChart3 },
-        { title: "Medarbejder-administration", description: "Administrer hvilke medarbejdere der må leje hvilke biler.", icon: Users },
-        { title: "Månedlig samlet faktura", description: "Én faktura for alle bookinger med EAN/CVR-nummer.", icon: Receipt },
-        { title: "Flåde-afregning", description: "Månedlig afregning med kommission for store flådeejere.", icon: Wallet, badge: "Ny" },
-        { title: "CVR-opslag", description: "Automatisk opslag af virksomhedsdata via CVR-nummer.", icon: Building2, badge: "Ny" },
+        { title: "Erhvervskonti", description: "Særlige vilkår og fakturering for erhvervskunder med EAN-nummer.", icon: Building2, status: "Fuldt implementeret" },
+        { title: "Afdelingsbudgetter", description: "Fordel kørsel på afdelinger med separate budgetter og rapporter.", icon: BarChart3, status: "Fuldt implementeret" },
+        { title: "Medarbejder-administration", description: "Administrer hvilke medarbejdere der må leje hvilke biler.", icon: Users, status: "Beta" },
+        { title: "Månedlig samlet faktura", description: "Én faktura for alle bookinger med EAN/CVR-nummer.", icon: Receipt, status: "Fuldt implementeret" },
+        { title: "Flåde-afregning", description: "Månedlig afregning med kommission for store flådeejere.", icon: Wallet, badge: "Ny", status: "Planlagt" },
+        { title: "CVR-opslag", description: "Automatisk opslag af virksomhedsdata via CVR-nummer.", icon: Building2, badge: "Ny", status: "Fuldt implementeret" },
       ],
     },
   ];
+
+  // Filter og søg logik
+  const filteredCategories = useMemo(() => {
+    let filtered = [...featureCategories];
+
+    // Filter by selected categories
+    if (selectedCategories.size > 0) {
+      filtered = filtered.filter(cat => selectedCategories.has(cat.id));
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.map(category => ({
+        ...category,
+        features: category.features.filter(feature =>
+          feature.title.toLowerCase().includes(query) ||
+          feature.description.toLowerCase().includes(query)
+        )
+      })).filter(cat => cat.features.length > 0);
+    }
+
+    return filtered;
+  }, [searchQuery, selectedCategories]);
+
+  const toggleCategory = (categoryId: string) => {
+    const newSelected = new Set(selectedCategories);
+    if (newSelected.has(categoryId)) {
+      newSelected.delete(categoryId);
+    } else {
+      newSelected.add(categoryId);
+    }
+    setSelectedCategories(newSelected);
+  };
+
+  const toggleFeatureCompare = (featureTitle: string) => {
+    const newSelected = new Set(selectedFeatures);
+    if (newSelected.has(featureTitle)) {
+      newSelected.delete(featureTitle);
+    } else {
+      newSelected.add(featureTitle);
+    }
+    setSelectedFeatures(newSelected);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Fuldt implementeret":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "Beta":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "Planlagt":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getTierBg = (tier: string) => {
+    switch (tier) {
+      case "starter":
+        return "bg-slate-50 border-slate-200";
+      case "pro":
+        return "bg-blue-50 border-blue-200";
+      case "enterprise":
+        return "bg-purple-50 border-purple-200";
+      default:
+        return "bg-gray-50 border-gray-200";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -271,53 +373,187 @@ const Features = () => {
           </div>
         </section>
 
+        {/* Search & Filter Section */}
+        <section className="py-8 relative border-b border-border/50">
+          <div className="container mx-auto px-6">
+            <div className="max-w-5xl mx-auto space-y-6">
+              {/* Search Bar */}
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  placeholder="Søg blandt alle funktioner..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-3 rounded-xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSearchQuery("")}
+                    className="px-4"
+                  >
+                    Ryd
+                  </Button>
+                )}
+              </div>
+
+              {/* Category Filter */}
+              <div className="flex flex-wrap gap-2">
+                <span className="text-sm font-semibold text-muted-foreground self-center">Filtrer:</span>
+                {featureCategories.map((category) => (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategories.has(category.id) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleCategory(category.id)}
+                    className="rounded-full"
+                  >
+                    {category.title}
+                  </Button>
+                ))}
+                {selectedCategories.size > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedCategories(new Set())}
+                    className="text-xs"
+                  >
+                    Nulstil
+                  </Button>
+                )}
+              </div>
+
+              {/* Compare Toggle */}
+              <div className="flex items-center gap-2 pt-2">
+                <Button
+                  variant={compareMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setCompareMode(!compareMode);
+                    if (!compareMode) setSelectedFeatures(new Set());
+                  }}
+                  className="rounded-full"
+                >
+                  {compareMode ? "Sammenligning aktiv" : "Sammenlign features"}
+                  {selectedFeatures.size > 0 && ` (${selectedFeatures.size})`}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Features Grid */}
         <section className="py-16 relative">
           <div className="container mx-auto px-6">
-            <div className="space-y-16">
-              {featureCategories.map((category, categoryIndex) => {
-                const CategoryIcon = category.icon;
-                return (
-                  <div key={categoryIndex} className="space-y-8">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-lg`}>
-                        <CategoryIcon className="w-7 h-7 text-white" />
+            {filteredCategories.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground text-lg">Ingen features matcher dine søgekritier</p>
+              </div>
+            ) : (
+              <div className="space-y-16">
+                {filteredCategories.map((category, categoryIndex) => {
+                  const CategoryIcon = category.icon;
+                  return (
+                    <div key={categoryIndex} className="space-y-8">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-lg`}>
+                          <CategoryIcon className="w-7 h-7 text-white" />
+                        </div>
+                        <h2 className="font-display text-3xl font-black">{category.title}</h2>
                       </div>
-                      <h2 className="font-display text-3xl font-black">{category.title}</h2>
-                    </div>
 
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                      {category.features.map((feature, featureIndex) => {
-                        const FeatureIcon = feature.icon;
-                        return (
-                          <Card 
-                            key={featureIndex}
-                            className="group hover:shadow-xl hover:-translate-y-1 transition-all bg-card/50 backdrop-blur-sm border-border/50"
-                          >
-                            <CardHeader className="pb-3">
-                              <div className="flex items-start justify-between">
-                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
-                                  <FeatureIcon className="w-5 h-5 text-white" />
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                        {category.features.map((feature, featureIndex) => {
+                          const FeatureIcon = feature.icon;
+                          const isSelected = compareMode && selectedFeatures.has(feature.title);
+                          
+                          return (
+                            <Card 
+                              key={featureIndex}
+                              className={`group hover:shadow-xl hover:-translate-y-1 transition-all backdrop-blur-sm cursor-pointer relative ${
+                                getTierBg(feature.tier || category.tier)
+                              } ${isSelected ? "ring-2 ring-primary" : ""}`}
+                              onClick={() => compareMode && toggleFeatureCompare(feature.title)}
+                            >
+                              {/* Tier Lock Badge */}
+                              {(feature.tier || category.tier) !== "starter" && (
+                                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-100 text-yellow-800 text-xs font-bold">
+                                  <Lock className="w-3 h-3" />
+                                  {(feature.tier || category.tier) === "pro" ? "Pro" : "Enterprise"}
                                 </div>
-                                {feature.badge && (
-                                  <Badge variant="secondary" className="text-xs font-bold">
-                                    {feature.badge}
-                                  </Badge>
+                              )}
+
+                              {/* Compare Checkbox */}
+                              {compareMode && (
+                                <div className="absolute top-3 left-3">
+                                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                                    isSelected ? "bg-primary border-primary" : "border-border bg-background"
+                                  }`}>
+                                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                                  </div>
+                                </div>
+                              )}
+
+                              <CardHeader className={`pb-3 ${compareMode ? "pt-8" : ""}`}>
+                                <div className="flex items-start justify-between">
+                                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
+                                    <FeatureIcon className="w-5 h-5 text-white" />
+                                  </div>
+                                  <div className="flex flex-col gap-1 items-end">
+                                    {feature.badge && (
+                                      <Badge variant="secondary" className="text-xs font-bold">
+                                        {feature.badge}
+                                      </Badge>
+                                    )}
+                                    {feature.status && (
+                                      <Badge variant="outline" className={`text-xs font-bold border ${getStatusColor(feature.status)}`}>
+                                        {feature.status}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <CardTitle className="text-base font-bold mt-3">{feature.title}</CardTitle>
+                              </CardHeader>
+                              <CardContent className="pt-0 space-y-3">
+                                <CardDescription className="text-sm">{feature.description}</CardDescription>
+                                {feature.demoUrl && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-center gap-2 text-primary hover:text-primary"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(feature.demoUrl, "_blank");
+                                    }}
+                                  >
+                                    <Play className="w-4 h-4" />
+                                    Se demo
+                                  </Button>
                                 )}
-                              </div>
-                              <CardTitle className="text-base font-bold mt-3">{feature.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-0">
-                              <CardDescription className="text-sm">{feature.description}</CardDescription>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
+                                {(feature.title === "Smart Booking-kalender" || feature.title === "Check-in & Check-out" || feature.title === "AI-funktioner") && !feature.demoUrl && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-center gap-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate("/auth");
+                                    }}
+                                  >
+                                    <ArrowRight className="w-4 h-4" />
+                                    Kom i gang
+                                  </Button>
+                                )}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
