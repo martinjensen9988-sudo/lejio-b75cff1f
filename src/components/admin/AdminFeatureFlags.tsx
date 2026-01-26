@@ -192,7 +192,7 @@ export const AdminFeatureFlags = () => {
         <div className="mb-8">
           <div className="font-bold text-lg mb-1">Admin oversigt</div>
           <div className="text-sm text-muted-foreground mb-4">Her ser du alle moduler og features. Vælg en kunde for at redigere deres features.</div>
-          <Accordion type="multiple" collapsible>
+          <Accordion type="multiple">
             {featureCategories.map((category, idx) => {
               const CategoryIcon = category.icon;
               return (
