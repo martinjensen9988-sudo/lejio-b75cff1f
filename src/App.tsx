@@ -151,6 +151,7 @@ const FleetVehicleEditPage = lazy(() => import("./pages/admin/FleetVehicleEdit")
 const DriverLicenseReviewPage = lazy(() => import("./pages/admin/DriverLicenseReview"));
 const AdminAuditLogPage = lazy(() => import("./pages/admin/AuditLog"));
 const AdminCRMPage = lazy(() => import("./pages/admin/CRM"));
+const AdminFeatureFlagsPage = lazy(() => import("./pages/admin/FeatureFlags"));
 
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
@@ -238,6 +239,7 @@ const App = () => (
               <Route path="/admin/bookings/add" element={<AdminAuthProvider><BookingsAddPage /></AdminAuthProvider>} />
               <Route path="/admin/locations" element={<AdminAuthProvider><AdminLocationsPage /></AdminAuthProvider>} />
               <Route path="/admin/fees" element={<AdminAuthProvider><AdminFeesPage /></AdminAuthProvider>} />
+              <Route path="/admin/feature-flags" element={<AdminAuthProvider><AdminFeatureFlagsPage /></AdminAuthProvider>} />
               <Route path="/admin/discounts" element={<AdminAuthProvider><AdminDiscountsPage /></AdminAuthProvider>} />
               <Route path="/admin/discounts/add" element={<AdminAuthProvider><DiscountsAddPage /></AdminAuthProvider>} />
               <Route path="/admin/fleet" element={<AdminAuthProvider><AdminFleetPage /></AdminAuthProvider>} />

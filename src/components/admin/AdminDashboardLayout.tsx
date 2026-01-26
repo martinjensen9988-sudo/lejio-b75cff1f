@@ -41,6 +41,7 @@ const menuItems = [
   { value: 'api-keys', icon: Key, label: 'API-nøgler', path: '/admin/api-keys' },
   { value: 'stats', icon: BarChart3, label: 'Statistik', path: '/admin/stats' },
   { value: 'audit-log', icon: FileText, label: 'Audit Log', path: '/admin/audit-log', superAdminOnly: true },
+  { value: 'feature-flags', icon: Sparkles, label: 'Feature Flags', path: '/admin/feature-flags', superAdminOnly: true },
 ];
 
 interface MenuItem {
