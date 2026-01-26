@@ -11,10 +11,12 @@ export default function DealerProfile() {
   useEffect(() => {
     async function fetchDealer() {
       // Hent forhandler-data
-      const { data } = await supabase.from('dealer_profiles').select('*').eq('id', id).single();
+      // @ts-ignore
+      const { data } = await supabase.from<any, any>('dealer_profiles').select('*').eq('id', id).single();
       setDealer(data);
       // Hent forhandlerens biler
-      const { data: vehicleData } = await supabase.from('vehicles').select('*').eq('dealer_id', id);
+      // @ts-ignore
+      const { data: vehicleData } = await supabase.from<any, any>('vehicles').select('*').eq('dealer_id', id);
       setVehicles(vehicleData || []);
     }
     fetchDealer();
