@@ -45,6 +45,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import jsPDF from 'jspdf';
 
 interface CustomerDebt {
   id: string;
@@ -126,6 +127,13 @@ export const AdminFleetFinance = () => {
     new_amount: '',
     description: '',
   });
+
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [statement, setStatement] = useState<any>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const fetchFinanceData = async () => {
     setIsLoading(true);
@@ -389,6 +397,54 @@ export const AdminFleetFinance = () => {
   const totalMonthlyInstallments = customers.reduce((sum, c) => sum + c.monthlyInstallments, 0);
   const customersWithDebt = customers.filter(c => c.totalDebt > 0).length;
   const pendingRequestsTotal = customers.reduce((sum, c) => sum + c.pendingRequests.length, 0);
+
+  const calculateStatement = async (customerId: string, commissionRate: number) => {
+    setIsCalculating(true);
+    setStatement(null);
+    try {
+      // Find start og slutdato for måneden
+      const [year, month] = selectedMonth.split('-');
+      const startDate = `${year}-${month}-01`;
+      const endDate = format(new Date(Number(year), Number(month), 0), 'yyyy-MM-dd');
+      // Hent bookinger for kunden i perioden
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select('id, total_price, status, start_date, end_date')
+        .eq('lessor_id', customerId)
+        .gte('start_date', startDate)
+        .lte('end_date', endDate)
+        .in('status', ['completed', 'active']);
+      if (error) throw error;
+      const totalRevenue = (bookings || []).reduce((sum, b) => sum + (b.total_price || 0), 0);
+      const commission = Math.round(totalRevenue * (commissionRate / 100));
+      const payout = totalRevenue - commission;
+      setStatement({ totalRevenue, commission, payout, count: (bookings || []).length });
+    } catch (err) {
+      setStatement({ error: 'Kunne ikke beregne opgørelse' });
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  // Download opgørelse som PDF
+  const downloadStatementPDF = () => {
+    if (!statement) return;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Månedlig Opgørelse', 10, 20);
+    doc.setFontSize(12);
+    doc.text(`Omsætning: ${statement.totalRevenue} kr`, 10, 40);
+    doc.text(`Kommission: ${statement.commission} kr`, 10, 50);
+    doc.text(`Udbetaling: ${statement.payout} kr`, 10, 60);
+    doc.text(`Antal bookinger: ${statement.count}`, 10, 70);
+    doc.save('opgørelse.pdf');
+  };
+
+  // Opret faktura (dummy - skal evt. kobles til backend)
+  const createInvoice = async () => {
+    // Her kan du kalde en Supabase function eller API for at oprette faktura
+    alert('Faktura oprettet (demo)');
+  };
 
   if (isLoading) {
     return (
@@ -838,6 +894,84 @@ export const AdminFleetFinance = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Monthly Statement Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Månedlig Opgørelse</CardTitle>
+          <CardDescription>
+            Beregn og vis månedlig opgørelse for hver fleet-kunde baseret på omsætning og kommission.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4 flex gap-2 items-center">
+            <Label>Måned:</Label>
+            <Input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} style={{width: 140}} />
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Kunde</TableHead>
+                <TableHead className="text-right">Omsætning</TableHead>
+                <TableHead className="text-right">Kommission</TableHead>
+                <TableHead className="text-right">Udbetaling</TableHead>
+                <TableHead className="text-right">Antal bookinger</TableHead>
+                <TableHead className="text-right">Handling</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {customers.map(customer => (
+                <TableRow key={customer.id}>
+                  <TableCell>
+                    {customer.company_name || customer.full_name || customer.email}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(customer.totalDebt)} kr
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(customer.fleet_commission_rate || 0)} kr
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(customer.totalDebt - (customer.fleet_commission_rate || 0))} kr
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {customer.activeLoans.length}
+                  </TableCell>
+                  <TableCell>
+                    <Button size="sm" onClick={() => calculateStatement(customer.id, customer.fleet_commission_rate || 0)} disabled={isCalculating}>
+                      Beregn opgørelse
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {statement && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Månedlig opgørelse</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {statement.error ? (
+                  <div className="text-destructive">{statement.error}</div>
+                ) : (
+                  <div>
+                    <div>Omsætning: <b>{statement.totalRevenue} kr</b></div>
+                    <div>Kommission: <b>{statement.commission} kr</b></div>
+                    <div>Udbetaling: <b>{statement.payout} kr</b></div>
+                    <div>Antal bookinger: <b>{statement.count}</b></div>
+                    <div className="flex gap-2 mt-4">
+                      <Button size="sm" variant="outline" onClick={downloadStatementPDF}>Download PDF</Button>
+                      <Button size="sm" variant="default" onClick={createInvoice}>Opret faktura</Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

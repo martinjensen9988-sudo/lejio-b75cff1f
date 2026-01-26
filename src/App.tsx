@@ -1,3 +1,4 @@
+const AdminInvoicesPage = lazy(() => import("./pages/admin/Invoices"));
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -246,6 +247,7 @@ const App = () => (
               <Route path="/admin/warnings" element={<AdminAuthProvider><AdminWarningsPage /></AdminAuthProvider>} />
               <Route path="/admin/reports" element={<AdminAuthProvider><AdminReportsPage /></AdminAuthProvider>} />
               <Route path="/admin/messages" element={<AdminAuthProvider><AdminMessagesPage /></AdminAuthProvider>} />
+              <Route path="/admin/invoices" element={<AdminAuthProvider><AdminInvoicesPage /></AdminAuthProvider>} />
               <Route path="/admin/live-chat" element={<AdminAuthProvider><AdminLiveChatPage /></AdminAuthProvider>} />
               <Route path="/admin/customer-service" element={<AdminAuthProvider><AdminCustomerServicePage /></AdminAuthProvider>} />
               <Route path="/admin/vehicle-values" element={<AdminAuthProvider><AdminVehicleValuesPage /></AdminAuthProvider>} />
