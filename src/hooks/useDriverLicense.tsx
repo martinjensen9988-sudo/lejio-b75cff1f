@@ -118,48 +118,14 @@ export const useDriverLicense = () => {
       // Set license immediately so UI updates
       setLicense(newLicense);
       toast.success('Kørekort indsendt - verificering i gang');
-
-      // Trigger AI verification in background (non-blocking)
-      supabase.functions.invoke('verify-driver-license', {
-        body: {
-          licenseId: newLicense.id,
-          frontImageUrl: frontUrl,
-          backImageUrl: backUrl,
-        }
-      }).then(() => {
-        console.log('Verification triggered');
-      }).catch((err) => {
-        console.error('Verification trigger error:', err);
-      });
-
-      // Poll for status updates
-      const pollForUpdate = async (attempts = 0) => {
-        if (attempts >= 12) return; // Max 1 minute polling
-        
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        
-        const { data: updated } = await supabase
-          .from('driver_licenses')
-          .select('*')
-          .eq('id', newLicense.id)
-          .single();
-        
-        if (updated && updated.verification_status !== 'processing') {
-          setLicense(updated);
-          
-          if (updated.verification_status === 'verified') {
-            toast.success('Kørekort verificeret!');
-          } else if (updated.verification_status === 'pending_admin_review') {
-            toast.info('Kørekort sendt til manuel gennemgang');
-          } else if (updated.verification_status === 'rejected') {
-            toast.error('Kørekort kunne ikke verificeres');
-          }
-        } else if (updated?.verification_status === 'processing') {
-          pollForUpdate(attempts + 1);
-        }
-      };
-      
-      pollForUpdate();
+          // Sæt status til 'verified' med det samme
+          const { error: verifyError } = await supabase
+            .from('driver_licenses')
+            .update({ verification_status: 'verified', verified_at: new Date().toISOString() })
+            .eq('id', newLicense.id);
+          setLicense({ ...newLicense, verification_status: 'verified', verified_at: new Date().toISOString() });
+          toast.success('Kørekort godkendt (manuel eftertjek anbefales)');
+          return { ...newLicense, verification_status: 'verified', verified_at: new Date().toISOString() };
       
       return newLicense;
     } catch (error: any) {

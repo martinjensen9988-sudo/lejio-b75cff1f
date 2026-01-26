@@ -44,6 +44,8 @@ const DriverLicenseReview = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
   const [signedUrls, setSignedUrls] = useState<{ front?: string; back?: string }>({});
+  const [banning, setBanning] = useState(false);
+  const [userBanned, setUserBanned] = useState(false);
 
   // Helper to get signed URL for private bucket images
   const getSignedUrl = async (url: string | null): Promise<string | null> => {
@@ -106,10 +108,9 @@ const DriverLicenseReview = () => {
       for (const license of licensesData || []) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, email')
+          .select('full_name, email, account_banned_at, account_banned_reason')
           .eq('id', license.user_id)
           .single();
-        
         licensesWithProfiles.push({
           ...license,
           user_profile: profile || null,
@@ -134,12 +135,44 @@ const DriverLicenseReview = () => {
           getSignedUrl(selectedLicense.back_image_url),
         ]);
         setSignedUrls({ front: frontUrl || undefined, back: backUrl || undefined });
+        // Check if user is banned
+        if (selectedLicense.user_profile?.account_banned_at) {
+          setUserBanned(true);
+        } else {
+          setUserBanned(false);
+        }
       } else {
         setSignedUrls({});
+        setUserBanned(false);
       }
     };
     loadSignedUrls();
   }, [selectedLicense]);
+  const handleBanUser = async (license: DriverLicense) => {
+    if (!rejectionReason.trim()) {
+      toast.error('Angiv en begrundelse for spærring');
+      return;
+    }
+    setBanning(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          account_banned_at: new Date().toISOString(),
+          account_banned_reason: rejectionReason,
+        })
+        .eq('id', license.user_id);
+      if (error) throw error;
+      toast.success('Bruger spærret for udlejning');
+      setUserBanned(true);
+      fetchLicenses();
+    } catch (error) {
+      console.error('Error banning user:', error);
+      toast.error('Kunne ikke spærre bruger');
+    } finally {
+      setBanning(false);
+    }
+  };
 
   useEffect(() => {
     if (isAdmin) {
@@ -317,6 +350,12 @@ const DriverLicenseReview = () => {
                   {selectedLicense.license_country && (
                     <p className="text-sm">Land: {selectedLicense.license_country}</p>
                   )}
+                  {userBanned && (
+                    <p className="mt-2"><Badge variant="destructive">Bruger spærret</Badge></p>
+                  )}
+                  {selectedLicense.user_profile?.account_banned_reason && (
+                    <p className="text-xs text-muted-foreground mt-1">Spærret grund: {selectedLicense.user_profile.account_banned_reason}</p>
+                  )}
                 </div>
 
                 {/* Images */}
@@ -399,24 +438,32 @@ const DriverLicenseReview = () => {
                   <Button
                     variant="outline"
                     onClick={() => setSelectedLicense(null)}
-                    disabled={processing}
+                    disabled={processing || banning}
                   >
                     Annuller
                   </Button>
                   <Button
                     variant="destructive"
                     onClick={() => handleReject(selectedLicense)}
-                    disabled={processing}
+                    disabled={processing || banning}
                   >
                     {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <XCircle className="w-4 h-4 mr-2" />}
                     Afvis
                   </Button>
                   <Button
                     onClick={() => handleApprove(selectedLicense)}
-                    disabled={processing}
+                    disabled={processing || banning}
                   >
                     {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
                     Godkend
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleBanUser(selectedLicense)}
+                    disabled={banning || userBanned || processing}
+                  >
+                    {banning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <AlertTriangle className="w-4 h-4 mr-2" />}
+                    Spær bruger
                   </Button>
                 </div>
               </div>

@@ -82,7 +82,7 @@ const Booking = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { redirectToPayment, isProcessing: isPaymentProcessing } = usePayments();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { 
     license: existingLicense, 
     isLoading: licenseLoading, 
@@ -341,6 +341,14 @@ const Booking = () => {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
+        if (profile?.account_banned_at) {
+          toast({
+            title: "Din konto er spærret",
+            description: profile.account_banned_reason ? `Årsag: ${profile.account_banned_reason}` : "Du kan ikke oprette nye bookinger.",
+            variant: "destructive",
+          });
+          return false;
+        }
         if (!startDate) {
           toast({ title: "Vælg startdato", variant: "destructive" });
           return false;

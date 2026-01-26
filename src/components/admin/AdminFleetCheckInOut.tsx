@@ -358,14 +358,33 @@ export const AdminFleetCheckInOut = () => {
                               </Button>
                             )}
                             {booking.check_in_record && !booking.check_out_record && (
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => handleCheckOut(booking)}
-                              >
-                                <LogOut className="h-4 w-4 mr-1" />
-                                Indlever
-                              </Button>
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() => handleCheckOut(booking)}
+                                >
+                                  <LogOut className="h-4 w-4 mr-1" />
+                                  Indlever
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    toast(
+                                      <div>
+                                        <div className="font-medium mb-1">Kontakt lejer</div>
+                                        <div className="mb-1">Email: <a href={`mailto:${booking.renter_email}`}>{booking.renter_email}</a></div>
+                                        <div>Telefon: <a href={`tel:${booking.renter_phone}`}>{booking.renter_phone}</a></div>
+                                      </div>,
+                                      { duration: 10000 }
+                                    );
+                                  }}
+                                >
+                                  <Mail className="h-4 w-4 mr-1" />
+                                  Kontakt lejer
+                                </Button>
+                              </>
                             )}
                             {booking.check_out_record && (
                               <Badge variant="outline" className="font-mono">

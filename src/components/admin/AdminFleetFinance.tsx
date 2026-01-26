@@ -72,6 +72,7 @@ interface Loan {
   setup_fee: number;
   remaining_months: number;
   status: string;
+  platform_fee_paid_at?: string | null;
   start_date: string;
   vehicle?: {
     make: string;
@@ -106,6 +107,19 @@ interface LoanRequest {
 }
 
 export const AdminFleetFinance = () => {
+    const handleMarkFeePaid = async (loanId: string) => {
+      try {
+        const { error } = await supabase
+          .from('fleet_vehicle_loans')
+          .update({ platform_fee_paid_at: new Date().toISOString() })
+          .eq('id', loanId);
+        if (error) throw error;
+        toast.success('Platformgebyr markeret som betalt');
+        fetchFinanceData();
+      } catch (err) {
+        toast.error('Kunne ikke markere gebyr som betalt');
+      }
+    };
   const [customers, setCustomers] = useState<CustomerDebt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -409,7 +423,7 @@ export const AdminFleetFinance = () => {
       // Hent bookinger for kunden i perioden
       const { data: bookings, error } = await supabase
         .from('bookings')
-        .select('id, total_price, status, start_date, end_date')
+        .select('id, total_price, status, start_date, end_date, vehicle_id, renter_name')
         .eq('lessor_id', customerId)
         .gte('start_date', startDate)
         .lte('end_date', endDate)
@@ -418,7 +432,7 @@ export const AdminFleetFinance = () => {
       const totalRevenue = (bookings || []).reduce((sum, b) => sum + (b.total_price || 0), 0);
       const commission = Math.round(totalRevenue * (commissionRate / 100));
       const payout = totalRevenue - commission;
-      setStatement({ totalRevenue, commission, payout, count: (bookings || []).length });
+      setStatement({ totalRevenue, commission, payout, count: (bookings || []).length, bookings });
     } catch (err) {
       setStatement({ error: 'Kunne ikke beregne opgørelse' });
     } finally {
@@ -430,20 +444,69 @@ export const AdminFleetFinance = () => {
   const downloadStatementPDF = () => {
     if (!statement) return;
     const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Månedlig Opgørelse', 10, 20);
+    // Logo (hvis muligt)
+    // doc.addImage('/public/lejio-logo.png', 'PNG', 150, 10, 40, 12); // kræver base64 eller ekstern url
+    doc.setFontSize(18);
+    doc.text('Lejio - Månedlig Opgørelse', 10, 20);
     doc.setFontSize(12);
-    doc.text(`Omsætning: ${statement.totalRevenue} kr`, 10, 40);
-    doc.text(`Kommission: ${statement.commission} kr`, 10, 50);
-    doc.text(`Udbetaling: ${statement.payout} kr`, 10, 60);
-    doc.text(`Antal bookinger: ${statement.count}`, 10, 70);
+    doc.text(`Periode: ${selectedMonth}`, 10, 30);
+    if (selectedCustomer) {
+      doc.text(`Kunde: ${selectedCustomer.company_name || selectedCustomer.full_name || selectedCustomer.email}`, 10, 38);
+      doc.text(`E-mail: ${selectedCustomer.email}`, 10, 44);
+    }
+    doc.text(`Omsætning: ${statement.totalRevenue} kr`, 10, 54);
+    doc.text(`Kommission: ${statement.commission} kr`, 10, 62);
+    doc.text(`Udbetaling: ${statement.payout} kr`, 10, 70);
+    doc.text(`Antal bookinger: ${statement.count}`, 10, 78);
+    // Tabel med bookinger
+    if (statement.bookings && statement.bookings.length > 0) {
+      doc.setFontSize(11);
+      doc.text('Bookinger:', 10, 88);
+      let y = 94;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Dato', 10, y);
+      doc.text('Bil', 45, y);
+      doc.text('Lejer', 100, y);
+      doc.text('Pris', 150, y);
+      doc.setFont('helvetica', 'normal');
+      y += 6;
+      statement.bookings.forEach((b: any) => {
+        doc.text(`${b.start_date} - ${b.end_date}`, 10, y);
+        doc.text(`${b.vehicle_id || ''}`, 45, y); // evt. slå op på bilnavn
+        doc.text(`${b.renter_name || ''}`, 100, y);
+        doc.text(`${b.total_price || 0} kr`, 150, y);
+        y += 6;
+        if (y > 270) { doc.addPage(); y = 20; }
+      });
+    }
     doc.save('opgørelse.pdf');
   };
 
   // Opret faktura (dummy - skal evt. kobles til backend)
   const createInvoice = async () => {
-    // Her kan du kalde en Supabase function eller API for at oprette faktura
-    alert('Faktura oprettet (demo)');
+    if (!selectedCustomer || !statement) return;
+    setIsCalculating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-invoice', {
+        body: {
+          lessor_id: selectedCustomer.id,
+          month: selectedMonth,
+          total_revenue: statement.totalRevenue,
+          commission: statement.commission,
+          payout: statement.payout,
+          bookings: statement.bookings,
+        }
+      });
+      if (error || !data || !data.invoice) throw error || new Error('Ingen faktura retur');
+      toast.success(`Faktura oprettet: ${data.invoice.invoice_number}`);
+      if (data.invoice.pdf_url) {
+        window.open(data.invoice.pdf_url, '_blank');
+      }
+    } catch (err: any) {
+      toast.error('Kunne ikke oprette faktura: ' + (err?.message || err));
+    } finally {
+      setIsCalculating(false);
+    }
   };
 
   if (isLoading) {
@@ -942,6 +1005,42 @@ export const AdminFleetFinance = () => {
                       Beregn opgørelse
                     </Button>
                   </TableCell>
+                      {/* Loans Table: Add marker for platform fee paid */}
+                      <Card className="mt-8">
+                        <CardHeader>
+                          <CardTitle>Aktive Lån og Gebyrer</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Kunde</TableHead>
+                                <TableHead>Beskrivelse</TableHead>
+                                <TableHead>Oprettelsesgebyr</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Handling</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {customers.flatMap(customer => customer.activeLoans.map(loan => (
+                                <TableRow key={loan.id}>
+                                  <TableCell>{customer.company_name || customer.full_name || customer.email}</TableCell>
+                                  <TableCell>{loan.description}</TableCell>
+                                  <TableCell>{loan.setup_fee} kr</TableCell>
+                                  <TableCell>{loan.platform_fee_paid_at ? <Badge variant="success">Betalt</Badge> : <Badge variant="outline">Ikke betalt</Badge>}</TableCell>
+                                  <TableCell>
+                                    {!loan.platform_fee_paid_at && (
+                                      <Button size="sm" variant="default" onClick={() => handleMarkFeePaid(loan.id)}>
+                                        Marker som betalt
+                                      </Button>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              )))}
+                            </TableBody>
+                          </Table>
+                        </CardContent>
+                      </Card>
                 </TableRow>
               ))}
             </TableBody>
