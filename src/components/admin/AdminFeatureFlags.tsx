@@ -1,3 +1,6 @@
+import {
+  Calendar, FileText, CreditCard, MapPin, Bell, Users, BarChart3, MessageSquare, Camera, Brain, BadgeCheck, Wallet, Building2, Scan, FileCheck, Store, Bike, CalendarClock, Wrench, CircleDot, Star, Receipt, Truck, Shield, ShieldCheck, Smartphone, QrCode, Globe, Zap, TrendingDown, AlertTriangle, ArrowRight, Play, Check, Lock
+} from "lucide-react";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -48,6 +51,7 @@ const FEATURES = [
   { key: 'service_booking', label: 'Service-booking' },
   { key: 'auto_dispatch_ai', label: 'Auto-Dispatch AI' },
   { key: 'ai_dashboard_analysis', label: 'Dashboard-analyse' },
+
   { key: 'ai_translation', label: 'AI-oversættelse' },
   { key: 'damage_ai_analysis', label: 'Skade-AI' },
   { key: 'messaging', label: 'Indbygget beskedsystem' },
@@ -146,19 +150,20 @@ export const AdminFeatureFlags = () => {
     enterprise: ['corporate']
   };
 
+
   const featureCategories = [
-    { id: 'booking', label: 'Booking & Kalender', tier: 'starter' },
-    { id: 'contracts', label: 'Kontrakter & Dokumentation', tier: 'starter' },
-    { id: 'checkin', label: 'Check-in & Check-out', tier: 'starter' },
-    { id: 'payment', label: 'Betaling & Økonomi', tier: 'starter' },
-    { id: 'communication', label: 'Kommunikation', tier: 'starter' },
-    { id: 'renter', label: 'Lejer-administration', tier: 'starter' },
-    { id: 'locations', label: 'Lokationer & Afdelinger', tier: 'pro' },
-    { id: 'gps', label: 'GPS & Flådestyring', tier: 'pro' },
-    { id: 'motorcycle', label: 'Motorcykel & Scooter', tier: 'pro' },
-    { id: 'service', label: 'Værksted & Service', tier: 'pro' },
-    { id: 'ai', label: 'AI-funktioner', tier: 'pro' },
-    { id: 'corporate', label: 'Erhverv & Flåde', tier: 'enterprise' }
+    { id: 'booking', label: 'Booking & Kalender', title: 'Booking & Kalender', tier: 'starter', icon: Calendar, color: 'from-primary to-primary/60' },
+    { id: 'contracts', label: 'Kontrakter & Dokumentation', title: 'Kontrakter & Dokumentation', tier: 'starter', icon: FileText, color: 'from-accent to-accent/60' },
+    { id: 'checkin', label: 'Check-in & Check-out', title: 'Check-in & Check-out', tier: 'starter', icon: Camera, color: 'from-teal-500 to-teal-500/60' },
+    { id: 'payment', label: 'Betaling & Økonomi', title: 'Betaling & Økonomi', tier: 'starter', icon: CreditCard, color: 'from-secondary to-secondary/60' },
+    { id: 'communication', label: 'Kommunikation', title: 'Kommunikation', tier: 'starter', icon: MessageSquare, color: 'from-indigo-500 to-indigo-500/60' },
+    { id: 'renter', label: 'Lejer-administration', title: 'Lejer-administration', tier: 'starter', icon: Users, color: 'from-blue-500 to-blue-500/60' },
+    { id: 'locations', label: 'Lokationer & Afdelinger', title: 'Lokationer & Afdelinger', tier: 'pro', icon: Store, color: 'from-emerald-500 to-emerald-500/60' },
+    { id: 'gps', label: 'GPS & Flådestyring', title: 'GPS & Flådestyring', tier: 'pro', icon: MapPin, color: 'from-green-500 to-green-500/60' },
+    { id: 'motorcycle', label: 'Motorcykel & Scooter', title: 'Motorcykel & Scooter', tier: 'pro', icon: Bike, color: 'from-yellow-500 to-yellow-500/60' },
+    { id: 'service', label: 'Værksted & Service', title: 'Værksted & Service', tier: 'pro', icon: Wrench, color: 'from-orange-500 to-orange-500/60' },
+    { id: 'ai', label: 'AI-funktioner', title: 'AI-funktioner', tier: 'pro', icon: Brain, color: 'from-purple-500 to-purple-500/60' },
+    { id: 'corporate', label: 'Erhverv & Flåde', title: 'Erhverv & Flåde', tier: 'enterprise', icon: Building2, color: 'from-slate-500 to-slate-500/60' }
   ];
 
   const tierColors = {
@@ -182,87 +187,82 @@ export const AdminFeatureFlags = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <Accordion type="single" collapsible>
-          {customers
-            .filter(customer => {
-              const q = search.toLowerCase();
-              return (
-                !q ||
-                (customer.company_name && customer.company_name.toLowerCase().includes(q)) ||
-                (customer.full_name && customer.full_name.toLowerCase().includes(q)) ||
-                (customer.email && customer.email.toLowerCase().includes(q))
-              );
-            })
-            .map(customer => (
-              <AccordionItem key={customer.id} value={customer.id} className="mb-2 border rounded-lg">
-                <AccordionTrigger className="px-4 py-3 font-bold text-left">
-                  {customer.company_name || customer.full_name || customer.email}
-                  <span className="block text-sm text-muted-foreground font-normal">
-                    Abonnement: {customer.subscription_tier || 'Ingen'} | Status: {customer.subscription_status || 'Ukendt'}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4">
-                  {/* Group features by abonnementer and fleet packages */}
-                  {PACKAGE_GROUPS.map(group => (
-                    <div key={group.name} className={`mb-6 p-3 rounded-xl border ${group.color}`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="px-3 py-1 rounded text-sm font-bold bg-primary/10 text-primary">{group.name}</span>
-                        <span className="text-xs text-muted-foreground">{group.description}</span>
-                      </div>
-                      {featureCategories.filter(pkg => group.tiers.includes(pkg.tier)).map(pkg => (
-                        <div key={pkg.id} className="mb-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`px-2 py-1 rounded text-xs font-bold ${tierColors[pkg.tier]}`}>{pkg.label}</span>
-                            <span className={`px-2 py-1 rounded text-xs ${tierColors[pkg.tier]}`}>{pkg.tier.charAt(0).toUpperCase() + pkg.tier.slice(1)}</span>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {FEATURES.filter(f => f.key && PACKAGE_FEATURES[pkg.tier].includes(pkg.id)).map(feature => {
-                              const isStandard = STANDARD_FEATURES.includes(feature.key);
-                              return (
-                                <div key={feature.key} className="flex items-center gap-2">
-                                  <Switch
-                                    checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
-                                    disabled={isStandard}
-                                    onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
-                                  />
-                                  <span>{feature.label}{isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}</span>
-                                  <span className={`ml-2 px-2 py-1 rounded text-xs ${tierColors[pkg.tier]}`}>{pkg.tier.charAt(0).toUpperCase() + pkg.tier.slice(1)}</span>
-                                  {/* Admin custom links for video, image, page */}
-                                  <div className="flex flex-col gap-1 ml-2">
-                                    <input
-                                      type="url"
-                                      placeholder="Video-link"
-                                      className="px-2 py-1 rounded border text-xs"
-                                      value={customer.feature_flags?.custom_links?.[feature.key]?.video || ''}
-                                      onChange={e => handleCustomLinkChange(customer.id, feature.key, 'video', e.target.value)}
-                                    />
-                                    <input
-                                      type="url"
-                                      placeholder="Billede-link"
-                                      className="px-2 py-1 rounded border text-xs"
-                                      value={customer.feature_flags?.custom_links?.[feature.key]?.image || ''}
-                                      onChange={e => handleCustomLinkChange(customer.id, feature.key, 'image', e.target.value)}
-                                    />
-                                    <input
-                                      type="url"
-                                      placeholder="Side-link"
-                                      className="px-2 py-1 rounded border text-xs"
-                                      value={customer.feature_flags?.custom_links?.[feature.key]?.page || ''}
-                                      onChange={e => handleCustomLinkChange(customer.id, feature.key, 'page', e.target.value)}
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+        {/* Show each customer as a section, with modules as cards/grids like /funktioner */}
+        {customers
+          .filter(customer => {
+            const q = search.toLowerCase();
+            return (
+              !q ||
+              (customer.company_name && customer.company_name.toLowerCase().includes(q)) ||
+              (customer.full_name && customer.full_name.toLowerCase().includes(q)) ||
+              (customer.email && customer.email.toLowerCase().includes(q))
+            );
+          })
+          .map(customer => (
+            <div key={customer.id} className="mb-8">
+              <div className="font-bold text-lg mb-1">{customer.company_name || customer.full_name || customer.email}</div>
+              <div className="text-sm text-muted-foreground mb-4">Abonnement: {customer.subscription_tier || 'Ingen'} | Status: {customer.subscription_status || 'Ukendt'}</div>
+              {/* Modules as cards/grids */}
+              <div className="space-y-10">
+                {featureCategories.map((category, idx) => {
+                  const CategoryIcon = category.icon;
+                  return (
+                    <div key={category.id} className="">
+                      <div className="flex items-center gap-4 mb-2">
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md`}>
+                          {CategoryIcon && <CategoryIcon className="w-6 h-6 text-white" />}
                         </div>
-                      ))}
+                        <h2 className="font-display text-xl font-bold">{category.title}</h2>
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${tierColors[category.tier]}`}>{category.tier.charAt(0).toUpperCase() + category.tier.slice(1)}</span>
+                      </div>
+                      <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+                        {FEATURES.filter(f => f.key && PACKAGE_FEATURES[category.tier].includes(category.id)).map(feature => {
+                          const isStandard = STANDARD_FEATURES.includes(feature.key);
+                          return (
+                            <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tierColors[category.tier]}`}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <Switch
+                                  checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
+                                  disabled={isStandard}
+                                  onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
+                                />
+                                <span className="font-bold text-sm">{feature.label}</span>
+                                {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
+                              </div>
+                              {/* Admin custom links for video, image, page */}
+                              <div className="flex flex-col gap-1">
+                                <input
+                                  type="url"
+                                  placeholder="Video-link"
+                                  className="px-2 py-1 rounded border text-xs"
+                                  value={customer.feature_flags?.custom_links?.[feature.key]?.video || ''}
+                                  onChange={e => handleCustomLinkChange(customer.id, feature.key, 'video', e.target.value)}
+                                />
+                                <input
+                                  type="url"
+                                  placeholder="Billede-link"
+                                  className="px-2 py-1 rounded border text-xs"
+                                  value={customer.feature_flags?.custom_links?.[feature.key]?.image || ''}
+                                  onChange={e => handleCustomLinkChange(customer.id, feature.key, 'image', e.target.value)}
+                                />
+                                <input
+                                  type="url"
+                                  placeholder="Side-link"
+                                  className="px-2 py-1 rounded border text-xs"
+                                  value={customer.feature_flags?.custom_links?.[feature.key]?.page || ''}
+                                  onChange={e => handleCustomLinkChange(customer.id, feature.key, 'page', e.target.value)}
+                                />
+                              </div>
+                            </Card>
+                          );
+                        })}
+                      </div>
                     </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-        </Accordion>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
       </CardContent>
     </Card>
   );
