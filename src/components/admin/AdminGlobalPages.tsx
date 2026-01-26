@@ -104,35 +104,33 @@ export default function AdminGlobalPages() {
             </Card>
           ))}
         </div>
-        {(editing || form.title) && (
-          <Card className="p-4 mb-8">
-            <h2 className="font-bold mb-2">{editing ? 'Rediger side' : 'Opret ny side'}</h2>
-            <label className="block mb-1 font-medium">Titel</label>
-            <Input
-              value={form.title}
-              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              placeholder="Titel på siden"
-              className="mb-2"
-            />
-            <label className="block mb-1 font-medium">Slug</label>
-            <Input
-              value={form.slug}
-              onChange={e => setForm(f => ({ ...f, slug: e.target.value.replace(/\s+/g, '-').toLowerCase() }))}
-              placeholder="URL slug (fx: min-side)"
-              className="mb-2"
-            />
-            <MarkdownEditor value={form.content_markdown} onChange={v => setForm(f => ({ ...f, content_markdown: v }))} />
-            <div className="flex gap-2 mt-2">
-              <input type="file" accept="image/*" onChange={e => uploadFile(e, 'image')} disabled={uploading} />
-              <input type="file" accept="video/*" onChange={e => uploadFile(e, 'video')} disabled={uploading} />
-            </div>
-            <div className="flex gap-2 mt-2">
-              {form.image_urls?.map((url: string) => <img key={url} src={url} alt="billede" className="h-12 rounded" />)}
-              {form.video_urls?.map((url: string) => <video key={url} src={url} className="h-12 rounded" controls />)}
-            </div>
-            <Button onClick={savePage} disabled={uploading} className="mt-4">Gem</Button>
-          </Card>
-        )}
+        <Card className="p-4 mb-8">
+          <h2 className="font-bold mb-2">{editing ? 'Rediger side' : 'Opret ny side'}</h2>
+          <label className="block mb-1 font-medium">Titel</label>
+          <Input
+            value={form.title}
+            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            placeholder="Titel på siden"
+            className="mb-2"
+          />
+          <label className="block mb-1 font-medium">Slug</label>
+          <Input
+            value={form.slug}
+            onChange={e => setForm(f => ({ ...f, slug: e.target.value.replace(/\s+/g, '-').toLowerCase() }))}
+            placeholder="URL slug (fx: min-side)"
+            className="mb-2"
+          />
+          <MarkdownEditor value={form.content_markdown} onChange={v => setForm(f => ({ ...f, content_markdown: v }))} />
+          <div className="flex gap-2 mt-2">
+            <input type="file" accept="image/*" onChange={e => uploadFile(e, 'image')} disabled={uploading} />
+            <input type="file" accept="video/*" onChange={e => uploadFile(e, 'video')} disabled={uploading} />
+          </div>
+          <div className="flex gap-2 mt-2">
+            {form.image_urls?.map((url: string) => <img key={url} src={url} alt="billede" className="h-12 rounded" />)}
+            {form.video_urls?.map((url: string) => <video key={url} src={url} className="h-12 rounded" controls />)}
+          </div>
+          <Button onClick={savePage} disabled={uploading} className="mt-4">Gem</Button>
+        </Card>
       </div>
     </AdminDashboardLayout>
   );

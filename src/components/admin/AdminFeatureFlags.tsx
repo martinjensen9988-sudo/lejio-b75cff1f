@@ -179,19 +179,10 @@ export const AdminFeatureFlags = () => {
   };
 
 
-  const featureCategories = [
-    { id: 'booking', label: 'Booking & Kalender', title: 'Booking & Kalender', tier: 'starter', icon: Calendar, color: 'from-primary to-primary/60' },
-    { id: 'contracts', label: 'Kontrakter & Dokumentation', title: 'Kontrakter & Dokumentation', tier: 'starter', icon: FileText, color: 'from-accent to-accent/60' },
-    { id: 'checkin', label: 'Check-in & Check-out', title: 'Check-in & Check-out', tier: 'starter', icon: Camera, color: 'from-teal-500 to-teal-500/60' },
-    { id: 'payment', label: 'Betaling & Økonomi', title: 'Betaling & Økonomi', tier: 'starter', icon: CreditCard, color: 'from-secondary to-secondary/60' },
-    { id: 'communication', label: 'Kommunikation', title: 'Kommunikation', tier: 'starter', icon: MessageSquare, color: 'from-indigo-500 to-indigo-500/60' },
-    { id: 'renter', label: 'Lejer-administration', title: 'Lejer-administration', tier: 'starter', icon: Users, color: 'from-blue-500 to-blue-500/60' },
-    { id: 'locations', label: 'Lokationer & Afdelinger', title: 'Lokationer & Afdelinger', tier: 'pro', icon: Store, color: 'from-emerald-500 to-emerald-500/60' },
-    { id: 'gps', label: 'GPS & Flådestyring', title: 'GPS & Flådestyring', tier: 'pro', icon: MapPin, color: 'from-green-500 to-green-500/60' },
-    { id: 'motorcycle', label: 'Motorcykel & Scooter', title: 'Motorcykel & Scooter', tier: 'pro', icon: Bike, color: 'from-yellow-500 to-yellow-500/60' },
-    { id: 'service', label: 'Værksted & Service', title: 'Værksted & Service', tier: 'pro', icon: Wrench, color: 'from-orange-500 to-orange-500/60' },
-    { id: 'ai', label: 'AI-funktioner', title: 'AI-funktioner', tier: 'pro', icon: Brain, color: 'from-purple-500 to-purple-500/60' },
-    { id: 'corporate', label: 'Erhverv & Flåde', title: 'Erhverv & Flåde', tier: 'enterprise', icon: Building2, color: 'from-slate-500 to-slate-500/60' }
+  const packageTabs = [
+    { id: 'starter', label: 'Starter', color: 'bg-slate-100 text-slate-800' },
+    { id: 'pro', label: 'Pro', color: 'bg-blue-100 text-blue-800' },
+    { id: 'enterprise', label: 'Enterprise', color: 'bg-purple-100 text-purple-800' }
   ];
 
   const tierColors = {
@@ -221,64 +212,56 @@ export const AdminFeatureFlags = () => {
           <div className="font-bold text-lg mb-1">Admin oversigt</div>
           <div className="text-sm text-muted-foreground mb-4">Her ser du alle moduler og features. Rediger links for hver funktion direkte her.</div>
           <Accordion type="multiple">
-            {featureCategories.map((category, idx) => {
-              const CategoryIcon = category.icon;
-              return (
-                <AccordionItem key={category.id} value={category.id} className="mb-2 border rounded-lg">
-                  <AccordionTrigger className="flex items-center gap-4 px-4 py-3 font-bold text-left">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md`}>
-                      {CategoryIcon && <CategoryIcon className="w-6 h-6 text-white" />}
-                    </div>
-                    <span className="font-display text-xl font-bold">{category.title}</span>
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${tierColors[category.tier]}`}>{category.tier.charAt(0).toUpperCase() + category.tier.slice(1)}</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 pb-4">
-                    <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                      {FEATURES.filter(f => f.key && PACKAGE_FEATURES[category.tier].includes(category.id)).map(feature => {
-                        const isStandard = STANDARD_FEATURES.includes(feature.key);
-                        // Global links state
-                        const globalLinks = customLinks[feature.key] || {};
-                        return (
-                          <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tierColors[category.tier]}`}> 
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-bold text-sm">{feature.label}</span>
-                              {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
-                            </div>
-                            {/* Global admin links for video, image, page */}
-                            <div className="flex flex-col gap-1 mt-2">
-                              <input
-                                type="url"
-                                placeholder="Video-link (global)"
-                                className="px-2 py-1 rounded border text-xs"
-                                value={globalLinks.video || ''}
-                                onChange={e => handleGlobalLinkChange(feature.key, 'video', e.target.value)}
-                              />
-                              <input
-                                type="url"
-                                placeholder="Billede-link (global)"
-                                className="px-2 py-1 rounded border text-xs"
-                                value={globalLinks.image || ''}
-                                onChange={e => handleGlobalLinkChange(feature.key, 'image', e.target.value)}
-                              />
-                              <input
-                                type="url"
-                                placeholder="Side-link (global)"
-                                className="px-2 py-1 rounded border text-xs"
-                                value={globalLinks.page || ''}
-                                onChange={e => handleGlobalLinkChange(feature.key, 'page', e.target.value)}
-                              />
-                              <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[feature.key]} onClick={() => handleSaveGlobalLinks(feature.key)}>
-                                {saving[feature.key] ? 'Gemmer...' : 'Gem links'}
-                              </Button>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
+            {packageTabs.map(tab => (
+              <AccordionItem key={tab.id} value={tab.id} className="mb-2 border rounded-lg">
+                <AccordionTrigger className="flex items-center gap-4 px-4 py-3 font-bold text-left">
+                  <span className={`font-display text-xl font-bold`}>{tab.label}</span>
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${tab.color}`}>{tab.label}</span>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+                    {FEATURES.filter(f => PACKAGE_FEATURES[tab.id]?.includes(f.key)).map(feature => {
+                      const isStandard = STANDARD_FEATURES.includes(feature.key);
+                      const globalLinks = customLinks[feature.key] || {};
+                      return (
+                        <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tab.color}`}> 
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm">{feature.label}</span>
+                            {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
+                          </div>
+                          <div className="flex flex-col gap-1 mt-2">
+                            <input
+                              type="url"
+                              placeholder="Video-link (global)"
+                              className="px-2 py-1 rounded border text-xs"
+                              value={globalLinks.video || ''}
+                              onChange={e => handleGlobalLinkChange(feature.key, 'video', e.target.value)}
+                            />
+                            <input
+                              type="url"
+                              placeholder="Billede-link (global)"
+                              className="px-2 py-1 rounded border text-xs"
+                              value={globalLinks.image || ''}
+                              onChange={e => handleGlobalLinkChange(feature.key, 'image', e.target.value)}
+                            />
+                            <input
+                              type="url"
+                              placeholder="Side-link (global)"
+                              className="px-2 py-1 rounded border text-xs"
+                              value={globalLinks.page || ''}
+                              onChange={e => handleGlobalLinkChange(feature.key, 'page', e.target.value)}
+                            />
+                            <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[feature.key]} onClick={() => handleSaveGlobalLinks(feature.key)}>
+                              {saving[feature.key] ? 'Gemmer...' : 'Gem links'}
+                            </Button>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
           </Accordion>
         </div>
         {/* Customer selection and feature editing */}
@@ -303,42 +286,32 @@ export const AdminFeatureFlags = () => {
               <div className="text-sm text-muted-foreground mb-4">Abonnement: {customer.subscription_tier || 'Ingen'} | Status: {customer.subscription_status || 'Ukendt'}</div>
               {/* Modules as cards/grids */}
               <div className="space-y-10">
-                {featureCategories.map((category, idx) => {
-                  const CategoryIcon = category.icon;
-                  return (
-                    <div key={category.id} className="">
-                      <div className="flex items-center gap-4 mb-2">
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-md`}>
-                          {CategoryIcon && <CategoryIcon className="w-6 h-6 text-white" />}
-                        </div>
-                        <h2 className="font-display text-xl font-bold">{category.title}</h2>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${tierColors[category.tier]}`}>{category.tier.charAt(0).toUpperCase() + category.tier.slice(1)}</span>
-                      </div>
-                      <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                        {FEATURES.filter(f => f.key && PACKAGE_FEATURES[category.tier].includes(category.id)).map(feature => {
-                          const isStandard = STANDARD_FEATURES.includes(feature.key);
-                          return (
-                            <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tierColors[category.tier]}`}>
-                              <div className="flex items-center gap-2 mb-1">
-                                <Switch
-                                  checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
-                                  disabled={isStandard}
-                                  onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
-                                />
-                                <span className="font-bold text-sm">{feature.label}</span>
-                                {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
-                              </div>
-                              {/* Admin custom links for video, image, page */}
-                              <div className="flex flex-col gap-1">
-                                {/* Fjernet custom link inputs for kunde, kun global links via admin */}
-                              </div>
-                            </Card>
-                          );
-                        })}
-                      </div>
+                {packageTabs.map(tab => (
+                  <div key={tab.id} className="">
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className={`font-display text-xl font-bold`}>{tab.label}</span>
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${tab.color}`}>{tab.label}</span>
                     </div>
-                  );
-                })}
+                    <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+                      {FEATURES.filter(f => PACKAGE_FEATURES[tab.id]?.includes(f.key)).map(feature => {
+                        const isStandard = STANDARD_FEATURES.includes(feature.key);
+                        return (
+                          <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tab.color}`}> 
+                            <div className="flex items-center gap-2 mb-1">
+                              <Switch
+                                checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
+                                disabled={isStandard}
+                                onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
+                              />
+                              <span className="font-bold text-sm">{feature.label}</span>
+                              {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
