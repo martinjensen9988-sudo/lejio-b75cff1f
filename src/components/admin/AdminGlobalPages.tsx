@@ -131,6 +131,32 @@ export default function AdminGlobalPages() {
           </div>
           <Button onClick={savePage} disabled={uploading} className="mt-4">Gem</Button>
         </Card>
+
+        <div className="mt-8">
+          <h3 className="font-bold text-lg mb-2">Dine sider</h3>
+          <div className="grid gap-4">
+            {pages.length === 0 && <div className="text-muted-foreground">Ingen sider oprettet endnu.</div>}
+            {pages.map(page => (
+              <Card key={page.id} className="p-4 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-bold text-lg">{page.title}</span>
+                    <Badge variant="secondary" className="ml-2">/{page.slug}</Badge>
+                  </div>
+                  <div>
+                    <Button size="sm" onClick={() => startEdit(page)}>Rediger</Button>
+                    <Button size="sm" variant="destructive" onClick={() => deletePage(page.id)} className="ml-2">Slet</Button>
+                  </div>
+                </div>
+                <div className="text-muted-foreground text-sm">{page.content_markdown?.slice(0, 120)}...</div>
+                <div className="flex gap-2 mt-2">
+                  {page.image_urls?.map((url: string) => <img key={url} src={url} alt="billede" className="h-12 rounded" />)}
+                  {page.video_urls?.map((url: string) => <video key={url} src={url} className="h-12 rounded" controls />)}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </AdminDashboardLayout>
   );
