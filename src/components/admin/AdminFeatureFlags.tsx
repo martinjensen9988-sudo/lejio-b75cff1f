@@ -70,6 +70,27 @@ const FEATURES = [
 ];
 
 export const AdminFeatureFlags = () => {
+    // Store custom links for features (video, image, page)
+    const [customLinks, setCustomLinks] = useState({});
+
+    // Save custom link for a feature
+    const handleCustomLinkChange = async (customerId, featureKey, type, value) => {
+      const customer = customers.find(c => c.id === customerId);
+      const flags = customer?.feature_flags || {};
+      const links = flags.custom_links || {};
+      const newLinks = { ...links, [featureKey]: { ...links[featureKey], [type]: value } };
+      const newFlags = { ...flags, custom_links: newLinks };
+      const { error } = await supabase
+        .from('profiles')
+        .update({ feature_flags: newFlags })
+        .eq('id', customerId);
+      if (!error) {
+        setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, feature_flags: newFlags } : c));
+        toast.success('Link opdateret');
+      } else {
+        toast.error('Kunne ikke opdatere link');
+      }
+    };
   const [customers, setCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -206,6 +227,30 @@ export const AdminFeatureFlags = () => {
                                   />
                                   <span>{feature.label}{isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}</span>
                                   <span className={`ml-2 px-2 py-1 rounded text-xs ${tierColors[pkg.tier]}`}>{pkg.tier.charAt(0).toUpperCase() + pkg.tier.slice(1)}</span>
+                                  {/* Admin custom links for video, image, page */}
+                                  <div className="flex flex-col gap-1 ml-2">
+                                    <input
+                                      type="url"
+                                      placeholder="Video-link"
+                                      className="px-2 py-1 rounded border text-xs"
+                                      value={customer.feature_flags?.custom_links?.[feature.key]?.video || ''}
+                                      onChange={e => handleCustomLinkChange(customer.id, feature.key, 'video', e.target.value)}
+                                    />
+                                    <input
+                                      type="url"
+                                      placeholder="Billede-link"
+                                      className="px-2 py-1 rounded border text-xs"
+                                      value={customer.feature_flags?.custom_links?.[feature.key]?.image || ''}
+                                      onChange={e => handleCustomLinkChange(customer.id, feature.key, 'image', e.target.value)}
+                                    />
+                                    <input
+                                      type="url"
+                                      placeholder="Side-link"
+                                      className="px-2 py-1 rounded border text-xs"
+                                      value={customer.feature_flags?.custom_links?.[feature.key]?.page || ''}
+                                      onChange={e => handleCustomLinkChange(customer.id, feature.key, 'page', e.target.value)}
+                                    />
+                                  </div>
                                 </div>
                               );
                             })}
