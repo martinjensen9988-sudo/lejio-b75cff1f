@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useCVRLookup } from "@/hooks/useCVRLookup";
 import { useReferral } from "@/hooks/useReferral";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,26 +8,23 @@ import { Label } from "@/components/ui/label";
 import LejioLogo from "@/components/LejioLogo";
 import { toast } from "sonner";
 import { z } from "zod";
-import { User, Building2, ArrowLeft, ArrowRight, Check, Mail, Lock, Phone, MapPin, Loader2, CheckCircle, XCircle, Calendar, Briefcase } from "lucide-react";
+import { User, ArrowLeft, ArrowRight, Check, Mail, Lock, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 // Validation schemas
 const emailSchema = z.string().email("Ugyldig email adresse").max(255);
 const passwordSchema = z.string().min(8, "Adgangskode skal være mindst 8 tegn").max(128);
 const nameSchema = z.string().min(2, "Navn skal være mindst 2 tegn").max(100);
-const cvrSchema = z.string().regex(/^\d{8}$/, "CVR-nummer skal være 8 cifre").optional().or(z.literal(''));
 
 type AuthMode = "login" | "signup";
-type UserType = "privat" | "professionel";
-type SignupStep = "choose-type" | "credentials" | "profile";
+type SignupStep = "credentials" | "profile";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { user, signUp, signIn, loading } = useAuth();
 
   const [mode, setMode] = useState<AuthMode>("login");
-  const [signupStep, setSignupStep] = useState<SignupStep>("choose-type");
-  const [userType, setUserType] = useState<UserType>("privat");
+  const [signupStep, setSignupStep] = useState<SignupStep>("credentials");
   
   // Form fields
   const [email, setEmail] = useState("");
@@ -36,14 +32,11 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [cvrNumber, setCvrNumber] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [referralCodeFromUrl, setReferralCodeFromUrl] = useState<string | null>(null);
-  const { data: cvrData, lookupCVR, isLoading: cvrLoading, error: cvrError, isCompanyActive } = useCVRLookup();
   const { applyReferralCode } = useReferral();
   const [searchParams] = useSearchParams();
 
@@ -56,23 +49,6 @@ const Auth = () => {
     }
   }, [searchParams]);
 
-  // Auto-lookup CVR when 8 digits are entered
-  useEffect(() => {
-    if (userType !== 'professionel') return;
-    
-    const cleanCvr = cvrNumber.replace(/\D/g, '');
-    if (cleanCvr.length === 8) {
-      lookupCVR(cleanCvr).then((result) => {
-        if (result?.companyName && result.isActive) {
-          setCompanyName(result.companyName);
-          toast.success('Virksomhed fundet!', { description: result.companyName });
-        } else if (result?.companyName && !result.isActive) {
-          setCompanyName(result.companyName);
-          toast.error('Virksomheden er ikke aktiv', { description: 'Kun aktive virksomheder kan registreres.' });
-        }
-      });
-    }
-  }, [cvrNumber, userType, lookupCVR]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -87,7 +63,6 @@ const Auth = () => {
         case "email": emailSchema.parse(value); break;
         case "password": passwordSchema.parse(value); break;
         case "fullName": nameSchema.parse(value); break;
-        case "cvrNumber": if (value) cvrSchema.parse(value); break;
       }
       return null;
     } catch (e) {
@@ -131,20 +106,14 @@ const Auth = () => {
     const emailError = validateField("email", email);
     const passwordError = validateField("password", password);
     const nameError = validateField("fullName", fullName);
-    const cvrValidationError = userType === "professionel" ? validateField("cvrNumber", cvrNumber) : null;
 
     if (password !== confirmPassword) {
       setErrors(prev => ({ ...prev, confirmPassword: "Adgangskoderne matcher ikke" }));
       return;
     }
 
-    if (emailError || passwordError || nameError || cvrValidationError) {
-      setErrors({ email: emailError || "", password: passwordError || "", fullName: nameError || "", cvrNumber: cvrValidationError || "" });
-      return;
-    }
-
-    if (userType === "professionel" && cvrData && !cvrData.isActive) {
-      toast.error('Virksomheden er ikke aktiv', { description: 'Kun aktive virksomheder kan registreres på platformen.' });
+    if (emailError || passwordError || nameError) {
+      setErrors({ email: emailError || "", password: passwordError || "", fullName: nameError || "" });
       return;
     }
 
@@ -154,7 +123,7 @@ const Auth = () => {
     }
 
     setIsSubmitting(true);
-    const { error } = await signUp(email, password, fullName, userType, userType === "professionel" ? cvrNumber : undefined, userType === "professionel" ? companyName : undefined);
+    const { error } = await signUp(email, password, fullName, "privat");
     setIsSubmitting(false);
 
     if (error) {
@@ -179,9 +148,9 @@ const Auth = () => {
 
   const resetForm = () => {
     setEmail(""); setPassword(""); setConfirmPassword("");
-    setFullName(""); setPhone(""); setCvrNumber("");
-    setCompanyName(""); setAcceptedTerms(false);
-    setErrors({}); setSignupStep("choose-type");
+    setFullName(""); setPhone("");
+    setAcceptedTerms(false);
+    setErrors({}); setSignupStep("credentials");
   };
 
   const switchMode = (newMode: AuthMode) => {
@@ -293,74 +262,15 @@ const Auth = () => {
             </form>
           ) : (
             <>
-              {signupStep === "choose-type" && (
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <h2 className="text-2xl font-display font-bold text-foreground mb-2">Vælg din profil</h2>
-                    <p className="text-muted-foreground text-sm">Hvad beskriver dig bedst?</p>
-                  </div>
-
-                  <div className="grid gap-4">
-                    <button
-                      type="button"
-                      onClick={() => { setUserType("privat"); setSignupStep("credentials"); }}
-                      className="p-6 rounded-2xl glass border border-accent/30 text-left transition-all duration-300 hover:scale-[1.02] hover:border-accent/60 hover:shadow-lg"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shrink-0 shadow-lg">
-                          <User className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg text-foreground">Privat udlejer</h3>
-                          <p className="text-sm text-muted-foreground mt-1">Jeg vil udleje min private bil og tjene penge, når jeg ikke bruger den.</p>
-                          <div className="flex items-center gap-2 mt-3 text-xs text-accent font-medium">
-                            <Check className="w-4 h-4" />
-                            <span>59 kr pr. booking • Ingen binding</span>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => navigate("/forhandler-opret")}
-                      className="p-6 rounded-2xl glass border border-primary/30 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/60 hover:shadow-lg"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-lg">
-                          <Building2 className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg text-foreground">Forhandler</h3>
-                          <p className="text-sm text-muted-foreground mt-1">Jeg har et CVR-nummer og driver en udlejningsforretning.</p>
-                          <div className="flex items-center gap-2 mt-3 text-xs text-primary font-medium">
-                            <ArrowRight className="w-4 h-4" />
-                            <span>Ansøg om partnerskab</span>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-
-                  <p className="text-center text-sm text-muted-foreground">
-                    Har du allerede en konto?{" "}
-                    <button type="button" onClick={() => switchMode("login")} className="text-primary font-semibold hover:underline">
-                      Log ind
-                    </button>
-                  </p>
-                </div>
-              )}
 
               {signupStep === "credentials" && (
                 <form onSubmit={(e) => { e.preventDefault(); setSignupStep("profile"); }} className="space-y-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <button type="button" onClick={() => setSignupStep("choose-type")} className="p-2 rounded-xl hover:bg-muted/50 transition-colors">
-                      <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <div>
-                      <h2 className="text-xl font-display font-bold text-foreground">{userType === "privat" ? "Privat udlejer" : "Forhandler"}</h2>
-                      <p className="text-sm text-muted-foreground">Trin 1 af 2 - Login oplysninger</p>
+                  <div className="text-center mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <User className="w-6 h-6 text-white" />
                     </div>
+                    <h2 className="text-xl font-display font-bold text-foreground">Privat udlejer</h2>
+                    <p className="text-sm text-muted-foreground">Trin 1 af 2 - Login oplysninger</p>
                   </div>
 
                   <div className="space-y-2">
@@ -394,6 +304,19 @@ const Auth = () => {
                     Fortsæt
                     <ArrowRight className="w-4 h-4" />
                   </Button>
+
+                  <p className="text-center text-sm text-muted-foreground">
+                    Har du allerede en konto?{" "}
+                    <button type="button" onClick={() => switchMode("login")} className="text-primary font-semibold hover:underline">
+                      Log ind
+                    </button>
+                  </p>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Er du forhandler?{" "}
+                    <button type="button" onClick={() => navigate("/forhandler-opret")} className="text-primary font-semibold hover:underline">
+                      Ansøg om partnerskab →
+                    </button>
+                  </p>
                 </form>
               )}
 
@@ -404,7 +327,7 @@ const Auth = () => {
                       <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                      <h2 className="text-xl font-display font-bold text-foreground">{userType === "privat" ? "Privat udlejer" : "Forhandler"}</h2>
+                      <h2 className="text-xl font-display font-bold text-foreground">Privat udlejer</h2>
                       <p className="text-sm text-muted-foreground">Trin 2 af 2 - Profiloplysninger</p>
                     </div>
                   </div>
@@ -417,30 +340,6 @@ const Auth = () => {
                     <Input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Dit fulde navn" className="rounded-xl bg-muted/30 border-border/50" required />
                     {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
                   </div>
-
-                  {userType === "professionel" && (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="cvrNumber" className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-primary" />
-                          CVR-nummer
-                        </Label>
-                        <div className="relative">
-                          <Input id="cvrNumber" type="text" value={cvrNumber} onChange={(e) => setCvrNumber(e.target.value.replace(/\D/g, '').slice(0, 8))} placeholder="12345678" className="rounded-xl bg-muted/30 border-border/50 pr-10" maxLength={8} />
-                          {cvrLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-primary" />}
-                          {cvrData && cvrData.isActive && <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mint" />}
-                          {cvrData && !cvrData.isActive && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />}
-                        </div>
-                        {errors.cvrNumber && <p className="text-sm text-destructive">{errors.cvrNumber}</p>}
-                        {cvrData && (
-                          <div className={`text-sm p-3 rounded-lg ${cvrData.isActive ? 'bg-mint/10 text-mint border border-mint/30' : 'bg-destructive/10 text-destructive border border-destructive/30'}`}>
-                            <p className="font-medium">{cvrData.companyName}</p>
-                            <p className="text-xs opacity-80">{cvrData.isActive ? 'Aktiv virksomhed' : 'Inaktiv virksomhed - kan ikke registreres'}</p>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
 
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border/50">
                     <input type="checkbox" id="terms" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-1 w-4 h-4 rounded border-border bg-muted accent-primary" />
