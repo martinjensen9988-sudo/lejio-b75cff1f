@@ -296,6 +296,7 @@ const App = () => (
               <Route path="/forhandler-opret" element={<DealerRegistration />} />
               <Route path="/kontakt" element={<Contact />} />
               <Route path="/side/:slug" element={<GlobalPage />} />
+              <Route path="/forhandler/:id" element={<DealerProfile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
