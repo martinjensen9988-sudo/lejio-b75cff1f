@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import HowItWorks from "@/components/HowItWorks";
+import Pricing from "@/components/Pricing";
 import LeaderSection from "@/components/LeaderSection";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -40,6 +41,7 @@ const Index = () => {
         <Hero />
         <Features />
         <HowItWorks />
+        <Pricing />
         <LeaderSection />
       </main>
       <Footer />
