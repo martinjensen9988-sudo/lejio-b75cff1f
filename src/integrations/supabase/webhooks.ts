@@ -12,7 +12,8 @@ export interface WebhookPayload {
 export const processDunningWebhook = async (): Promise<void> => {
   try {
     // Get all unpaid invoices
-    const { data: unpaidInvoices, error } = await supabase
+    // TODO: Replace 'as any' with proper types when Supabase types are updated
+    const { data: unpaidInvoices, error } = await (supabase as any)
       .from('invoices')
       .select('id, due_date, lessor_id, renter_id')
       .in('status', ['unpaid', 'partially_paid', 'overdue'])
@@ -21,7 +22,9 @@ export const processDunningWebhook = async (): Promise<void> => {
     if (error) throw error;
 
     for (const invoice of unpaidInvoices || []) {
-      const daysOverdue = differenceInDays(new Date(), new Date(invoice.due_date));
+      // Use 'as any' for invoice object
+      const inv: any = invoice;
+      const daysOverdue = differenceInDays(new Date(), new Date(inv.due_date));
 
       // Determine reminder type based on days overdue
       let reminderType = 'overdue_1';
@@ -34,40 +37,39 @@ export const processDunningWebhook = async (): Promise<void> => {
       }
 
       // Check if reminder already sent
-      const { data: existingReminder } = await supabase
+      const { data: existingReminder } = await (supabase as any)
         .from('payment_reminders')
         .select('id')
-        .eq('invoice_id', invoice.id)
+        .eq('invoice_id', inv.id)
         .eq('reminder_type', reminderType)
         .single();
 
       if (!existingReminder) {
         // Create reminder
-        await supabase
+        await (supabase as any)
           .from('payment_reminders')
           .insert({
-            invoice_id: invoice.id,
+            invoice_id: inv.id,
             reminder_type: reminderType,
             scheduled_date: new Date().toISOString(),
             status: 'pending',
-            email_subject: `Rykkerskrivelse: Betaling af faktura ${invoice.id}`,
+            email_subject: `Rykkerskrivelse: Betaling af faktura ${inv.id}`,
             email_body: `Din faktura er ${daysOverdue} dage forfalden. Venligst betale hurtigst muligt.`,
-            recipient_email: invoice.renter_id, // Will be looked up by RLS
-          })
-          .then(() => {
-            // Send reminder email via Edge Function
-            return fetch('/functions/v1/send-dunning-reminder', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                invoice_id: invoice.id,
-                reminder_type: reminderType,
-              }),
-            });
-          })
-          .catch((err) => {
-            console.error('Dunning webhook error:', err);
+            recipient_email: inv.renter_id, // Will be looked up by RLS
           });
+        // Send reminder email via Edge Function
+        try {
+          await fetch('/functions/v1/send-dunning-reminder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              invoice_id: inv.id,
+              reminder_type: reminderType,
+            }),
+          });
+        } catch (err) {
+          console.error('Dunning webhook error:', err);
+        }
       }
     }
   } catch (err) {
@@ -81,9 +83,10 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
     const today = startOfDay(new Date()).toISOString();
 
     // Get subscriptions due for billing
-    const { data: dueSubscriptions, error } = await supabase
+    // TODO: Replace 'as any' with proper types when Supabase types are updated
+    const { data: dueSubscriptions, error } = await (supabase as any)
       .from('subscriptions')
-      .select('id, renter_id, lessor_id, vehicle_id, daily_rate, billing_cycle_days, subscription_type')
+      .select('id, renter_id, lessor_id, vehicle_id, daily_rate, billing_cycle_days, subscription_type, completed_billing_cycles')
       .eq('status', 'active')
       .or(
         `and(last_billed_date.is.null,created_at.lt.${today}),` +
@@ -93,16 +96,17 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
     if (error) throw error;
 
     for (const subscription of dueSubscriptions || []) {
-      // Calculate billing amount
-      const billingAmount = subscription.daily_rate * subscription.billing_cycle_days;
+      // Use 'as any' for subscription object
+      const sub: any = subscription;
+      const billingAmount = sub.daily_rate * sub.billing_cycle_days;
 
       // Create invoice for subscription
-      const { data: invoice, error: invoiceError } = await supabase
+      const { data: invoice, error: invoiceError } = await (supabase as any)
         .from('invoices')
         .insert({
           booking_id: null, // Subscription-based, not booking-based
-          lessor_id: subscription.lessor_id,
-          renter_id: subscription.renter_id,
+          lessor_id: sub.lessor_id,
+          renter_id: sub.renter_id,
           invoice_number: `SUB-${Date.now()}`, // Auto-generated
           status: 'sent',
           amount_total: billingAmount,
@@ -121,22 +125,22 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
       }
 
       // Update subscription last billed date
-      await supabase
+      await (supabase as any)
         .from('subscriptions')
         .update({
           last_billed_date: today,
-          completed_billing_cycles: subscription.completed_billing_cycles + 1,
+          completed_billing_cycles: (sub.completed_billing_cycles || 0) + 1,
         })
-        .eq('id', subscription.id);
+        .eq('id', sub.id);
 
       // Create accounting entries
-      await supabase
+      await (supabase as any)
         .from('accounting_entries')
         .insert([
           {
             invoice_id: invoice.id,
-            subscription_id: subscription.id,
-            lessor_id: subscription.lessor_id,
+            subscription_id: sub.id,
+            lessor_id: sub.lessor_id,
             entry_type: 'revenue',
             account_code: '4200', // Subscription Revenue
             debit_amount: billingAmount,
@@ -147,8 +151,8 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
           },
           {
             invoice_id: invoice.id,
-            subscription_id: subscription.id,
-            lessor_id: subscription.lessor_id,
+            subscription_id: sub.id,
+            lessor_id: sub.lessor_id,
             entry_type: 'receivable',
             account_code: '1200', // Accounts Receivable
             debit_amount: 0,
