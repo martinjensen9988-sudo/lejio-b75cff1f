@@ -2801,6 +2801,7 @@ export type Database = {
           status?: string
           updated_at?: string
           vehicle_id?: string
+          platform_fee_paid_at?: string | null
         }
         Relationships: [
           {
@@ -3892,6 +3893,7 @@ export type Database = {
           trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+          feature_flags?: Record<string, boolean>
         }
         Relationships: []
       }

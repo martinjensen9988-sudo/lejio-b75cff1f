@@ -1027,7 +1027,7 @@ export const AdminFleetFinance = () => {
                                   <TableCell>{customer.company_name || customer.full_name || customer.email}</TableCell>
                                   <TableCell>{loan.description}</TableCell>
                                   <TableCell>{loan.setup_fee} kr</TableCell>
-                                  <TableCell>{loan.platform_fee_paid_at ? <Badge variant="success">Betalt</Badge> : <Badge variant="outline">Ikke betalt</Badge>}</TableCell>
+                                  <TableCell>{loan.platform_fee_paid_at ? <Badge variant="default">Betalt</Badge> : <Badge variant="outline">Ikke betalt</Badge>}</TableCell>
                                   <TableCell>
                                     {!loan.platform_fee_paid_at && (
                                       <Button size="sm" variant="default" onClick={() => handleMarkFeePaid(loan.id)}>
