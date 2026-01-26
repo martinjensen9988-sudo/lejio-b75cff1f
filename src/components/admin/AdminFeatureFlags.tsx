@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 
 const STANDARD_FEATURES = ['booking_calendar', 'contract_generation', 'pdf_email']; // Tilpas listen efter behov
 const FEATURES = [
@@ -102,6 +103,49 @@ export const AdminFeatureFlags = () => {
 
   if (isLoading) return <div>Indlæser...</div>;
 
+  // Map features to abonnementer and fleet packages
+  const PACKAGE_GROUPS = [
+    {
+      name: 'Abonnementer',
+      description: 'Features der følger med abonnementspakker (Starter, Pro, Enterprise)',
+      tiers: ['starter', 'pro', 'enterprise'],
+      color: 'bg-green-50 border-green-200',
+    },
+    {
+      name: 'Fleet Pakker',
+      description: 'Ekstra features for flådeejere og erhverv',
+      tiers: ['pro', 'enterprise'],
+      color: 'bg-blue-50 border-blue-200',
+    }
+  ];
+
+  const PACKAGE_FEATURES = {
+    starter: ['booking', 'contracts', 'checkin', 'payment', 'communication', 'renter'],
+    pro: ['locations', 'gps', 'motorcycle', 'service', 'ai'],
+    enterprise: ['corporate']
+  };
+
+  const featureCategories = [
+    { id: 'booking', label: 'Booking & Kalender', tier: 'starter' },
+    { id: 'contracts', label: 'Kontrakter & Dokumentation', tier: 'starter' },
+    { id: 'checkin', label: 'Check-in & Check-out', tier: 'starter' },
+    { id: 'payment', label: 'Betaling & Økonomi', tier: 'starter' },
+    { id: 'communication', label: 'Kommunikation', tier: 'starter' },
+    { id: 'renter', label: 'Lejer-administration', tier: 'starter' },
+    { id: 'locations', label: 'Lokationer & Afdelinger', tier: 'pro' },
+    { id: 'gps', label: 'GPS & Flådestyring', tier: 'pro' },
+    { id: 'motorcycle', label: 'Motorcykel & Scooter', tier: 'pro' },
+    { id: 'service', label: 'Værksted & Service', tier: 'pro' },
+    { id: 'ai', label: 'AI-funktioner', tier: 'pro' },
+    { id: 'corporate', label: 'Erhverv & Flåde', tier: 'enterprise' }
+  ];
+
+  const tierColors = {
+    starter: 'bg-slate-100 text-slate-800',
+    pro: 'bg-blue-100 text-blue-800',
+    enterprise: 'bg-purple-100 text-purple-800'
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -117,39 +161,63 @@ export const AdminFeatureFlags = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {customers
-          .filter(customer => {
-            const q = search.toLowerCase();
-            return (
-              !q ||
-              (customer.company_name && customer.company_name.toLowerCase().includes(q)) ||
-              (customer.full_name && customer.full_name.toLowerCase().includes(q)) ||
-              (customer.email && customer.email.toLowerCase().includes(q))
-            );
-          })
-          .map(customer => (
-            <div key={customer.id} className="mb-6 p-4 border rounded-lg">
-              <div className="font-bold mb-2">{customer.company_name || customer.full_name || customer.email}</div>
-              <div className="text-sm text-muted-foreground mb-2">
-                Abonnement: {customer.subscription_tier || 'Ingen'} | Status: {customer.subscription_status || 'Ukendt'}
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {FEATURES.map(feature => {
-                  const isStandard = STANDARD_FEATURES.includes(feature.key);
-                  return (
-                    <div key={feature.key} className="flex items-center gap-2">
-                      <Switch
-                        checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
-                        disabled={isStandard}
-                        onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
-                      />
-                      <span>{feature.label}{isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}</span>
+        <Accordion type="single" collapsible>
+          {customers
+            .filter(customer => {
+              const q = search.toLowerCase();
+              return (
+                !q ||
+                (customer.company_name && customer.company_name.toLowerCase().includes(q)) ||
+                (customer.full_name && customer.full_name.toLowerCase().includes(q)) ||
+                (customer.email && customer.email.toLowerCase().includes(q))
+              );
+            })
+            .map(customer => (
+              <AccordionItem key={customer.id} value={customer.id} className="mb-2 border rounded-lg">
+                <AccordionTrigger className="px-4 py-3 font-bold text-left">
+                  {customer.company_name || customer.full_name || customer.email}
+                  <span className="block text-sm text-muted-foreground font-normal">
+                    Abonnement: {customer.subscription_tier || 'Ingen'} | Status: {customer.subscription_status || 'Ukendt'}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                  {/* Group features by abonnementer and fleet packages */}
+                  {PACKAGE_GROUPS.map(group => (
+                    <div key={group.name} className={`mb-6 p-3 rounded-xl border ${group.color}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="px-3 py-1 rounded text-sm font-bold bg-primary/10 text-primary">{group.name}</span>
+                        <span className="text-xs text-muted-foreground">{group.description}</span>
+                      </div>
+                      {featureCategories.filter(pkg => group.tiers.includes(pkg.tier)).map(pkg => (
+                        <div key={pkg.id} className="mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${tierColors[pkg.tier]}`}>{pkg.label}</span>
+                            <span className={`px-2 py-1 rounded text-xs ${tierColors[pkg.tier]}`}>{pkg.tier.charAt(0).toUpperCase() + pkg.tier.slice(1)}</span>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {FEATURES.filter(f => f.key && PACKAGE_FEATURES[pkg.tier].includes(pkg.id)).map(feature => {
+                              const isStandard = STANDARD_FEATURES.includes(feature.key);
+                              return (
+                                <div key={feature.key} className="flex items-center gap-2">
+                                  <Switch
+                                    checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
+                                    disabled={isStandard}
+                                    onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
+                                  />
+                                  <span>{feature.label}{isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}</span>
+                                  <span className={`ml-2 px-2 py-1 rounded text-xs ${tierColors[pkg.tier]}`}>{pkg.tier.charAt(0).toUpperCase() + pkg.tier.slice(1)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+        </Accordion>
       </CardContent>
     </Card>
   );
