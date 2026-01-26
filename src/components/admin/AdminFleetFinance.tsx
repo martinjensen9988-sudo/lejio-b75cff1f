@@ -430,7 +430,12 @@ export const AdminFleetFinance = () => {
         .in('status', ['completed', 'active']);
       if (error) throw error;
       const totalRevenue = (bookings || []).reduce((sum, b) => sum + (b.total_price || 0), 0);
-      const commission = Math.round(totalRevenue * (commissionRate / 100));
+      // Sikrer at Fleet Premium altid bruger 35% kommission
+      let actualCommissionRate = commissionRate;
+      if (selectedCustomer?.fleet_plan === 'premium') {
+        actualCommissionRate = 35;
+      }
+      const commission = Math.round(totalRevenue * (actualCommissionRate / 100));
       const payout = totalRevenue - commission;
       setStatement({ totalRevenue, commission, payout, count: (bookings || []).length, bookings });
     } catch (err) {

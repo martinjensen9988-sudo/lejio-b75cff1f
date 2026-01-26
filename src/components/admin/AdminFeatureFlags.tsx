@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
+const STANDARD_FEATURES = ['booking_calendar', 'contract_generation', 'pdf_email']; // Tilpas listen efter behov
 const FEATURES = [
   { key: 'booking_calendar', label: 'Smart Booking-kalender' },
   { key: 'auto_availability', label: 'Automatisk tilgængelighed' },
@@ -70,12 +71,13 @@ const FEATURES = [
 export const AdminFeatureFlags = () => {
   const [customers, setCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchCustomers = async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, full_name, company_name, feature_flags');
+        .select('id, email, full_name, company_name, feature_flags, subscription_status, subscription_tier');
       if (!error) setCustomers(data || []);
       setIsLoading(false);
     };
@@ -104,24 +106,50 @@ export const AdminFeatureFlags = () => {
     <Card>
       <CardHeader>
         <CardTitle>Feature Flags pr. Kunde</CardTitle>
+        <div className="mt-2">
+          <input
+            type="text"
+            placeholder="Søg kunde (navn, email, firma)"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg"
+          />
+        </div>
       </CardHeader>
       <CardContent>
-        {customers.map(customer => (
-          <div key={customer.id} className="mb-6 p-4 border rounded-lg">
-            <div className="font-bold mb-2">{customer.company_name || customer.full_name || customer.email}</div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {FEATURES.map(feature => (
-                <div key={feature.key} className="flex items-center gap-2">
-                  <Switch
-                    checked={!!customer.feature_flags?.[feature.key]}
-                    onCheckedChange={checked => handleToggle(customer.id, feature.key, checked)}
-                  />
-                  <span>{feature.label}</span>
-                </div>
-              ))}
+        {customers
+          .filter(customer => {
+            const q = search.toLowerCase();
+            return (
+              !q ||
+              (customer.company_name && customer.company_name.toLowerCase().includes(q)) ||
+              (customer.full_name && customer.full_name.toLowerCase().includes(q)) ||
+              (customer.email && customer.email.toLowerCase().includes(q))
+            );
+          })
+          .map(customer => (
+            <div key={customer.id} className="mb-6 p-4 border rounded-lg">
+              <div className="font-bold mb-2">{customer.company_name || customer.full_name || customer.email}</div>
+              <div className="text-sm text-muted-foreground mb-2">
+                Abonnement: {customer.subscription_tier || 'Ingen'} | Status: {customer.subscription_status || 'Ukendt'}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {FEATURES.map(feature => {
+                  const isStandard = STANDARD_FEATURES.includes(feature.key);
+                  return (
+                    <div key={feature.key} className="flex items-center gap-2">
+                      <Switch
+                        checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
+                        disabled={isStandard}
+                        onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
+                      />
+                      <span>{feature.label}{isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </CardContent>
     </Card>
   );
