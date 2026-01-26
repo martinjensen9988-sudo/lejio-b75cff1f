@@ -50,7 +50,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from '@/integrations/supabase/client';
 
 const Features = () => {
   const navigate = useNavigate();
@@ -58,6 +59,26 @@ const Features = () => {
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [compareMode, setCompareMode] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState<Set<string>>(new Set());
+  const [featureLinks, setFeatureLinks] = useState({});
+
+  // Hent globale feature links fra Supabase
+  useEffect(() => {
+    const fetchLinks = async () => {
+      const { data, error } = await supabase.from('feature_links').select('feature_key, video, image, page');
+      if (!error && data) {
+        const linksObj = {};
+        data.forEach(row => {
+          linksObj[row.feature_key] = {
+            video: row.video || '',
+            image: row.image || '',
+            page: row.page || ''
+          };
+        });
+        setFeatureLinks(linksObj);
+      }
+    };
+    fetchLinks();
+  }, []);
 
   const featureCategories = [
     {
@@ -466,7 +487,9 @@ const Features = () => {
                         {category.features.map((feature, featureIndex) => {
                           const FeatureIcon = feature.icon;
                           const isSelected = compareMode && selectedFeatures.has(feature.title);
-                          
+                          // Find links fra Supabase
+                          const key = feature.title.toLowerCase().replace(/[^a-z0-9_]+/gi, '_');
+                          const links = featureLinks[key] || {};
                           return (
                             <Card 
                               key={featureIndex}
@@ -516,6 +539,49 @@ const Features = () => {
                               </CardHeader>
                               <CardContent className="pt-0 space-y-3">
                                 <CardDescription className="text-sm">{feature.description}</CardDescription>
+                                {/* Globale links fra admin */}
+                                {links.video && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-center gap-2 text-primary hover:text-primary"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(links.video, "_blank");
+                                    }}
+                                  >
+                                    <Play className="w-4 h-4" />
+                                    Se video
+                                  </Button>
+                                )}
+                                {links.image && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-center gap-2 text-primary hover:text-primary"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(links.image, "_blank");
+                                    }}
+                                  >
+                                    <Play className="w-4 h-4" />
+                                    Se billede
+                                  </Button>
+                                )}
+                                {links.page && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-center gap-2 text-primary hover:text-primary"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(links.page, "_blank");
+                                    }}
+                                  >
+                                    <ArrowRight className="w-4 h-4" />
+                                    Se side
+                                  </Button>
+                                )}
                                 {feature.demoUrl && (
                                   <Button
                                     variant="ghost"

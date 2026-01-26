@@ -74,25 +74,53 @@ const FEATURES = [
 ];
 
 export const AdminFeatureFlags = () => {
-    // Store custom links for features (video, image, page)
+    // Store global links for features (video, image, page)
     const [customLinks, setCustomLinks] = useState({});
+    const [saving, setSaving] = useState(false);
 
-    // Save custom link for a feature
-    const handleCustomLinkChange = async (customerId, featureKey, type, value) => {
-      const customer = customers.find(c => c.id === customerId);
-      const flags = customer?.feature_flags || {};
-      const links = flags.custom_links || {};
-      const newLinks = { ...links, [featureKey]: { ...links[featureKey], [type]: value } };
-      const newFlags = { ...flags, custom_links: newLinks };
-      const { error } = await supabase
-        .from('profiles')
-        .update({ feature_flags: newFlags })
-        .eq('id', customerId);
+    // Load global feature links from Supabase
+    useEffect(() => {
+      const fetchLinks = async () => {
+        const { data, error } = await supabase.from<any, any>('feature_links').select('feature_key, video, image, page');
+        if (!error && data) {
+          const linksObj = {};
+          data.forEach(row => {
+            // @ts-ignore
+            linksObj[row.feature_key] = {
+              // @ts-ignore
+              video: row.video || '',
+              // @ts-ignore
+              image: row.image || '',
+              // @ts-ignore
+              page: row.page || ''
+            };
+          });
+          setCustomLinks(linksObj);
+        }
+      };
+      fetchLinks();
+    }, []);
+
+    // Save global link for a feature
+    const handleGlobalLinkChange = async (featureKey, type, value) => {
+      setCustomLinks(prev => ({ ...prev, [featureKey]: { ...prev[featureKey], [type]: value } }));
+    };
+
+    const handleSaveGlobalLinks = async (featureKey) => {
+      setSaving(true);
+      const links = customLinks[featureKey] || {};
+      // Upsert to Supabase
+      const { error } = await supabase.from<any, any>('feature_links').upsert({
+        feature_key: featureKey,
+        video: links.video || '',
+        image: links.image || '',
+        page: links.page || ''
+      }, { onConflict: 'feature_key' });
+      setSaving(false);
       if (!error) {
-        setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, feature_flags: newFlags } : c));
-        toast.success('Link opdateret');
+        toast.success('Links gemt!');
       } else {
-        toast.error('Kunne ikke opdatere link');
+        toast.error('Kunne ikke gemme links');
       }
     };
   const [customers, setCustomers] = useState([]);
@@ -191,7 +219,7 @@ export const AdminFeatureFlags = () => {
         {/* Show all modules/features by default, only show customer features after selection */}
         <div className="mb-8">
           <div className="font-bold text-lg mb-1">Admin oversigt</div>
-          <div className="text-sm text-muted-foreground mb-4">Her ser du alle moduler og features. Vælg en kunde for at redigere deres features.</div>
+          <div className="text-sm text-muted-foreground mb-4">Her ser du alle moduler og features. Rediger links for hver funktion direkte her.</div>
           <Accordion type="multiple">
             {featureCategories.map((category, idx) => {
               const CategoryIcon = category.icon;
@@ -208,11 +236,40 @@ export const AdminFeatureFlags = () => {
                     <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
                       {FEATURES.filter(f => f.key && PACKAGE_FEATURES[category.tier].includes(category.id)).map(feature => {
                         const isStandard = STANDARD_FEATURES.includes(feature.key);
+                        // Global links state
+                        const globalLinks = customLinks[feature.key] || {};
                         return (
-                          <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tierColors[category.tier]}`}>
+                          <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tierColors[category.tier]}`}> 
                             <div className="flex items-center gap-2 mb-1">
                               <span className="font-bold text-sm">{feature.label}</span>
                               {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
+                            </div>
+                            {/* Global admin links for video, image, page */}
+                            <div className="flex flex-col gap-1 mt-2">
+                              <input
+                                type="url"
+                                placeholder="Video-link (global)"
+                                className="px-2 py-1 rounded border text-xs"
+                                value={globalLinks.video || ''}
+                                onChange={e => handleGlobalLinkChange(feature.key, 'video', e.target.value)}
+                              />
+                              <input
+                                type="url"
+                                placeholder="Billede-link (global)"
+                                className="px-2 py-1 rounded border text-xs"
+                                value={globalLinks.image || ''}
+                                onChange={e => handleGlobalLinkChange(feature.key, 'image', e.target.value)}
+                              />
+                              <input
+                                type="url"
+                                placeholder="Side-link (global)"
+                                className="px-2 py-1 rounded border text-xs"
+                                value={globalLinks.page || ''}
+                                onChange={e => handleGlobalLinkChange(feature.key, 'page', e.target.value)}
+                              />
+                              <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={saving} onClick={() => handleSaveGlobalLinks(feature.key)}>
+                                {saving ? 'Gemmer...' : 'Gem links'}
+                              </Button>
                             </div>
                           </Card>
                         );
@@ -225,6 +282,12 @@ export const AdminFeatureFlags = () => {
           </Accordion>
         </div>
         {/* Customer selection and feature editing */}
+        {!search.trim() && (
+          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+            <p className="text-lg font-semibold mb-2">Søg efter en kunde for at redigere deres features</p>
+            <p className="text-sm">Indtast navn, email eller firma i søgefeltet ovenfor.</p>
+          </div>
+        )}
         {search.trim() && customers
           .filter(customer => {
             const q = search.toLowerCase();
@@ -267,27 +330,7 @@ export const AdminFeatureFlags = () => {
                               </div>
                               {/* Admin custom links for video, image, page */}
                               <div className="flex flex-col gap-1">
-                                <input
-                                  type="url"
-                                  placeholder="Video-link"
-                                  className="px-2 py-1 rounded border text-xs"
-                                  value={customer.feature_flags?.custom_links?.[feature.key]?.video || ''}
-                                  onChange={e => handleCustomLinkChange(customer.id, feature.key, 'video', e.target.value)}
-                                />
-                                <input
-                                  type="url"
-                                  placeholder="Billede-link"
-                                  className="px-2 py-1 rounded border text-xs"
-                                  value={customer.feature_flags?.custom_links?.[feature.key]?.image || ''}
-                                  onChange={e => handleCustomLinkChange(customer.id, feature.key, 'image', e.target.value)}
-                                />
-                                <input
-                                  type="url"
-                                  placeholder="Side-link"
-                                  className="px-2 py-1 rounded border text-xs"
-                                  value={customer.feature_flags?.custom_links?.[feature.key]?.page || ''}
-                                  onChange={e => handleCustomLinkChange(customer.id, feature.key, 'page', e.target.value)}
-                                />
+                                {/* Fjernet custom link inputs for kunde, kun global links via admin */}
                               </div>
                             </Card>
                           );
