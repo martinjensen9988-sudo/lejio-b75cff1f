@@ -1,4 +1,4 @@
-const AdminInvoicesPage = lazy(() => import("./pages/admin/Invoices"));
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -8,6 +8,12 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams, use
 import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import ErrorBoundary from "@/components/ErrorBoundary";
+
+// Lazy loaded pages - only loaded when needed
+const AdminInvoicesPage = lazy(() => import("./pages/admin/Invoices"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 // Lazy load LiveChatWidget to reduce initial bundle size
 const LiveChatWidget = lazy(() => import("@/components/chat/LiveChatWidget").then(m => ({ default: m.LiveChatWidget })));
@@ -33,11 +39,6 @@ const ConditionalLiveChat = () => {
 // Critical path - loaded immediately for homepage
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-
-// Lazy loaded pages - only loaded when needed
-const Auth = lazy(() => import("./pages/Auth"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Settings = lazy(() => import("./pages/Settings"));
 const Search = lazy(() => import("./pages/Search"));
 const Booking = lazy(() => import("./pages/Booking"));
 const MyRentals = lazy(() => import("./pages/MyRentals"));
