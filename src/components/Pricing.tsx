@@ -357,7 +357,7 @@ const Pricing = () => {
                   </div>
 
                   <div className="flex items-baseline gap-2 mb-5">
-                    <span className="font-display text-4xl font-black text-foreground">30%</span>
+                    <span className="font-display text-4xl font-black text-foreground">35%</span>
                     <span className="text-mint font-bold text-sm">af omsætningen</span>
                   </div>
 
