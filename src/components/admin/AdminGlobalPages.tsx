@@ -1,0 +1,139 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { AdminDashboardLayout } from './AdminDashboardLayout';
+
+// Simple markdown editor (can be replaced with react-markdown or similar)
+function MarkdownEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return <Textarea value={value} onChange={e => onChange(e.target.value)} rows={10} placeholder="Skriv tekst i markdown..." />;
+}
+
+export default function AdminGlobalPages() {
+  const { user, isSuperAdmin } = useAdminAuth();
+  const [pages, setPages] = useState<any[]>([]);
+  const [editing, setEditing] = useState<any | null>(null);
+  const [form, setForm] = useState({ title: '', slug: '', content_markdown: '', image_urls: [], video_urls: [] });
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    fetchPages();
+  }, []);
+
+  async function fetchPages() {
+    // @ts-ignore
+    const { data } = await supabase.from<any, any>('global_pages').select('*').order('created_at', { ascending: false });
+    setPages(data || []);
+  }
+
+  function startEdit(page: any) {
+    setEditing(page);
+    setForm({ ...page });
+  }
+
+  function startNew() {
+    setEditing(null);
+    setForm({ title: '', slug: '', content_markdown: '', image_urls: [], video_urls: [] });
+  }
+
+  async function savePage() {
+    setUploading(true);
+    if (editing) {
+      // @ts-ignore
+      await supabase.from<any, any>('global_pages').update(form).eq('id', String(editing.id));
+    } else {
+      // @ts-ignore
+      await supabase.from<any, any>('global_pages').insert([form]);
+    }
+    setUploading(false);
+    setEditing(null);
+    fetchPages();
+  }
+
+  async function deletePage(id: number) {
+    // @ts-ignore
+    await supabase.from<any, any>('global_pages').delete().eq('id', String(id));
+    fetchPages();
+  }
+
+  // Simple file upload to Supabase Storage
+  async function uploadFile(e: any, type: 'image' | 'video') {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const filePath = `${type}s/${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage.from('public').upload(filePath, file);
+    if (!error && data) {
+      const { publicUrl } = supabase.storage.from('public').getPublicUrl(filePath).data;
+      setForm(f => ({
+        ...f,
+        [type === 'image' ? 'image_urls' : 'video_urls']: [...f[type === 'image' ? 'image_urls' : 'video_urls'], publicUrl],
+      }));
+    }
+    setUploading(false);
+  }
+
+  return (
+    <AdminDashboardLayout activeTab="global-pages">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-2">Globale sider</h1>
+        <p className="text-muted-foreground mb-4">Opret og rediger indholdssider med tekst, billeder og video.</p>
+        <Button onClick={startNew} variant="default" className="mb-4">Opret ny side</Button>
+        <div className="grid gap-4 mb-8">
+          {pages.map(page => (
+            <Card key={page.id} className="p-4 flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="font-bold text-lg">{page.title}</span>
+                  <Badge variant="secondary" className="ml-2">/{page.slug}</Badge>
+                </div>
+                <div>
+                  <Button size="sm" onClick={() => startEdit(page)}>Rediger</Button>
+                  <Button size="sm" variant="destructive" onClick={() => deletePage(page.id)} className="ml-2">Slet</Button>
+                </div>
+              </div>
+              <div className="text-muted-foreground text-sm">{page.content_markdown?.slice(0, 120)}...</div>
+              <div className="flex gap-2 mt-2">
+                {page.image_urls?.map((url: string) => <img key={url} src={url} alt="billede" className="h-12 rounded" />)}
+                {page.video_urls?.map((url: string) => <video key={url} src={url} className="h-12 rounded" controls />)}
+              </div>
+            </Card>
+          ))}
+        </div>
+        {(editing || form.title) && (
+          <Card className="p-4 mb-8">
+            <h2 className="font-bold mb-2">{editing ? 'Rediger side' : 'Opret ny side'}</h2>
+            <label className="block mb-1 font-medium">Titel</label>
+            <Input
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              placeholder="Titel på siden"
+              className="mb-2"
+            />
+            <label className="block mb-1 font-medium">Slug</label>
+            <Input
+              value={form.slug}
+              onChange={e => setForm(f => ({ ...f, slug: e.target.value.replace(/\s+/g, '-').toLowerCase() }))}
+              placeholder="URL slug (fx: min-side)"
+              className="mb-2"
+            />
+            <MarkdownEditor value={form.content_markdown} onChange={v => setForm(f => ({ ...f, content_markdown: v }))} />
+            <div className="flex gap-2 mt-2">
+              <input type="file" accept="image/*" onChange={e => uploadFile(e, 'image')} disabled={uploading} />
+              <input type="file" accept="video/*" onChange={e => uploadFile(e, 'video')} disabled={uploading} />
+            </div>
+            <div className="flex gap-2 mt-2">
+              {form.image_urls?.map((url: string) => <img key={url} src={url} alt="billede" className="h-12 rounded" />)}
+              {form.video_urls?.map((url: string) => <video key={url} src={url} className="h-12 rounded" controls />)}
+            </div>
+            <Button onClick={savePage} disabled={uploading} className="mt-4">Gem</Button>
+          </Card>
+        )}
+      </div>
+    </AdminDashboardLayout>
+  );
+}

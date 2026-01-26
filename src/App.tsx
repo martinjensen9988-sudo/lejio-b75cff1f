@@ -38,6 +38,8 @@ const ConditionalLiveChat = () => {
 
 // Critical path - loaded immediately for homepage
 import Index from "./pages/Index";
+import GlobalPage from "./pages/GlobalPage";
+const AdminGlobalPages = lazy(() => import("./pages/admin/GlobalPages"));
 import NotFound from "./pages/NotFound";
 const Search = lazy(() => import("./pages/Search"));
 const Booking = lazy(() => import("./pages/Booking"));
@@ -270,6 +272,7 @@ const App = () => (
               <Route path="/admin/sales-ai/company-search" element={<AdminAuthProvider><SalesAICompanySearchPage /></AdminAuthProvider>} />
               <Route path="/admin/stats" element={<AdminAuthProvider><AdminStatsPage /></AdminAuthProvider>} />
               <Route path="/admin/driver-licenses" element={<AdminAuthProvider><DriverLicenseReviewPage /></AdminAuthProvider>} />
+              <Route path="/admin/global-pages" element={<AdminAuthProvider><AdminGlobalPages /></AdminAuthProvider>} />
               <Route path="/admin/audit-log" element={<AdminAuthProvider><AdminAuditLogPage /></AdminAuthProvider>} />
               <Route path="/admin/crm" element={<AdminAuthProvider><AdminCRMPage /></AdminAuthProvider>} />
               <Route path="/privatlivspolitik" element={<PrivacyPolicy />} />
@@ -292,6 +295,7 @@ const App = () => (
               <Route path="/forhandler" element={<Forhandler />} />
               <Route path="/forhandler-opret" element={<DealerRegistration />} />
               <Route path="/kontakt" element={<Contact />} />
+              <Route path="/side/:slug" element={<GlobalPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

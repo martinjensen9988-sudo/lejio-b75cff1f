@@ -74,9 +74,10 @@ const FEATURES = [
 ];
 
 export const AdminFeatureFlags = () => {
-    // Store global links for features (video, image, page)
-    const [customLinks, setCustomLinks] = useState({});
-    const [saving, setSaving] = useState(false);
+  // Store global links for features (video, image, page)
+  const [customLinks, setCustomLinks] = useState({});
+  // Loading state pr. feature
+  const [saving, setSaving] = useState<{[key: string]: boolean}>({});
 
     // Load global feature links from Supabase
     useEffect(() => {
@@ -106,17 +107,16 @@ export const AdminFeatureFlags = () => {
       setCustomLinks(prev => ({ ...prev, [featureKey]: { ...prev[featureKey], [type]: value } }));
     };
 
-    const handleSaveGlobalLinks = async (featureKey) => {
-      setSaving(true);
+    const handleSaveGlobalLinks = async (featureKey: string) => {
+      setSaving(prev => ({ ...prev, [featureKey]: true }));
       const links = customLinks[featureKey] || {};
-      // Upsert to Supabase
       const { error } = await supabase.from<any, any>('feature_links').upsert({
         feature_key: featureKey,
         video: links.video || '',
         image: links.image || '',
         page: links.page || ''
       }, { onConflict: 'feature_key' });
-      setSaving(false);
+      setSaving(prev => ({ ...prev, [featureKey]: false }));
       if (!error) {
         toast.success('Links gemt!');
       } else {
@@ -267,8 +267,8 @@ export const AdminFeatureFlags = () => {
                                 value={globalLinks.page || ''}
                                 onChange={e => handleGlobalLinkChange(feature.key, 'page', e.target.value)}
                               />
-                              <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={saving} onClick={() => handleSaveGlobalLinks(feature.key)}>
-                                {saving ? 'Gemmer...' : 'Gem links'}
+                              <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[feature.key]} onClick={() => handleSaveGlobalLinks(feature.key)}>
+                                {saving[feature.key] ? 'Gemmer...' : 'Gem links'}
                               </Button>
                             </div>
                           </Card>

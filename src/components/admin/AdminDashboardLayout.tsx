@@ -19,6 +19,7 @@ interface AdminDashboardLayoutProps {
 }
 
 const menuItems = [
+  { value: 'global-pages', icon: FileText, label: 'Globale sider', path: '/admin/global-pages' },
   { value: 'customer-service', icon: HeadphonesIcon, label: 'Kundeservice', path: '/admin/customer-service' },
   { value: 'users', icon: UserCog, label: 'Brugerstyring', path: '/admin/users' },
   { value: 'staff', icon: UsersRound, label: 'Medarbejdere', path: '/admin/staff' },
