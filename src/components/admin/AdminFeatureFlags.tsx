@@ -225,11 +225,10 @@ export const AdminFeatureFlags = () => {
           </Accordion>
         </div>
         {/* Customer selection and feature editing */}
-        {customers
+        {search.trim() && customers
           .filter(customer => {
             const q = search.toLowerCase();
             return (
-              !q ||
               (customer.company_name && customer.company_name.toLowerCase().includes(q)) ||
               (customer.full_name && customer.full_name.toLowerCase().includes(q)) ||
               (customer.email && customer.email.toLowerCase().includes(q))
