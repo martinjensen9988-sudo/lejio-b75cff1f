@@ -222,7 +222,9 @@ export const AdminFeatureFlags = () => {
           <div className="text-sm text-muted-foreground mb-4">Her kan du sætte video, billede og side-link på ALLE features – uanset kunde.</div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
             {FEATURES.map(featureTitle => {
-              const globalLinks = customLinks[featureTitle] || {};
+              // Brug præcis samme key-format som Features-siden
+              const featureKey = featureTitle.toLowerCase().replace(/[^a-z0-9_]+/gi, '_');
+              const globalLinks = customLinks[featureKey] || {};
               return (
                 <Card key={featureTitle} className="relative p-3 flex flex-col gap-2">
                   <div className="flex items-center gap-2 mb-1">
