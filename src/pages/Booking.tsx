@@ -120,7 +120,14 @@ const Booking = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
 
   // Step 1: Booking details
-  const [periodType, setPeriodType] = useState<PeriodType>("daily");
+  // Forudvælg abonnement hvis ?plan=subscription
+  const [periodType, setPeriodType] = useState<PeriodType>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('plan') === 'subscription') return 'monthly';
+    }
+    return 'daily';
+  });
   const [periodCount, setPeriodCount] = useState(1);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [formData, setFormData] = useState({

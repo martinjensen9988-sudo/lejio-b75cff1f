@@ -104,6 +104,7 @@ const SalesAIImportPage = () => {
                 <TabsTrigger value="facebook" className="flex items-center gap-2">
                   <Facebook className="w-4 h-4" />
                   Facebook
+                  <span className="ml-2"><span className="inline-block bg-muted text-xs rounded px-2 py-0.5">Beta</span></span>
                 </TabsTrigger>
               </TabsList>
               
@@ -141,27 +142,10 @@ const SalesAIImportPage = () => {
               </TabsContent>
               
               <TabsContent value="facebook" className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Firmanavne fra Facebook</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Indsæt firmanavne (ét per linje) kopieret fra Facebook grupper, sider eller kommentarer.
-                    Disse oprettes som leads, som du senere kan berige med flere oplysninger via CVR-opslag.
-                  </p>
-                  <Textarea
-                    value={facebookText}
-                    onChange={(e) => setFacebookText(e.target.value)}
-                    placeholder="Auto Hansen A/S&#10;Biludlejning Vest&#10;Biler & Co&#10;..."
-                    rows={10}
-                  />
-                </div>
-                <div className="flex gap-4 pt-4">
-                  <Button type="button" variant="outline" onClick={() => navigate('/admin/sales-ai')}>
-                    Annuller
-                  </Button>
-                  <Button onClick={handleImportFacebook} disabled={isImporting || !facebookText.trim()}>
-                    {isImporting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Importer fra Facebook
-                  </Button>
+                <div className="text-center py-8 text-muted-foreground">
+                  <Facebook className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Facebook-import er under udvikling</p>
+                  <span className="inline-block bg-muted text-xs rounded px-2 py-0.5 mt-2">Kommer snart</span>
                 </div>
               </TabsContent>
             </Tabs>

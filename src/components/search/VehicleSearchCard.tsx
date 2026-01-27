@@ -99,6 +99,9 @@ const VehicleSearchCard = ({
   const isElectric = vehicle.fuel_type?.toLowerCase() === 'el';
   const isDealer = vehicle.owner_company_name && vehicle.owner_fleet_plan;
 
+  // Abonnement tilgængelig hvis monthly_price og dealer har Stripe
+  const subscriptionAvailable = !!vehicle.monthly_price && isDealer;
+
   if (viewMode === 'list') {
     return (
       <div
@@ -238,16 +241,29 @@ const VehicleSearchCard = ({
               ) : (
                 <span className="text-sm text-muted-foreground">Vælg datoer for total pris</span>
               )}
-              <Button
-                className="bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/20"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/booking/${vehicle.id}`);
-                }}
-              >
-                Lej nu
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              {subscriptionAvailable ? (
+                <Button
+                  className="bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/booking/${vehicle.id}?plan=subscription`);
+                  }}
+                >
+                  Book abonnement
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  className="bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/booking/${vehicle.id}`);
+                  }}
+                >
+                  Lej nu
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -460,16 +476,35 @@ const VehicleSearchCard = ({
               </div>
             )}
           </div>
-          <Button
-            className="w-full bg-gradient-to-r from-primary to-primary/80 font-bold shadow-lg shadow-primary/20 group-hover:shadow-primary/30 transition-all"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/booking/${vehicle.id}`);
-            }}
-          >
-            Lej nu
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          {subscriptionAvailable ? (
+            <Button
+              className="w-full bg-gradient-to-r from-primary to-primary/80 font-bold shadow-lg shadow-primary/20 group-hover:shadow-primary/30 transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/booking/${vehicle.id}?plan=subscription`);
+              }}
+            >
+              Book abonnement
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          ) : (
+            <Button
+              className="w-full bg-gradient-to-r from-primary to-primary/80 font-bold shadow-lg shadow-primary/20 group-hover:shadow-primary/30 transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/booking/${vehicle.id}`);
+              }}
+            >
+              Lej nu
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          )}
+              {/* Badge for abonnement */}
+              {subscriptionAvailable && (
+                <div className="absolute top-3 left-3 z-10">
+                  <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold shadow">Abonnement</Badge>
+                </div>
+              )}
         </div>
       </div>
     </div>

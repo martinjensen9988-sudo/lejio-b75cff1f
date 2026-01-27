@@ -209,60 +209,46 @@ export const AdminFeatureFlags = () => {
         {/* Show each customer as a section, with modules as cards/grids like /funktioner */}
         {/* Show all modules/features by default, only show customer features after selection */}
         <div className="mb-8">
-          <div className="font-bold text-lg mb-1">Admin oversigt</div>
-          <div className="text-sm text-muted-foreground mb-4">Her ser du alle moduler og features. Rediger links for hver funktion direkte her.</div>
-          <Accordion type="multiple">
-            {packageTabs.map(tab => (
-              <AccordionItem key={tab.id} value={tab.id} className="mb-2 border rounded-lg">
-                <AccordionTrigger className="flex items-center gap-4 px-4 py-3 font-bold text-left">
-                  <span className={`font-display text-xl font-bold`}>{tab.label}</span>
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${tab.color}`}>{tab.label}</span>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4">
-                  <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                    {FEATURES.filter(f => PACKAGE_FEATURES[tab.id]?.includes(f.key)).map(feature => {
-                      const isStandard = STANDARD_FEATURES.includes(feature.key);
-                      const globalLinks = customLinks[feature.key] || {};
-                      return (
-                        <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tab.color}`}> 
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm">{feature.label}</span>
-                            {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
-                          </div>
-                          <div className="flex flex-col gap-1 mt-2">
-                            <input
-                              type="url"
-                              placeholder="Video-link (global)"
-                              className="px-2 py-1 rounded border text-xs"
-                              value={globalLinks.video || ''}
-                              onChange={e => handleGlobalLinkChange(feature.key, 'video', e.target.value)}
-                            />
-                            <input
-                              type="url"
-                              placeholder="Billede-link (global)"
-                              className="px-2 py-1 rounded border text-xs"
-                              value={globalLinks.image || ''}
-                              onChange={e => handleGlobalLinkChange(feature.key, 'image', e.target.value)}
-                            />
-                            <input
-                              type="url"
-                              placeholder="Side-link (global)"
-                              className="px-2 py-1 rounded border text-xs"
-                              value={globalLinks.page || ''}
-                              onChange={e => handleGlobalLinkChange(feature.key, 'page', e.target.value)}
-                            />
-                            <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[feature.key]} onClick={() => handleSaveGlobalLinks(feature.key)}>
-                              {saving[feature.key] ? 'Gemmer...' : 'Gem links'}
-                            </Button>
-                          </div>
-                        </Card>
-                      );
-                    })}
+          <div className="font-bold text-lg mb-1">Rediger links for alle features</div>
+          <div className="text-sm text-muted-foreground mb-4">Her kan du sætte video, billede og side-link på ALLE features – uanset kunde.</div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+            {FEATURES.map(feature => {
+              const globalLinks = customLinks[feature.key] || {};
+              return (
+                <Card key={feature.key} className="relative p-3 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold text-sm">{feature.label}</span>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+                  <div className="flex flex-col gap-1 mt-2">
+                    <input
+                      type="url"
+                      placeholder="Video-link (global)"
+                      className="px-2 py-1 rounded border text-xs"
+                      value={globalLinks.video || ''}
+                      onChange={e => handleGlobalLinkChange(feature.key, 'video', e.target.value)}
+                    />
+                    <input
+                      type="url"
+                      placeholder="Billede-link (global)"
+                      className="px-2 py-1 rounded border text-xs"
+                      value={globalLinks.image || ''}
+                      onChange={e => handleGlobalLinkChange(feature.key, 'image', e.target.value)}
+                    />
+                    <input
+                      type="url"
+                      placeholder="Side-link (global)"
+                      className="px-2 py-1 rounded border text-xs"
+                      value={globalLinks.page || ''}
+                      onChange={e => handleGlobalLinkChange(feature.key, 'page', e.target.value)}
+                    />
+                    <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[feature.key]} onClick={() => handleSaveGlobalLinks(feature.key)}>
+                      {saving[feature.key] ? 'Gemmer...' : 'Gem links'}
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
         </div>
         {/* Customer selection and feature editing */}
         {!search.trim() && (
