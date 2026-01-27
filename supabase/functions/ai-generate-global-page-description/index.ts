@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,49 +11,45 @@ serve(async (req: Request): Promise<Response> => {
 
   try {
     const { title, slug } = await req.json();
-    const apiKey = Deno.env.get("OPENAI_API_KEY");
+    const apiKey = Deno.env.get("GOOGLE_AI_API_KEY");
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: "Missing OpenAI API key" }),
+        JSON.stringify({ error: "Missing Google AI API key" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const prompt = `Skriv en kort, informativ og letforståelig beskrivelse (på dansk) af følgende modul/funktion til en biludlejningsplatform. Brug markdown og nævn konkrete fordele for brugeren.\n\nTitel: ${title}\nSlug: ${slug}`;
 
-    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: 'Du er en hjælpsom tekstforfatter for en dansk biludlejningsplatform.' },
-          { role: 'user', content: prompt },
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      }),
-    });
+    const googleRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      }
+    );
 
-    if (!openaiRes.ok) {
-      const errorText = await openaiRes.text();
+    if (!googleRes.ok) {
+      const errorText = await googleRes.text();
       return new Response(
-        JSON.stringify({ error: 'OpenAI API error', details: errorText }),
+        JSON.stringify({ error: "Google AI API error", details: errorText }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    const data = await openaiRes.json();
-    const text = data.choices?.[0]?.message?.content || '';
+
+    const data = await googleRes.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
     return new Response(
       JSON.stringify({ description: text }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
+  } catch (error) {
     return new Response(
-      JSON.stringify({ error: 'Edge function error', details: String(err) }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
