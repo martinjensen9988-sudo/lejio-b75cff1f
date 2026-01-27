@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_entries: {
+        Row: {
+          account_code: string
+          accounting_period: string | null
+          created_at: string
+          credit_amount: number | null
+          currency: string | null
+          debit_amount: number | null
+          description: string
+          entry_type: string
+          external_id: string | null
+          id: string
+          invoice_id: string | null
+          lessor_id: string
+          posted_at: string | null
+          posting_date: string
+          reference_number: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_code: string
+          accounting_period?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          currency?: string | null
+          debit_amount?: number | null
+          description: string
+          entry_type?: string
+          external_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          lessor_id: string
+          posted_at?: string | null
+          posting_date?: string
+          reference_number?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_code?: string
+          accounting_period?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          currency?: string | null
+          debit_amount?: number | null
+          description?: string
+          entry_type?: string
+          external_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          lessor_id?: string
+          posted_at?: string | null
+          posting_date?: string
+          reference_number?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_entries_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_entries_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_audit_logs: {
         Row: {
           action_type: string
@@ -2059,6 +2137,114 @@ export type Database = {
         }
         Relationships: []
       }
+      email_campaigns: {
+        Row: {
+          body: string
+          click_count: number | null
+          conversion_count: number | null
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          open_count: number | null
+          recipient_count: number | null
+          scheduled_at: string | null
+          sent_at: string | null
+          sent_count: number | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          click_count?: number | null
+          conversion_count?: number | null
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          open_count?: number | null
+          recipient_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          click_count?: number | null
+          conversion_count?: number | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          open_count?: number | null
+          recipient_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_tracking: {
+        Row: {
+          campaign_id: string
+          clicked_at: string | null
+          clicked_links: string[] | null
+          created_at: string
+          created_by: string
+          id: string
+          lead_id: string
+          opened_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          clicked_at?: string | null
+          clicked_links?: string[] | null
+          created_at?: string
+          created_by: string
+          id?: string
+          lead_id: string
+          opened_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          clicked_at?: string | null
+          clicked_links?: string[] | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          lead_id?: string
+          opened_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_tracking_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_tracking_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "sales_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facebook_posts: {
         Row: {
           created_at: string
@@ -2109,6 +2295,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      feature_links: {
+        Row: {
+          created_at: string | null
+          feature_key: string
+          id: number
+          image: string | null
+          page: string | null
+          updated_at: string | null
+          video: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feature_key: string
+          id?: number
+          image?: string | null
+          page?: string | null
+          updated_at?: string | null
+          video?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feature_key?: string
+          id?: number
+          image?: string | null
+          page?: string | null
+          updated_at?: string | null
+          video?: string | null
+        }
+        Relationships: []
       }
       fines: {
         Row: {
@@ -2760,6 +2976,7 @@ export type Database = {
           lessor_id: string
           monthly_installment: number
           original_amount: number
+          platform_fee_paid_at: string | null
           remaining_balance: number
           remaining_months: number
           setup_fee: number | null
@@ -2777,6 +2994,7 @@ export type Database = {
           lessor_id: string
           monthly_installment: number
           original_amount: number
+          platform_fee_paid_at?: string | null
           remaining_balance: number
           remaining_months: number
           setup_fee?: number | null
@@ -2794,6 +3012,7 @@ export type Database = {
           lessor_id?: string
           monthly_installment?: number
           original_amount?: number
+          platform_fee_paid_at?: string | null
           remaining_balance?: number
           remaining_months?: number
           setup_fee?: number | null
@@ -2801,7 +3020,6 @@ export type Database = {
           status?: string
           updated_at?: string
           vehicle_id?: string
-          platform_fee_paid_at?: string | null
         }
         Relationships: [
           {
@@ -3615,6 +3833,59 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_reminders: {
+        Row: {
+          created_at: string
+          email_body: string | null
+          email_subject: string | null
+          id: string
+          invoice_id: string
+          recipient_email: string
+          reminder_number: number | null
+          reminder_type: string
+          scheduled_date: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_body?: string | null
+          email_subject?: string | null
+          id?: string
+          invoice_id: string
+          recipient_email: string
+          reminder_number?: number | null
+          reminder_type?: string
+          scheduled_date: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_body?: string | null
+          email_subject?: string | null
+          id?: string
+          invoice_id?: string
+          recipient_email?: string
+          reminder_number?: number | null
+          reminder_type?: string
+          scheduled_date?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_transactions: {
         Row: {
           amount: number
@@ -3751,6 +4022,7 @@ export type Database = {
           created_at: string
           cvr_number: string | null
           email: string
+          feature_flags: Json | null
           fine_admin_fee: number | null
           fleet_commission_rate: number | null
           fleet_contract_expires_at: string | null
@@ -3805,6 +4077,7 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email: string
+          feature_flags?: Json | null
           fine_admin_fee?: number | null
           fleet_commission_rate?: number | null
           fleet_contract_expires_at?: string | null
@@ -3859,6 +4132,7 @@ export type Database = {
           created_at?: string
           cvr_number?: string | null
           email?: string
+          feature_flags?: Json | null
           fine_admin_fee?: number | null
           fleet_commission_rate?: number | null
           fleet_contract_expires_at?: string | null
@@ -3893,7 +4167,6 @@ export type Database = {
           trial_ends_at?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
-          feature_flags?: Record<string, boolean>
         }
         Relationships: []
       }
@@ -4462,6 +4735,39 @@ export type Database = {
           status?: string
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      saved_searches: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_favorite: boolean | null
+          name: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          name: string
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          name?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

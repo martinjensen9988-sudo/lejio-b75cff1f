@@ -72,6 +72,8 @@ const Features = () => {
     };
     fetchLinks();
   }, []);
+
+  const renterFeatures = [
     {
       icon: Car,
       title: "Stort udvalg",
