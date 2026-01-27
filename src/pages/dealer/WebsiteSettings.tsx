@@ -52,7 +52,7 @@ export default function DealerWebsiteSettings() {
   useEffect(() => {
     async function fetchDealer() {
       if (!user) return;
-      const { data } = await supabase.from('dealer_profiles').select('*').eq('id', user.id).single();
+      const { data } = await (supabase as any).from('dealer_profiles').select('*').eq('id', user.id).single();
       if (data) setForm(f => ({
         ...f,
         name: data.name || '',
@@ -74,7 +74,7 @@ export default function DealerWebsiteSettings() {
         contact_phone: data.contact_phone || '',
       }));
       // Hent forhandlerens biler
-      const { data: vehicleData } = await supabase.from('vehicles').select('*').eq('dealer_id', user.id);
+      const { data: vehicleData } = await (supabase as any).from('vehicles').select('*').eq('dealer_id', user.id);
       setVehicles(vehicleData || []);
       // Dummy statistik
       setStats({ views: Math.floor(Math.random() * 1000) });
@@ -84,7 +84,7 @@ export default function DealerWebsiteSettings() {
 
   async function handleSave() {
     setSaving(true);
-    const { error } = await supabase.from('dealer_profiles').update(form).eq('id', user.id);
+    const { error } = await (supabase as any).from('dealer_profiles').update(form).eq('id', user.id);
     setSaving(false);
     if (error) {
       toast({ title: 'Fejl', description: error.message, variant: 'destructive' });
@@ -251,7 +251,7 @@ export default function DealerWebsiteSettings() {
         <Label>Udvalgte biler</Label>
         <div className="flex flex-wrap gap-2">
           {vehicles.map(v => (
-            <Button key={v.id} variant={form.featured_vehicle_ids.includes(v.id) ? 'primary' : 'outline'} size="sm" onClick={() => handleToggleFeatured(v.id)}>
+            <Button key={v.id} variant={form.featured_vehicle_ids.includes(v.id) ? 'default' : 'outline'} size="sm" onClick={() => handleToggleFeatured(v.id)}>
               {v.make} {v.model}
             </Button>
           ))}

@@ -33,6 +33,8 @@ interface DriverLicense {
   user_profile?: {
     full_name: string | null;
     email: string | null;
+    account_banned_at?: string | null;
+    account_banned_reason?: string | null;
   } | null;
 }
 
