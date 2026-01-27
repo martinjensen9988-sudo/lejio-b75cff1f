@@ -61,8 +61,9 @@ const Features = () => {
   const [selectedFeatures, setSelectedFeatures] = useState<Set<string>>(new Set());
   const [featureLinks, setFeatureLinks] = useState({});
 
-  // Hent globale feature links fra Supabase
+  // Hent globale feature links fra Supabase og lyt realtime
   useEffect(() => {
+    let subscription: any;
     const fetchLinks = async () => {
       const { data, error } = await supabase.from('feature_links').select('feature_key, video, image, page');
       if (!error && data) {
@@ -78,6 +79,15 @@ const Features = () => {
       }
     };
     fetchLinks();
+    // Realtime subscription
+    subscription = supabase.channel('feature_links_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'feature_links' }, () => {
+        fetchLinks();
+      })
+      .subscribe();
+    return () => {
+      if (subscription && subscription.unsubscribe) subscription.unsubscribe();
+    };
   }, []);
 
   // DEBUG: Log featureLinks for at se hvad der hentes fra Supabase

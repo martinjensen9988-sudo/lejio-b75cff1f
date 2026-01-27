@@ -74,7 +74,22 @@ serve(async (req) => {
     const startDate = new Date(booking.start_date);
     const endDate = new Date(booking.end_date);
     const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    const dailyPrice = booking.total_price / days;
+
+    // Udregn selvrisiko-forsikring (max 49 kr/dag, max 400 kr/md)
+    let insuranceFee = 0;
+    let insuranceDays = 0;
+    if (booking.deductible_insurance_selected && booking.deductible_insurance_price > 0) {
+      // Beregn antal dage og måneder
+      insuranceDays = days;
+      const months = Math.ceil(insuranceDays / 30);
+      const rawPrice = insuranceDays * 49;
+      const cappedPrice = Math.min(rawPrice, months * 400);
+      insuranceFee = Math.min(booking.deductible_insurance_price, cappedPrice);
+    }
+
+    // Udlejers lejeindtægt ekskl. forsikring
+    const lessorRentalIncome = booking.total_price - insuranceFee;
+    const dailyPrice = lessorRentalIncome / days;
 
     const lineItems = [
       {
@@ -82,9 +97,21 @@ serve(async (req) => {
         quantity: days,
         unit: "dage",
         unit_price: dailyPrice,
-        total: booking.total_price,
+        total: lessorRentalIncome,
       }
     ];
+
+    // Tilføj selvrisiko-forsikring som særskilt line item (Lejio’s andel)
+    if (insuranceFee > 0) {
+      lineItems.push({
+        description: "Nul selvrisiko-forsikring (Lejio)",
+        quantity: insuranceDays,
+        unit: "dage",
+        unit_price: Math.round((insuranceFee / insuranceDays) * 100) / 100,
+        total: insuranceFee,
+        platform_fee: true
+      });
+    }
 
     // Add fuel fee if applicable
     if (booking.fuel_fee && booking.fuel_fee > 0) {
@@ -97,9 +124,12 @@ serve(async (req) => {
       });
     }
 
-    const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
-    const vatAmount = includeVat ? subtotal * 0.25 : 0;
-    const totalAmount = subtotal + vatAmount;
+    // Udlejers subtotal er kun lejeindtægt + evt. brændstof, ikke forsikring
+    const lessorSubtotal = lineItems
+      .filter(item => !item.platform_fee)
+      .reduce((sum, item) => sum + item.total, 0);
+    const vatAmount = includeVat ? lessorSubtotal * 0.25 : 0;
+    const totalAmount = lessorSubtotal + vatAmount;
 
     // Create invoice
     const { data: invoice, error: invoiceError } = await supabase
@@ -111,7 +141,7 @@ serve(async (req) => {
         renter_email: booking.renter_email,
         renter_name: booking.renter_name || `${booking.renter_first_name} ${booking.renter_last_name}`,
         renter_address: booking.renter_address,
-        subtotal,
+        subtotal: lessorSubtotal,
         vat_amount: vatAmount,
         total_amount: totalAmount,
         status: "issued",
