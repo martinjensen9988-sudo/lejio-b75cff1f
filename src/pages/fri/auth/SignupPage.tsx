@@ -4,26 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useFriAuth } from '@/hooks/useFriAuth';
-import { useFriAuthContext } from '@/providers/FriAuthProvider';
-import { useCreateLessorAccount } from '@/hooks/useLessorAccount';
+import { createLessorAccount } from '@/hooks/useLessorAccount';
 
 export function FriSignupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signUp, user: authUser } = useFriAuth();
-  const { user: contextUser } = useFriAuthContext();
-  const { createAccount } = useCreateLessorAccount();
+  const { signUp, user } = useFriAuth();
 
   const selectedTier = searchParams.get('tier') || 'business';
-  const currentUser = contextUser || authUser;
 
   const [formData, setFormData] = useState({
     companyName: '',
     email: '',
     password: '',
     cvr: '',
+    domain: '',
     primaryColor: '#0066cc',
-    customDomain: '',
   });
 
   const [step, setStep] = useState<'credentials' | 'company' | 'branding'>('credentials');
@@ -51,7 +47,7 @@ export function FriSignupPage() {
       setError('Virksomhedsnavn er påkrævet');
       return;
     }
-    if (!formData.customDomain) {
+    if (!formData.domain) {
       setError('Domæne er påkrævet');
       return;
     }
@@ -65,23 +61,16 @@ export function FriSignupPage() {
     setLoading(true);
 
     try {
-      if (!currentUser?.id) {
-        throw new Error('User not authenticated');
-      }
+      if (!user) throw new Error('No user found');
 
-      // Create lessor account in Azure
-      const account = await createAccount({
-        userId: currentUser.id,
-        email: formData.email,
-        companyName: formData.companyName,
-        cvr: formData.cvr || undefined,
-        customDomain: formData.customDomain,
-        primaryColor: formData.primaryColor,
+      // Create lessor account
+      await createLessorAccount({
+        user_id: user.id,
+        company_name: formData.companyName,
+        custom_domain: formData.domain,
+        cvr_number: formData.cvr || undefined,
+        primary_color: formData.primaryColor,
       });
-
-      if (!account) {
-        throw new Error('Failed to create account');
-      }
 
       // Redirect to dashboard
       navigate('/fri/dashboard');
@@ -184,6 +173,27 @@ export function FriSignupPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Dit domæne
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      value={formData.domain}
+                      onChange={(e) =>
+                        setFormData({ ...formData, domain: e.target.value })
+                      }
+                      placeholder="biluthyr"
+                      required
+                    />
+                    <span className="text-gray-600">.lejio.app</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Dit dashboard bliver: biluthyr.lejio.app
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     CVR-nummer (valgfrit)
                   </label>
                   <Input
@@ -194,29 +204,6 @@ export function FriSignupPage() {
                     }
                     placeholder="12345678"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dit domæne
-                  </label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="text"
-                      value={formData.customDomain}
-                      onChange={(e) =>
-                        setFormData({ ...formData, customDomain: e.target.value })
-                      }
-                      placeholder="biluthyr"
-                      required
-                    />
-                    <span className="text-gray-600 px-3 py-2 bg-gray-100 rounded text-sm whitespace-nowrap">
-                      .lejio-fri.app
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Dit dashboard vil være tilgængeligt på: {formData.customDomain || 'your-domain'}.lejio-fri.app
-                  </p>
                 </div>
 
                 {error && (
@@ -273,7 +260,7 @@ export function FriSignupPage() {
 
                 <div className="bg-blue-50 border border-blue-200 rounded p-3">
                   <p className="text-sm text-blue-800">
-                    Logo og branding kan tilpasses senere i indstillinger.
+                    Logo og mere branding kan tilpasses senere i indstillinger.
                   </p>
                 </div>
 

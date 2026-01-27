@@ -2,18 +2,16 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useFriAuth } from '@/hooks/useFriAuth';
 
 export function FriLoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useFriAuth();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +21,10 @@ export function FriLoginPage() {
     setLoading(true);
 
     try {
-      await signIn(formData.email, formData.password);
-      navigate('/fri/dashboard');
+      await signIn(email, password);
+      // Redirect to where they came from or dashboard
+      const from = (location.state as any)?.from?.pathname || '/fri/dashboard';
+      navigate(from);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -38,7 +38,7 @@ export function FriLoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Lejio Fri</h1>
-          <p className="text-gray-600">Log ind i dit dashboard</p>
+          <p className="text-gray-600">Log ind på dit dashboard</p>
         </div>
 
         <Card>
@@ -53,10 +53,8 @@ export function FriLoginPage() {
                 </label>
                 <Input
                   type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="din@email.dk"
                   required
                 />
@@ -68,11 +66,9 @@ export function FriLoginPage() {
                 </label>
                 <Input
                   type="password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  placeholder="Din adgangskode"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
                   required
                 />
               </div>
@@ -89,14 +85,24 @@ export function FriLoginPage() {
             </form>
 
             {/* Footer */}
-            <div className="mt-6 text-center text-sm text-gray-600">
-              Har du ikke en konto?{' '}
-              <button
-                onClick={() => navigate('/fri/signup')}
-                className="text-blue-600 hover:underline font-medium"
-              >
-                Opret her
-              </button>
+            <div className="mt-6 space-y-3 text-center">
+              <p className="text-sm text-gray-600">
+                Har du ikke en konto?{' '}
+                <button
+                  onClick={() => navigate('/fri/signup')}
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Tilmeld dig her
+                </button>
+              </p>
+              <p className="text-sm text-gray-600">
+                <button
+                  onClick={() => alert('Kontakt support: support@lejio.dk')}
+                  className="text-blue-600 hover:underline"
+                >
+                  Glemt adgangskode?
+                </button>
+              </p>
             </div>
           </CardContent>
         </Card>

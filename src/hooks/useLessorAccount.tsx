@@ -1,242 +1,94 @@
-import { useState, useCallback } from 'react';
-import { queryAzure } from '@/integrations/azure/clientFri';
+import { supabase } from '@/integrations/supabase/client';
 
-interface CreateLessorAccountInput {
-  userId: string;
-  email: string;
-  companyName: string;
-  cvr?: string;
-  customDomain: string;
-  primaryColor?: string;
-}
-
-interface CreateLessorAccountOutput {
-  id: string;
+export interface CreateLessorAccountInput {
   user_id: string;
   company_name: string;
   custom_domain: string;
-  subscription_tier: string;
-  created_at: string;
+  cvr_number?: string;
+  primary_color?: string;
 }
 
 /**
- * Create a new lessor account in Azure
- * Called during signup after user is created in Supabase
+ * Create a new lessor account
+ * Call after user signs up
+ * This will be stored in Azure when connected
+ * For now, we'll store metadata in Supabase
  */
-export function useCreateLessorAccount() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export async function createLessorAccount(input: CreateLessorAccountInput) {
+  try {
+    // For now, store lessor metadata in a Supabase table
+    // When Azure is connected, this will be moved to Azure
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({
+        id: input.user_id,
+        full_name: input.company_name,
+        metadata: {
+          lessor_account: true,
+          company_name: input.company_name,
+          custom_domain: input.custom_domain,
+          cvr_number: input.cvr_number,
+          branding: {
+            primary_color: input.primary_color || '#0066cc',
+            secondary_color: '#f0f0f0',
+            company_name: input.company_name,
+          },
+          subscription_tier: 'trial',
+          trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+        },
+      })
+      .select()
+      .single();
 
-  const createAccount = useCallback(
-    async (input: CreateLessorAccountInput): Promise<CreateLessorAccountOutput | null> => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Check if domain is already taken
-        const domainCheck = await queryAzure(
-          'SELECT id FROM lessor_accounts WHERE custom_domain = $1',
-          [input.customDomain]
-        );
-
-        if (domainCheck.rows.length > 0) {
-          throw new Error('Dette domæne er allerede taget');
-        }
-
-        // Create lessor account
-        const result = await queryAzure(
-          `INSERT INTO lessor_accounts 
-           (user_id, company_name, cvr_number, custom_domain, subscription_tier, branding, trial_ends_at) 
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
-           RETURNING id, user_id, company_name, custom_domain, subscription_tier, created_at`,
-          [
-            input.userId,
-            input.companyName,
-            input.cvr || null,
-            input.customDomain,
-            'trial',
-            JSON.stringify({
-              logo_url: null,
-              primary_color: input.primaryColor || '#0066cc',
-              secondary_color: '#f0f0f0',
-              company_name: input.companyName,
-              favicon_url: null,
-            }),
-            new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
-          ]
-        );
-
-        if (result.rows.length === 0) {
-          throw new Error('Failed to create account');
-        }
-
-        const account = result.rows[0];
-
-        // Create team member record (owner role)
-        await queryAzure(
-          `INSERT INTO lessor_team_members 
-           (lessor_account_id, user_id, role, joined_at, active)
-           VALUES ($1, $2, $3, $4, $5)`,
-          [account.id, input.userId, 'owner', new Date().toISOString(), true]
-        );
-
-        // Create settings record
-        await queryAzure(
-          `INSERT INTO lessor_settings 
-           (lessor_account_id, settings)
-           VALUES ($1, $2)`,
-          [
-            account.id,
-            JSON.stringify({
-              email_notifications: true,
-              sms_notifications: false,
-              language: 'da',
-              timezone: 'Europe/Copenhagen',
-              currency: 'DKK',
-            }),
-          ]
-        );
-
-        return account;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  return { createAccount, loading, error };
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating lessor account:', error);
+    throw error;
+  }
 }
 
 /**
- * Get lessor account by domain
+ * Get lessor account for current user
  */
-export function useLessorAccountByDomain() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export async function getLessorAccount(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-  const getAccount = useCallback(
-    async (domain: string) => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const result = await queryAzure(
-          `SELECT 
-             id, user_id, company_name, custom_domain, subscription_tier, 
-             branding, trial_ends_at, stripe_subscription_id, created_at
-           FROM lessor_accounts 
-           WHERE custom_domain = $1`,
-          [domain]
-        );
-
-        return result.rows[0] || null;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  return { getAccount, loading, error };
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching lessor account:', error);
+    return null;
+  }
 }
 
 /**
- * Get lessor account by user ID
+ * Update lessor account metadata
  */
-export function useLessorAccountByUser() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export async function updateLessorAccount(
+  userId: string,
+  updates: Partial<CreateLessorAccountInput>
+) {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        metadata: updates,
+      })
+      .eq('id', userId)
+      .select()
+      .single();
 
-  const getAccount = useCallback(
-    async (userId: string) => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const result = await queryAzure(
-          `SELECT 
-             id, user_id, company_name, custom_domain, subscription_tier, 
-             branding, trial_ends_at, stripe_subscription_id, created_at
-           FROM lessor_accounts 
-           WHERE user_id = $1
-           LIMIT 1`,
-          [userId]
-        );
-
-        return result.rows[0] || null;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  return { getAccount, loading, error };
-}
-
-/**
- * Update lessor account (branding, subscription tier, etc)
- */
-export function useUpdateLessorAccount() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const updateAccount = useCallback(
-    async (accountId: string, updates: Partial<CreateLessorAccountInput>) => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const setClauses: string[] = [];
-        const values: any[] = [];
-        let paramIndex = 1;
-
-        if (updates.companyName) {
-          setClauses.push(`company_name = $${paramIndex++}`);
-          values.push(updates.companyName);
-        }
-
-        if (updates.primaryColor) {
-          setClauses.push(`branding = jsonb_set(branding, '{primary_color}', $${paramIndex++})`);
-          values.push(`"${updates.primaryColor}"`);
-        }
-
-        if (setClauses.length === 0) {
-          return;
-        }
-
-        setClauses.push(`updated_at = $${paramIndex++}`);
-        values.push(new Date().toISOString());
-
-        values.push(accountId);
-
-        const query = `UPDATE lessor_accounts SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
-
-        const result = await queryAzure(query, values);
-        return result.rows[0] || null;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  return { updateAccount, loading, error };
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating lessor account:', error);
+    throw error;
+  }
 }
