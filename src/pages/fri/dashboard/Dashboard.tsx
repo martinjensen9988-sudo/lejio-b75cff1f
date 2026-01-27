@@ -8,6 +8,7 @@ import { FriBookingList } from '@/components/fri/FriBookingList';
 import { FriInvoiceList } from '@/components/fri/FriInvoiceList';
 import { FriAnalyticsDashboard } from '@/components/fri/FriAnalyticsDashboard';
 import { FriTeamList } from '@/components/fri/FriTeamList';
+import { FriSettingsPage } from '@/components/fri/FriSettingsPage';
 
 export function FriDashboard() {
   const { user, signOut } = useFriAuthContext();
@@ -118,12 +119,7 @@ export function FriDashboard() {
 
           {/* Settings Tab */}
           <TabsContent value="settings">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Indstillinger</h2>
-              <p className="text-gray-600">
-                Indstillinger kommer snart.
-              </p>
-            </div>
+            <FriSettingsPage userId={user?.id || null} />
           </TabsContent>
         </Tabs>
       </main>
