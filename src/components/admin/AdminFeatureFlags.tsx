@@ -199,10 +199,13 @@ export const AdminFeatureFlags = () => {
 
   useEffect(() => {
     const fetchLinks = async () => {
-      const { data, error } = await supabase.from<any, any>('feature_links').select('feature_key, video, image, page');
-      if (!error && data) {
-        const linksObj = {};
-        data.forEach(row => {
+      const { data, error } = await supabase
+        .from('feature_links')
+        .select('feature_key, video, image, page');
+      
+      if (!error && data && Array.isArray(data)) {
+        const linksObj: {[key: string]: any} = {};
+        (data as Array<{feature_key: string; video?: string; image?: string; page?: string}>).forEach(row => {
           linksObj[row.feature_key] = {
             video: row.video || '',
             image: row.image || '',
@@ -234,12 +237,14 @@ export const AdminFeatureFlags = () => {
   const handleSaveGlobalLinks = async (featureKey: string) => {
     setSaving(prev => ({ ...prev, [featureKey]: true }));
     const links = customLinks[featureKey] || {};
-    const { error } = await supabase.from<any, any>('feature_links').upsert({
-      feature_key: featureKey,
-      video: links.video || '',
-      image: links.image || '',
-      page: links.page || ''
-    }, { onConflict: 'feature_key' });
+    const { error } = await supabase
+      .from('feature_links')
+      .upsert({
+        feature_key: featureKey,
+        video: links.video || '',
+        image: links.image || '',
+        page: links.page || ''
+      }, { onConflict: 'feature_key' });
     setSaving(prev => ({ ...prev, [featureKey]: false }));
     if (!error) {
       toast({ title: 'Links gemt!', description: '', variant: 'default' });
