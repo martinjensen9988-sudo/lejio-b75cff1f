@@ -1,5 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -13,7 +11,6 @@ serve(async (req: Request): Promise<Response> => {
   try {
     const { title, slug } = await req.json();
     const apiKey = Deno.env.get("GOOGLE_AI_API_KEY");
-    
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: "Missing Google AI API key" }),
@@ -24,7 +21,7 @@ serve(async (req: Request): Promise<Response> => {
     const prompt = `Skriv en kort, informativ og letforståelig beskrivelse (på dansk) af følgende modul/funktion til en biludlejningsplatform. Brug markdown og nævn konkrete fordele for brugeren.\n\nTitel: ${title}\nSlug: ${slug}`;
 
     const googleRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,7 +35,7 @@ serve(async (req: Request): Promise<Response> => {
       const errorText = await googleRes.text();
       console.error("Google AI API error:", errorText);
       return new Response(
-        JSON.stringify({ error: "Google AI API error" }),
+        JSON.stringify({ error: "Google AI API error", details: errorText }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -57,4 +54,5 @@ serve(async (req: Request): Promise<Response> => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
+});
 });
