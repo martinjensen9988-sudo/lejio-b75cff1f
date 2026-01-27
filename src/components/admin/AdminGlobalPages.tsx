@@ -54,7 +54,13 @@ export default function AdminGlobalPages() {
 
   function startEdit(page: GlobalPage) {
     setEditing(page);
-    setForm({ ...page });
+    setForm({ 
+      title: page.title,
+      slug: page.slug,
+      content_markdown: page.content_markdown,
+      image_urls: page.image_urls || [],
+      video_urls: page.video_urls || []
+    });
     setTimeout(() => {
       if (editRef.current) {
         editRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });

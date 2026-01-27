@@ -3,21 +3,40 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 
+interface DealerProfile {
+  id: string;
+  name: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  opening_hours?: string;
+  images?: string[];
+}
+
+interface Vehicle {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  license_plate?: string;
+  image_url?: string;
+  [key: string]: unknown;
+}
+
 export default function DealerProfile() {
   const { id } = useParams();
-  const [dealer, setDealer] = useState<unknown | null>(null);
-  const [vehicles, setVehicles] = useState<unknown[]>([]);
+  const [dealer, setDealer] = useState<DealerProfile | null>(null);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   useEffect(() => {
     async function fetchDealer() {
       // Hent forhandler-data
-      // @ts-expect-error Supabase type compatibility
-      const { data } = await supabase.from('dealer_profiles').select('*').eq('id', id).single();
-      setDealer(data);
+      const dealerResult = await (supabase.from('dealer_profiles' as any).select('*').eq('id', id).single() as any);
+      setDealer(dealerResult.data as DealerProfile | null);
       // Hent forhandlerens biler
-      // @ts-expect-error Supabase type compatibility
-      const { data: vehicleData } = await supabase.from('vehicles').select('*').eq('dealer_id', id);
-      setVehicles(vehicleData || []);
+      const vehiclesResult = await (supabase.from('vehicles' as any).select('*').eq('dealer_id', id) as any);
+      setVehicles((vehiclesResult.data || []) as Vehicle[]);
     }
     fetchDealer();
   }, [id]);

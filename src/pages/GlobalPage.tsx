@@ -5,15 +5,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
 
+interface GlobalPageData {
+  id: number;
+  title: string;
+  slug: string;
+  content_markdown: string;
+  image_urls?: string[];
+  video_urls?: string[];
+}
+
 export default function GlobalPage() {
   const { slug } = useParams();
-  const [page, setPage] = useState<unknown | null>(null);
+  const [page, setPage] = useState<GlobalPageData | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     async function fetchPage() {
-      // @ts-expect-error Supabase type compatibility
-      const { data } = await supabase.from('global_pages').select('*').eq('slug', slug).single();
+      const { data } = await supabase.from('global_pages').select('*').eq('slug', slug).single() as { data: GlobalPageData | null };
       if (!data) {
         setNotFound(true);
         setPage(null);

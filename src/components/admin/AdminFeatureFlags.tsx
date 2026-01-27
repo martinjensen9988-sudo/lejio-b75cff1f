@@ -358,7 +358,7 @@ export const AdminFeatureFlags = React.memo(() => {
 
                 <select 
                   value={filterTier}
-                  onChange={e => setFilterTier(e.target.value)}
+                  onChange={e => setFilterTier(e.target.value as "all" | "starter" | "pro" | "enterprise")}
                   className="px-3 py-2 border rounded-lg text-sm"
                 >
                   <option value="all">Alle tiers</option>
