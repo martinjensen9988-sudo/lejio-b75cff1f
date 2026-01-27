@@ -131,7 +131,7 @@ function SubscriptionForm({
         daily_rate: dailyRate,
         start_date: new Date().toISOString().split('T')[0],
         payment_method: 'stripe',
-      });
+      } as any);
       if (sub) {
         setSuccess(true);
       } else {

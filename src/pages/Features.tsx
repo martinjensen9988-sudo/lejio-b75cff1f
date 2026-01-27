@@ -306,7 +306,7 @@ const Features = () => {
       })).filter((cat: any) => cat.features.length > 0);
     }
 
-    return filtered;
+    return filtered as any[];
   }, [searchQuery, selectedCategories]);
 
   const toggleCategory = (categoryId: string) => {

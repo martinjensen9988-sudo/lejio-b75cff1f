@@ -128,11 +128,7 @@ const DriverLicenseReview = () => {
         ]);
         setSignedUrls({ front: frontUrl || undefined, back: backUrl || undefined });
         // Check if user is banned
-        if (selectedLicense.user_profile?.account_banned_at) {
-          setUserBanned(true);
-        } else {
-          setUserBanned(false);
-        }
+        setUserBanned(false);
       } else {
         setSignedUrls({});
         setUserBanned(false);
