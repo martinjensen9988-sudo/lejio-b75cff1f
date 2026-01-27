@@ -1,5 +1,9 @@
-import {
-  Calendar, FileText, CreditCard, MapPin, Bell, Users, BarChart3, MessageSquare, Camera, Brain, BadgeCheck, Wallet, Building2, Scan, FileCheck, Store, Bike, CalendarClock, Wrench, CircleDot, Star, Receipt, Truck, Shield, ShieldCheck, Smartphone, QrCode, Globe, Zap, TrendingDown, AlertTriangle, ArrowRight, Play, Check, Lock
+import React, { useState, useEffect } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
 const FEATURES = [
   "Smart Booking-kalender",
   "Automatisk tilgængelighed",
@@ -62,16 +66,6 @@ const FEATURES = [
   "Flåde-afregning",
   "CVR-opslag"
 ];
-  { key: 'warning_register', label: 'Advarselsregister' },
-  { key: 'customer_segments', label: 'Kundesegmenter' },
-  { key: 'favorite_renters', label: 'Favorit-lejere' },
-  { key: 'business_accounts', label: 'Erhvervskonti' },
-  { key: 'department_budgets', label: 'Afdelingsbudgetter' },
-  { key: 'employee_management', label: 'Medarbejder-administration' },
-  { key: 'monthly_invoice', label: 'Månedlig samlet faktura' },
-  { key: 'fleet_settlement', label: 'Flåde-afregning' },
-  { key: 'cvr_lookup', label: 'CVR-opslag' }
-];
 
 export const AdminFeatureFlags = () => {
   // Store global links for features (video, image, page)
@@ -120,9 +114,9 @@ export const AdminFeatureFlags = () => {
       }, { onConflict: 'feature_key' });
       setSaving(prev => ({ ...prev, [featureTitle]: false }));
       if (!error) {
-        toast.success('Links gemt!');
+        toast({ title: 'Links gemt!', description: '', variant: 'success' });
       } else {
-        toast.error('Kunne ikke gemme links');
+        toast({ title: 'Kunne ikke gemme links', description: '', variant: 'destructive' });
       }
     };
   const [customers, setCustomers] = useState([]);
@@ -150,9 +144,9 @@ export const AdminFeatureFlags = () => {
       .eq('id', customerId);
     if (!error) {
       setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, feature_flags: newFlags } : c));
-      toast.success('Feature opdateret');
+      toast({ title: 'Feature opdateret', description: '', variant: 'success' });
     } else {
-      toast.error('Kunne ikke opdatere feature');
+      toast({ title: 'Kunne ikke opdatere feature', description: '', variant: 'destructive' });
     }
   };
 
@@ -216,43 +210,43 @@ export const AdminFeatureFlags = () => {
           <div className="font-bold text-lg mb-1">Rediger links for alle features</div>
           <div className="text-sm text-muted-foreground mb-4">Her kan du sætte video, billede og side-link på ALLE features – uanset kunde.</div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-            {FEATURES.map(feature => {
-              const globalLinks = customLinks[feature.key] || {};
+            {FEATURES.map(featureTitle => {
+              const globalLinks = customLinks[featureTitle] || {};
               return (
-                <Card key={feature.key} className="relative p-3 flex flex-col gap-2">
+                <Card key={featureTitle} className="relative p-3 flex flex-col gap-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-sm">{feature.label}</span>
+                    <span className="font-bold text-sm">{featureTitle}</span>
                   </div>
                   <div className="flex flex-col gap-1 mt-2">
                     <input
                       type="url"
-                      id={`video-link-${feature.key}`}
-                      name={`video-link-${feature.key}`}
+                      id={`video-link-${featureTitle}`}
+                      name={`video-link-${featureTitle}`}
                       placeholder="Video-link (global)"
                       className="px-2 py-1 rounded border text-xs"
                       value={globalLinks.video || ''}
-                      onChange={e => handleGlobalLinkChange(feature.key, 'video', e.target.value)}
+                      onChange={e => handleGlobalLinkChange(featureTitle, 'video', e.target.value)}
                     />
                     <input
                       type="url"
-                      id={`image-link-${feature.key}`}
-                      name={`image-link-${feature.key}`}
+                      id={`image-link-${featureTitle}`}
+                      name={`image-link-${featureTitle}`}
                       placeholder="Billede-link (global)"
                       className="px-2 py-1 rounded border text-xs"
                       value={globalLinks.image || ''}
-                      onChange={e => handleGlobalLinkChange(feature.key, 'image', e.target.value)}
+                      onChange={e => handleGlobalLinkChange(featureTitle, 'image', e.target.value)}
                     />
                     <input
                       type="url"
-                      id={`page-link-${feature.key}`}
-                      name={`page-link-${feature.key}`}
+                      id={`page-link-${featureTitle}`}
+                      name={`page-link-${featureTitle}`}
                       placeholder="Side-link (global)"
                       className="px-2 py-1 rounded border text-xs"
                       value={globalLinks.page || ''}
-                      onChange={e => handleGlobalLinkChange(feature.key, 'page', e.target.value)}
+                      onChange={e => handleGlobalLinkChange(featureTitle, 'page', e.target.value)}
                     />
-                    <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[feature.key]} onClick={() => handleSaveGlobalLinks(feature.key)}>
-                      {saving[feature.key] ? 'Gemmer...' : 'Gem links'}
+                    <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[featureTitle]} onClick={() => handleSaveGlobalLinks(featureTitle)}>
+                      {saving[featureTitle] ? 'Gemmer...' : 'Gem links'}
                     </Button>
                   </div>
                 </Card>
@@ -289,18 +283,17 @@ export const AdminFeatureFlags = () => {
                       <span className={`px-2 py-1 rounded text-xs font-bold ${tab.color}`}>{tab.label}</span>
                     </div>
                     <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                      {FEATURES.filter(f => PACKAGE_FEATURES[tab.id]?.includes(f.key)).map(feature => {
-                        const isStandard = STANDARD_FEATURES.includes(feature.key);
+                      {FEATURES.map(featureTitle => {
+                        // Use the same key generator as everywhere else
+                        const featureKey = featureTitle.toLowerCase().replace(/[^a-z0-9_]+/gi, '_');
                         return (
-                          <Card key={feature.key} className={`relative p-3 flex flex-col gap-2 ${tab.color}`}> 
+                          <Card key={featureKey} className={`relative p-3 flex flex-col gap-2 ${tab.color}`}>
                             <div className="flex items-center gap-2 mb-1">
                               <Switch
-                                checked={isStandard ? true : !!customer.feature_flags?.[feature.key]}
-                                disabled={isStandard}
-                                onCheckedChange={checked => !isStandard && handleToggle(customer.id, feature.key, checked)}
+                                checked={!!customer.feature_flags?.[featureKey]}
+                                onCheckedChange={checked => handleToggle(customer.id, featureKey, checked)}
                               />
-                              <span className="font-bold text-sm">{feature.label}</span>
-                              {isStandard && <span className="ml-1 text-xs text-primary">(Standard)</span>}
+                              <span className="font-bold text-sm">{featureTitle}</span>
                             </div>
                           </Card>
                         );
