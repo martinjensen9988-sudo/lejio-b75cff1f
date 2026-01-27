@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { useFriVehicles, Vehicle, CreateVehicleInput } from '@/hooks/useFriVehicles';
-import { FriVehicleForm } from './FriVehicleForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,78 @@ import {
 
 interface FriVehicleListProps {
   lessorId: string | null;
+}
+
+// Simple vehicle form component
+function FriVehicleForm({
+  vehicle,
+  onSubmit,
+  onCancel,
+}: {
+  vehicle?: Vehicle;
+  onSubmit: (data: CreateVehicleInput) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [formData, setFormData] = useState<CreateVehicleInput>({
+    make: vehicle?.make || '',
+    model: vehicle?.model || '',
+    year: vehicle?.year || new Date().getFullYear(),
+    license_plate: vehicle?.license_plate || '',
+    vin: vehicle?.vin || '',
+    daily_rate: vehicle?.daily_rate || 0,
+    mileage_limit: vehicle?.mileage_limit || 0,
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-1">Make</label>
+        <input
+          type="text"
+          value={formData.make}
+          onChange={(e) => setFormData({ ...formData, make: e.target.value })}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Model</label>
+        <input
+          type="text"
+          value={formData.model}
+          onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Daily Rate (DKK)</label>
+        <input
+          type="number"
+          step="0.01"
+          value={formData.daily_rate}
+          onChange={(e) => setFormData({ ...formData, daily_rate: parseFloat(e.target.value) })}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={loading}>Save</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
+    </form>
+  );
 }
 
 export function FriVehicleList({ lessorId }: FriVehicleListProps) {

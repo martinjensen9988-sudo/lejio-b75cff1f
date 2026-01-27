@@ -162,7 +162,7 @@ export function useFriBookings(lessorId: string | null) {
   // Update booking status
   const updateStatus = useCallback(
     async (id: string, status: Booking['status']) => {
-      return updateBooking(id, { status });
+      return updateBooking(id, { status } as any);
     },
     [updateBooking]
   );

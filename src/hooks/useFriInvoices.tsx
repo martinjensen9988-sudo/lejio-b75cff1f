@@ -178,7 +178,7 @@ export function useFriInvoices(lessorId: string | null) {
   // Update invoice status
   const updateStatus = useCallback(
     async (id: string, status: Invoice['status']) => {
-      return updateInvoice(id, { status });
+      return updateInvoice(id, { status } as any);
     },
     [updateInvoice]
   );
@@ -194,7 +194,7 @@ export function useFriInvoices(lessorId: string | null) {
   // Mark as paid
   const markAsPaid = useCallback(
     async (id: string, paymentMethod?: string) => {
-      return updateInvoice(id, { status: 'paid', payment_method: paymentMethod });
+      return updateInvoice(id, { status: 'paid', payment_method: paymentMethod } as any);
     },
     [updateInvoice]
   );

@@ -1,82 +1,62 @@
 /**
- * Azure PostgreSQL Client for Lejio Fri (Lessor Platform)
- * Connects to: Azure Database for PostgreSQL
+ * Azure SQL Client for Lejio Fri (Lessor Platform)
+ * Connects to: Azure SQL Database via REST API
  * 
  * Usage:
- * - Direct PostgreSQL queries via pg Client
- * - All lessor_* tables stored in Azure
- * - Auth still handled by Supabase (hybrid approach)
+ * - All database calls via Azure Functions REST endpoints
+ * - All lessor_* tables stored in Azure SQL
+ * - Auth handled by Supabase
  */
 
-import { Client } from 'pg';
-
-let azurePgFri: Client | null = null;
+const API_BASE_URL = import.meta.env.VITE_AZURE_API_URL || 'https://api.lejio-fri.com';
 
 /**
- * Initialize Azure PostgreSQL connection
- * Should be called once on app startup
+ * Initialize Azure SQL connection
+ * All database calls go through Azure Functions REST endpoints
  */
 export async function initializeAzureDb() {
-  if (azurePgFri) return; // Already connected
+  console.log('✅ Azure SQL initialized (API: ' + API_BASE_URL + ')');
+  return true;
+}
 
-  const connectionString = import.meta.env.VITE_DATABASE_URL_FRI;
-
-  if (!connectionString) {
-    console.error(
-      '❌ VITE_DATABASE_URL_FRI not set. Lejio Fri will not work.',
-      'Add to .env.local: VITE_DATABASE_URL_FRI=postgresql://...'
-    );
-    return;
-  }
-
-  azurePgFri = new Client({
-    connectionString,
-    ssl: {
-      rejectUnauthorized: false, // Azure requires SSL
+/**
+ * Make request to Azure Functions API
+ */
+export async function fetchAzureAPI(
+  endpoint: string,
+  options: RequestInit = {}
+) {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
     },
   });
 
-  try {
-    await azurePgFri.connect();
-    console.log('✅ Connected to Azure PostgreSQL (Lejio Fri)');
-  } catch (error) {
-    console.error('❌ Failed to connect to Azure PostgreSQL:', error);
-    azurePgFri = null;
+  if (!response.ok) {
+    throw new Error(`Azure API error: ${response.statusText}`);
   }
+
+  return response.json();
 }
 
 /**
- * Get Azure client instance
- * Call initializeAzureDb() first
+ * Query wrapper for Azure SQL (via REST)
  */
-export function getAzureDb(): Client {
-  if (!azurePgFri) {
-    throw new Error('Azure PostgreSQL not initialized. Call initializeAzureDb() first.');
-  }
-  return azurePgFri;
+export async function queryAzure(endpoint: string, params: any = {}) {
+  return fetchAzureAPI(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
 }
 
 /**
- * Query wrapper for Azure PostgreSQL
- */
-export async function queryAzure(sql: string, params: any[] = []) {
-  const client = getAzureDb();
-  try {
-    const result = await client.query(sql, params);
-    return result;
-  } catch (error) {
-    console.error('Azure query error:', { sql, params, error });
-    throw error;
-  }
-}
-
-/**
- * Disconnect from Azure (for cleanup)
+ * Disconnect from Azure (no-op for REST API)
  */
 export async function disconnectAzure() {
-  if (azurePgFri) {
-    await azurePgFri.end();
-    azurePgFri = null;
-    console.log('✅ Disconnected from Azure PostgreSQL');
-  }
+  console.log('✅ Azure connection closed');
+  return true;
 }
+

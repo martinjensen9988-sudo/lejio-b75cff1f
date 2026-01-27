@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFriSettings } from '@/hooks/useFriSettings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +39,7 @@ export function FriSettingsPage({ userId }: FriSettingsPageProps) {
   const [savingBranding, setSavingBranding] = useState(false);
 
   // Update forms when account data loads
-  useState(() => {
+  useEffect(() => {
     if (account) {
       setAccountForm({
         company_name: account.company_name,
@@ -51,7 +51,7 @@ export function FriSettingsPage({ userId }: FriSettingsPageProps) {
         logo_url: account.branding?.logo_url || '',
       });
     }
-  }, [account]);
+  }, [account?.id]);
 
   const handleUpdateAccount = async (e: React.FormEvent) => {
     e.preventDefault();

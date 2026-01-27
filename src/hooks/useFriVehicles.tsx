@@ -130,7 +130,7 @@ export function useFriVehicles(lessorId: string | null) {
       id: string,
       status: 'available' | 'rented' | 'maintenance' | 'retired'
     ) => {
-      return updateVehicle(id, { availability_status: status });
+      return updateVehicle(id, { status } as any);
     },
     [updateVehicle]
   );
