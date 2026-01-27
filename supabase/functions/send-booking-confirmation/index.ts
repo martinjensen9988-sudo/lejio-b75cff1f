@@ -110,29 +110,32 @@ serve(async (req: Request): Promise<Response> => {
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #00E676, #2962FF); padding: 30px; border-radius: 12px 12px 0 0; text-align: center; }
-    .header h1 { color: white; margin: 0; font-size: 24px; }
-    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
-    .success-badge { background: #00E676; color: white; display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: 600; margin-bottom: 20px; }
-    .info-box { background: white; padding: 20px; border-radius: 8px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-    .info-row:last-child { border-bottom: none; }
-    .label { color: #666; font-weight: 500; }
-    .value { color: #333; font-weight: 600; }
-    .price { font-size: 24px; color: #00E676; font-weight: bold; text-align: center; padding: 20px; }
-    .contact-box { background: #2962FF; color: white; padding: 20px; border-radius: 8px; margin: 15px 0; }
-    .contact-box h3 { margin-top: 0; }
-    .contact-box a { color: white; }
-    .cta-button { display: block; background: linear-gradient(135deg, #FFD600, #FF8A65); color: #333; text-decoration: none; padding: 16px 32px; border-radius: 30px; font-weight: bold; font-size: 18px; text-align: center; margin: 25px 0; box-shadow: 0 4px 15px rgba(255, 214, 0, 0.4); }
-    .cta-button:hover { transform: translateY(-2px); }
-    .contract-box { background: linear-gradient(135deg, #FFD600, #FF8A65); padding: 25px; border-radius: 12px; margin: 20px 0; text-align: center; }
-    .contract-box h3 { margin-top: 0; color: #333; font-size: 20px; }
-    .contract-box p { color: #555; margin-bottom: 15px; }
-    .contract-number { background: white; display: inline-block; padding: 8px 16px; border-radius: 6px; font-family: monospace; font-size: 14px; color: #333; }
-    .footer { text-align: center; margin-top: 20px; color: #888; font-size: 12px; }
+    body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;line-height:1.6;color:#333}
+    .container{max-width:600px;margin:0 auto;padding:20px}
+    .header{background:linear-gradient(135deg,#00E676,#2962FF);padding:30px;border-radius:12px 12px 0 0;text-align:center}
+    .header h1{color:#fff;margin:0;font-size:24px}
+    .content{background:#f8f9fa;padding:30px;border-radius:0 0 12px 12px}
+    .info-box{background:#fff;padding:20px;border-radius:8px;margin:15px 0;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+    .info-box h3{margin-top:0;color:#00E676}
+    .info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
+    .info-row:last-child{border-bottom:none}
+    .label{color:#666;font-weight:500}
+    .value{color:#333;font-weight:600}
+    .price{font-size:24px;color:#00E676;font-weight:bold;text-align:center;padding:20px}
+    .contact-box{background:#2962FF;color:#fff;padding:20px;border-radius:8px;margin:15px 0}
+    .contact-box h3{margin-top:0}
+    .contact-box a{color:#fff}
+    .cta-button{display:inline-block;background:linear-gradient(135deg,#FFD600,#FF8A65);color:#333;text-decoration:none;padding:16px 32px;border-radius:30px;font-weight:bold;font-size:18px;margin:20px 0;box-shadow:0 4px 15px rgba(255,214,0,.4)}
+    .contract-box{background:linear-gradient(135deg,#FFD600,#FF8A65);padding:25px;border-radius:12px;margin:20px 0;text-align:center}
+    .contract-box h3{margin-top:0;color:#333;font-size:20px}
+    .contract-box p{color:#555;margin-bottom:15px}
+    .contract-number{background:#fff;display:inline-block;padding:8px 16px;border-radius:6px;font-family:monospace;font-size:14px;color:#333}
+    .next-steps{background:#FFF8E1;border-left:4px solid #FFD600;padding:20px;border-radius:0 8px 8px 0}
+    .next-steps h3{margin-top:0;color:#F57C00}
+    .next-steps ol{margin:0;padding-left:20px}
+    .footer{text-align:center;margin-top:20px;color:#888;font-size:12px}
   </style>
 </head>
 <body>
@@ -176,22 +179,22 @@ serve(async (req: Request): Promise<Response> => {
         <h3>📋 Underskriv din lejekontrakt</h3>
         <p>Før du kan afhente bilen, skal du underskrive lejekontrakten digitalt.</p>
         <p class="contract-number">Kontrakt: ${safeContractNumber}</p>
-        <a href="${contractLink}" class="cta-button" style="display: inline-block; margin-top: 15px;">
+        <a href="${contractLink}" class="cta-button">
           ✍️ Underskriv kontrakt nu
         </a>
       </div>
 
       <div class="contact-box">
         <h3>📞 Kontakt udlejeren</h3>
-        <p style="margin-bottom: 5px;"><strong>${safeLessorName}</strong></p>
-        ${safeLessorPhone ? `<p style="margin: 5px 0;">Telefon: <a href="tel:${safeLessorPhone}">${safeLessorPhone}</a></p>` : ''}
-        <p style="margin: 5px 0;">Email: <a href="mailto:${safeLessorEmail}">${safeLessorEmail}</a></p>
-        <p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">Kontakt udlejeren for at aftale afhentning efter kontrakten er underskrevet.</p>
+        <p><strong>${safeLessorName}</strong></p>
+        ${safeLessorPhone ? `<p>Telefon: <a href="tel:${safeLessorPhone}">${safeLessorPhone}</a></p>` : ''}
+        <p>Email: <a href="mailto:${safeLessorEmail}">${safeLessorEmail}</a></p>
+        <p style="font-size:14px;opacity:.9">Kontakt udlejeren for at aftale afhentning efter kontrakten er underskrevet.</p>
       </div>
 
-      <div class="info-box" style="background: #FFF8E1; border-left: 4px solid #FFD600;">
-        <h3 style="margin-top: 0; color: #F57C00;">📋 Næste skridt</h3>
-        <ol style="margin: 0; padding-left: 20px;">
+      <div class="next-steps">
+        <h3>📋 Næste skridt</h3>
+        <ol>
           <li><strong>Underskriv kontrakten</strong> via linket ovenfor</li>
           <li>Kontakt udlejeren for at aftale tid og sted</li>
           <li>Medbring gyldigt kørekort ved afhentning</li>
@@ -215,7 +218,11 @@ serve(async (req: Request): Promise<Response> => {
       subject: `🎉 Din booking er bekræftet: ${safeVehicleMake} ${safeVehicleModel} - Underskriv kontrakt`,
       content: emailHtml,
       html: emailHtml,
-    });
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Transfer-Encoding': '8bit',
+      },
+    } as any);
 
     await client.close();
 
