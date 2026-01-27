@@ -7,6 +7,7 @@ import { FriVehicleList } from '@/components/fri/FriVehicleList';
 import { FriBookingList } from '@/components/fri/FriBookingList';
 import { FriInvoiceList } from '@/components/fri/FriInvoiceList';
 import { FriAnalyticsDashboard } from '@/components/fri/FriAnalyticsDashboard';
+import { FriTeamList } from '@/components/fri/FriTeamList';
 
 export function FriDashboard() {
   const { user, signOut } = useFriAuthContext();
@@ -111,13 +112,7 @@ export function FriDashboard() {
           {/* Team Tab */}
           <TabsContent value="team">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Teammedlemmer</h2>
-                <Button>Inviter medlem</Button>
-              </div>
-              <p className="text-gray-600">
-                Du er den eneste medlem for øjeblikket.
-              </p>
+              <FriTeamList lessorId={user?.id || null} />
             </div>
           </TabsContent>
 
