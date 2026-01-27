@@ -77,7 +77,7 @@ const CorporateEmailIntegration = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTemplates(data || []);
+      setTemplates((data as EmailTemplate[]) || []);
     } catch (err) {
       console.error('Fejl ved hentning af templates:', err);
       toast.error('Kunne ikke hente email-templates');
@@ -88,9 +88,9 @@ const CorporateEmailIntegration = () => {
 
   const fetchLogs = async () => {
     try {
-      const { data, error } = await supabase
-        .from('email_logs')
-        .select('*')
+      const { data, error } = await (supabase
+        .from('email_logs' as any)
+        .select('*') as any)
         .eq('corporate_account_id', corporateAccount?.id)
         .order('sent_at', { ascending: false })
         .limit(50);

@@ -69,8 +69,8 @@ const CorporateApiIntegration = () => {
   const fetchApiKeys = async () => {
     try {
       setIsLoadingKeys(true);
-      const { data, error } = await supabase
-        .from('api_keys')
+      const { data, error } = await (supabase
+        .from('api_logs' as any) as any)
         .select('*')
         .eq('corporate_account_id', corporateAccount?.id)
         .order('created_at', { ascending: false });
@@ -87,8 +87,8 @@ const CorporateApiIntegration = () => {
 
   const fetchApiLogs = async () => {
     try {
-      const { data, error } = await supabase
-        .from('api_logs')
+      const { data, error } = await (supabase
+        .from('api_keys' as any) as any)
         .select('*')
         .eq('corporate_account_id', corporateAccount?.id)
         .order('created_at', { ascending: false })

@@ -121,8 +121,8 @@ const CorporateRoleManagement = () => {
         if (error) throw error;
         toast.success('Rolle opdateret');
       } else {
-        const { error } = await supabase
-          .from('corporate_roles')
+        const { data, error } = await (supabase
+          .from('corporate_roles' as any) as any)
           .insert({
             corporate_account_id: corporateAccount.id,
             name: formData.name,
