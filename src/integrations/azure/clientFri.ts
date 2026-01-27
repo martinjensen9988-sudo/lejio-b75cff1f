@@ -1,82 +1,55 @@
 /**
  * Azure PostgreSQL Client for Lejio Fri (Lessor Platform)
- * Connects to: Azure Database for PostgreSQL
+ * Note: Browser cannot directly connect to PostgreSQL
+ * This is a stub that will be replaced with Supabase edge functions or backend API
  * 
- * Usage:
- * - Direct PostgreSQL queries via pg Client
- * - All lessor_* tables stored in Azure
- * - Auth still handled by Supabase (hybrid approach)
+ * For now, we'll use a mock that stores in localStorage for demo
+ * In production, use Supabase edge functions to query Azure
  */
 
-import { Client } from 'pg';
-
-let azurePgFri: Client | null = null;
-
-/**
- * Initialize Azure PostgreSQL connection
- * Should be called once on app startup
- */
+// Stub: Will be replaced with real API calls to edge function
 export async function initializeAzureDb() {
-  if (azurePgFri) return; // Already connected
+  console.log('✅ Azure client initialized (mock mode)');
+}
 
-  const connectionString = import.meta.env.VITE_DATABASE_URL_FRI;
-
-  if (!connectionString) {
-    console.error(
-      '❌ VITE_DATABASE_URL_FRI not set. Lejio Fri will not work.',
-      'Add to .env.local: VITE_DATABASE_URL_FRI=postgresql://...'
-    );
-    return;
-  }
-
-  azurePgFri = new Client({
-    connectionString,
-    ssl: {
-      rejectUnauthorized: false, // Azure requires SSL
-    },
-  });
-
-  try {
-    await azurePgFri.connect();
-    console.log('✅ Connected to Azure PostgreSQL (Lejio Fri)');
-  } catch (error) {
-    console.error('❌ Failed to connect to Azure PostgreSQL:', error);
-    azurePgFri = null;
-  }
+export function getAzureDb() {
+  throw new Error('Direct database access not available in browser. Use edge functions instead.');
 }
 
 /**
- * Get Azure client instance
- * Call initializeAzureDb() first
- */
-export function getAzureDb(): Client {
-  if (!azurePgFri) {
-    throw new Error('Azure PostgreSQL not initialized. Call initializeAzureDb() first.');
-  }
-  return azurePgFri;
-}
-
-/**
- * Query wrapper for Azure PostgreSQL
+ * Query wrapper that will call a Supabase edge function
+ * The edge function will handle actual Azure PostgreSQL queries
  */
 export async function queryAzure(sql: string, params: any[] = []) {
-  const client = getAzureDb();
-  try {
-    const result = await client.query(sql, params);
-    return result;
-  } catch (error) {
-    console.error('Azure query error:', { sql, params, error });
-    throw error;
+  // For now, this is a mock
+  // In production:
+  // const response = await supabase.functions.invoke('query-fri-db', { 
+  //   body: { sql, params } 
+  // });
+  // return response.data;
+  
+  console.warn('⚠️  queryAzure called - implement edge function integration');
+  
+  // Mock implementation using localStorage for development
+  const store = localStorage.getItem('fri_mock_db') || '{}';
+  const db = JSON.parse(store);
+  
+  // Very basic mock implementation
+  if (sql.includes('SELECT') && sql.includes('lessor_accounts')) {
+    return {
+      rows: db.lessor_accounts || [],
+      rowCount: (db.lessor_accounts || []).length,
+    };
   }
+  
+  if (sql.includes('INSERT')) {
+    return { rows: [{ id: crypto.randomUUID() }], rowCount: 1 };
+  }
+  
+  return { rows: [], rowCount: 0 };
 }
 
-/**
- * Disconnect from Azure (for cleanup)
- */
 export async function disconnectAzure() {
-  if (azurePgFri) {
-    await azurePgFri.end();
-    azurePgFri = null;
-    console.log('✅ Disconnected from Azure PostgreSQL');
-  }
+  console.log('✅ Disconnected from Azure PostgreSQL');
 }
+

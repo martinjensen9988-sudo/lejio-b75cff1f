@@ -170,6 +170,7 @@ const CorporateApiIntegration = lazy(() => import("./pages/admin/CorporateApiInt
 
 // Lejio Fri (White-label lessor platform) - lazy loaded
 const FriLandingPage = lazy(() => import("./pages/fri/landing/LandingPage").then(m => ({ default: m.FriLandingPage })));
+const FriLoginPage = lazy(() => import("./pages/fri/auth/LoginPage").then(m => ({ default: m.FriLoginPage })));
 const FriSignupPage = lazy(() => import("./pages/fri/auth/SignupPage").then(m => ({ default: m.FriSignupPage })));
 const FriDashboard = lazy(() => import("./pages/fri/dashboard/Dashboard").then(m => ({ default: m.FriDashboard })));
 
@@ -347,6 +348,7 @@ const App = forwardRef((props, ref) => (
               
               {/* Lejio Fri (White-label lessor platform) */}
               <Route path="/fri" element={<FriLandingPage />} />
+              <Route path="/fri/login" element={<FriLoginPage />} />
               <Route path="/fri/signup" element={<FriSignupPage />} />
               <Route path="/fri/dashboard" element={<FriDashboard />} />
               
