@@ -178,8 +178,8 @@ const queryClient = new QueryClient({
       retry: 2,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       refetchOnWindowFocus: false, // Don't refetch when user returns to tab
-      refetchOnReconnect: 'stale', // Refetch if connection lost
-      refetchOnMount: 'stale', // Refetch if component remounts
+      refetchOnReconnect: true, // Refetch if connection lost
+      refetchOnMount: true, // Refetch if component remounts
       networkMode: 'always', // Try offline queries
     },
     mutations: {

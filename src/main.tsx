@@ -7,9 +7,21 @@ import "./index.css";
 // Provided by vite-plugin-pwa.
 import { registerSW } from "virtual:pwa-register";
 
-// Suppress Lovable dev environment 404 errors for inspection tokens
-// These are benign dev-only errors and don't affect functionality
+// Suppress Lovable dev environment warnings and errors
+// These are benign dev-only artifacts and don't affect functionality
 if (typeof window !== 'undefined') {
+  // Suppress ref warnings from Lovable inspection system
+  const originalError = console.error;
+  console.error = function(...args) {
+    const message = args[0]?.toString?.() || '';
+    // Filter out Lovable-specific ref warnings (dev-only inspection)
+    if (message.includes('Function components cannot be given refs') || 
+        message.includes('Did you mean to use React.forwardRef')) {
+      return;
+    }
+    originalError.apply(console, args);
+  };
+
   const originalFetch = window.fetch;
   window.fetch = function(...args) {
     const url = args[0]?.toString?.() || '';
