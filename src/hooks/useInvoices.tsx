@@ -137,10 +137,34 @@ export const useInvoices = () => {
     );
   };
 
+  // Generate settlement/final invoice for extra charges at end of rental
+  const generateSettlementInvoice = async (bookingId: string, settlement: any) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-settlement-invoice', {
+        body: { bookingId, settlement }
+      });
+
+      if (error) throw error;
+
+      if (data && data.invoice) {
+        setInvoices(prev => [data.invoice, ...prev]);
+        toast.success(`Afregningsfaktura ${data.invoice.invoice_number} oprettet`);
+        return data.invoice;
+      }
+
+      throw new Error(data?.error || 'Kunne ikke oprette afregningsfaktura');
+    } catch (error: any) {
+      console.error('Error generating settlement invoice:', error);
+      toast.error(error.message || 'Kunne ikke oprette afregningsfaktura');
+      return null;
+    }
+  };
+
   return {
     invoices,
     isLoading,
     generateInvoice,
+    generateSettlementInvoice,
     markAsPaid,
     cancelInvoice,
     getUnpaidInvoices,
