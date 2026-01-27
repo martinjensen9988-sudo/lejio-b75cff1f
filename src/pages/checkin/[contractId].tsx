@@ -75,11 +75,14 @@ export default function CheckinPage() {
             id="pin"
             type="text"
             inputMode="numeric"
-            maxLength={8}
+            maxLength={6}
             className="border rounded px-3 py-2 text-lg text-center tracking-widest mb-2 w-full"
             value={pin}
             onChange={e => setPin(e.target.value)}
+            onKeyPress={e => e.key === 'Enter' && handleCheckin()}
             autoComplete="one-time-code"
+            placeholder="000000"
+            autoFocus
           />
           {pinError && <div className="text-red-500 text-sm mb-2">{pinError}</div>}
           <Button size="lg" className="mt-2 w-full" onClick={handleCheckin}>Bekræft check-in</Button>
