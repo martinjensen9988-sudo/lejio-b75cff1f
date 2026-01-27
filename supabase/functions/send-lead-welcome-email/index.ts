@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -17,7 +18,7 @@ interface SendLeadEmailRequest {
   body?: string;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -99,7 +100,7 @@ Grund til at kontakte: ${reason}`,
         const parsed = JSON.parse(emailContent);
         emailSubject = parsed.subject || 'Velkommen til LEJIO';
         emailBody = parsed.body || 'Tak fordi du overvejer LEJIO!';
-      } catch (e) {
+      } catch (e: any) {
         console.error('Failed to parse email generation:', e);
         emailSubject = 'Velkommen til LEJIO';
         emailBody = `Hej ${companyName},\n\nVi synes at LEJIO kunne være perfekt for jer!\n\nVed du gerne høre mere?\n\nMed venlig hilsen,\nLEJIO Sales Team`;
@@ -134,7 +135,7 @@ Grund til at kontakte: ${reason}`,
         last_email_sent_at: new Date().toISOString(),
       })
       .eq('id', leadId)
-      .catch(err => console.error('Error updating lead status:', err));
+      .catch((err: any) => console.error('Error updating lead status:', err));
 
     // TODO: Send actual email via email service (SendGrid, Resend, etc)
     // For now, we're just tracking that email was generated and would be sent

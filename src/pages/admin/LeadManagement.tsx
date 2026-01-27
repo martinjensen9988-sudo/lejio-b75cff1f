@@ -56,7 +56,7 @@ const AdminLeadManagementPage = () => {
     setLeads(allLeads);
     
     // Extract unique industries
-    const uniqueIndustries = [...new Set(allLeads.map(l => l.industry))].filter(Boolean);
+    const uniqueIndustries = [...new Set(allLeads.map(l => l.industry))].filter(Boolean) as string[];
     setIndustries(uniqueIndustries);
     
     applyFilters(allLeads, searchQuery, filterIndustry, filterStatus);

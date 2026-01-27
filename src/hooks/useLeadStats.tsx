@@ -15,6 +15,24 @@ export interface LeadStats {
   topCities: { city: string; count: number }[];
 }
 
+interface Lead {
+  id: string;
+  company_name: string;
+  industry: string;
+  city?: string;
+  reason?: string;
+  score: number;
+  enriched: boolean;
+  contact_email?: string;
+  contact_phone?: string;
+  website?: string;
+  cvr?: string;
+  email_sent: boolean;
+  status: string;
+  created_at: string;
+  updated_at?: string;
+}
+
 export const useLeadStats = () => {
   const [stats, setStats] = useState<LeadStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,14 +41,14 @@ export const useLeadStats = () => {
   const fetchLeadStats = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data: leads, error } = await supabase
+      const { data: leads, error } = await (supabase as any)
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const leadList = leads || [];
+      const leadList = (leads || []) as Lead[];
 
       // Calculate statistics
       const totalLeads = leadList.length;
@@ -107,7 +125,7 @@ export const useLeadStats = () => {
     source?: string;
   }) => {
     try {
-      const { data: existingLead } = await supabase
+      const { data: existingLead } = await (supabase as any)
         .from('leads')
         .select('id')
         .eq('company_name', leadData.company_name)
@@ -118,7 +136,7 @@ export const useLeadStats = () => {
         return null;
       }
 
-      const { data: newLead, error } = await supabase
+      const { data: newLead, error } = await (supabase as any)
         .from('leads')
         .insert({
           ...leadData,
@@ -144,7 +162,7 @@ export const useLeadStats = () => {
   // Update lead status
   const updateLeadStatus = useCallback(async (leadId: string, status: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('leads')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', leadId);
@@ -164,7 +182,7 @@ export const useLeadStats = () => {
   // Delete lead
   const deleteLead = useCallback(async (leadId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('leads')
         .delete()
         .eq('id', leadId);
@@ -190,7 +208,7 @@ export const useLeadStats = () => {
     enrichedOnly?: boolean;
   }) => {
     try {
-      let query = supabase.from('leads').select('*');
+      let query = (supabase as any).from('leads').select('*');
 
       if (filters?.industry) {
         query = query.eq('industry', filters.industry);
