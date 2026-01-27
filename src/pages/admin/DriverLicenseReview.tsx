@@ -50,43 +50,33 @@ const DriverLicenseReview = () => {
   // Helper to get signed URL for private bucket images
   const getSignedUrl = async (url: string | null): Promise<string | null> => {
     if (!url) return null;
-    
     try {
-      // Extract file path from the URL
-      const urlObj = new URL(url);
-      const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/driver-licenses\/(.+)/);
-      
-      if (pathMatch) {
-        const filePath = decodeURIComponent(pathMatch[1]);
+      // Try to extract the file path for the private bucket
+      // Accept both public and private URL patterns
+      let filePath = null;
+      // Pattern 1: Supabase public URL
+      const urlObj = new URL(url, window.location.origin);
+      const match1 = urlObj.pathname.match(/\/storage\/v1\/object\/(?:public|private)\/driver-licenses\/(.+)/);
+      if (match1) filePath = decodeURIComponent(match1[1]);
+      // Pattern 2: Just the path
+      if (!filePath) {
+        const match2 = url.match(/driver-licenses\/(.+)$/);
+        if (match2) filePath = decodeURIComponent(match2[1]);
+      }
+      if (filePath) {
         const { data, error } = await supabase.storage
           .from('driver-licenses')
           .createSignedUrl(filePath, 3600); // 1 hour expiry
-        
         if (error) {
           console.error('Error creating signed URL:', error);
           return null;
         }
         return data.signedUrl;
       }
-      
-      // Try alternative path pattern
-      const altMatch = url.match(/driver-licenses\/(.+)$/);
-      if (altMatch) {
-        const filePath = decodeURIComponent(altMatch[1]);
-        const { data, error } = await supabase.storage
-          .from('driver-licenses')
-          .createSignedUrl(filePath, 3600);
-        
-        if (error) {
-          console.error('Error creating signed URL:', error);
-          return null;
-        }
-        return data.signedUrl;
-      }
-      
-      return url; // Return original if can't parse
+      // If no match, return original (should not happen for valid images)
+      return url;
     } catch (e) {
-      console.error('Error parsing URL:', e);
+      console.error('Error parsing URL for signed image:', e);
       return url;
     }
   };
