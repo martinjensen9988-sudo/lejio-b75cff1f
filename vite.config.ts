@@ -66,6 +66,11 @@ export default defineConfig(({ mode }) => ({
               },
             },
           },
+          // Undgå at cache HTML-filer som fallback, så non-precached-url fejl ikke opstår
+          {
+            urlPattern: /index\.html$/,
+            handler: "NetworkOnly",
+          },
         ],
       },
     }),
