@@ -11,7 +11,12 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(),
+    react({
+      jsxImportSource: "@emotion/react",
+      babel: {
+        plugins: [["@emotion/babel-plugin"]],
+      },
+    }),
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
@@ -48,9 +53,9 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        // Nu inkluderes index.html i precache for at undgå non-precached-url fejl
+        // Optimized caching strategy
         globPatterns: ["**/*.{js,css,ico,png,svg,woff2,html}"],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB limit
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
@@ -66,7 +71,6 @@ export default defineConfig(({ mode }) => ({
               },
             },
           },
-          // Undgå at cache HTML-filer som fallback, så non-precached-url fejl ikke opstår
           {
             urlPattern: /index\.html$/,
             handler: "NetworkOnly",
@@ -81,24 +85,71 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: "ES2020",
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: mode === "production",
+        drop_debugger: true,
+      },
+    },
+    reportCompressedSize: false,
+    sourcemap: mode === "development",
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
-          ui: [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-select",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-tooltip",
-          ],
-          charts: ["recharts"],
-          maps: ["mapbox-gl"],
-          forms: ["react-hook-form", "@hookform/resolvers", "zod"],
-          supabase: ["@supabase/supabase-js"],
+        manualChunks: (id) => {
+          // Vendor chunks
+          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
+            return "react-vendor";
+          }
+          if (id.includes("node_modules/react-router")) {
+            return "router-vendor";
+          }
+          if (id.includes("node_modules/@radix-ui")) {
+            return "ui-vendor";
+          }
+          if (id.includes("node_modules/recharts")) {
+            return "charts-vendor";
+          }
+          if (id.includes("node_modules/mapbox-gl")) {
+            return "maps-vendor";
+          }
+          if (id.includes("node_modules/@supabase")) {
+            return "supabase-vendor";
+          }
+          if (id.includes("node_modules/react-hook-form")) {
+            return "forms-vendor";
+          }
+          
+          // Route-based chunks
+          if (id.includes("/pages/admin/")) {
+            return "admin-routes";
+          }
+          if (id.includes("/pages/dashboard/")) {
+            return "dashboard-routes";
+          }
+          if (id.includes("/pages/search")) {
+            return "search-route";
+          }
+          if (id.includes("/components/admin/")) {
+            return "admin-components";
+          }
+          if (id.includes("/components/dashboard/")) {
+            return "dashboard-components";
+          }
         },
       },
     },
+  },
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@supabase/supabase-js",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-tabs",
+    ],
   },
 }));

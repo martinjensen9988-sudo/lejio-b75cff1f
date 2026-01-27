@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Info, Copy, RotateCcw, Search, ChevronDown, ChevronUp, Clock, Check, X, Download, Upload, Filter } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -184,7 +184,7 @@ const SUBSCRIPTION_TEMPLATES = {
   }
 };
 
-export const AdminFeatureFlags = () => {
+export const AdminFeatureFlags = React.memo(() => {
   const navigate = typeof window !== 'undefined' ? (window.history.back ? () => window.history.back() : () => {}) : () => {};
   const [customLinks, setCustomLinks] = useState({});
   const [saving, setSaving] = useState<{[key: string]: boolean}>({});
@@ -230,11 +230,11 @@ export const AdminFeatureFlags = () => {
     fetchCustomers();
   }, []);
 
-  const handleGlobalLinkChange = async (featureKey, type, value) => {
+  const handleGlobalLinkChange = useCallback((featureKey: string, type: 'video' | 'image' | 'page', value: string) => {
     setCustomLinks(prev => ({ ...prev, [featureKey]: { ...prev[featureKey], [type]: value } }));
-  };
+  }, []);
 
-  const handleSaveGlobalLinks = async (featureKey: string) => {
+  const handleSaveGlobalLinks = useCallback(async (featureKey: string) => {
     setSaving(prev => ({ ...prev, [featureKey]: true }));
     const links = customLinks[featureKey] || {};
     const { error } = await supabase
@@ -251,9 +251,9 @@ export const AdminFeatureFlags = () => {
     } else {
       toast({ title: 'Kunne ikke gemme links', description: '', variant: 'destructive' });
     }
-  };
+  }, [customLinks]);
 
-  const handleToggle = async (customerId, featureKey, enabled) => {
+  const handleToggle = useCallback(async (customerId: string, featureKey: string, enabled: boolean) => {
     const customer = customers.find(c => c.id === customerId);
     const flags = customer?.feature_flags || {};
     const newFlags = { ...flags, [featureKey]: enabled };
@@ -267,9 +267,9 @@ export const AdminFeatureFlags = () => {
     } else {
       toast({ title: 'Kunne ikke opdatere feature', description: '', variant: 'destructive' });
     }
-  };
+  }, [customers]);
 
-  const handleBulkTemplateApply = async (customerId: string, templateName: 'starter' | 'pro' | 'enterprise') => {
+  const handleBulkTemplateApply = useCallback(async (customerId: string, templateName: 'starter' | 'pro' | 'enterprise') => {
     const template = SUBSCRIPTION_TEMPLATES[templateName];
     const newFlags: {[key: string]: boolean} = {};
     
@@ -292,25 +292,29 @@ export const AdminFeatureFlags = () => {
     } else {
       toast({ title: 'Kunne ikke anvende template', description: '', variant: 'destructive' });
     }
-  };
+  }, []);
 
   if (isLoading) return <div>Indlæser...</div>;
 
-  const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = !search.trim() || 
-      (customer.company_name && customer.company_name.toLowerCase().includes(search.toLowerCase())) ||
-      (customer.full_name && customer.full_name.toLowerCase().includes(search.toLowerCase())) ||
-      (customer.email && customer.email.toLowerCase().includes(search.toLowerCase()));
-    
-    const matchesTier = filterTier === 'all' || customer.subscription_tier === filterTier;
-    return matchesSearch && matchesTier;
-  });
+  // Memoized filtered customers for performance
+  const filteredCustomers = useMemo(() => {
+    return customers.filter(customer => {
+      const matchesSearch = !search.trim() || 
+        (customer.company_name && customer.company_name.toLowerCase().includes(search.toLowerCase())) ||
+        (customer.full_name && customer.full_name.toLowerCase().includes(search.toLowerCase())) ||
+        (customer.email && customer.email.toLowerCase().includes(search.toLowerCase()));
+      
+      const matchesTier = filterTier === 'all' || customer.subscription_tier === filterTier;
+      return matchesSearch && matchesTier;
+    });
+  }, [customers, search, filterTier]);
 
-  const getFeatureStats = (customer: any) => {
+  // Memoized feature stats calculation
+  const getFeatureStats = useCallback((customer: any) => {
     const enabledCount = Object.values(customer.feature_flags || {}).filter(Boolean).length;
     const totalCount = FEATURES.length;
     return { enabled: enabledCount, total: totalCount, percentage: Math.round((enabledCount / totalCount) * 100) };
-  };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -554,4 +558,4 @@ export const AdminFeatureFlags = () => {
       </Tabs>
     </div>
   );
-};
+});

@@ -169,7 +169,26 @@ const SearchBookingRedirect = () => {
   return <Navigate to={`/booking/${vehicleId}${queryString ? `?${queryString}` : ''}`} replace />;
 };
 
-const queryClient = new QueryClient();
+// Optimized QueryClient configuration for better performance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh
+      gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache for reuse
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      refetchOnWindowFocus: false, // Don't refetch when user returns to tab
+      refetchOnReconnect: 'stale', // Refetch if connection lost
+      refetchOnMount: 'stale', // Refetch if component remounts
+      networkMode: 'always', // Try offline queries
+    },
+    mutations: {
+      retry: 1,
+      retryDelay: 1000,
+      networkMode: 'always',
+    }
+  }
+});
 
 // Minimal loading fallback
 const PageLoader = () => (
