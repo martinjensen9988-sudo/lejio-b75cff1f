@@ -52,13 +52,13 @@ interface Contract {
   renter_phone: string | null;
   renter_address: string | null;
   renter_license_number: string | null;
-  renter_signature: string | null;
   renter_signed_at: string | null;
   vanvidskørsel_accepted: boolean;
   vanvidskørsel_liability_amount: number | null;
   insurance_company: string | null;
   insurance_policy_number: string | null;
   status: string;
+  checkin_pin?: string;
 }
 
 async function generateContractPDF(contract: Contract): Promise<Uint8Array> {
@@ -659,6 +659,16 @@ const handler = async (req: Request): Promise<Response> => {
           </p>
         </div>
         `}
+
+        ${isFullySigned && contract.checkin_pin ? `
+        <div style="background-color: #f3e5f5; border-left: 4px solid #9c27b0; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+          <p style="margin: 0; color: #6a1b9a;">
+            <strong>🔑 Din check-in PIN-kode:</strong><br>
+            Brug denne kode når du scanner QR-koden ved afhentning:<br>
+            <span style="font-size: 18px; font-weight: bold; letter-spacing: 3px; color: #2962FF; font-family: 'Courier New', monospace;">${contract.checkin_pin}</span>
+          </p>
+        </div>
+        ` : ''}
 
         <div style="text-align: center; margin-top: 30px;">
           <a href="https://lejio.dk/my-rentals" style="display: inline-block; background-color: #2962FF; color: white; padding: 14px 28px; text-decoration: none; border-radius: 25px; font-weight: bold;">
