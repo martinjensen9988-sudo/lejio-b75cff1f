@@ -174,6 +174,13 @@ const FriLoginPage = lazy(() => import("./pages/fri/auth/LoginPage").then(m => (
 const FriSignupPage = lazy(() => import("./pages/fri/auth/SignupPage").then(m => ({ default: m.FriSignupPage })));
 const FriDashboard = lazy(() => import("./pages/fri/dashboard/Dashboard").then(m => ({ default: m.FriDashboard })));
 
+// Lejio Fri Admin - lazy loaded
+const FriAdminLoginPage = lazy(() => import("./pages/fri/admin/LoginPage").then(m => ({ default: m.FriAdminLoginPage })));
+const FriAdminDashboard = lazy(() => import("./pages/fri/admin/Dashboard").then(m => ({ default: m.FriAdminDashboard })));
+const FriAdminLessorsPage = lazy(() => import("./pages/fri/admin/LessorsPage").then(m => ({ default: m.FriAdminLessorsPage })));
+const FriAdminLessorDetailsPage = lazy(() => import("./pages/fri/admin/LessorDetailsPage").then(m => ({ default: m.FriAdminLessorDetailsPage })));
+const FriAdminLayout = lazy(() => import("./pages/fri/admin/Layout").then(m => ({ default: m.FriAdminLayout })));
+
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
   const { vehicleId } = useParams();
@@ -351,6 +358,19 @@ const App = forwardRef((props, ref) => (
               <Route path="/fri/login" element={<FriLoginPage />} />
               <Route path="/fri/signup" element={<FriSignupPage />} />
               <Route path="/fri/dashboard" element={<FriDashboard />} />
+              
+              {/* Lejio Fri Admin */}
+              <Route path="/fri/admin/login" element={<FriAdminLoginPage />} />
+              <Route path="/fri/admin/*" element={
+                <FriAdminLayout>
+                  <Routes>
+                    <Route path="/dashboard" element={<FriAdminDashboard />} />
+                    <Route path="/lessors" element={<FriAdminLessorsPage />} />
+                    <Route path="/lessors/:lessorId" element={<FriAdminLessorDetailsPage />} />
+                    <Route path="/" element={<Navigate to="/fri/admin/dashboard" replace />} />
+                  </Routes>
+                </FriAdminLayout>
+              } />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="/abonnementsudlejning" element={<SubscriptionRental />} />
