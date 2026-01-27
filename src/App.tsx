@@ -179,7 +179,13 @@ const FriAdminLoginPage = lazy(() => import("./pages/fri/admin/LoginPage").then(
 const FriAdminDashboard = lazy(() => import("./pages/fri/admin/Dashboard").then(m => ({ default: m.FriAdminDashboard })));
 const FriAdminLessorsPage = lazy(() => import("./pages/fri/admin/LessorsPage").then(m => ({ default: m.FriAdminLessorsPage })));
 const FriAdminLessorDetailsPage = lazy(() => import("./pages/fri/admin/LessorDetailsPage").then(m => ({ default: m.FriAdminLessorDetailsPage })));
+const FriAdminTicketsPage = lazy(() => import("./pages/fri/admin/TicketsPage").then(m => ({ default: m.FriAdminTicketsPage })));
+const FriAdminTicketDetailsPage = lazy(() => import("./pages/fri/admin/TicketDetailsPage").then(m => ({ default: m.FriAdminTicketDetailsPage })));
+const FriAdminPaymentsPage = lazy(() => import("./pages/fri/admin/PaymentsPage").then(m => ({ default: m.FriAdminPaymentsPage })));
 const FriAdminLayout = lazy(() => import("./pages/fri/admin/Layout").then(m => ({ default: m.FriAdminLayout })));
+
+// Fri Lessor Pages - lazy loaded
+const FriApiKeysPage = lazy(() => import("./pages/fri/dashboard/ApiKeysPage").then(m => ({ default: m.FriApiKeysPage })));
 
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
@@ -367,6 +373,9 @@ const App = forwardRef((props, ref) => (
                     <Route path="/dashboard" element={<FriAdminDashboard />} />
                     <Route path="/lessors" element={<FriAdminLessorsPage />} />
                     <Route path="/lessors/:lessorId" element={<FriAdminLessorDetailsPage />} />
+                    <Route path="/support" element={<FriAdminTicketsPage />} />
+                    <Route path="/support/:ticketId" element={<FriAdminTicketDetailsPage />} />
+                    <Route path="/payments" element={<FriAdminPaymentsPage />} />
                     <Route path="/" element={<Navigate to="/fri/admin/dashboard" replace />} />
                   </Routes>
                 </FriAdminLayout>
