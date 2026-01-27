@@ -163,6 +163,10 @@ const AdminFeatureFlagsPage = lazy(() => import("./pages/admin/FeatureFlags"));
 const CorporateEmployeeAdmin = lazy(() => import("./pages/admin/CorporateEmployeeAdmin"));
 const CorporateBudgetDashboard = lazy(() => import("./pages/admin/CorporateBudgetDashboard"));
 const CorporateSettlementReports = lazy(() => import("./pages/admin/CorporateSettlementReports"));
+const CorporateRoleManagement = lazy(() => import("./pages/admin/CorporateRoleManagement"));
+const CorporateEmailIntegration = lazy(() => import("./pages/admin/CorporateEmailIntegration"));
+const CorporateDocumentManagement = lazy(() => import("./pages/admin/CorporateDocumentManagement"));
+const CorporateApiIntegration = lazy(() => import("./pages/admin/CorporateApiIntegration"));
 
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
@@ -294,6 +298,10 @@ const App = forwardRef((props, ref) => (
               <Route path="/admin/corporate/employees" element={<AdminAuthProvider><CorporateEmployeeAdmin /></AdminAuthProvider>} />
               <Route path="/admin/corporate/budget" element={<AdminAuthProvider><CorporateBudgetDashboard /></AdminAuthProvider>} />
               <Route path="/admin/corporate/settlement" element={<AdminAuthProvider><CorporateSettlementReports /></AdminAuthProvider>} />
+              <Route path="/admin/corporate/roles" element={<AdminAuthProvider><CorporateRoleManagement /></AdminAuthProvider>} />
+              <Route path="/admin/corporate/email" element={<AdminAuthProvider><CorporateEmailIntegration /></AdminAuthProvider>} />
+              <Route path="/admin/corporate/documents" element={<AdminAuthProvider><CorporateDocumentManagement /></AdminAuthProvider>} />
+              <Route path="/admin/corporate/api" element={<AdminAuthProvider><CorporateApiIntegration /></AdminAuthProvider>} />
               <Route path="/admin/facebook" element={<AdminAuthProvider><AdminFacebookPage /></AdminAuthProvider>} />
               <Route path="/admin/api-keys" element={<AdminAuthProvider><AdminApiKeysPage /></AdminAuthProvider>} />
               <Route path="/admin/sales-ai" element={<Navigate to="/admin/crm" replace />} />
