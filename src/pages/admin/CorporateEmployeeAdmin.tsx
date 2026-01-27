@@ -239,7 +239,7 @@ const CorporateEmployeeAdmin = () => {
   return (
     <AdminDashboardLayout activeTab="corporate">
       <div className="space-y-6">
-        {/* Header */}
+        {/* Overskrift */}
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold">Medarbejder Administration</h2>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -347,7 +347,7 @@ const CorporateEmployeeAdmin = () => {
           </Dialog>
         </div>
 
-        {/* Stats Cards */}
+        {/* Statistik kort */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
@@ -388,7 +388,7 @@ const CorporateEmployeeAdmin = () => {
           </Card>
         </div>
 
-        {/* Filters */}
+        {/* Filtre og tabel */}
         <Card>
           <CardHeader>
             <CardTitle>Medarbejdere</CardTitle>
@@ -428,7 +428,7 @@ const CorporateEmployeeAdmin = () => {
               </Select>
             </div>
 
-            {/* Table */}
+            {/* Tabel */}
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -524,7 +524,7 @@ const CorporateEmployeeAdmin = () => {
         </Card>
       </div>
 
-      {/* Delete Alert */}
+      {/* Bekræftelse af sletning */}
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogTitle>Er du sikker?</AlertDialogTitle>

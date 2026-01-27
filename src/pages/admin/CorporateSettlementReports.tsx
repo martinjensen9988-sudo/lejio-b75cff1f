@@ -155,7 +155,7 @@ const CorporateSettlementReports = () => {
   const loadReportDetails = async (report: SettlementReport) => {
     setIsLoadingDetails(true);
     try {
-      // Mock details - in production fetch from database
+      // Mock detaljer - i produktion hent fra database
       setReportDetails({
         report_id: report.id,
         department_name: 'Main Department',
@@ -165,19 +165,19 @@ const CorporateSettlementReports = () => {
         total_amount: report.total_amount,
         line_items: [
           {
-            description: 'Vehicle Rental - 5 days',
+            description: 'Billeje - 5 dage',
             quantity: 5,
             unit_price: 500,
             total: 2500,
           },
           {
-            description: 'Extra KM - 250 km',
+            description: 'Ekstra km - 250 km',
             quantity: 250,
             unit_price: 2,
             total: 500,
           },
           {
-            description: 'Fuel Surcharge',
+            description: 'Brændstoftillæg',
             quantity: 1,
             unit_price: 150,
             total: 150,
@@ -208,7 +208,7 @@ const CorporateSettlementReports = () => {
 
   const handleUpdateStatus = async (report: SettlementReport, newStatus: string) => {
     try {
-      // In production, update in database
+      // I produktion, opdater i database
       const updatedReports = reports.map((r) =>
         r.id === report.id ? { ...r, status: newStatus as SettlementReport['status'] } : r
       );

@@ -52,7 +52,7 @@ const CorporateBudgetDashboard = () => {
   const loadBudgetData = async () => {
     setIsLoadingData(true);
     try {
-      // Fetch all invoices for this month
+      // Hent alle fakturaer for denne måned
       const currentDate = new Date();
       const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -65,7 +65,7 @@ const CorporateBudgetDashboard = () => {
 
       if (error) throw error;
 
-      // Calculate budget data per department
+      // Beregn budgetdata pr. afdeling
       const budgetMap = new Map<string, BudgetData>();
 
       departments.forEach((dept) => {
@@ -81,7 +81,7 @@ const CorporateBudgetDashboard = () => {
         });
       });
 
-      // Aggregate spending from invoices
+      // Aggreger udgifter fra fakturaer
       if (invoices) {
         invoices.forEach((invoice) => {
           const dept = budgetMap.get(invoice.department_id);
@@ -97,7 +97,7 @@ const CorporateBudgetDashboard = () => {
         });
       }
 
-      // Calculate percentages and averages
+      // Beregn procenter og gennemsnit
       const processedData: BudgetData[] = Array.from(budgetMap.values()).map((dept) => ({
         ...dept,
         spent_percentage: (dept.current_spend / dept.monthly_budget) * 100,
@@ -106,7 +106,7 @@ const CorporateBudgetDashboard = () => {
 
       setBudgetData(processedData);
 
-      // Generate alerts
+      // Opret advarsler
       const newAlerts: DepartmentAlert[] = [];
       processedData.forEach((dept) => {
         if (dept.spent_percentage >= 100) {
@@ -128,7 +128,7 @@ const CorporateBudgetDashboard = () => {
 
       setAlerts(newAlerts);
 
-      // Generate monthly trend (simplified - last 6 months)
+      // Generer månedtrend (de sidste 6 måneder)
       const trendData: MonthlyTrend[] = [];
       for (let i = 5; i >= 0; i--) {
         const date = new Date();
@@ -159,7 +159,7 @@ const CorporateBudgetDashboard = () => {
   const budgetUtilization = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
   const overBudgetDepts = budgetData.filter((d) => d.spent_percentage > 100).length;
 
-  // Color coding for charts
+  // Farveomrids til diagrammer
   const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6'];
 
   if (isLoading) {
