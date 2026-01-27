@@ -11,6 +11,13 @@ export interface LeadSuggestion {
   score: number;
   search_query: string;
   source: 'ai_recommendation' | 'ai_discovery';
+  contact_email?: string;
+  contact_phone?: string;
+  website?: string;
+  cvr?: string;
+  enriched?: boolean;
+  email_sent?: boolean;
+  email_status?: string;
 }
 
 export interface AILeadFinderResponse {
@@ -18,6 +25,14 @@ export interface AILeadFinderResponse {
   suggestions: LeadSuggestion[];
   mode: string;
   total: number;
+  savedLeads?: number;
+  enriched?: number;
+  stats?: {
+    with_email: number;
+    with_phone: number;
+    with_website: number;
+    with_cvr: number;
+  };
 }
 
 export const useAILeadFinder = () => {
@@ -25,13 +40,21 @@ export const useAILeadFinder = () => {
   const [suggestions, setSuggestions] = useState<LeadSuggestion[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const findSmartRecommendations = useCallback(async (existingLeads: SalesLead[]) => {
+  const findSmartRecommendations = useCallback(async (existingLeads: SalesLead[], options?: {
+    autoEnrich?: boolean;
+    sendEmails?: boolean;
+    batchSize?: number;
+  }) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-find-leads', {
         body: { 
           mode: 'smart_recommendations',
           existingLeads,
+          autoEnrich: options?.autoEnrich ?? true,
+          sendEmails: options?.sendEmails ?? false,
+          batchSize: options?.batchSize ?? 20,
+          includeScoring: true,
           targetIndustries: [
             'biludlejning',
             'billeasing',
@@ -50,6 +73,12 @@ export const useAILeadFinder = () => {
 
       setSuggestions(data.suggestions || []);
       setLastUpdated(new Date());
+      
+      // Show stats
+      if (data.stats) {
+        toast.success(`${data.enriched || 0} leads berigt med kontaktinfo`);
+      }
+      
       return data as AILeadFinderResponse;
     } catch (error) {
       console.error('AI find leads error:', error);
@@ -60,19 +89,29 @@ export const useAILeadFinder = () => {
     }
   }, []);
 
-  const discoverNewLeads = useCallback(async () => {
+  const discoverNewLeads = useCallback(async (options?: {
+    autoEnrich?: boolean;
+    sendEmails?: boolean;
+    batchSize?: number;
+  }) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-find-leads', {
         body: { 
           mode: 'discovery',
+          autoEnrich: options?.autoEnrich ?? true,
+          sendEmails: options?.sendEmails ?? false,
+          batchSize: options?.batchSize ?? 20,
+          includeScoring: true,
           targetIndustries: [
             'biludlejning',
             'billeasing',
             'bilforhandler',
             'autoværksted',
             'autoudlejning',
-            'motorcykeludlejning'
+            'motorcykeludlejning',
+            'taxiselskab',
+            'transportfirma'
           ]
         },
       });
@@ -85,6 +124,13 @@ export const useAILeadFinder = () => {
 
       setSuggestions(data.suggestions || []);
       setLastUpdated(new Date());
+      
+      // Show comprehensive stats
+      if (data.stats) {
+        const statMsg = `${data.suggestions?.length || 0} leads fundet. ${data.enriched || 0} med kontaktinfo (email: ${data.stats.with_email}, telefon: ${data.stats.with_phone})`;
+        toast.success(statMsg);
+      }
+      
       return data as AILeadFinderResponse;
     } catch (error) {
       console.error('AI discovery error:', error);
