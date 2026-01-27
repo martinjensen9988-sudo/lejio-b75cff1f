@@ -1,4 +1,15 @@
 import { useState, useEffect } from 'react';
+// Kald Google edge function for AI-beskrivelse
+async function generateAIDescription({ title, slug }: { title: string; slug: string }) {
+  const res = await fetch('/functions/v1/ai-generate-global-page-description-google', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, slug }),
+  });
+  if (!res.ok) throw new Error('AI-beskrivelse kunne ikke genereres');
+  const data = await res.json();
+  return data.description;
+}
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
@@ -39,6 +50,22 @@ export default function AdminGlobalPages() {
   function startNew() {
     setEditing(null);
     setForm({ title: '', slug: '', content_markdown: '', image_urls: [], video_urls: [] });
+  }
+
+  async function handleAIGenerate() {
+    if (!form.title || !form.slug) {
+      toast.error('Titel og slug skal udfyldes først!');
+      return;
+    }
+    setUploading(true);
+    try {
+      const aiText = await generateAIDescription({ title: form.title, slug: form.slug });
+      setForm(f => ({ ...f, content_markdown: aiText }));
+      toast.success('AI-tekst genereret! Husk at trykke Gem for at gemme.');
+    } catch (e: any) {
+      toast.error('Kunne ikke generere AI-tekst: ' + e.message);
+    }
+    setUploading(false);
   }
 
   async function savePage() {
@@ -149,7 +176,10 @@ export default function AdminGlobalPages() {
             {form.image_urls?.map((url: string) => <img key={url} src={url} alt="billede" className="h-12 rounded" />)}
             {form.video_urls?.map((url: string) => <video key={url} src={url} className="h-12 rounded" controls />)}
           </div>
-          <Button onClick={savePage} disabled={uploading} className="mt-4">Gem</Button>
+          <div className="flex gap-2 mt-4">
+            <Button onClick={savePage} disabled={uploading}>Gem</Button>
+            <Button onClick={handleAIGenerate} disabled={uploading} variant="secondary">Generér AI-tekst</Button>
+          </div>
         </Card>
 
         <div className="mt-8">

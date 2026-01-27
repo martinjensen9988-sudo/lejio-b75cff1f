@@ -1,4 +1,5 @@
-import { useParams } from 'react-router-dom';
+
+import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
@@ -7,16 +8,32 @@ import ReactMarkdown from 'react-markdown';
 export default function GlobalPage() {
   const { slug } = useParams();
   const [page, setPage] = useState<any | null>(null);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     async function fetchPage() {
       // @ts-ignore
       const { data } = await supabase.from<any, any>('global_pages').select('*').eq('slug', slug).single();
-      setPage(data);
+      if (!data) {
+        setNotFound(true);
+        setPage(null);
+      } else {
+        setPage(data);
+        setNotFound(false);
+      }
     }
     fetchPage();
   }, [slug]);
 
+  if (notFound) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-200">
+        <h1 className="text-4xl font-bold mb-2">404</h1>
+        <p className="mb-4">Ups! Siden blev ikke fundet</p>
+        <Link to="/" className="text-primary underline">Tilbage til forsiden</Link>
+      </div>
+    );
+  }
   if (!page) return <div className="min-h-screen flex items-center justify-center">Indlæser...</div>;
 
   return (
