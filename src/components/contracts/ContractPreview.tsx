@@ -4,6 +4,7 @@ import { da } from 'date-fns/locale';
 import { VehicleDamageMap } from './VehicleDamageMap';
 import { DamageReport } from '@/hooks/useDamageReports';
 import { Car, User, Calendar, CreditCard, Shield, Fuel, Phone, FileText, PenLine, AlertTriangle, Clock } from 'lucide-react';
+import { CheckinQrCode } from '@/components/checkinout/CheckinQrCode';
 
 interface ContractPreviewProps {
   contract: Contract;
@@ -20,6 +21,9 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
     if (amount === null || amount === undefined) return '-';
     return new Intl.NumberFormat('da-DK', { style: 'currency', currency: 'DKK', maximumFractionDigits: 0 }).format(amount);
   };
+
+  // QR-kode check-in URL (kan tilpasses til booking eller kontrakt-id)
+  const checkinUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/checkin/${contract.id}`;
 
   return (
     <div className="bg-white text-gray-900 font-sans max-w-4xl mx-auto print:max-w-none">
@@ -42,6 +46,16 @@ const ContractPreview = ({ contract, pickupDamageReport, returnDamageReport }: C
                 <span className="text-3xl font-black text-primary tracking-tight">LEJIO</span>
               </div>
             )}
+            {/* QR-kode check-in */}
+            <div className="ml-6 flex flex-col items-center">
+              <span className="text-xs text-white/80 mb-1">QR-kode til selv-check-in</span>
+              <CheckinQrCode checkinUrl={checkinUrl} />
+              {contract.checkin_pin && (
+                <div className="mt-2 text-xs text-white/90 bg-primary/60 rounded px-2 py-1 font-mono tracking-widest">
+                  PIN-kode: <span className="font-bold">{contract.checkin_pin}</span>
+                </div>
+              )}
+            </div>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Lejekontrakt</h1>
               <p className="text-white/80 text-sm mt-1">Billejeaftale mellem udlejer og lejer</p>

@@ -139,6 +139,16 @@ serve(async (req) => {
     // Calculate deductible: if renter selected 0-deductible insurance, set to 0
     const deductibleAmount = booking.deductible_insurance_selected ? 0 : (booking.original_deductible || 5000);
 
+    // Generér tilfældig 6-cifret PIN til check-in
+    function generatePin(length = 6) {
+      let pin = '';
+      for (let i = 0; i < length; i++) {
+        pin += Math.floor(Math.random() * 10);
+      }
+      return pin;
+    }
+    const checkinPin = generatePin(6);
+
     // Create contract record
     const contractData = {
       booking_id: bookingId,
@@ -234,6 +244,7 @@ serve(async (req) => {
         : null,
       
       status: 'pending_renter_signature',
+      checkin_pin: checkinPin,
     };
 
     const { data: contract, error: insertError } = await supabase

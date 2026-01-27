@@ -68,6 +68,8 @@ export interface Contract {
   interior_cleaning_fee: number | null;
   // Logo
   logo_url: string | null;
+  checked_in_at?: string | null;
+  checkin_pin?: string | null;
 }
 
 export const useContracts = () => {
