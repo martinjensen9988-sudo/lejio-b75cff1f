@@ -67,15 +67,27 @@ serve(async (req) => {
       .eq("id", booking.lessor_id)
       .single();
 
-    // Generate invoice number
-    const { data: invoiceNumber } = await supabase.rpc("generate_invoice_number");
+    // Generate invoice number using UUID (fallback hvis RPC fejler)
+    let invoiceNumber: string;
+    try {
+      const { data, error } = await supabase.rpc("generate_invoice_number");
+      if (error || !data) {
+        // Fallback: generate invoice number manually
+        invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      } else {
+        invoiceNumber = data;
+      }
+    } catch (err) {
+      // Fallback til manual nummer generering
+      invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    }
 
     // Calculate line items
     const startDate = new Date(booking.start_date);
     const endDate = new Date(booking.end_date);
     const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-    // Udregn selvrisiko-forsikring (max 49 kr/dag, max 400 kr/md)
+    // Udregn selvrisiko-forsikring (max 49 kr/dag, max 400 kr/md) - hvis kolonne eksisterer
     let insuranceFee = 0;
     let insuranceDays = 0;
     if (booking.deductible_insurance_selected && booking.deductible_insurance_price > 0) {
@@ -93,7 +105,7 @@ serve(async (req) => {
 
     const lineItems = [
       {
-        description: `Leje af ${booking.vehicles?.make} ${booking.vehicles?.model} (${booking.vehicles?.registration})`,
+        description: `Leje af ${booking.vehicles?.[0]?.make || 'Køretøj'} ${booking.vehicles?.[0]?.model || ''} (${booking.vehicles?.[0]?.registration || 'N/A'})`,
         quantity: days,
         unit: "dage",
         unit_price: dailyPrice,
@@ -138,9 +150,9 @@ serve(async (req) => {
         invoice_number: invoiceNumber,
         lessor_id: booking.lessor_id,
         booking_id: bookingId,
-        renter_email: booking.renter_email,
-        renter_name: booking.renter_name || `${booking.renter_first_name} ${booking.renter_last_name}`,
-        renter_address: booking.renter_address,
+        renter_email: booking.renter_email || '',
+        renter_name: booking.renter_name || (booking.renter_first_name || '') + ' ' + (booking.renter_last_name || ''),
+        renter_address: booking.renter_address || null,
         subtotal: lessorSubtotal,
         vat_amount: vatAmount,
         total_amount: totalAmount,
