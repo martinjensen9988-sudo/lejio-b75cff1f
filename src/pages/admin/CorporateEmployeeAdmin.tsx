@@ -48,7 +48,7 @@ interface EmployeeForm {
 }
 
 const CorporateEmployeeAdmin = () => {
-  const { employees, departments, fetchCorporateData, isLoading } = useCorporateFleet();
+  const { employees, departments, corporateAccount, refetch, isLoading } = useCorporateFleet();
   const [filteredEmployees, setFilteredEmployees] = useState<CorporateEmployee[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterDepartment, setFilterDepartment] = useState<string>('');
@@ -67,8 +67,8 @@ const CorporateEmployeeAdmin = () => {
   });
 
   useEffect(() => {
-    fetchCorporateData();
-  }, [fetchCorporateData]);
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
     applyFilters();
@@ -155,6 +155,7 @@ const CorporateEmployeeAdmin = () => {
         const { error } = await supabase
           .from('corporate_employees')
           .insert({
+            corporate_account_id: corporateAccount?.id || '',
             full_name: formData.full_name,
             email: formData.email,
             phone: formData.phone || null,
@@ -168,7 +169,7 @@ const CorporateEmployeeAdmin = () => {
         toast.success('Medarbejder oprettet');
       }
 
-      await fetchCorporateData();
+      await refetch();
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Error saving employee:', error);
@@ -190,7 +191,7 @@ const CorporateEmployeeAdmin = () => {
 
       if (error) throw error;
       toast.success('Medarbejder deaktiveret');
-      await fetchCorporateData();
+      await refetch();
       setIsDeleteAlertOpen(false);
     } catch (error) {
       console.error('Error deleting employee:', error);
@@ -212,7 +213,7 @@ const CorporateEmployeeAdmin = () => {
       toast.success(
         employee.is_admin ? 'Admin-rettigheder fjernet' : 'Admin-rettigheder tildelt'
       );
-      await fetchCorporateData();
+      await refetch();
     } catch (error) {
       console.error('Error toggling admin:', error);
       toast.error('Kunne ikke opdatere admin-status');

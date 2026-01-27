@@ -37,7 +37,7 @@ interface DepartmentAlert {
 }
 
 const CorporateBudgetDashboard = () => {
-  const { departments, fetchCorporateData, isLoading } = useCorporateFleet();
+  const { departments, invoices, refetch, isLoading } = useCorporateFleet();
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
   const [monthlyTrend, setMonthlyTrend] = useState<MonthlyTrend[]>([]);
   const [alerts, setAlerts] = useState<DepartmentAlert[]>([]);
@@ -45,9 +45,9 @@ const CorporateBudgetDashboard = () => {
   const [selectedDept, setSelectedDept] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchCorporateData();
+    refetch();
     loadBudgetData();
-  }, [fetchCorporateData]);
+  }, [refetch]);
 
   const loadBudgetData = async () => {
     setIsLoadingData(true);
@@ -84,16 +84,17 @@ const CorporateBudgetDashboard = () => {
       // Aggreger udgifter fra fakturaer
       if (invoices) {
         invoices.forEach((invoice) => {
-          const dept = budgetMap.get(invoice.department_id);
-          if (dept) {
-            const lineItems = invoice.department_breakdown || [];
-            const total = Array.isArray(lineItems)
-              ? lineItems.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
-              : 0;
-
-            dept.current_spend += total;
-            dept.invoice_count += 1;
-          }
+          const deptBreakdown = Array.isArray(invoice.department_breakdown) 
+            ? invoice.department_breakdown 
+            : [];
+          
+          deptBreakdown.forEach((item: any) => {
+            const dept = budgetMap.get(item.department_id);
+            if (dept) {
+              dept.current_spend += item.amount || 0;
+              dept.invoice_count += 1;
+            }
+          });
         });
       }
 

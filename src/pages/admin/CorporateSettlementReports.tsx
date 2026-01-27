@@ -58,7 +58,7 @@ interface DashboardStats {
 }
 
 const CorporateSettlementReports = () => {
-  const { fetchCorporateData, isLoading } = useCorporateFleet();
+  const { invoices, refetch, isLoading } = useCorporateFleet();
   const [reports, setReports] = useState<SettlementReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<SettlementReport | null>(null);
   const [reportDetails, setReportDetails] = useState<SettlementDetail | null>(null);
@@ -75,9 +75,9 @@ const CorporateSettlementReports = () => {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
   useEffect(() => {
-    fetchCorporateData();
+    refetch();
     loadReports();
-  }, [fetchCorporateData]);
+  }, [refetch]);
 
   const loadReports = async () => {
     setIsLoadingReports(true);
@@ -95,7 +95,7 @@ const CorporateSettlementReports = () => {
 
       if (invoices && Array.isArray(invoices)) {
         invoices.forEach((invoice) => {
-          const date = new Date(invoice.invoice_date || new Date());
+          const date = new Date(invoice.created_at || new Date());
           const month = date.toLocaleDateString('da-DK', { month: 'long' });
           const year = date.getFullYear();
           const key = `${invoice.corporate_account_id}-${year}-${month}`;
@@ -106,7 +106,7 @@ const CorporateSettlementReports = () => {
               month,
               year,
               corporate_account_id: invoice.corporate_account_id,
-              company_name: invoice.company_name || 'Ukendt Virksomhed',
+              company_name: 'Ukendt Virksomhed',
               total_amount: 0,
               department_count: 0,
               line_item_count: 0,
@@ -118,7 +118,7 @@ const CorporateSettlementReports = () => {
 
           const report = reportMap.get(key)!;
           report.total_amount += invoice.total_amount || 0;
-          report.line_item_count += invoice.department_breakdown?.length || 0;
+          report.line_item_count += Array.isArray(invoice.department_breakdown) ? invoice.department_breakdown.length : 0;
         });
       }
 
