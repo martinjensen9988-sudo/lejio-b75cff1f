@@ -101,10 +101,5 @@ const CalendarPage = () => {
     </DashboardLayout>
   );
 };
-        )}
-      </div>
-    </DashboardLayout>
-  );
-};
 
 export default CalendarPage;
