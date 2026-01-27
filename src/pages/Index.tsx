@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
@@ -13,12 +13,13 @@ import { useAuth } from "@/hooks/useAuth";
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !location.pathname.startsWith('/admin')) {
       navigate("/dashboard", { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location.pathname]);
 
   // Show nothing while checking auth to prevent flash
   if (loading) {

@@ -263,7 +263,7 @@ const App = forwardRef((props, ref) => (
               <Route path="/fleet-widget" element={<FleetWidgetDemo />} />
               <Route path="/my-rentals" element={<MyRentals />} />
               <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminAuthProvider><AdminDashboard /></AdminAuthProvider>} />
               {/* Admin sub-routes - wrapped in AdminAuthProvider */}
               <Route path="/admin/users" element={<AdminAuthProvider><AdminUsersPage /></AdminAuthProvider>} />
               <Route path="/admin/staff" element={<AdminAuthProvider><AdminStaffPage /></AdminAuthProvider>} />
