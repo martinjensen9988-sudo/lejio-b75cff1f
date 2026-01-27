@@ -226,7 +226,7 @@ export const AdminFeatureFlags = () => {
               const featureKey = featureTitle.toLowerCase().replace(/[^a-z0-9_]+/gi, '_');
               const globalLinks = customLinks[featureKey] || {};
               return (
-                <Card key={featureTitle} className="relative p-3 flex flex-col gap-2">
+                <Card key={featureKey} className="relative p-3 flex flex-col gap-2">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-bold text-sm">{featureTitle}</span>
                   </div>
@@ -234,41 +234,41 @@ export const AdminFeatureFlags = () => {
                     <div className="flex items-center gap-1">
                       <input
                         type="url"
-                        id={`video-link-${featureTitle}`}
-                        name={`video-link-${featureTitle}`}
+                        id={`video-link-${featureKey}`}
+                        name={`video-link-${featureKey}`}
                         placeholder="f.eks. https://youtube.com/... (video)"
                         className="px-2 py-1 rounded border text-xs flex-1"
                         value={globalLinks.video || ''}
-                        onChange={e => handleGlobalLinkChange(featureTitle, 'video', e.target.value)}
+                        onChange={e => handleGlobalLinkChange(featureKey, 'video', e.target.value)}
                       />
                       <span title="Link til video, fx YouTube" className="text-muted-foreground"><Info size={14} /></span>
                     </div>
                     <div className="flex items-center gap-1">
                       <input
                         type="url"
-                        id={`image-link-${featureTitle}`}
-                        name={`image-link-${featureTitle}`}
+                        id={`image-link-${featureKey}`}
+                        name={`image-link-${featureKey}`}
                         placeholder="f.eks. https://billede.dk/... (billede)"
                         className="px-2 py-1 rounded border text-xs flex-1"
                         value={globalLinks.image || ''}
-                        onChange={e => handleGlobalLinkChange(featureTitle, 'image', e.target.value)}
+                        onChange={e => handleGlobalLinkChange(featureKey, 'image', e.target.value)}
                       />
                       <span title="Link til billede" className="text-muted-foreground"><Info size={14} /></span>
                     </div>
                     <div className="flex items-center gap-1">
                       <input
                         type="url"
-                        id={`page-link-${featureTitle}`}
-                        name={`page-link-${featureTitle}`}
+                        id={`page-link-${featureKey}`}
+                        name={`page-link-${featureKey}`}
                         placeholder="f.eks. https://side.dk/... (side)"
                         className="px-2 py-1 rounded border text-xs flex-1"
                         value={globalLinks.page || ''}
-                        onChange={e => handleGlobalLinkChange(featureTitle, 'page', e.target.value)}
+                        onChange={e => handleGlobalLinkChange(featureKey, 'page', e.target.value)}
                       />
                       <span title="Link til side" className="text-muted-foreground"><Info size={14} /></span>
                     </div>
-                    <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[featureTitle]} onClick={() => handleSaveGlobalLinks(featureTitle)}>
-                      {saving[featureTitle] ? 'Gemmer...' : 'Gem links'}
+                    <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[featureKey]} onClick={() => handleSaveGlobalLinks(featureKey)}>
+                      {saving[featureKey] ? 'Gemmer...' : 'Gem links'}
                     </Button>
                   </div>
                 </Card>
