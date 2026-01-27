@@ -59,7 +59,12 @@ export default function CheckinPage() {
       <div className="mb-4 text-center">
         <div className="font-mono text-lg">{contract.contract_number}</div>
         <div className="text-gray-500 text-sm mt-1">{contract.renter_name}</div>
-        <div className="text-gray-500 text-sm">{contract.vehicle_make} {contract.vehicle_model}</div>
+        <div className="text-gray-500 text-sm">
+          {contract.vehicle_make && contract.vehicle_model 
+            ? `${contract.vehicle_make} ${contract.vehicle_model}` 
+            : contract.vehicle_id}
+        </div>
+        <div className="text-xs text-gray-400 mt-2">(ID: {contract.vehicle_id})</div>
       </div>
       {checkedIn || contract.checked_in_at ? (
         <div className="text-green-600 font-semibold text-lg mt-4">Du er allerede checket ind!</div>

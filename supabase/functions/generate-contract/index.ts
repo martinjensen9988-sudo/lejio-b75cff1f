@@ -123,6 +123,21 @@ serve(async (req) => {
     }
 
     const vehicle = booking.vehicle;
+    
+    // Fallback: Hvis vehicle data mangler, fetch direkte fra vehicles tabel
+    if (!vehicle || !vehicle.make || !vehicle.model) {
+      const { data: vehicleData, error: vError } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('id', booking.vehicle_id)
+        .single();
+      
+      if (!vError && vehicleData) {
+        // Merge data
+        Object.assign(vehicle || {}, vehicleData);
+      }
+    }
+    
     const calculatedVehicleValue = vehicleValue || 150000; // Default value if not provided
 
     // Determine pricing based on booking period type
