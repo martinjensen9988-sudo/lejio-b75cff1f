@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { FriVehicleList } from '@/components/fri/FriVehicleList';
 import { FriBookingList } from '@/components/fri/FriBookingList';
+import { FriInvoiceList } from '@/components/fri/FriInvoiceList';
 
 export function FriDashboard() {
   const { user, signOut } = useFriAuthContext();
@@ -97,10 +98,7 @@ export function FriDashboard() {
           {/* Invoices Tab */}
           <TabsContent value="invoices">
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Invoicer</h2>
-              <p className="text-gray-600">
-                Ingen invoicer endnu.
-              </p>
+              <FriInvoiceList lessorId={user?.id || null} />
             </div>
           </TabsContent>
 
