@@ -109,9 +109,11 @@ export const AdminFeatureFlags = () => {
 
     const handleSaveGlobalLinks = async (featureKey: string) => {
       setSaving(prev => ({ ...prev, [featureKey]: true }));
+      // Formatér key: små bogstaver, kun a-z0-9_
+      const formattedKey = featureKey.toLowerCase().replace(/[^a-z0-9_]+/g, '_');
       const links = customLinks[featureKey] || {};
       const { error } = await supabase.from<any, any>('feature_links').upsert({
-        feature_key: featureKey,
+        feature_key: formattedKey,
         video: links.video || '',
         image: links.image || '',
         page: links.page || ''
