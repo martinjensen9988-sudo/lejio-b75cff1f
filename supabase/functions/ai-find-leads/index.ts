@@ -379,50 +379,35 @@ Find kontaktinformation for denne virksomhed type. Hvis du ikke kan finde det pr
             lead.email_sent = false;
 
             // IMPROVEMENT: Send welcome email if enabled
-            if (sendEmails && lead.contact_email) {
+            if (sendEmails && lead.contact_email && newLead) {
               try {
-                const emailResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+                const sendEmailResponse = await fetch(`${supabaseUrl}/functions/v1/send-lead-welcome-email`, {
                   method: 'POST',
                   headers: {
-                    'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+                    'Authorization': `Bearer ${supabaseServiceKey}`,
                     'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
-                    model: 'google/gemini-3-flash-preview',
-                    messages: [
-                      {
-                        role: 'system',
-                        content: `Du skriver professionelle, kortfattede sales-emails på dansk.
-Skriv en personaliseret email til en virksomhed der præsenterer LEJIO-platformen.
-
-Email skal:
-- Være kort (max 150 ord)
-- Være personlig og relevants for deres industri
-- Afslutte med CTA (call to action) til at booke demo
-- Signeres af LEJIO sales team`
-                      },
-                      {
-                        role: 'user',
-                        content: `Virksomhed: ${lead.company_name}
-Industri: ${lead.industry}
-By: ${lead.city}
-Grund til kontakt: ${lead.reason}`
-                      }
-                    ],
-                    max_tokens: 500,
+                    leadId: newLead.id,
+                    companyName: lead.company_name,
+                    contactEmail: lead.contact_email,
+                    industry: lead.industry,
+                    city: lead.city,
+                    reason: lead.reason,
                   }),
                 });
 
-                if (emailResponse.ok) {
-                  const emailData = await emailResponse.json();
-                  const emailContent = emailData.choices?.[0]?.message?.content || '';
-                  
-                  // TODO: Send actual email via edge function
-                  lead.email_status = 'generated';
-                  console.log(`✉️ Generated email for ${lead.company_name}`);
+                if (sendEmailResponse.ok) {
+                  const emailData = await sendEmailResponse.json();
+                  lead.email_status = 'sent';
+                  lead.email_sent = true;
+                  console.log(`✉️ Email sent for ${lead.company_name}`);
+                } else {
+                  lead.email_status = 'error';
+                  console.error(`Email send failed for ${lead.company_name}`);
                 }
               } catch (error) {
-                console.error(`Error generating email for ${lead.company_name}:`, error);
+                console.error(`Error sending email for ${lead.company_name}:`, error);
                 lead.email_status = 'error';
               }
             }
