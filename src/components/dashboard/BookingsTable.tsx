@@ -235,7 +235,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                   {booking.status === 'confirmed' && (
                     <div className="flex items-center gap-1">
                       <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/checkinout/${booking.id}?mode=check_in`)} title="AR Check-in"><ScanLine className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/damage-report/${booking.id}?type=pickup`)} title="Udleveringsrapport"><Camera className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/damage-report/${booking.id}?type=pickup&vehicleId=${booking.vehicle_id}`)} title="Udleveringsrapport"><Camera className="w-4 h-4" /></Button>
                       <Button size="sm" variant="outline" onClick={() => onUpdateStatus(booking.id, 'active')}>Start</Button>
                     </div>
                   )}
@@ -243,7 +243,7 @@ const BookingsTable = ({ bookings, onUpdateStatus }: BookingsTableProps) => {
                     <div className="flex items-center gap-1">
                       <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/vehicle-swap/${booking.id}`)} title="Udskift køretøj"><ArrowRightLeft className="w-4 h-4" /></Button>
                       <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/checkinout/${booking.id}?mode=check_out`)} title="AR Check-out"><ScanLine className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/damage-report/${booking.id}?type=return`)} title="Indleveringsrapport"><ClipboardCheck className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/damage-report/${booking.id}?type=return&vehicleId=${booking.vehicle_id}`)} title="Indleveringsrapport"><ClipboardCheck className="w-4 h-4" /></Button>
                       <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/scan-history/${booking.id}`)} title="Skanningshistorik"><History className="w-4 h-4" /></Button>
                       <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/settlement/${booking.id}`)}>Afslut</Button>
                     </div>
