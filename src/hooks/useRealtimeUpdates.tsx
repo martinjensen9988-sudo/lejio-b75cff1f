@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { RealtimeChannel } from '@supabase/supabase-js';
+import { RealtimeChannel, PostgresChangesPayload } from '@supabase/supabase-js';
 
 // Type-safe real-time subscription management
 export interface RealtimeSubscriptionConfig {
   tableName: string;
   event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
   filter?: string;
-  onData: (payload: unknown) => void;
+  onData: (payload: PostgresChangesPayload<Record<string, unknown>>) => void;
   onError?: (error: Error) => void;
 }
 
@@ -16,41 +16,39 @@ export const useRealtimeSubscription = (config: RealtimeSubscriptionConfig) => {
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    // TODO: Fix real-time subscription when Supabase types support 'postgres_changes'
-    // Disabled for now to avoid type errors
-    // const subscribeToChanges = () => {
-    //   try {
-    //     const newChannel = supabase
-    //       .channel(`${config.tableName}:${config.event || '*'}`)
-    //       .on(
-    //         'postgres_changes',
-    //         {
-    //           event: config.event || '*',
-    //           schema: 'public',
-    //           table: config.tableName,
-    //           ...(config.filter && { filter: config.filter }),
-    //         },
-    //         (payload) => {
-    //           config.onData(payload);
-    //         }
-    //       )
-    //       .subscribe((status) => {
-    //         if (status === 'SUBSCRIBED') {
-    //           setIsSubscribed(true);
-    //         } else if (status === 'CLOSED') {
-    //           setIsSubscribed(false);
-    //         } else if (status === 'CHANNEL_ERROR') {
-    //           config.onError?.(new Error('Real-time subscription error'));
-    //           setIsSubscribed(false);
-    //         }
-    //       });
-    //
-    //     setChannel(newChannel);
-    //   } catch (error) {
-    //     config.onError?.(error instanceof Error ? error : new Error('Subscription error'));
-    //   }
-    // };
-    // subscribeToChanges();
+    const subscribeToChanges = () => {
+      try {
+        const newChannel = supabase
+          .channel(`${config.tableName}:${config.event || '*'}`)
+          .on(
+            'postgres_changes',
+            {
+              event: config.event || '*',
+              schema: 'public',
+              table: config.tableName,
+              ...(config.filter && { filter: config.filter }),
+            } as Parameters<typeof supabase.channel['on']>[1],
+            (payload) => {
+              config.onData(payload as PostgresChangesPayload<Record<string, unknown>>);
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              setIsSubscribed(true);
+            } else if (status === 'CLOSED') {
+              setIsSubscribed(false);
+            } else if (status === 'CHANNEL_ERROR') {
+              config.onError?.(new Error('Real-time subscription error'));
+              setIsSubscribed(false);
+            }
+          });
+
+        setChannel(newChannel);
+      } catch (error) {
+        config.onError?.(error instanceof Error ? error : new Error('Subscription error'));
+      }
+    };
+    subscribeToChanges();
     return () => {
       if (channel) {
         supabase.removeChannel(channel);
@@ -62,92 +60,95 @@ export const useRealtimeSubscription = (config: RealtimeSubscriptionConfig) => {
 };
 
 // Real-time invoice updates hook
-export const useRealtimeInvoices = (userId: string | undefined, onUpdate: (payload: unknown) => void) => {
+export const useRealtimeInvoices = (userId: string | undefined, onUpdate: (payload: PostgresChangesPayload<Record<string, unknown>>) => void) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // TODO: Fix real-time invoice updates when Supabase types support 'postgres_changes'
-    // Disabled for now to avoid type errors
-    // if (!userId) return;
-    // const channel = supabase
-    //   .channel(`invoices:${userId}`)
-    //   .on(
-    //     'postgres_changes',
-    //     {
-    //       event: '*',
-    //       schema: 'public',
-    //       table: 'invoices',
-    //       filter: `lessor_id=eq.${userId}`,
-    //     },
-    //     (payload) => {
-    //       onUpdate(payload);
-    //     }
-    //   )
-    //   .subscribe((status) => {
-    //     setIsConnected(status === 'SUBSCRIBED');
-    //   });
-    // return () => {
-    //   supabase.removeChannel(channel);
-    // };
+    if (!userId) return;
+    const channel = supabase
+      .channel(`invoices:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'invoices',
+          filter: `lessor_id=eq.${userId}`,
+        } as Parameters<typeof supabase.channel['on']>[1],
+        (payload) => {
+          onUpdate(payload as PostgresChangesPayload<Record<string, unknown>>);
+        }
+      )
+      .subscribe((status) => {
+        setIsConnected(status === 'SUBSCRIBED');
+      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [userId, onUpdate]);
 
   return { isConnected };
 };
 
 // Real-time payment reminders hook
-export const useRealtimePaymentReminders = (onUpdate: (payload: unknown) => void) => {
+export const useRealtimePaymentReminders = (onUpdate: (payload: PostgresChangesPayload<Record<string, unknown>>) => void) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // TODO: Fix real-time payment reminders when Supabase types support 'postgres_changes'
-    // Disabled for now to avoid type errors
-    // const channel = supabase
-    //   .channel('payment_reminders:all')
-    //   .on(
-    //     'postgres_changes',
-    //     {
-    //       event: '*',
-    //       schema: 'public',
-    //       table: 'payment_reminders',
-    //     },
-    //     (payload) => {
-    //       onUpdate(payload);
-    //     }
-    //   )
-    //   .subscribe((status) => {
-    //     setIsConnected(status === 'SUBSCRIBED');
-    //   });
-    // return () => {
-    //   supabase.removeChannel(channel);
-    // };
+    const channel = supabase
+      .channel('payment_reminders:all')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payment_reminders',
+        } as Parameters<typeof supabase.channel['on']>[1],
+        (payload) => {
+          onUpdate(payload as PostgresChangesPayload<Record<string, unknown>>);
+        }
+      )
+      .subscribe((status) => {
+        setIsConnected(status === 'SUBSCRIBED');
+      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [onUpdate]);
 
   return { isConnected };
 };
 
 // Real-time subscriptions hook
-export const useRealtimeSubscriptions = (userId: string | undefined, onUpdate: (payload: unknown) => void) => {
+export const useRealtimeSubscriptions = (userId: string | undefined, onUpdate: (payload: PostgresChangesPayload<Record<string, unknown>>) => void) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // TODO: Fix real-time subscriptions when Supabase types support 'postgres_changes'
-    // Disabled for now to avoid type errors
-    // if (!userId) return;
-    // const channel = supabase
-    //   .channel(`subscriptions:${userId}`)
-    //   .on(
-    //     'postgres_changes',
-    //     {
-    //       event: '*',
-    //       schema: 'public',
-    //       table: 'subscriptions',
-    //       filter: `renter_id=eq.${userId}`,
-    //     },
-    //     (payload) => {
-    //       onUpdate(payload);
-    //     }
-    //   )
-    //   .subscribe((status) => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(`subscriptions:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriptions',
+          filter: `renter_id=eq.${userId}`,
+        } as Parameters<typeof supabase.channel['on']>[1],
+        (payload) => {
+          onUpdate(payload as PostgresChangesPayload<Record<string, unknown>>);
+        }
+      )
+      .subscribe((status) => {
+        setIsConnected(status === 'SUBSCRIBED');
+      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, onUpdate]);
+
+  return { isConnected };
+};
     //     setIsConnected(status === 'SUBSCRIBED');
     //   });
     // return () => {
