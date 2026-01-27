@@ -97,6 +97,10 @@ const Features = () => {
     }));
     // eslint-disable-next-line no-console
     console.table(table);
+
+    // Ekstra: Print alle feature_keys som array til copy-paste
+    // eslint-disable-next-line no-console
+    console.log('Alle feature_keys til Supabase:', JSON.stringify(allFeatureKeys, null, 2));
   }, [featureLinks]);
 
   const featureCategories = [

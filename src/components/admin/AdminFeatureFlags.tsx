@@ -1,67 +1,67 @@
 import {
   Calendar, FileText, CreditCard, MapPin, Bell, Users, BarChart3, MessageSquare, Camera, Brain, BadgeCheck, Wallet, Building2, Scan, FileCheck, Store, Bike, CalendarClock, Wrench, CircleDot, Star, Receipt, Truck, Shield, ShieldCheck, Smartphone, QrCode, Globe, Zap, TrendingDown, AlertTriangle, ArrowRight, Play, Check, Lock
-} from "lucide-react";
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-
-const STANDARD_FEATURES = ['booking_calendar', 'contract_generation', 'pdf_email']; // Tilpas listen efter behov
 const FEATURES = [
-  { key: 'booking_calendar', label: 'Smart Booking-kalender' },
-  { key: 'auto_availability', label: 'Automatisk tilgængelighed' },
-  { key: 'subscription_rental', label: 'Abonnementsudlejning' },
-  { key: 'ai_pricing', label: 'AI-prissætning' },
-  { key: 'season_pricing', label: 'Sæsonpriser' },
-  { key: 'multi_location', label: 'Multi-lokation support' },
-  { key: 'location_hours', label: 'Åbningstider pr. lokation' },
-  { key: 'special_closures', label: 'Særlige lukkedage' },
-  { key: 'location_on_vehicle', label: 'Lokation på køretøj' },
-  { key: 'contract_generation', label: 'Automatisk kontraktgenerering' },
-  { key: 'digital_signature', label: 'Digital underskrift' },
-  { key: 'pdf_email', label: 'PDF-download & Email' },
-  { key: 'damage_ai', label: 'Skaderapporter med AI' },
-  { key: 'location_in_contract', label: 'Lokationsinfo i kontrakt' },
-  { key: 'license_plate_scan', label: 'Nummerplade-scanning' },
-  { key: 'dashboard_photo_ai', label: 'Dashboard-foto med AI' },
-  { key: 'gps_verification', label: 'GPS-lokationsverifikation' },
-  { key: 'auto_statement', label: 'Automatisk opgørelse' },
-  { key: 'qr_checkin', label: 'QR-kode check-in' },
-  { key: 'payment_methods', label: 'Flere betalingsmetoder' },
-  { key: 'auto_subscription_payment', label: 'Automatisk abonnementsbetaling' },
-  { key: 'deposit_handling', label: 'Depositumhåndtering' },
-  { key: 'selfrisk_insurance', label: 'Selvrisiko-forsikring' },
-  { key: 'fuel_policy', label: 'Brændstofpolitik' },
-  { key: 'platform_fee_payment', label: 'Platformgebyr-betaling' },
-  { key: 'gps_security', label: 'GPS-sikkerhed' },
-  { key: 'geofencing', label: 'Geofencing-alarmer' },
-  { key: 'km_registration', label: 'Kilometerregistrering' },
-  { key: 'webhook_gps', label: 'Webhook-integration' },
-  { key: 'mc_license_validation', label: 'MC-kørekort validering' },
-  { key: 'mc_maintenance', label: 'MC-specifik vedligeholdelse' },
-  { key: 'season_checklist', label: 'Sæson-tjekliste' },
-  { key: 'mc_checkin_guide', label: 'MC Check-in guide' },
-  { key: 'smart_service', label: 'Smart Service hos LEJIO' },
-  { key: 'inspection_reminders', label: 'Syns-påmindelser' },
-  { key: 'tire_management', label: 'Dækstyring' },
-  { key: 'replacement_car', label: 'Byttebil-funktion' },
-  { key: 'service_booking', label: 'Service-booking' },
-  { key: 'auto_dispatch_ai', label: 'Auto-Dispatch AI' },
-  { key: 'ai_dashboard_analysis', label: 'Dashboard-analyse' },
-
-  { key: 'ai_translation', label: 'AI-oversættelse' },
-  { key: 'damage_ai_analysis', label: 'Skade-AI' },
-  { key: 'messaging', label: 'Indbygget beskedsystem' },
-  { key: 'push_notifications', label: 'Push-notifikationer' },
-  { key: 'auto_emails', label: 'Automatiske emails' },
-  { key: 'live_chat', label: 'Live Chat Support' },
-  { key: 'unread_messages', label: 'Ulæste beskeder' },
-  { key: 'license_verification', label: 'Kørekortsverifikation' },
-  { key: 'renter_history', label: 'Lejerhistorik' },
-  { key: 'renter_rating', label: 'Lejer-rating' },
+  "Smart Booking-kalender",
+  "Automatisk tilgængelighed",
+  "Abonnementsudlejning",
+  "AI-prissætning",
+  "Sæsonpriser",
+  "Multi-lokation support",
+  "Åbningstider pr. lokation",
+  "Særlige lukkedage",
+  "Forberedelsestid",
+  "Lokation på køretøj",
+  "Automatisk kontraktgenerering",
+  "Digital underskrift",
+  "PDF-download & Email",
+  "Skaderapporter med AI",
+  "Lokationsinfo i kontrakt",
+  "Nummerplade-scanning",
+  "Dashboard-foto med AI",
+  "GPS-lokationsverifikation",
+  "Automatisk opgørelse",
+  "QR-kode check-in",
+  "Flere betalingsmetoder",
+  "Automatisk abonnementsbetaling",
+  "Depositumhåndtering",
+  "Selvrisiko-forsikring",
+  "Brændstofpolitik",
+  "Platformgebyr-betaling",
+  "GPS-sikkerhed",
+  "Geofencing-alarmer",
+  "Kilometerregistrering",
+  "Webhook-integration",
+  "MC-kørekort validering",
+  "MC-specifik vedligeholdelse",
+  "Sæson-tjekliste",
+  "MC Check-in guide",
+  "Smart Service hos LEJIO",
+  "Syns-påmindelser",
+  "Dækstyring",
+  "Byttebil-funktion",
+  "Service-booking",
+  "Auto-Dispatch AI",
+  "Dashboard-analyse",
+  "Skade-AI",
+  "AI-oversættelse",
+  "Indbygget beskedsystem",
+  "Push-notifikationer",
+  "Automatiske emails",
+  "Live Chat Support",
+  "Ulæste beskeder",
+  "Kørekortsverifikation",
+  "Lejerhistorik",
+  "Lejer-rating",
+  "Advarselsregister",
+  "Kundesegmenter",
+  "Favorit-lejere",
+  "Erhvervskonti",
+  "Afdelingsbudgetter",
+  "Medarbejder-administration",
+  "Månedlig samlet faktura",
+  "Flåde-afregning",
+  "CVR-opslag"
+];
   { key: 'warning_register', label: 'Advarselsregister' },
   { key: 'customer_segments', label: 'Kundesegmenter' },
   { key: 'favorite_renters', label: 'Favorit-lejere' },
@@ -107,18 +107,18 @@ export const AdminFeatureFlags = () => {
       setCustomLinks(prev => ({ ...prev, [featureKey]: { ...prev[featureKey], [type]: value } }));
     };
 
-    const handleSaveGlobalLinks = async (featureKey: string) => {
-      setSaving(prev => ({ ...prev, [featureKey]: true }));
-      // Formatér key: små bogstaver, kun a-z0-9_
-      const formattedKey = featureKey.toLowerCase().replace(/[^a-z0-9_]+/g, '_');
-      const links = customLinks[featureKey] || {};
+    const handleSaveGlobalLinks = async (featureTitle: string) => {
+      setSaving(prev => ({ ...prev, [featureTitle]: true }));
+      // Brug præcis samme key-generator som featuresiden
+      const formattedKey = featureTitle.toLowerCase().replace(/[^a-z0-9_]+/gi, '_');
+      const links = customLinks[featureTitle] || {};
       const { error } = await supabase.from<any, any>('feature_links').upsert({
         feature_key: formattedKey,
         video: links.video || '',
         image: links.image || '',
         page: links.page || ''
       }, { onConflict: 'feature_key' });
-      setSaving(prev => ({ ...prev, [featureKey]: false }));
+      setSaving(prev => ({ ...prev, [featureTitle]: false }));
       if (!error) {
         toast.success('Links gemt!');
       } else {
