@@ -115,12 +115,10 @@ export const useBookings = () => {
           : b
       ));
 
-      // Lazy import for at undgå circular dependencies
+      // Opret faktura asynkront, men fail ikke payment marking hvis det mislykkes
       try {
-        const invoicesModule = await import('./useInvoices');
-        // Vi bruger Supabase edge function direkte i stedet for hook
         await supabase.functions.invoke('generate-invoice', {
-          body: { bookingId: id, markPaid: true }
+          body: { bookingId: id }
         });
       } catch (invoiceError) {
         console.error('Fejl ved fakturering:', invoiceError);
