@@ -90,7 +90,7 @@ const Features = () => {
       features: [
         { title: "Smart Booking-kalender", description: "Visuel oversigt over alle dine bookinger med drag-and-drop funktionalitet.", icon: Calendar, status: "Fuldt implementeret" },
         { title: "Automatisk tilgængelighed", description: "Systemet blokerer automatisk datoer ved nye bookinger.", icon: Clock, status: "Fuldt implementeret" },
-        { title: "Abonnementsudlejning", description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.", icon: Repeat, status: "Beta", demoUrl: "https://yourdomain.com/demo/subscription" },
+        { title: "Abonnementsudlejning", description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.", icon: Repeat, status: "Beta" },
         { title: "AI-prissætning", description: "Få intelligente prisforslag baseret på marked, sæson og efterspørgsel.", icon: Brain, badge: "Ny", status: "Planlagt", tier: "pro" },
         { title: "Sæsonpriser", description: "Indstil forskellige priser for høj- og lavsæson automatisk.", icon: CalendarClock, badge: "Ny", status: "Fuldt implementeret", tier: "pro" },
       ],
