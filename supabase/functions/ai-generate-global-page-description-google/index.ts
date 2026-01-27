@@ -3,7 +3,7 @@ import { serve } from 'std/server';
 
 serve(async (req) => {
   const { title, slug } = await req.json();
-  const apiKey = Deno.env.get('GOOGLE_AI_API_KEY');
+  const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) {
     return new Response('Missing Google AI API key', { status: 500 });
   }

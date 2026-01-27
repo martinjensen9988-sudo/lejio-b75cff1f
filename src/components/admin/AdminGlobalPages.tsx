@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 // Kald Google edge function for AI-beskrivelse
 async function generateAIDescription({ title, slug }: { title: string; slug: string }) {
   const res = await fetch('/functions/v1/ai-generate-global-page-description-google', {
@@ -26,6 +26,7 @@ function MarkdownEditor({ value, onChange }: { value: string; onChange: (v: stri
 }
 
 export default function AdminGlobalPages() {
+  const editRef = useRef<HTMLDivElement>(null);
   const { user, isSuperAdmin } = useAdminAuth();
   const [pages, setPages] = useState<any[]>([]);
   const [editing, setEditing] = useState<any | null>(null);
@@ -45,6 +46,11 @@ export default function AdminGlobalPages() {
   function startEdit(page: any) {
     setEditing(page);
     setForm({ ...page });
+    setTimeout(() => {
+      if (editRef.current) {
+        editRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   }
 
   function startNew() {
@@ -151,7 +157,7 @@ export default function AdminGlobalPages() {
             </Card>
           ))}
         </div>
-        <Card className="p-4 mb-8">
+        <Card className="p-4 mb-8" ref={editRef}>
           <h2 className="font-bold mb-2">{editing ? 'Rediger side' : 'Opret ny side'}</h2>
           <label className="block mb-1 font-medium">Titel</label>
           <Input
