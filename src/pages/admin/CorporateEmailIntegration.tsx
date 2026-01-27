@@ -256,7 +256,7 @@ const CorporateEmailIntegration = () => {
                     onChange={(e) => setFormData({ ...formData, body: e.target.value })}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
-                    Brug {{'{'}}{'{employee_name}{'}'}} for medarbejdernavn, {'{'}}{'{company_name}{'}'}} for virksomhedsnavn
+                    Brug {"{employee_name}"} for medarbejdernavn, {"{company_name}"} for virksomhedsnavn
                   </p>
                 </div>
 
