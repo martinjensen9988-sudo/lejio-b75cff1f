@@ -7,6 +7,22 @@ import "./index.css";
 // Provided by vite-plugin-pwa.
 import { registerSW } from "virtual:pwa-register";
 
+// Suppress Lovable dev environment 404 errors for inspection tokens
+// These are benign dev-only errors and don't affect functionality
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  window.fetch = function(...args) {
+    const url = args[0]?.toString?.() || '';
+    
+    // Silently fail if URL contains Lovable token (dev-only)
+    if (url.includes('__lovable_token')) {
+      return Promise.reject(new Error('Lovable token resource not available (dev-only)'));
+    }
+    
+    return originalFetch.apply(this, args);
+  };
+}
+
 registerSW({
   immediate: true,
   onNeedRefresh() {
