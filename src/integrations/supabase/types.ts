@@ -3149,6 +3149,39 @@ export type Database = {
           },
         ]
       }
+      global_pages: {
+        Row: {
+          content_markdown: string | null
+          created_at: string | null
+          id: number
+          image_urls: string[] | null
+          slug: string
+          title: string
+          updated_at: string | null
+          video_urls: string[] | null
+        }
+        Insert: {
+          content_markdown?: string | null
+          created_at?: string | null
+          id?: number
+          image_urls?: string[] | null
+          slug: string
+          title: string
+          updated_at?: string | null
+          video_urls?: string[] | null
+        }
+        Update: {
+          content_markdown?: string | null
+          created_at?: string | null
+          id?: number
+          image_urls?: string[] | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+          video_urls?: string[] | null
+        }
+        Relationships: []
+      }
       gps_data_points: {
         Row: {
           altitude: number | null
