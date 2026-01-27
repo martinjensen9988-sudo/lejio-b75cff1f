@@ -4,7 +4,7 @@ import {
   Shield, Users, Calendar, Receipt, Tag, Truck, AlertTriangle, Flag, 
   UserCog, MessageCircle, Headphones, ShieldCheck, MapPin, BarChart3,
   Menu, Camera, Building2, Facebook, UsersRound, LogOut, CheckCircle, Clock, Sparkles, HeadphonesIcon,
-  FileText, Key, Briefcase
+  FileText, Key, Briefcase, DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -36,6 +36,9 @@ const menuItems = [
   { value: 'gps', icon: MapPin, label: 'GPS', path: '/admin/gps' },
   { value: 'checkinout', icon: Camera, label: 'Check-in/out', path: '/admin/checkinout' },
   { value: 'corporate', icon: Building2, label: 'Virksomheder', path: '/admin/corporate' },
+  { value: 'corporate-employees', icon: Users, label: 'Medarbejderstyring', path: '/admin/corporate/employees' },
+  { value: 'corporate-budget', icon: DollarSign, label: 'Budget Management', path: '/admin/corporate/budget' },
+  { value: 'corporate-settlement', icon: FileText, label: 'Settlement Rapporter', path: '/admin/corporate/settlement' },
   { value: 'facebook', icon: Facebook, label: 'Facebook', path: '/admin/facebook' },
   { value: 'crm', icon: Briefcase, label: 'Salg & CRM', path: '/admin/crm' },
   { value: 'driver-licenses', icon: ShieldCheck, label: 'Kørekort', path: '/admin/driver-licenses' },
