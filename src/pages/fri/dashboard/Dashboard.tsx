@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { FriVehicleList } from '@/components/fri/FriVehicleList';
 import { FriBookingList } from '@/components/fri/FriBookingList';
 import { FriInvoiceList } from '@/components/fri/FriInvoiceList';
+import { FriAnalyticsDashboard } from '@/components/fri/FriAnalyticsDashboard';
 
 export function FriDashboard() {
   const { user, signOut } = useFriAuthContext();
@@ -104,12 +105,7 @@ export function FriDashboard() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Analytik</h2>
-              <p className="text-gray-600">
-                Analytik data vises her når du har bookinger.
-              </p>
-            </div>
+            <FriAnalyticsDashboard lessorId={user?.id || null} />
           </TabsContent>
 
           {/* Team Tab */}
