@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useInvoices } from './useInvoices';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
@@ -42,7 +41,6 @@ export interface UpdateStatusResult {
 
 export const useBookings = () => {
   const { user } = useAuth();
-  const { generateInvoice } = useInvoices();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,8 +115,17 @@ export const useBookings = () => {
           : b
       ));
 
-      // Opret faktura automatisk når betaling er modtaget
-      await generateInvoice(id, true);
+      // Lazy import for at undgå circular dependencies
+      try {
+        const invoicesModule = await import('./useInvoices');
+        // Vi bruger Supabase edge function direkte i stedet for hook
+        await supabase.functions.invoke('generate-invoice', {
+          body: { bookingId: id, markPaid: true }
+        });
+      } catch (invoiceError) {
+        console.error('Fejl ved fakturering:', invoiceError);
+        // Don't fail payment marking if invoice generation fails
+      }
 
       // Send booking paid confirmation email to renter
       try {

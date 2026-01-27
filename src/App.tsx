@@ -58,6 +58,9 @@ const GpsTracking = lazy(() => import("./pages/GpsTracking"));
 const Features = lazy(() => import("./pages/Features"));
 const CorporateDashboard = lazy(() => import("./pages/CorporateDashboard"));
 const PrivateFleet = lazy(() => import("./pages/PrivateFleet"));
+
+// QR check-in page
+const CheckinPage = lazy(() => import("./pages/checkin/[contractId]"));
 const About = lazy(() => import("./pages/About"));
 const WhatIsLejio = lazy(() => import("./pages/WhatIsLejio"));
 const BecomeLessor = lazy(() => import("./pages/BecomeLessor"));
@@ -188,6 +191,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
+                {/* QR check-in route for scanned QR codes */}
+                <Route path="/checkin/:contractId" element={<CheckinPage />} />
               {/* Dashboard sub-routes */}
               <Route path="/dashboard/vehicles" element={<VehiclesPage />} />
               <Route path="/dashboard/vehicles/add" element={<AddVehiclePage />} />
