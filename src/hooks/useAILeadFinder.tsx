@@ -142,30 +142,10 @@ export const useAILeadFinder = () => {
   }, []);
 
   // Trigger automated lead discovery (runs daily via scheduler)
+  // Now simply use discoverNewLeads with autoEnrich: true
   const triggerAutomatedDiscovery = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('auto-find-and-score-leads', {
-        body: {}
-      });
-
-      if (error) {
-        console.error('Automated discovery error:', error);
-        toast.error('Kunne ikke starte automatisk lead-søgning');
-        return null;
-      }
-
-      toast.success(`${data.added} nye leads fundet og tilføjet!`);
-      setLastUpdated(new Date());
-      return data;
-    } catch (error) {
-      console.error('Automated discovery error:', error);
-      toast.error('Der opstod en fejl ved automatisk søgning');
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    return discoverNewLeads({ autoEnrich: true, sendEmails: false, batchSize: 20 });
+  }, [discoverNewLeads]);
 
   const clearSuggestions = useCallback(() => {
     setSuggestions([]);
