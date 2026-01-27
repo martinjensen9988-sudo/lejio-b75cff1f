@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,22 +43,35 @@ export default function AdminGlobalPages() {
 
   async function savePage() {
     setUploading(true);
+    let error = null;
     if (editing) {
       // @ts-ignore
-      await supabase.from<any, any>('global_pages').update(form).eq('id', String(editing.id));
+      const res = await supabase.from<any, any>('global_pages').update(form).eq('id', String(editing.id));
+      error = res.error;
     } else {
       // @ts-ignore
-      await supabase.from<any, any>('global_pages').insert([form]);
+      const res = await supabase.from<any, any>('global_pages').insert([form]);
+      error = res.error;
     }
     setUploading(false);
+    if (error) {
+      toast.error('Kunne ikke gemme siden: ' + error.message);
+      return;
+    }
     setEditing(null);
     fetchPages();
+    toast.success('Side gemt!');
   }
 
   async function deletePage(id: number) {
     // @ts-ignore
-    await supabase.from<any, any>('global_pages').delete().eq('id', String(id));
+    const res = await supabase.from<any, any>('global_pages').delete().eq('id', String(id));
+    if (res.error) {
+      toast.error('Kunne ikke slette siden: ' + res.error.message);
+      return;
+    }
     fetchPages();
+    toast.success('Side slettet!');
   }
 
   // Simple file upload to Supabase Storage
@@ -67,12 +81,18 @@ export default function AdminGlobalPages() {
     setUploading(true);
     const filePath = `${type}s/${Date.now()}_${file.name}`;
     const { data, error } = await supabase.storage.from('public').upload(filePath, file);
-    if (!error && data) {
+    if (error) {
+      toast.error('Kunne ikke uploade fil: ' + error.message);
+      setUploading(false);
+      return;
+    }
+    if (data) {
       const { publicUrl } = supabase.storage.from('public').getPublicUrl(filePath).data;
       setForm(f => ({
         ...f,
         [type === 'image' ? 'image_urls' : 'video_urls']: [...f[type === 'image' ? 'image_urls' : 'video_urls'], publicUrl],
       }));
+      toast.success('Fil uploadet!');
     }
     setUploading(false);
   }
