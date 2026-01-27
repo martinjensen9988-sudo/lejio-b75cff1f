@@ -86,6 +86,20 @@ const Features = () => {
     console.log('featureLinks fra Supabase:', featureLinks);
   }, [featureLinks]);
 
+  // DEBUG: Log alle feature keys der bruges i UI og om de matcher noget fra Supabase
+  useEffect(() => {
+    if (Object.keys(featureLinks).length === 0) return;
+    const allFeatureKeys = featureCategories.flatMap(cat => cat.features.map(f => f.title.toLowerCase().replace(/[^a-z0-9_]+/gi, '_')));
+    console.log('Alle feature keys i UI:', allFeatureKeys);
+    allFeatureKeys.forEach(key => {
+      if (featureLinks[key]) {
+        console.log(`MATCH: ${key} findes i Supabase featureLinks`);
+      } else {
+        console.warn(`NO MATCH: ${key} findes IKKE i Supabase featureLinks`);
+      }
+    });
+  }, [featureLinks]);
+
   const featureCategories = [
     {
       title: "Booking & Kalender",
