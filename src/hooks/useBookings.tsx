@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useInvoices } from './useInvoices';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
@@ -39,8 +40,8 @@ export interface UpdateStatusResult {
   booking?: Booking;
 }
 
-export const useBookings = () => {
   const { user } = useAuth();
+  const { generateInvoice } = useInvoices();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +115,9 @@ export const useBookings = () => {
           ? { ...b, payment_received: true, payment_received_at: new Date().toISOString() } 
           : b
       ));
+
+      // Opret faktura automatisk når betaling er modtaget
+      await generateInvoice(id, true);
 
       // Send booking paid confirmation email to renter
       try {
