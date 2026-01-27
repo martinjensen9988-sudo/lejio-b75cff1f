@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import * as Sentry from '@sentry/react';
 
 interface Props {
   children: ReactNode;
@@ -23,26 +24,16 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught:', error, errorInfo);
-    }
+    console.error('ErrorBoundary caught:', error, errorInfo);
 
-    // Log to monitoring service in production
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to Sentry or similar error tracking service
-      fetch('/api/errors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: error.message,
-          stack: error.stack,
+    // Send to Sentry for monitoring
+    Sentry.captureException(error, {
+      contexts: {
+        react: {
           componentStack: errorInfo.componentStack,
-          timestamp: new Date().toISOString(),
-        }),
-      }).catch(() => {
-        // Silently fail if error logging itself fails
-      });
-    }
+        },
+      },
+    });
   }
 
   resetError = () => {

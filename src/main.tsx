@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { initSentry } from "./lib/sentry";
+
+// Initialize Sentry for error tracking
+initSentry();
 
 // Ensure PWA/service worker updates don't leave users with a cached HTML
 // that references old hashed CSS/JS files (white screen / missing stylesheet).
@@ -69,4 +73,7 @@ registerSW({
   },
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Wrap App with Sentry error tracking
+const SentryApp = Sentry.withProfiler(App);
+
+createRoot(document.getElementById("root")!).render(<SentryApp />);
