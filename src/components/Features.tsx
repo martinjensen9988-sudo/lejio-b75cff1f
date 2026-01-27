@@ -146,7 +146,7 @@ const Features = () => {
         </motion.div>
 
         {/* Feature cards grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-16">
           {renterFeatures.map((feature, i) => {
             const Icon = feature.icon;
             // Find admin key
@@ -213,7 +213,7 @@ const Features = () => {
 
         {/* Provider teaser */}
         <motion.div 
-          className="bg-white/10 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-white/20 max-w-4xl mx-auto text-center"
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-white/20 w-full max-w-4xl mx-auto text-center"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

@@ -149,7 +149,7 @@ const PrivateFleetExplainer = () => {
         <div className="absolute bottom-32 left-20 w-16 h-16 bg-accent/10 rounded-full hidden lg:block" />
         
         <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="w-full max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-mint/10 border border-mint/20 text-sm font-bold text-mint mb-8 animate-slide-up">
               <Sparkles className="w-4 h-4" />
               <span>Nyt: Privat Fleet</span>
@@ -196,7 +196,7 @@ const PrivateFleetExplainer = () => {
             </h2>
           </div>
           
-          <div className="space-y-6 max-w-4xl mx-auto">
+          <div className="space-y-6 w-full max-w-4xl mx-auto">
             {steps.map((step, index) => {
               const colors = getColorClasses(step.color);
               const Icon = step.icon;
@@ -246,7 +246,7 @@ const PrivateFleetExplainer = () => {
             Hvorfor vælge Privat Fleet?
           </h3>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl mx-auto">
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon;
               return (
@@ -269,7 +269,7 @@ const PrivateFleetExplainer = () => {
       {/* Pricing by car size */}
       <div className="py-20 relative">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto">
+          <div className="w-full max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h3 className="font-display text-3xl font-black mb-4">
                 💰 Hvad kan du tjene?
@@ -384,7 +384,7 @@ const PrivateFleetExplainer = () => {
       {/* CTA */}
       <div className="py-24 relative">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center p-12 rounded-[3rem] bg-gradient-to-br from-mint/20 via-accent/10 to-primary/10 border-2 border-mint/30">
+          <div className="w-full max-w-4xl mx-auto text-center p-12 rounded-[3rem] bg-gradient-to-br from-mint/20 via-accent/10 to-primary/10 border-2 border-mint/30">
             <h3 className="font-display text-4xl font-black mb-4">
               Klar til at tjene penge på din bil?
             </h3>

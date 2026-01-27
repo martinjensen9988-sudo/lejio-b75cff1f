@@ -75,7 +75,7 @@ const Pricing = () => {
         {/* Privat pricing cards */}
         {activeTab === "privat" && (
           <motion.div 
-            className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+            className="grid md:grid-cols-2 gap-8 w-full max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -168,7 +168,7 @@ const Pricing = () => {
             transition={{ duration: 0.5 }}
           >
             {/* Three tier pricing */}
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+            <div className="grid md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto mb-12">
               {/* Starter */}
               <div className="glass-strong rounded-[2rem] p-8 border border-primary/20 hover:border-primary/50 transition-all duration-300 relative hover-lift">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-white text-sm font-bold shadow-lg flex items-center gap-2">
@@ -267,7 +267,7 @@ const Pricing = () => {
             </div>
 
             {/* Fleet plans */}
-            <div id="fleet-plans" className="glass-strong rounded-[2.5rem] p-10 border border-border/50 max-w-5xl mx-auto scroll-mt-24">
+            <div id="fleet-plans" className="glass-strong rounded-[2.5rem] p-10 border border-border/50 w-full max-w-5xl mx-auto scroll-mt-24">
               <div className="text-center mb-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lavender/10 border border-lavender/20 text-sm font-bold text-lavender mb-4">
                   <Shield className="w-4 h-4" />

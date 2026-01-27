@@ -64,8 +64,8 @@ const Hero = () => {
         }} />)}
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto px-6 relative z-10 w-full">
+        <div className="w-full">
           {/* Main content */}
           <div className="text-center mb-12">
             {/* Badge */}
@@ -125,7 +125,7 @@ const Hero = () => {
           }} transition={{
             duration: 0.6,
             delay: 0.3
-          }} className="glass-strong rounded-2xl p-4 shadow-2xl max-w-4xl mx-auto glow-border">
+          }} className="glass-strong rounded-2xl p-4 shadow-2xl w-full glow-border">
               <div className="flex flex-col lg:flex-row gap-3">
                 {/* Location input */}
                 <div className="flex-1 flex items-center gap-3 px-5 py-4 rounded-xl bg-background/50 border border-border hover:border-primary/50 transition-all group">
@@ -200,7 +200,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.6
-        }} className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-4xl mx-auto mt-12">
+        }} className="grid grid-cols-3 md:grid-cols-6 gap-3 w-full mt-12">
             {[{
             emoji: "🚗",
             label: "Biler"

@@ -52,7 +52,7 @@ const HowItWorks = () => {
         </motion.div>
 
         {/* Two columns */}
-        <div className="grid lg:grid-cols-2 gap-10 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-10 w-full max-w-6xl mx-auto">
           {/* Renters */}
           <motion.div 
             className="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 border border-white/20 hover-lift"
