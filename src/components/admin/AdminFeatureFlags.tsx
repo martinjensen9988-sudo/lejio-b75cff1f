@@ -200,6 +200,8 @@ export const AdminFeatureFlags = () => {
         <div className="mt-2">
           <input
             type="text"
+            id="search-customer"
+            name="search-customer"
             placeholder="Søg kunde (navn, email, firma)"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -224,6 +226,8 @@ export const AdminFeatureFlags = () => {
                   <div className="flex flex-col gap-1 mt-2">
                     <input
                       type="url"
+                      id={`video-link-${feature.key}`}
+                      name={`video-link-${feature.key}`}
                       placeholder="Video-link (global)"
                       className="px-2 py-1 rounded border text-xs"
                       value={globalLinks.video || ''}
@@ -231,6 +235,8 @@ export const AdminFeatureFlags = () => {
                     />
                     <input
                       type="url"
+                      id={`image-link-${feature.key}`}
+                      name={`image-link-${feature.key}`}
                       placeholder="Billede-link (global)"
                       className="px-2 py-1 rounded border text-xs"
                       value={globalLinks.image || ''}
@@ -238,6 +244,8 @@ export const AdminFeatureFlags = () => {
                     />
                     <input
                       type="url"
+                      id={`page-link-${feature.key}`}
+                      name={`page-link-${feature.key}`}
                       placeholder="Side-link (global)"
                       className="px-2 py-1 rounded border text-xs"
                       value={globalLinks.page || ''}
