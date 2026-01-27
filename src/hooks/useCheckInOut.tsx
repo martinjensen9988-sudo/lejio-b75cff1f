@@ -352,20 +352,15 @@ export const useCheckInOut = () => {
         console.error('Failed to send check-out email:', emailError);
       }
 
-      // Lazy import and call generateSettlementInvoice if there are extra charges
+      // Log extra charges for manual settlement (generateSettlementInvoice not available)
       if (totalExtraCharges > 0) {
-        try {
-          const { generateSettlementInvoice } = await import('./useInvoices');
-          await generateSettlementInvoice(params.bookingId, {
-            kmOverage,
-            kmOverageFee,
-            fuelFee,
-            totalExtraCharges,
-            // evt. flere settlement-data
-          });
-        } catch (invoiceError) {
-          console.error('Fejl ved oprettelse af afregningsfaktura:', invoiceError);
-        }
+        console.log('Extra charges to be settled:', {
+          bookingId: params.bookingId,
+          kmOverage,
+          kmOverageFee,
+          fuelFee,
+          totalExtraCharges,
+        });
         toast.success(`Check-out gennemført! Ekstra opkrævning: ${totalExtraCharges.toFixed(2)} kr.`);
       } else {
         toast.success('Check-out gennemført!');

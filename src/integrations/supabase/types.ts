@@ -3429,6 +3429,42 @@ export type Database = {
           },
         ]
       }
+      lead_discovery_runs: {
+        Row: {
+          average_score: number | null
+          created_at: string
+          error_message: string | null
+          id: string
+          leads_added: number | null
+          leads_found: number | null
+          run_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          average_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          leads_added?: number | null
+          leads_found?: number | null
+          run_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          average_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          leads_added?: number | null
+          leads_found?: number | null
+          run_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lessor_payment_settings: {
         Row: {
           bank_account: string | null
@@ -6382,6 +6418,20 @@ export type Database = {
         }
         Relationships: []
       }
+      today_lead_discovery_status: {
+        Row: {
+          average_score: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string | null
+          leads_added: number | null
+          leads_found: number | null
+          run_date: string | null
+          status: string | null
+          status_type: string | null
+        }
+        Relationships: []
+      }
       vehicles_public: {
         Row: {
           adult_sleeping_capacity: number | null
@@ -6713,6 +6763,16 @@ export type Database = {
       is_vehicle_owner: {
         Args: { _user_id: string; _vehicle_id: string }
         Returns: boolean
+      }
+      record_lead_discovery_run: {
+        Args: {
+          p_average_score: number
+          p_error_message?: string
+          p_leads_added: number
+          p_leads_found: number
+          p_status?: string
+        }
+        Returns: string
       }
       remove_role: {
         Args: {

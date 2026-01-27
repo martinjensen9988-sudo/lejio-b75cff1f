@@ -483,7 +483,7 @@ function calculateImprovedScore(lead: LeadSuggestion, existingLeads: any[] = [])
 
   // Boost for major cities
   const majorCities = ['København', 'Aarhus', 'Odense', 'Aalborg', 'Esbjerg'];
-  if (majorCities.includes(lead.city)) {
+  if (lead.city && majorCities.includes(lead.city)) {
     score += 0.5;
   }
 
