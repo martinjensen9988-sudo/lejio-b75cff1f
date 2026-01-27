@@ -332,10 +332,14 @@ const BecomeLessor = () => {
                     Vi hjælper dig med at digitalisere din udlejningsforretning.
                   </p>
                 </div>
-                <Button size="lg" className="shrink-0" onClick={() => navigate("/private-fleet")}>
-                  Læs om Fleet-løsningen
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+                <a href="https://www.lejio.dk/forhandler" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="shrink-0" asChild>
+                    <span>
+                      Læs om Fleet-løsningen
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </span>
+                  </Button>
+                </a>
               </div>
             </CardContent>
           </Card>
