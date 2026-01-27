@@ -545,7 +545,7 @@ const Features = () => {
                               </CardHeader>
                               <CardContent className="pt-0 space-y-3">
                                 <CardDescription className="text-sm">{feature.description}</CardDescription>
-                                {/* Globale links fra admin */}
+                                {/* Globale links fra admin - vis ALLE links hvis de findes for dette feature */}
                                 {links.video && (
                                   <Button
                                     variant="ghost"
@@ -588,6 +588,7 @@ const Features = () => {
                                     Se side
                                   </Button>
                                 )}
+                                {/* Demo-link fra feature data */}
                                 {feature.demoUrl && (
                                   <Button
                                     variant="ghost"
@@ -600,20 +601,6 @@ const Features = () => {
                                   >
                                     <Play className="w-4 h-4" />
                                     Se demo
-                                  </Button>
-                                )}
-                                {(feature.title === "Smart Booking-kalender" || feature.title === "Check-in & Check-out" || feature.title === "AI-funktioner") && !feature.demoUrl && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-center gap-2"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigate("/auth");
-                                    }}
-                                  >
-                                    <ArrowRight className="w-4 h-4" />
-                                    Kom i gang
                                   </Button>
                                 )}
                               </CardContent>
