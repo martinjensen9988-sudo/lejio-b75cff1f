@@ -257,9 +257,6 @@ export const useCheckInOut = () => {
       return null;
     }
     setIsSubmitting(true);
-
-    // Lazy import to avoid circular deps
-    const { generateSettlementInvoice } = await import('./useInvoices');
     try {
       let locationDistance = null;
       let locationVerified = true;
@@ -354,27 +351,8 @@ export const useCheckInOut = () => {
       } catch (emailError) {
         console.error('Failed to send check-out email:', emailError);
       }
-
-
       if (totalExtraCharges > 0) {
-        // Generate settlement invoice
-        try {
-          await generateSettlementInvoice(params.bookingId, {
-            rentalPrice: params.totalPrice ?? 0,
-            kmOverageFee: kmOverageFee,
-            fuelFee: fuelFee,
-            finesTotal: 0, // Add fines if available
-            totalCharges: totalExtraCharges,
-            depositAmount: params.depositAmount ?? 0,
-            depositRefund: 0, // Add logic if needed
-            amountDueFromRenter: totalExtraCharges,
-            fines: [], // Add fines if available
-          });
-          toast.success(`Check-out gennemført! Ekstra opkrævning: ${totalExtraCharges.toFixed(2)} kr. Faktura oprettet.`);
-        } catch (err) {
-          console.error('Error generating settlement invoice:', err);
-          toast.error('Ekstra opkrævning kunne ikke faktureres automatisk.');
-        }
+        toast.success(`Check-out gennemført! Ekstra opkrævning: ${totalExtraCharges.toFixed(2)} kr.`);
       } else {
         toast.success('Check-out gennemført!');
       }

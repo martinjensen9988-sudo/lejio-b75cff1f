@@ -40,6 +40,7 @@ export interface UpdateStatusResult {
   booking?: Booking;
 }
 
+export const useBookings = () => {
   const { user } = useAuth();
   const { generateInvoice } = useInvoices();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -94,7 +95,7 @@ export interface UpdateStatusResult {
     } catch (err) {
       console.error('Error updating booking:', err);
       toast.error('Kunne ikke opdatere booking');
-    return false;
+      return false;
     }
   };
 
