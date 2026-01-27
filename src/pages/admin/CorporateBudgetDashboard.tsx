@@ -47,7 +47,7 @@ const CorporateBudgetDashboard = () => {
   useEffect(() => {
     fetchCorporateData();
     loadBudgetData();
-  }, []);
+  }, [fetchCorporateData]);
 
   const loadBudgetData = async () => {
     setIsLoadingData(true);

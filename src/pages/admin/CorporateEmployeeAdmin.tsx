@@ -68,7 +68,7 @@ const CorporateEmployeeAdmin = () => {
 
   useEffect(() => {
     fetchCorporateData();
-  }, []);
+  }, [fetchCorporateData]);
 
   useEffect(() => {
     applyFilters();

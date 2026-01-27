@@ -77,7 +77,7 @@ const CorporateSettlementReports = () => {
   useEffect(() => {
     fetchCorporateData();
     loadReports();
-  }, []);
+  }, [fetchCorporateData]);
 
   const loadReports = async () => {
     setIsLoadingReports(true);
