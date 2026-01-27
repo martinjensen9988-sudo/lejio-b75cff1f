@@ -96,117 +96,99 @@ ALTER TABLE api_logs ENABLE ROW LEVEL SECURITY;
 -- Create RLS policies for corporate_roles
 CREATE POLICY "corporate_roles_select" ON corporate_roles
   FOR SELECT USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_roles.corporate_account_id
-      AND (ca.admin_user_id = auth.uid() OR ca.id IN (
-        SELECT corporate_account_id FROM corporate_employees 
-        WHERE user_id = auth.uid() AND is_active = true
-      ))
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true
     )
   );
 
 CREATE POLICY "corporate_roles_insert" ON corporate_roles
   FOR INSERT WITH CHECK (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 CREATE POLICY "corporate_roles_update" ON corporate_roles
   FOR UPDATE USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 CREATE POLICY "corporate_roles_delete" ON corporate_roles
   FOR DELETE USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 -- Create RLS policies for email_templates
 CREATE POLICY "email_templates_select" ON email_templates
   FOR SELECT USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND (ca.admin_user_id = auth.uid() OR ca.id IN (
-        SELECT corporate_account_id FROM corporate_employees 
-        WHERE user_id = auth.uid() AND is_active = true
-      ))
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true
     )
   );
 
 CREATE POLICY "email_templates_insert" ON email_templates
   FOR INSERT WITH CHECK (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 CREATE POLICY "email_templates_update" ON email_templates
   FOR UPDATE USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 CREATE POLICY "email_templates_delete" ON email_templates
   FOR DELETE USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 -- Create RLS policies for api_keys
 CREATE POLICY "api_keys_select" ON api_keys
   FOR SELECT USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true
     )
   );
 
 CREATE POLICY "api_keys_insert" ON api_keys
   FOR INSERT WITH CHECK (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 CREATE POLICY "api_keys_update" ON api_keys
   FOR UPDATE USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
 CREATE POLICY "api_keys_delete" ON api_keys
   FOR DELETE USING (
-    EXISTS(
-      SELECT 1 FROM corporate_accounts ca
-      WHERE ca.id = corporate_account_id
-      AND ca.admin_user_id = auth.uid()
+    corporate_account_id IN (
+      SELECT corporate_account_id FROM corporate_employees 
+      WHERE user_id = auth.uid() AND is_active = true AND is_admin = true
     )
   );
 
