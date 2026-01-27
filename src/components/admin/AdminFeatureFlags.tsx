@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Info } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -68,6 +70,7 @@ const FEATURES = [
 ];
 
 export const AdminFeatureFlags = () => {
+  const navigate = typeof window !== 'undefined' ? (window.history.back ? () => window.history.back() : () => {}) : () => {};
   // Store global links for features (video, image, page)
   const [customLinks, setCustomLinks] = useState({});
   // Loading state pr. feature
@@ -114,7 +117,7 @@ export const AdminFeatureFlags = () => {
       }, { onConflict: 'feature_key' });
       setSaving(prev => ({ ...prev, [featureTitle]: false }));
       if (!error) {
-        toast({ title: 'Links gemt!', description: '', variant: 'success' });
+        toast({ title: 'Links gemt!', description: '', variant: 'default' });
       } else {
         toast({ title: 'Kunne ikke gemme links', description: '', variant: 'destructive' });
       }
@@ -144,7 +147,7 @@ export const AdminFeatureFlags = () => {
       .eq('id', customerId);
     if (!error) {
       setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, feature_flags: newFlags } : c));
-      toast({ title: 'Feature opdateret', description: '', variant: 'success' });
+      toast({ title: 'Feature opdateret', description: '', variant: 'default' });
     } else {
       toast({ title: 'Kunne ikke opdatere feature', description: '', variant: 'destructive' });
     }
@@ -190,7 +193,12 @@ export const AdminFeatureFlags = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Feature Flags pr. Kunde</CardTitle>
+        <div className="flex items-center justify-between mb-2">
+          <CardTitle>Feature Flags pr. Kunde</CardTitle>
+          <Button variant="outline" size="sm" onClick={navigate}>
+            ← Tilbage
+          </Button>
+        </div>
         <div className="mt-2">
           <input
             type="text"
@@ -207,7 +215,10 @@ export const AdminFeatureFlags = () => {
         {/* Show each customer as a section, with modules as cards/grids like /funktioner */}
         {/* Show all modules/features by default, only show customer features after selection */}
         <div className="mb-8">
-          <div className="font-bold text-lg mb-1">Rediger links for alle features</div>
+          <div className="font-bold text-lg mb-1 flex items-center gap-2">
+            Rediger links for alle features
+            <span className="text-muted-foreground" title="Disse links vises for alle brugere, hvis udfyldt."><Info size={16} /></span>
+          </div>
           <div className="text-sm text-muted-foreground mb-4">Her kan du sætte video, billede og side-link på ALLE features – uanset kunde.</div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
             {FEATURES.map(featureTitle => {
@@ -218,33 +229,42 @@ export const AdminFeatureFlags = () => {
                     <span className="font-bold text-sm">{featureTitle}</span>
                   </div>
                   <div className="flex flex-col gap-1 mt-2">
-                    <input
-                      type="url"
-                      id={`video-link-${featureTitle}`}
-                      name={`video-link-${featureTitle}`}
-                      placeholder="Video-link (global)"
-                      className="px-2 py-1 rounded border text-xs"
-                      value={globalLinks.video || ''}
-                      onChange={e => handleGlobalLinkChange(featureTitle, 'video', e.target.value)}
-                    />
-                    <input
-                      type="url"
-                      id={`image-link-${featureTitle}`}
-                      name={`image-link-${featureTitle}`}
-                      placeholder="Billede-link (global)"
-                      className="px-2 py-1 rounded border text-xs"
-                      value={globalLinks.image || ''}
-                      onChange={e => handleGlobalLinkChange(featureTitle, 'image', e.target.value)}
-                    />
-                    <input
-                      type="url"
-                      id={`page-link-${featureTitle}`}
-                      name={`page-link-${featureTitle}`}
-                      placeholder="Side-link (global)"
-                      className="px-2 py-1 rounded border text-xs"
-                      value={globalLinks.page || ''}
-                      onChange={e => handleGlobalLinkChange(featureTitle, 'page', e.target.value)}
-                    />
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="url"
+                        id={`video-link-${featureTitle}`}
+                        name={`video-link-${featureTitle}`}
+                        placeholder="f.eks. https://youtube.com/... (video)"
+                        className="px-2 py-1 rounded border text-xs flex-1"
+                        value={globalLinks.video || ''}
+                        onChange={e => handleGlobalLinkChange(featureTitle, 'video', e.target.value)}
+                      />
+                      <span title="Link til video, fx YouTube" className="text-muted-foreground"><Info size={14} /></span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="url"
+                        id={`image-link-${featureTitle}`}
+                        name={`image-link-${featureTitle}`}
+                        placeholder="f.eks. https://billede.dk/... (billede)"
+                        className="px-2 py-1 rounded border text-xs flex-1"
+                        value={globalLinks.image || ''}
+                        onChange={e => handleGlobalLinkChange(featureTitle, 'image', e.target.value)}
+                      />
+                      <span title="Link til billede" className="text-muted-foreground"><Info size={14} /></span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="url"
+                        id={`page-link-${featureTitle}`}
+                        name={`page-link-${featureTitle}`}
+                        placeholder="f.eks. https://side.dk/... (side)"
+                        className="px-2 py-1 rounded border text-xs flex-1"
+                        value={globalLinks.page || ''}
+                        onChange={e => handleGlobalLinkChange(featureTitle, 'page', e.target.value)}
+                      />
+                      <span title="Link til side" className="text-muted-foreground"><Info size={14} /></span>
+                    </div>
                     <Button size="sm" className="mt-1 self-end" variant="secondary" disabled={!!saving[featureTitle]} onClick={() => handleSaveGlobalLinks(featureTitle)}>
                       {saving[featureTitle] ? 'Gemmer...' : 'Gem links'}
                     </Button>
