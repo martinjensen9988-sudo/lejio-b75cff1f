@@ -21,6 +21,8 @@ interface Profile {
   trial_ends_at: string | null;
   subscription_status: string;
   feature_flags?: Record<string, boolean>;
+  account_banned_at?: string | null;
+  account_banned_reason?: string | null;
 }
 
 export interface PaymentSettings {
