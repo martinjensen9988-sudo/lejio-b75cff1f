@@ -80,6 +80,12 @@ const Features = () => {
     fetchLinks();
   }, []);
 
+  // DEBUG: Log featureLinks for at se hvad der hentes fra Supabase
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('featureLinks fra Supabase:', featureLinks);
+  }, [featureLinks]);
+
   const featureCategories = [
     {
       title: "Booking & Kalender",
