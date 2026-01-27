@@ -38,7 +38,7 @@ export const useDunningManagement = () => {
   const fetchPendingReminders = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('payment_reminders')
         .select('*')
         .eq('status', 'pending')
@@ -112,7 +112,7 @@ export const useDunningManagement = () => {
       });
 
       // Insert all reminders
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('payment_reminders')
         .insert(remindersToCreate);
 
@@ -141,7 +141,7 @@ export const useDunningManagement = () => {
       // In real implementation, send email via email service
       // await emailService.sendReminder(reminder);
 
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('payment_reminders')
         .update({
           status: 'sent',
@@ -181,7 +181,7 @@ export const useDunningManagement = () => {
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('payment_reminders')
         .select('*')
         .eq('status', 'pending')
@@ -205,7 +205,7 @@ export const useDunningManagement = () => {
   // Cancel dunning sequence
   const cancelDunningSequence = useCallback(async (invoiceId: string): Promise<boolean> => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('payment_reminders')
         .update({ status: 'cancelled' })
         .eq('invoice_id', invoiceId)

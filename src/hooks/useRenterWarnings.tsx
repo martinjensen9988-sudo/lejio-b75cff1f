@@ -182,7 +182,7 @@ export const useRenterWarnings = () => {
       }
       
       // Map RPC result to RenterWarning format (partial data)
-      return (data || []).map((d: any) => ({
+      return (data || []).map((d: unknown) => ({
         id: d.id,
         renter_email: renterEmail,
         renter_phone: null,

@@ -171,7 +171,7 @@ export const useCRM = () => {
       });
 
       return newDealData;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding deal:', error);
       toast({
         title: 'Fejl',
@@ -358,7 +358,7 @@ export const useCRM = () => {
       });
 
       return data as CRMActivity;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding activity:', error);
       toast({
         title: 'Fejl',
@@ -432,7 +432,7 @@ export const useCRM = () => {
       });
 
       return data as CRMTask;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding task:', error);
       toast({
         title: 'Fejl',

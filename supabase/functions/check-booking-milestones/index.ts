@@ -9,7 +9,7 @@ const corsHeaders = {
 // Milestone thresholds
 const MILESTONES = [10, 25, 50, 100, 250, 500, 1000];
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   console.log(`[MILESTONE] ${step}`, details ? JSON.stringify(details) : '');
 };
 

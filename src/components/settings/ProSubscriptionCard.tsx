@@ -176,7 +176,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
       if (data?.url) {
         window.location.href = data.url;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
       toast.error('Kunne ikke starte checkout', {
         description: error.message || 'Prøv igen senere',
@@ -194,7 +194,7 @@ const ProSubscriptionCard = ({ vehicleCount = 0 }: ProSubscriptionCardProps) => 
       if (data?.url) {
         window.location.href = data.url;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Portal error:', error);
       toast.error('Kunne ikke åbne kundeportal', {
         description: error.message || 'Prøv igen senere',

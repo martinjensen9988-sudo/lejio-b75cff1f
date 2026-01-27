@@ -73,7 +73,7 @@ export const useVehicleImages = (vehicleId?: string) => {
       ]);
 
       const currentUserId = userData?.user?.id;
-      const ownerId = (vehicleRow as any)?.owner_id as string | undefined;
+      const ownerId = (vehicleRow)?.owner_id as string | undefined;
 
       if (currentUserId && ownerId && currentUserId !== ownerId) {
         console.warn('[vehicle-images] Upload blocked: not owner', {
@@ -106,8 +106,8 @@ export const useVehicleImages = (vehicleId?: string) => {
       // Preflight: check backend permission (helps debug RLS)
       try {
         const { data: canUpload, error: canUploadErr } = await supabase.rpc(
-          'can_manage_vehicle_image_path' as any,
-          { object_name: fileName } as any
+          'can_manage_vehicle_image_path',
+          { object_name: fileName }
         );
         console.log('[vehicle-images] can_manage_vehicle_image_path', {
           vehicleId,
@@ -151,7 +151,7 @@ export const useVehicleImages = (vehicleId?: string) => {
       return result.publicUrl;
     } catch (error) {
       console.error('Upload error:', error);
-      const msg = typeof (error as any)?.message === 'string' ? (error as any).message : '';
+      const msg = typeof (error)?.message === 'string' ? (error).message : '';
       if (msg.toLowerCase().includes('forbidden')) {
         toast.error('Du har ikke rettighed til at uploade billeder til dette køretøj');
       } else {

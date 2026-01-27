@@ -64,7 +64,7 @@ serve(async (req) => {
 
     if (mode === 'smart_recommendations' && existingLeads?.length > 0) {
       // Analyze existing leads to find patterns and suggest similar companies
-      const leadSummary = existingLeads.slice(0, 20).map((l: any) => ({
+      const leadSummary = existingLeads.slice(0, 20).map((l: unknown) => ({
         company: l.company_name,
         industry: l.industry,
         city: l.city,
@@ -118,7 +118,7 @@ Returner et JSON array med objekter der har:
           const jsonMatch = content.match(/\[[\s\S]*\]/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            suggestions = parsed.map((s: any) => ({
+            suggestions = parsed.map((s: unknown) => ({
               company_name: s.company_type || s.company_name,
               industry: s.industry,
               city: s.city,
@@ -190,7 +190,7 @@ Returner KUN et JSON array, ingen anden tekst.`
           const jsonMatch = content.match(/\[[\s\S]*\]/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            suggestions = parsed.map((s: any) => ({
+            suggestions = parsed.map((s: unknown) => ({
               company_name: s.company_type || s.search_query,
               industry: s.industry,
               city: s.city,
@@ -465,7 +465,7 @@ Grund til kontakt: ${lead.reason}`
 });
 
 // IMPROVEMENT: Enhanced scoring algorithm
-function calculateImprovedScore(lead: LeadSuggestion, existingLeads: any[] = []): number {
+function calculateImprovedScore(lead: LeadSuggestion, existingLeads: Record<string, unknown>[] = []): number {
   let score = lead.score || 5;
 
   // Boost if has enriched contact info

@@ -25,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ publicKey: vapidPublicKey }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error getting VAPID public key:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

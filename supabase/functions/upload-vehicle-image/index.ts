@@ -140,7 +140,7 @@ serve(async (req) => {
     const userId = userData.user.id;
 
     // Authorization: owner OR admin/support roles
-    const [{ data: vehicle }, { data: roles }]: any = await Promise.all([
+    const [{ data: vehicle }, { data: roles }]: unknown = await Promise.all([
       service.from("vehicles").select("owner_id").eq("id", vehicleId).maybeSingle(),
       service
         .from("user_roles")
@@ -191,7 +191,7 @@ serve(async (req) => {
       .limit(1);
 
     const maxOrder = existingImages && existingImages.length > 0 
-      ? (existingImages[0] as any).display_order 
+      ? (existingImages[0] ).display_order 
       : -1;
 
     // Insert into vehicle_images table using service role (bypasses RLS)
@@ -220,8 +220,8 @@ serve(async (req) => {
         success: true, 
         publicUrl, 
         objectPath,
-        imageId: (imageRecord as any)?.id,
-        displayOrder: (imageRecord as any)?.display_order,
+        imageId: (imageRecord )?.id,
+        displayOrder: (imageRecord )?.display_order,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

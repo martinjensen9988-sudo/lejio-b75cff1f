@@ -26,11 +26,21 @@ function MarkdownEditor({ value, onChange }: { value: string; onChange: (v: stri
 }
 
 export default function AdminGlobalPages() {
+  interface GlobalPage {
+    id: number;
+    title: string;
+    slug: string;
+    content_markdown: string;
+    image_urls?: string[];
+    video_urls?: string[];
+    created_at?: string;
+  }
+
   const editRef = useRef<HTMLDivElement>(null);
   const { user, isSuperAdmin } = useAdminAuth();
-  const [pages, setPages] = useState<any[]>([]);
-  const [editing, setEditing] = useState<any | null>(null);
-  const [form, setForm] = useState({ title: '', slug: '', content_markdown: '', image_urls: [], video_urls: [] });
+  const [pages, setPages] = useState<GlobalPage[]>([]);
+  const [editing, setEditing] = useState<GlobalPage | null>(null);
+  const [form, setForm] = useState({ title: '', slug: '', content_markdown: '', image_urls: [] as string[], video_urls: [] as string[] });
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -38,12 +48,11 @@ export default function AdminGlobalPages() {
   }, []);
 
   async function fetchPages() {
-    // @ts-ignore
-    const { data } = await supabase.from<any, any>('global_pages').select('*').order('created_at', { ascending: false });
-    setPages(data || []);
+    const { data } = await supabase.from('global_pages').select('*').order('created_at', { ascending: false });
+    setPages((data || []) as GlobalPage[]);
   }
 
-  function startEdit(page: any) {
+  function startEdit(page: GlobalPage) {
     setEditing(page);
     setForm({ ...page });
     setTimeout(() => {
@@ -68,8 +77,9 @@ export default function AdminGlobalPages() {
       const aiText = await generateAIDescription({ title: form.title, slug: form.slug });
       setForm(f => ({ ...f, content_markdown: aiText }));
       toast.success('AI-tekst genereret! Husk at trykke Gem for at gemme.');
-    } catch (e: any) {
-      toast.error('Kunne ikke generere AI-tekst: ' + e.message);
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Ukendt fejl';
+      toast.error('Kunne ikke generere AI-tekst: ' + errorMessage);
     }
     setUploading(false);
   }
@@ -78,12 +88,10 @@ export default function AdminGlobalPages() {
     setUploading(true);
     let error = null;
     if (editing) {
-      // @ts-ignore
-      const res = await supabase.from<any, any>('global_pages').update(form).eq('id', String(editing.id));
+      const res = await supabase.from('global_pages').update(form).eq('id', editing.id);
       error = res.error;
     } else {
-      // @ts-ignore
-      const res = await supabase.from<any, any>('global_pages').insert([form]);
+      const res = await supabase.from('global_pages').insert([form]);
       error = res.error;
     }
     setUploading(false);
@@ -97,8 +105,7 @@ export default function AdminGlobalPages() {
   }
 
   async function deletePage(id: number) {
-    // @ts-ignore
-    const res = await supabase.from<any, any>('global_pages').delete().eq('id', String(id));
+    const res = await supabase.from('global_pages').delete().eq('id', id);
     if (res.error) {
       toast.error('Kunne ikke slette siden: ' + res.error.message);
       return;
@@ -108,8 +115,8 @@ export default function AdminGlobalPages() {
   }
 
   // Simple file upload to Supabase Storage
-  async function uploadFile(e: any, type: 'image' | 'video') {
-    const file = e.target.files[0];
+  async function uploadFile(e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') {
+    const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     const filePath = `${type}s/${Date.now()}_${file.name}`;
@@ -120,10 +127,10 @@ export default function AdminGlobalPages() {
       return;
     }
     if (data) {
-      const { publicUrl } = supabase.storage.from('public').getPublicUrl(filePath).data;
+      const { data: { publicUrl } } = supabase.storage.from('public').getPublicUrl(filePath);
       setForm(f => ({
         ...f,
-        [type === 'image' ? 'image_urls' : 'video_urls']: [...f[type === 'image' ? 'image_urls' : 'video_urls'], publicUrl],
+        [type === 'image' ? 'image_urls' : 'video_urls']: [...(f[type === 'image' ? 'image_urls' : 'video_urls'] || []), publicUrl],
       }));
       toast.success('Fil uploadet!');
     }

@@ -34,7 +34,7 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: `Analyze this vehicle image for any damage. Identify:
+                text: `Analyze this vehicle image for unknown damage. Identify:
 1. Type of damage (scratch, dent, crack, rust, etc.)
 2. Location on the vehicle (front, rear, left side, right side, roof, etc.)
 3. Severity (minor, moderate, severe)
@@ -106,7 +106,7 @@ If no damage is detected, return an empty damages array with overall_condition a
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[DAMAGE] Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

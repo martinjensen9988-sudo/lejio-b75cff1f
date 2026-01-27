@@ -42,9 +42,9 @@ const BookingModal = ({ open, onClose, vehicle, filters }: BookingModalProps) =>
   const [licenseValid, setLicenseValid] = useState(true);
 
   // Determine if this is a motorcycle/scooter
-  const vehicleType = (vehicle as any).vehicle_type as string;
+  const vehicleType = (vehicle).vehicle_type as string;
   const isMCOrScooter = vehicleType === 'motorcykel' || vehicleType === 'scooter';
-  const mcCategory = isMCOrScooter ? (vehicle as any).mc_category as MCCategory : null;
+  const mcCategory = isMCOrScooter ? (vehicle).mc_category as MCCategory : null;
 
   const handleLicenseValidationChange = useCallback((isValid: boolean) => {
     setLicenseValid(isValid);

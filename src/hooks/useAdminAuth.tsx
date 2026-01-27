@@ -12,7 +12,7 @@ interface AdminAuthContextType {
   isSupport: boolean;
   hasAccess: boolean;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
   signOut: () => Promise<void>;
 }
 
@@ -23,7 +23,7 @@ let globalUser: User | null = null;
 let globalAdminRole: AdminRole = null;
 let globalIsLoading = true;
 let globalIsInitialized = false;
-let globalListeners: Set<() => void> = new Set();
+const globalListeners: Set<() => void> = new Set();
 
 const notifyListeners = () => {
   globalListeners.forEach(listener => listener());
@@ -161,7 +161,7 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (data.user) {
-      const { data: hasAnyRole } = await (supabase.rpc as any)('has_any_admin_role', {
+      const { data: hasAnyRole } = await supabase.rpc<boolean>('has_any_admin_role', {
         _user_id: data.user.id
       });
 
@@ -221,10 +221,11 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAdminAuth = () => {
   const context = useContext(AdminAuthContext);
+  const standaloneFallback = useAdminAuthStandalone();
   
   // Fallback for components outside the provider (e.g., admin login page)
   if (context === undefined) {
-    return useAdminAuthStandalone();
+    return standaloneFallback;
   }
   
   return context;
@@ -352,7 +353,7 @@ const useAdminAuthStandalone = () => {
     }
 
     if (data.user) {
-      const { data: hasAnyRole } = await (supabase.rpc as any)('has_any_admin_role', {
+      const { data: hasAnyRole } = await supabase.rpc<boolean>('has_any_admin_role', {
         _user_id: data.user.id
       });
 

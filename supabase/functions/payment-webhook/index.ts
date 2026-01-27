@@ -45,7 +45,7 @@ async function verifyStripeSignature(payload: string, signature: string, secret:
 }
 
 // Parse Stripe webhook for LEJIO commission payments
-function parseStripeWebhook(body: any): WebhookEvent | null {
+function parseStripeWebhook(body: unknown): WebhookEvent | null {
   const eventType = body.type;
   const session = body.data?.object;
   

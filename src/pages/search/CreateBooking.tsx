@@ -27,13 +27,13 @@ const CreateBookingPage = () => {
   const { toast } = useToast();
   const { user, signUp } = useAuth();
 
-  const [vehicle, setVehicle] = useState<any>(null);
+  const [vehicle, setVehicle] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<'details' | 'account' | 'success'>('details');
   const [licenseValid, setLicenseValid] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [pendingBookingData, setPendingBookingData] = useState<any>(null);
+  const [pendingBookingData, setPendingBookingData] = useState<Record<string, unknown> | null>(null);
   const [lessorPaymentSettings, setLessorPaymentSettings] = useState<{
     accepted_payment_methods: PaymentMethod[];
     mobilepay_number: string | null;
@@ -79,7 +79,7 @@ const CreateBookingPage = () => {
         setVehicle(vehicleData);
         
         // Set default pickup/dropoff times from vehicle settings
-        const vehicleAny = vehicleData as any;
+        const vehicleAny = vehicleData;
         setFormData(prev => ({
           ...prev,
           pickupTime: vehicleAny.default_pickup_time || '10:00',
@@ -272,7 +272,7 @@ const CreateBookingPage = () => {
           original_deductible: 5000,
           pickup_time: formData.pickupTime,
           dropoff_time: formData.dropoffTime,
-        } as any)
+        })
         .select('id')
         .single();
 
@@ -631,7 +631,7 @@ const CreateBookingPage = () => {
                         onChange={(e) => setFormData(prev => ({ ...prev, pickupTime: e.target.value }))}
                       />
                       <p className="text-xs text-muted-foreground">
-                        Tidligst kl. {(vehicle as any)?.default_pickup_time || '10:00'}
+                        Tidligst kl. {(vehicle)?.default_pickup_time || '10:00'}
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -643,13 +643,13 @@ const CreateBookingPage = () => {
                         onChange={(e) => setFormData(prev => ({ ...prev, dropoffTime: e.target.value }))}
                       />
                       <p className="text-xs text-muted-foreground">
-                        Senest kl. {(vehicle as any)?.default_dropoff_time || '08:00'}
+                        Senest kl. {(vehicle)?.default_dropoff_time || '08:00'}
                       </p>
                     </div>
                   </div>
-                  {(vehicle as any)?.late_return_charge_enabled !== false && (
+                  {(vehicle)?.late_return_charge_enabled !== false && (
                     <p className="text-xs text-destructive mt-3">
-                      ⚠️ Ved aflevering efter kl. {(vehicle as any)?.default_dropoff_time || '08:00'} opkræves gebyr for en ekstra lejedag
+                      ⚠️ Ved aflevering efter kl. {(vehicle)?.default_dropoff_time || '08:00'} opkræves gebyr for en ekstra lejedag
                     </p>
                   )}
                 </CardContent>

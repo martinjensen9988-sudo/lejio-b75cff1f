@@ -31,7 +31,7 @@ const LAYOUT_TYPE_LABELS: Record<string, string> = {
   round_seating: 'Rundsiddegruppe',
 };
 
-const FEATURE_ICONS: Record<string, any> = {
+const FEATURE_ICONS: Record<string, unknown> = {
   aircon: Thermometer,
   gps: MapPin,
   bluetooth: Car,
@@ -54,7 +54,7 @@ const VehicleDetailPage = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [vehicle, setVehicle] = useState<any>(null);
+  const [vehicle, setVehicle] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Parse filters from URL

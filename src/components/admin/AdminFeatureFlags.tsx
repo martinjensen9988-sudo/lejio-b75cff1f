@@ -199,13 +199,19 @@ export const AdminFeatureFlags = React.memo(() => {
 
   useEffect(() => {
     const fetchLinks = async () => {
+      interface FeatureLink {
+        feature_key: string;
+        video?: string;
+        image?: string;
+        page?: string;
+      }
       const { data, error } = await supabase
         .from('feature_links')
         .select('feature_key, video, image, page');
       
       if (!error && data && Array.isArray(data)) {
-        const linksObj: {[key: string]: any} = {};
-        (data as Array<{feature_key: string; video?: string; image?: string; page?: string}>).forEach(row => {
+        const linksObj: Record<string, {video: string; image: string; page: string}> = {};
+        (data as FeatureLink[]).forEach(row => {
           linksObj[row.feature_key] = {
             video: row.video || '',
             image: row.image || '',
@@ -224,7 +230,7 @@ export const AdminFeatureFlags = React.memo(() => {
         .from('profiles')
         .select('id, email, full_name, company_name, feature_flags, subscription_status, subscription_tier, created_at')
         .order('created_at', { ascending: false });
-      if (!error) setCustomers(data || []);
+      if (!error) setCustomers((data || []) as typeof customers);
       setIsLoading(false);
     };
     fetchCustomers();
@@ -294,8 +300,6 @@ export const AdminFeatureFlags = React.memo(() => {
     }
   }, []);
 
-  if (isLoading) return <div>Indlæser...</div>;
-
   // Memoized filtered customers for performance
   const filteredCustomers = useMemo(() => {
     return customers.filter(customer => {
@@ -310,11 +314,13 @@ export const AdminFeatureFlags = React.memo(() => {
   }, [customers, search, filterTier]);
 
   // Memoized feature stats calculation
-  const getFeatureStats = useCallback((customer: any) => {
-    const enabledCount = Object.values(customer.feature_flags || {}).filter(Boolean).length;
+  const getFeatureStats = useCallback((customer: typeof customers[0]) => {
+    const enabledCount = Object.values(customer?.feature_flags || {}).filter(Boolean).length;
     const totalCount = FEATURES.length;
     return { enabled: enabledCount, total: totalCount, percentage: Math.round((enabledCount / totalCount) * 100) };
   }, []);
+
+  if (isLoading) return <div>Indlæser...</div>;
 
   return (
     <div className="space-y-6">
@@ -352,7 +358,7 @@ export const AdminFeatureFlags = React.memo(() => {
 
                 <select 
                   value={filterTier}
-                  onChange={e => setFilterTier(e.target.value as any)}
+                  onChange={e => setFilterTier(e.target.value)}
                   className="px-3 py-2 border rounded-lg text-sm"
                 >
                   <option value="all">Alle tiers</option>

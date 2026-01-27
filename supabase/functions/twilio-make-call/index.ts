@@ -52,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Clean phone number
-    let cleanPhone = to.replace(/[\s\-\(\)]/g, "");
+    let cleanPhone = to.replace(/[\s\-()]/g, "");
     if (!cleanPhone.startsWith("+")) {
       cleanPhone = cleanPhone.startsWith("45") ? `+${cleanPhone}` : `+45${cleanPhone}`;
     }
@@ -123,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in twilio-make-call:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Kunne ikke starte opkald" }),

@@ -14,7 +14,7 @@ interface PaymentReminderProps {
 export const PaymentReminder: React.FC<PaymentReminderProps> = ({ invoiceId }) => {
   const { toast } = useToast();
   const { generateDunningSequence, sendReminder } = useDunningManagement();
-  const [reminders, setReminders] = useState<any[]>([]);
+  const [reminders, setReminders] = useState<unknown[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({

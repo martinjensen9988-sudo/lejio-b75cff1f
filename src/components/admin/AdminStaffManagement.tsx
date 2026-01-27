@@ -49,7 +49,7 @@ export const AdminStaffManagement = () => {
 
   const fetchAdminUsers = async () => {
     try {
-      const { data, error } = await (supabase.rpc as any)('get_admin_users');
+      const { data, error } = await (supabase.rpc)('get_admin_users');
       
       if (error) {
         console.error('Error fetching admin users:', error);
@@ -78,7 +78,7 @@ export const AdminStaffManagement = () => {
     setIsRemoving(true);
     
     try {
-      const { error } = await (supabase.rpc as any)('remove_role', {
+      const { error } = await (supabase.rpc)('remove_role', {
         _target_user_id: userId,
         _role: role,
       });
@@ -91,7 +91,7 @@ export const AdminStaffManagement = () => {
       
       toast.success('Rolle fjernet');
       fetchAdminUsers();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error:', err);
       toast.error('Kunne ikke fjerne rolle');
     } finally {

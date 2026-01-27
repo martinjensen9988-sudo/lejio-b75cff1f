@@ -52,7 +52,7 @@ export const useAutoDispatch = () => {
 
     try {
       const { data, error } = await supabase
-        .from('fleet_dispatch_recommendations' as any)
+        .from('fleet_dispatch_recommendations')
         .select('*')
         .eq('lessor_id', user.id)
         .eq('status', 'pending')
@@ -77,21 +77,21 @@ export const useAutoDispatch = () => {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       const { data: searches, error: searchError } = await supabase
-        .from('search_history' as any)
+        .from('search_history')
         .select('location_id, vehicle_type')
         .gte('searched_at', sevenDaysAgo.toISOString());
 
       if (searchError) throw searchError;
-      const searchData = (searches || []) as any[];
+      const searchData = (searches || []);
 
       // Get locations for this lessor
       const { data: locations, error: locError } = await supabase
-        .from('dealer_locations' as any)
+        .from('dealer_locations')
         .select('id, name, city')
         .eq('partner_id', user.id);
 
       if (locError) throw locError;
-      const locationData = (locations || []) as any[];
+      const locationData = (locations || []);
 
       // Get available vehicles per location
       const { data: vehicles, error: vehError } = await supabase
@@ -105,8 +105,8 @@ export const useAutoDispatch = () => {
       // Calculate demand per location
       const demandMap = new Map<string, SearchDemand>();
 
-      locationData.forEach((loc: any) => {
-        const searchCount = searchData.filter((s: any) => s.location_id === loc.id).length || 0;
+      locationData.forEach((loc: unknown) => {
+        const searchCount = searchData.filter((s: unknown) => s.location_id === loc.id).length || 0;
         const availableCount = vehicles?.filter(v => v.current_location_id === loc.id).length || 0;
         const demandScore = searchCount > 0 && availableCount === 0 
           ? searchCount * 2 
@@ -152,7 +152,7 @@ export const useAutoDispatch = () => {
   const updateRecommendationStatus = async (id: string, status: 'accepted' | 'rejected') => {
     try {
       const { error } = await supabase
-        .from('fleet_dispatch_recommendations' as any)
+        .from('fleet_dispatch_recommendations')
         .update({ status, acted_at: new Date().toISOString() })
         .eq('id', id);
 

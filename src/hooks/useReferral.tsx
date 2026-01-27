@@ -42,7 +42,7 @@ export const useReferral = () => {
     setIsLoading(true);
     try {
       // Fetch or create referral code
-      let { data: codeData, error: codeError } = await supabase
+      const { data: codeData, error: codeError } = await supabase
         .from('referral_codes')
         .select('*')
         .eq('user_id', user.id)
@@ -140,7 +140,7 @@ export const useReferral = () => {
     }
   };
 
-  const useCredit = async (amount: number, bookingId: string) => {
+  const applyCreditAmount = async (amount: number, bookingId: string) => {
     if (!referralCode || referralCode.available_credit < amount) {
       return { success: false, error: 'Ikke nok kredit' };
     }
@@ -224,7 +224,7 @@ export const useReferral = () => {
     redemptions,
     isLoading,
     applyReferralCode,
-    useCredit,
+    applyCreditAmount,
     getPendingDiscount,
     completePendingReferral,
     copyCodeToClipboard,

@@ -60,7 +60,7 @@ serve(async (req) => {
 
     // Analyze demand vs supply per location
     const locationStats = new Map<string, {
-      location: any;
+      location: unknown;
       searchCount: number;
       availableVehicles: number;
       upcomingBookings: number;
@@ -129,7 +129,7 @@ serve(async (req) => {
     Maksimalt 5 anbefalinger. Kun anbefal flytninger der giver mening.
     `;
 
-    let recommendations: any[] = [];
+    let recommendations: Record<string, unknown>[] = [];
 
     if (LOVABLE_API_KEY && sortedLocations.length >= 2) {
       try {

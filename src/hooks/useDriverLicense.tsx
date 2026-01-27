@@ -13,7 +13,7 @@ interface DriverLicense {
   front_image_url: string | null;
   back_image_url: string | null;
   verification_status: string;
-  ai_verification_result: any;
+  ai_verification_result: unknown;
   verified_at: string | null;
   rejection_reason: string | null;
 }
@@ -128,7 +128,7 @@ export const useDriverLicense = () => {
           return { ...newLicense, verification_status: 'verified', verified_at: new Date().toISOString() };
       
       return newLicense;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting license:', error);
       toast.error(error.message || 'Kunne ikke indsende kørekort');
       return null;

@@ -58,20 +58,23 @@ const AdminDealerLocations = () => {
       setPartners(partnersData || []);
 
       // Fetch location counts per partner
-      const { data: locationsData, error: locationsError } = await (supabase
-        .from('dealer_locations' as any)
-        .select('partner_id') as any);
+      interface LocationRecord {
+        partner_id: string;
+      }
+      const { data: locationsData, error: locationsError } = await supabase
+        .from('dealer_locations')
+        .select('partner_id');
 
       if (locationsError) throw locationsError;
 
       const counts: Record<string, number> = {};
-      ((locationsData || []) as Array<{ partner_id: string }>).forEach(loc => {
+      ((locationsData || []) as LocationRecord[]).forEach(loc => {
         counts[loc.partner_id] = (counts[loc.partner_id] || 0) + 1;
       });
       setLocationCounts(counts);
 
-    } catch (err: any) {
-      console.error('Error fetching data:', err);
+    } catch (err) {
+      console.error('Error fetching data:', err instanceof Error ? err.message : 'Unknown error');
       toast.error('Kunne ikke hente data');
     } finally {
       setIsLoading(false);

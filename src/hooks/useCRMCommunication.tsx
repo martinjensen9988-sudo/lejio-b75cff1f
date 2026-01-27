@@ -52,7 +52,7 @@ export const useCRMCommunication = () => {
 
       if (error) throw error;
       setCallLogs(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching call logs:', error);
     } finally {
       setIsLoadingCallLogs(false);
@@ -70,7 +70,7 @@ export const useCRMCommunication = () => {
 
       if (error) throw error;
       setCallLogs(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching all call logs:', error);
     } finally {
       setIsLoadingCallLogs(false);
@@ -108,7 +108,7 @@ export const useCRMCommunication = () => {
       } else {
         throw new Error(data?.error || 'Kunne ikke starte opkald');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error making call:', error);
       toast({
         title: 'Fejl ved opkald',
@@ -146,7 +146,7 @@ export const useCRMCommunication = () => {
       } else {
         throw new Error(data?.error || 'Kunne ikke sende email');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending email:', error);
       toast({
         title: 'Fejl ved afsendelse',

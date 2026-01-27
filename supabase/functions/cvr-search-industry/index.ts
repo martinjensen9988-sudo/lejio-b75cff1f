@@ -150,7 +150,7 @@ serve(async (req) => {
     
     // Filter by postal code if provided
     if (postalCode) {
-      companies = companies.filter((company: any) => {
+      companies = companies.filter((company: unknown) => {
         const zip = company.zipcode?.toString() || '';
         return zip.startsWith(postalCode.toString().substring(0, 2));
       });
@@ -158,7 +158,7 @@ serve(async (req) => {
 
     // Filter for car rental related companies if searching by industry
     if (searchType === 'industry') {
-      companies = companies.filter((company: any) => {
+      companies = companies.filter((company: unknown) => {
         const industry = (company.industrydesc || '').toLowerCase();
         const name = (company.name || '').toLowerCase();
         
@@ -168,7 +168,7 @@ serve(async (req) => {
       });
     }
 
-    const results: CompanyResult[] = companies.map((company: any) => {
+    const results: CompanyResult[] = companies.map((company: unknown) => {
       const statusText = (company.companydesc || '').toLowerCase();
       const isActive = !inactiveTerms.some(term => statusText.includes(term)) && company.name;
 

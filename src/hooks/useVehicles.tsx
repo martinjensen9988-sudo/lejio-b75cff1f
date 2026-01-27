@@ -264,7 +264,7 @@ export const useVehicles = () => {
       if (fetchError) throw fetchError;
       // Cast vehicle_type, tire_type, and service_status to proper types
       const typedData = (data || []).map(v => {
-        const vehicle = v as any;
+        const vehicle = v;
         return {
           ...v,
           vehicle_type: (v.vehicle_type || 'bil') as VehicleType,
@@ -309,7 +309,7 @@ export const useVehicles = () => {
         throw insertError;
       }
 
-      const vehicle = data as any;
+      const vehicle = data;
       const typedData = { 
         ...data, 
         vehicle_type: (data.vehicle_type || 'bil') as VehicleType,

@@ -12,8 +12,8 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Type-safe query helpers
 export const safeQuerySingle = async <T>(
-  query: Promise<{ data: T[] | null; error: any }>
-): Promise<{ data: T | null; error: any }> => {
+  query: Promise<{ data: T[] | null; error: unknown }>
+): Promise<{ data: T | null; error: unknown }> => {
   const { data, error } = await query;
   return {
     data: data?.[0] ?? null,
@@ -22,8 +22,8 @@ export const safeQuerySingle = async <T>(
 };
 
 export const safeQueryMany = async <T>(
-  query: Promise<{ data: T[] | null; error: any }>
-): Promise<{ data: T[]; error: any }> => {
+  query: Promise<{ data: T[] | null; error: unknown }>
+): Promise<{ data: T[]; error: unknown }> => {
   const { data, error } = await query;
   return {
     data: data ?? [],
@@ -33,8 +33,8 @@ export const safeQueryMany = async <T>(
 
 // Null-safe mutations
 export const safeMutation = async <T>(
-  mutation: Promise<{ data: T | null; error: any }>
-): Promise<{ data: T | null; error: any }> => {
+  mutation: Promise<{ data: T | null; error: unknown }>
+): Promise<{ data: T | null; error: unknown }> => {
   return mutation;
 };
 

@@ -36,7 +36,7 @@ const VehiclesPage = () => {
   }, [user, authLoading, navigate]);
 
   const handleToggleAvailability = async (id: string, available: boolean) => {
-    await updateVehicle(id, { is_available: available } as any);
+    await updateVehicle(id, { is_available: available });
   };
 
   if (authLoading) {

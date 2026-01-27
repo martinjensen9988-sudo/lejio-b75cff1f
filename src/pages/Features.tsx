@@ -63,7 +63,7 @@ const Features = () => {
 
   // Hent globale feature links fra Supabase og lyt realtime
   useEffect(() => {
-    let subscription: any;
+    const subscriptionRef: { current?: unknown } = { current: undefined };
     const fetchLinks = async () => {
       const { data, error } = await supabase.from('feature_links').select('feature_key, video, image, page');
       if (!error && data) {
@@ -80,19 +80,22 @@ const Features = () => {
     };
     fetchLinks();
     // Realtime subscription
-    subscription = supabase.channel('feature_links_realtime')
+    subscriptionRef.current = supabase.channel('feature_links_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'feature_links' }, () => {
         fetchLinks();
       })
       .subscribe();
     return () => {
-      if (subscription && subscription.unsubscribe) subscription.unsubscribe();
+      const sub = subscriptionRef.current as { unsubscribe?: () => void } | undefined;
+      if (sub && sub.unsubscribe) {
+        sub.unsubscribe();
+      }
     };
   }, []);
 
   // DEBUG: Log featureLinks for at se hvad der hentes fra Supabase
   useEffect(() => {
-    // eslint-disable-next-line no-console
+     
     console.log('featureLinks fra Supabase:', featureLinks);
   }, [featureLinks]);
 
@@ -105,11 +108,11 @@ const Features = () => {
       match: !!featureLinks[key],
       links: featureLinks[key] || null
     }));
-    // eslint-disable-next-line no-console
+     
     console.table(table);
 
     // Ekstra: Print alle feature_keys som array til copy-paste
-    // eslint-disable-next-line no-console
+     
     console.log('Alle feature_keys til Supabase:', JSON.stringify(allFeatureKeys, null, 2));
   }, [featureLinks]);
 
@@ -287,26 +290,26 @@ const Features = () => {
 
   // Filter og søg logik
   const filteredCategories = useMemo(() => {
-    let filtered = [...featureCategories] as any[];
+    let filtered = [...featureCategories];
 
     // Filter by selected categories
     if (selectedCategories.size > 0) {
-      filtered = filtered.filter((cat: any) => selectedCategories.has(cat.id));
+      filtered = filtered.filter((cat: unknown) => selectedCategories.has(cat.id));
     }
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.map((category: any) => ({
+      filtered = filtered.map((category: unknown) => ({
         ...category,
-        features: category.features.filter((feature: any) =>
+        features: category.features.filter((feature: unknown) =>
           feature.title.toLowerCase().includes(query) ||
           feature.description.toLowerCase().includes(query)
         )
-      })).filter((cat: any) => cat.features.length > 0);
+      })).filter((cat: unknown) => cat.features.length > 0);
     }
 
-    return filtered as any[];
+    return filtered;
   }, [searchQuery, selectedCategories]);
 
   const toggleCategory = (categoryId: string) => {

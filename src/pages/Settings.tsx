@@ -148,17 +148,17 @@ const Settings = () => {
         cvr_number: profile.cvr_number || '',
         insurance_company: profile.insurance_company || '',
         insurance_policy_number: profile.insurance_policy_number || '',
-        accepted_payment_methods: (profile as any).accepted_payment_methods || ['cash', 'bank_transfer', 'mobilepay'],
-        mobilepay_number: (profile as any).mobilepay_number || '',
-        bank_account_number: (profile as any).bank_account_number || '',
-        bank_reg_number: (profile as any).bank_reg_number || '',
-        roadside_assistance_provider: (profile as any).roadside_assistance_provider || '',
-        roadside_assistance_phone: (profile as any).roadside_assistance_phone || '',
-        fuel_policy_enabled: (profile as any).fuel_policy_enabled || false,
-        fuel_missing_fee: (profile as any).fuel_missing_fee || 0,
-        fuel_price_per_liter: (profile as any).fuel_price_per_liter || 0,
-        fine_admin_fee: (profile as any).fine_admin_fee || 500,
-        company_logo_url: (profile as any).company_logo_url || '',
+        accepted_payment_methods: (profile).accepted_payment_methods || ['cash', 'bank_transfer', 'mobilepay'],
+        mobilepay_number: (profile).mobilepay_number || '',
+        bank_account_number: (profile).bank_account_number || '',
+        bank_reg_number: (profile).bank_reg_number || '',
+        roadside_assistance_provider: (profile).roadside_assistance_provider || '',
+        roadside_assistance_phone: (profile).roadside_assistance_phone || '',
+        fuel_policy_enabled: (profile).fuel_policy_enabled || false,
+        fuel_missing_fee: (profile).fuel_missing_fee || 0,
+        fuel_price_per_liter: (profile).fuel_price_per_liter || 0,
+        fine_admin_fee: (profile).fine_admin_fee || 500,
+        company_logo_url: (profile).company_logo_url || '',
       });
     }
   }, [profile]);
@@ -214,7 +214,7 @@ const Settings = () => {
         throw error;
       }
 
-      const publicUrl = (data as any)?.publicUrl as string | undefined;
+      const publicUrl = (data)?.publicUrl as string | undefined;
       if (!publicUrl) throw new Error('Upload lykkedes ikke (mangler URL)');
 
       // Add cache-busting timestamp
@@ -225,7 +225,7 @@ const Settings = () => {
         title: 'Logo uploadet',
         description: 'Dit virksomhedslogo er blevet uploadet',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading logo:', error);
       toast({
         title: 'Fejl ved upload',
@@ -307,8 +307,7 @@ const Settings = () => {
 
       const msg =
         error && typeof error === 'object'
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ((error as any).message || (error as any).details || (error as any).hint || 'Ukendt fejl')
+          ? ((error).message || (error).details || (error).hint || 'Ukendt fejl')
           : 'Ukendt fejl';
 
       toast({

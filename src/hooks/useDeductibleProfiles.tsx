@@ -42,7 +42,7 @@ export const useDeductibleProfiles = () => {
 
     try {
       const { data, error } = await supabase
-        .from('deductible_profiles' as any)
+        .from('deductible_profiles')
         .select('*')
         .eq('lessor_id', user.id)
         .order('is_default', { ascending: false })
@@ -64,13 +64,13 @@ export const useDeductibleProfiles = () => {
       // If this is set as default, unset other defaults
       if (input.is_default) {
         await supabase
-          .from('deductible_profiles' as any)
+          .from('deductible_profiles')
           .update({ is_default: false })
           .eq('lessor_id', user.id);
       }
 
       const { data, error } = await supabase
-        .from('deductible_profiles' as any)
+        .from('deductible_profiles')
         .insert({
           ...input,
           lessor_id: user.id
@@ -97,14 +97,14 @@ export const useDeductibleProfiles = () => {
       // If setting as default, unset other defaults
       if (updates.is_default) {
         await supabase
-          .from('deductible_profiles' as any)
+          .from('deductible_profiles')
           .update({ is_default: false })
           .eq('lessor_id', user.id)
           .neq('id', id);
       }
 
       const { error } = await supabase
-        .from('deductible_profiles' as any)
+        .from('deductible_profiles')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id);
 
@@ -123,7 +123,7 @@ export const useDeductibleProfiles = () => {
   const deleteProfile = async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('deductible_profiles' as any)
+        .from('deductible_profiles')
         .delete()
         .eq('id', id);
 
@@ -187,7 +187,7 @@ export const useDeductibleProfiles = () => {
       const dailyPremium = tier === 'premium' ? (profile?.premium_daily_rate || 79) : 0;
 
       const { data, error } = await supabase
-        .from('booking_deductible_selections' as any)
+        .from('booking_deductible_selections')
         .insert({
           booking_id: bookingId,
           deductible_profile_id: profileId,

@@ -104,7 +104,7 @@ export const useRenterRatings = (renterEmail?: string) => {
       await fetchRatings();
       await fetchStats();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error submitting renter rating:', err);
       if (err.code === '23505') {
         toast.error('Du har allerede vurderet denne lejer for denne booking');

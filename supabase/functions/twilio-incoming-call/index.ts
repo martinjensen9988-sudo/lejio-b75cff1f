@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
       status: 200, 
       headers: { ...corsHeaders, "Content-Type": "application/xml" } 
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in twilio-incoming-call:", error);
     
     // Return a basic TwiML response even on error

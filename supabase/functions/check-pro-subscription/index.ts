@@ -20,7 +20,7 @@ const TIER_DETAILS: Record<string, { name: string; maxVehicles: number; price: n
   enterprise: { name: "LEJIO Pro - Enterprise", maxVehicles: 35, price: 899 },
 };
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CHECK-PRO-SUBSCRIPTION] ${step}${detailsStr}`);
 };

@@ -73,7 +73,7 @@ serve(async (req: Request): Promise<Response> => {
     const safeVehicle = escapeHtml(vehicleName);
     const safeReg = escapeHtml(vehicleRegistration);
 
-    // Build fines HTML if any
+    // Build fines HTML if unknown
     let finesHtml = '';
     if (fines && fines.length > 0) {
       finesHtml = `
@@ -211,7 +211,7 @@ serve(async (req: Request): Promise<Response> => {
       JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[SETTLEMENT-EMAIL] Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

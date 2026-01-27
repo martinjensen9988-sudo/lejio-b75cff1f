@@ -116,7 +116,7 @@ serve(async (req) => {
 
     // If regex didn't work well, try alternative parsing
     if (results.length === 0) {
-      // Try to extract any links with their text
+      // Try to extract unknown links with their text
       const linkPattern = /<a[^>]+href="(https?:\/\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
       while ((match = linkPattern.exec(html)) !== null && results.length < 20) {
         const url = match[1];

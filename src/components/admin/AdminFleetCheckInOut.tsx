@@ -125,8 +125,14 @@ export const AdminFleetCheckInOut = () => {
       // Fetch check-in/out records for these bookings
       const bookingIds = bookingsData?.map(b => b.id) || [];
       
-      let checkInRecords: Record<string, any> = {};
-      let checkOutRecords: Record<string, any> = {};
+      interface CheckRecord {
+        booking_id: string;
+        confirmed_odometer: number | null;
+        confirmed_fuel_percent: number | null;
+        created_at: string;
+      }
+      const checkInRecords: Record<string, CheckRecord> = {};
+      const checkOutRecords: Record<string, CheckRecord> = {};
 
       if (bookingIds.length > 0) {
         const { data: checkIns } = await supabase

@@ -113,7 +113,7 @@ const AdminWarnings = () => {
         })(),
         timeout,
       ]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AdminWarnings fetchData failed:', err);
       toast.error(err?.message || 'Kunne ikke hente data');
     } finally {
@@ -140,7 +140,7 @@ const AdminWarnings = () => {
   };
 
   const updateAppealStatus = async (appealId: string, status: AppealStatus, notes?: string) => {
-    const updateData: any = { 
+    const updateData: unknown = { 
       status, 
       reviewed_by: user?.id,
       reviewed_at: new Date().toISOString(),

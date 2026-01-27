@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 // Declare EdgeRuntime for TypeScript
 declare const EdgeRuntime: {
-  waitUntil: (promise: Promise<any>) => void;
+  waitUntil: (promise: Promise<unknown>) => void;
 } | undefined;
 
 const corsHeaders = {
@@ -119,7 +119,7 @@ Be fast and concise. If unclear, set confidence_score lower.`
     }
 
     return { result: verificationResult, timedOut: false };
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeoutId);
     
     if (error.name === 'AbortError') {
@@ -140,7 +140,7 @@ Be fast and concise. If unclear, set confidence_score lower.`
 }
 
 async function processVerification(
-  supabase: any,
+  supabase: unknown,
   licenseId: string,
   frontImageUrl: string,
   backImageUrl: string | null,
@@ -196,7 +196,7 @@ async function processVerification(
     }
 
     return { status, result: verificationResult, timedOut };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[LICENSE] Error in processing:", error);
     
     // On error, set to pending_admin_review
@@ -288,7 +288,7 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[LICENSE] Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

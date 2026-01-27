@@ -144,7 +144,7 @@ const AdminFacebookPosts = () => {
         })(),
         timeout,
       ]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AdminFacebookPosts fetchData failed:', err);
       toast.error(err?.message || 'Der skete en fejl ved hentning af data');
     } finally {
@@ -187,7 +187,7 @@ const AdminFacebookPosts = () => {
 
       setGeneratedPost(data.post);
       toast.success('Opslag genereret!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating post:', error);
       toast.error('Kunne ikke generere opslag: ' + (error.message || 'Ukendt fejl'));
     } finally {
@@ -221,7 +221,7 @@ const AdminFacebookPosts = () => {
       setGeneratedPost('');
       setSelectedVehicle(null);
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error posting to Facebook:', error);
       toast.error('Kunne ikke poste til Facebook: ' + (error.message || 'Ukendt fejl'));
     } finally {
@@ -554,7 +554,7 @@ const AdminFacebookPosts = () => {
               <div className="space-y-3">
                 <div className="space-y-2">
                   <Label>Opslag type</Label>
-                  <Select value={postType} onValueChange={(v: any) => setPostType(v)}>
+                  <Select value={postType} onValueChange={(v: unknown) => setPostType(v)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

@@ -5,18 +5,18 @@ import { Card } from '@/components/ui/card';
 
 export default function DealerProfile() {
   const { id } = useParams();
-  const [dealer, setDealer] = useState<any | null>(null);
-  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [dealer, setDealer] = useState<unknown | null>(null);
+  const [vehicles, setVehicles] = useState<unknown[]>([]);
 
   useEffect(() => {
     async function fetchDealer() {
       // Hent forhandler-data
-      // @ts-ignore
-      const { data } = await supabase.from<any, any>('dealer_profiles').select('*').eq('id', id).single();
+      // @ts-expect-error Supabase type compatibility
+      const { data } = await supabase.from('dealer_profiles').select('*').eq('id', id).single();
       setDealer(data);
       // Hent forhandlerens biler
-      // @ts-ignore
-      const { data: vehicleData } = await supabase.from<any, any>('vehicles').select('*').eq('dealer_id', id);
+      // @ts-expect-error Supabase type compatibility
+      const { data: vehicleData } = await supabase.from('vehicles').select('*').eq('dealer_id', id);
       setVehicles(vehicleData || []);
     }
     fetchDealer();

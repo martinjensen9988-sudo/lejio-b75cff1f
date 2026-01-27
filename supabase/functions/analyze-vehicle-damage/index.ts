@@ -278,7 +278,7 @@ Svar KUN med valid JSON-array, ingen anden tekst.`;
         damages = [];
       }
       
-      // Sanitize any user-visible text fields in the response
+      // Sanitize unknown user-visible text fields in the response
       damages = damages.map(d => ({
         ...d,
         description: d.description?.substring(0, 200) || '',

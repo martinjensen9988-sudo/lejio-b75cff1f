@@ -130,7 +130,7 @@ const AdminUserManagement = () => {
       } else {
         setUsers(data || []);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('fetchUsers failed:', err);
       toast.error(err?.message || 'Kunne ikke hente brugere');
     } finally {
@@ -188,7 +188,7 @@ const AdminUserManagement = () => {
 
       toast.success(`Email sendt til ${selectedUser.email}`);
       setShowEmailDialog(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending email:', error);
       toast.error('Kunne ikke sende email: ' + (error.message || 'Ukendt fejl'));
     } finally {
@@ -200,7 +200,7 @@ const AdminUserManagement = () => {
     if (!selectedUser) return;
     setIsUpdating(true);
 
-    const updateData: any = {
+    const updateData: unknown = {
       subscription_status: editForm.subscription_status,
       subscription_tier: editForm.subscription_tier,
       manual_activation: editForm.manual_activation,
@@ -231,7 +231,7 @@ const AdminUserManagement = () => {
     if (!selectedUser || !actionType) return;
     setIsUpdating(true);
 
-    let updateData: any = {};
+    let updateData: unknown = {};
 
     switch (actionType) {
       case 'pause':
@@ -302,7 +302,7 @@ const AdminUserManagement = () => {
         // Remove user from local state immediately
         setUsers(prev => prev.filter(u => u.id !== selectedUser.id));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting user:', error);
       toast.error('Kunne ikke slette bruger');
     } finally {

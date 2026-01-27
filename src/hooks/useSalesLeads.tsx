@@ -103,7 +103,7 @@ export const useSalesLeads = () => {
       });
 
       return data as SalesLead;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding lead:', error);
       toast({
         title: 'Fejl',
@@ -363,7 +363,7 @@ export const useSalesLeads = () => {
       });
       
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending email:', error);
       toast({
         title: 'Fejl',

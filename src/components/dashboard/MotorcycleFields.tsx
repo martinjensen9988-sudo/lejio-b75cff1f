@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Bike, Shield, Briefcase, Wrench, CloudRain, Thermometer } from 'lucide-react';
 
 interface MotorcycleFieldsProps {
-  formData: Record<string, any>;
-  onChange: (field: string, value: any) => void;
+  formData: Record<string, unknown>;
+  onChange: (field: string, value: unknown) => void;
 }
 
 const MC_CATEGORIES = [

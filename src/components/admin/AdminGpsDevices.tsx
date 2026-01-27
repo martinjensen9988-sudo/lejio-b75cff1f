@@ -79,7 +79,7 @@ const AdminGpsDevices = () => {
           setDevices(devicesData);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AdminGpsDevices fetchData failed:', err);
       toast.error(err?.message || 'Kunne ikke hente GPS data');
     } finally {

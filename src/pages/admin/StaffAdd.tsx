@@ -73,7 +73,7 @@ const StaffAddPage = () => {
     setIsAdding(true);
     
     try {
-      const { error } = await (supabase.rpc as any)('assign_role', {
+      const { error } = await (supabase.rpc)('assign_role', {
         _target_user_id: selectedUserId,
         _role: selectedRole,
       });
@@ -90,7 +90,7 @@ const StaffAddPage = () => {
       
       toast.success(`Rolle tildelt!`);
       navigate('/admin/staff');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error:', err);
       if (err?.message?.includes('super_admin') || err?.message?.includes('Only super admins')) {
         toast.error('Kun Super Admins kan tildele roller. Kontakt en Super Admin.');

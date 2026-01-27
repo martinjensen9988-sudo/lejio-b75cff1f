@@ -31,9 +31,9 @@ const SEVERITY_CONFIG = {
 };
 
 export const VehicleScanHistory = ({ bookingId, vehicleId }: VehicleScanHistoryProps) => {
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [selectedSession, setSelectedSession] = useState<any>(null);
-  const [sessionDetails, setSessionDetails] = useState<any>(null);
+  const [sessions, setSessions] = useState<unknown[]>([]);
+  const [selectedSession, setSelectedSession] = useState<unknown>(null);
+  const [sessionDetails, setSessionDetails] = useState<unknown>(null);
   const [showDetails, setShowDetails] = useState(false);
   const { getScanSessionsForBooking, getScanSessionDetails, getScanDamagesForVehicle } = useVehicleScan();
 
@@ -50,7 +50,7 @@ export const VehicleScanHistory = ({ bookingId, vehicleId }: VehicleScanHistoryP
     loadSessions();
   }, [bookingId, vehicleId]);
 
-  const handleViewDetails = async (session: any) => {
+  const handleViewDetails = async (session: unknown) => {
     setSelectedSession(session);
     const details = await getScanSessionDetails(session.id);
     setSessionDetails(details);
@@ -165,9 +165,9 @@ export const VehicleScanHistory = ({ bookingId, vehicleId }: VehicleScanHistoryP
                 </Card>
 
                 {/* Areas */}
-                {sessionDetails.areas.map((area: any) => {
+                {sessionDetails.areas.map((area: unknown) => {
                   const areaDamages = sessionDetails.damages.filter(
-                    (d: any) => d.scan_area_id === area.id
+                    (d: unknown) => d.scan_area_id === area.id
                   );
                   return (
                     <Card key={area.id}>
@@ -192,7 +192,7 @@ export const VehicleScanHistory = ({ bookingId, vehicleId }: VehicleScanHistoryP
 
                         {areaDamages.length > 0 && (
                           <div className="space-y-2">
-                            {areaDamages.map((damage: any) => (
+                            {areaDamages.map((damage: unknown) => (
                               <div
                                 key={damage.id}
                                 className={cn(

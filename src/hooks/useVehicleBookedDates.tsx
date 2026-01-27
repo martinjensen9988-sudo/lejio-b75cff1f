@@ -61,7 +61,7 @@ export const useVehicleBookedDates = (vehicleId: string | null | undefined) => {
     );
   }, [bookedDates]);
 
-  // Function to check if a date range overlaps with any booked period
+  // Function to check if a date range overlaps with unknown booked period
   const isRangeOverlapping = useCallback((startDate: Date, endDate: Date): boolean => {
     return bookedPeriods.some(period => {
       const periodStart = parseISO(period.start_date);

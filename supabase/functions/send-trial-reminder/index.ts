@@ -14,7 +14,7 @@ function escapeHtml(text: string | null | undefined): string {
   );
 }
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[TRIAL-REMINDER] ${step}${detailsStr}`);
 };

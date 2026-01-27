@@ -51,7 +51,7 @@ export const useFavorites = () => {
       setFavorites(prev => [...prev, vehicleId]);
       toast.success('Tilføjet til favoritter');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === '23505') {
         toast.info('Allerede i favoritter');
       } else {

@@ -171,7 +171,7 @@ const MyRentals = () => {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setInvoices((data as any) || []);
+        setInvoices((data) || []);
       } catch (error) {
         console.error("Error fetching invoices:", error);
       }

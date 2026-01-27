@@ -33,7 +33,7 @@ export const useSavedSearches = () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('saved_searches')
         .select('*')
         .eq('user_id', userData.user?.id)
@@ -59,7 +59,7 @@ export const useSavedSearches = () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('saved_searches')
         .insert({
           user_id: userData.user?.id,
@@ -95,7 +95,7 @@ export const useSavedSearches = () => {
   // Delete saved search
   const deleteSearch = useCallback(async (searchId: string): Promise<boolean> => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('saved_searches')
         .delete()
         .eq('id', searchId);
@@ -157,7 +157,7 @@ export const useSavedSearches = () => {
 };
 
 // Filter leads based on criteria
-export const applyFilters = (leads: any[], filters: FilterCriteria): any[] => {
+export const applyFilters = (leads: unknown[], filters: FilterCriteria): unknown[] => {
   return leads.filter(lead => {
     // Text search
     if (filters.searchText) {

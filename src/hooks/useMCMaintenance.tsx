@@ -50,10 +50,10 @@ export const useMCMaintenance = (vehicleId: string | null) => {
     try {
       // Use type assertion since mc_maintenance_log is a new table not yet in generated types
       const { data, error } = await (supabase
-        .from('mc_maintenance_log' as any)
+        .from('mc_maintenance_log')
         .select('*')
         .eq('vehicle_id', vehicleId)
-        .order('performed_at', { ascending: false }) as any);
+        .order('performed_at', { ascending: false }));
 
       if (error) throw error;
       setLogs((data || []) as MaintenanceLog[]);
@@ -93,10 +93,10 @@ export const useMCMaintenance = (vehicleId: string | null) => {
 
       // Use type assertion since mc_maintenance_log is a new table not yet in generated types
       const { data, error } = await (supabase
-        .from('mc_maintenance_log' as any)
-        .insert(insertData as any)
+        .from('mc_maintenance_log')
+        .insert(insertData)
         .select()
-        .single() as any);
+        .single());
 
       if (error) throw error;
 
@@ -107,8 +107,8 @@ export const useMCMaintenance = (vehicleId: string | null) => {
           .update({
             chain_last_checked_at: new Date().toISOString(),
             chain_last_checked_km: odometerReading,
-          } as any)
-          .eq('id', vehicleId) as any);
+          })
+          .eq('id', vehicleId));
       }
 
       toast.success('Vedligeholdelse registreret');
@@ -130,11 +130,11 @@ export const useMCMaintenance = (vehicleId: string | null) => {
         .from('vehicles')
         .select('current_odometer, chain_last_checked_km, tire_tread_front_mm, tire_tread_rear_mm')
         .eq('id', vehicleId)
-        .single() as any);
+        .single());
 
       if (error) throw error;
 
-      const v = vehicle as any;
+      const v = vehicle;
       const currentKm = v?.current_odometer || 0;
       const chainLastKm = v?.chain_last_checked_km || 0;
       const kmSinceChain = currentKm - chainLastKm;

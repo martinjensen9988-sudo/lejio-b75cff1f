@@ -44,7 +44,7 @@ export const useRevenueLoss = (vehicleId?: string) => {
 
     try {
       let query = supabase
-        .from('revenue_loss_calculations' as any)
+        .from('revenue_loss_calculations')
         .select('*')
         .eq('lessor_id', user.id)
         .order('created_at', { ascending: false });
@@ -135,7 +135,7 @@ export const useRevenueLoss = (vehicleId?: string) => {
 
       // Insert calculation
       const { data, error } = await supabase
-        .from('revenue_loss_calculations' as any)
+        .from('revenue_loss_calculations')
         .insert({
           damage_report_id: damageReportId,
           booking_id: bookingId,
@@ -170,7 +170,7 @@ export const useRevenueLoss = (vehicleId?: string) => {
   const submitClaim = async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('revenue_loss_calculations' as any)
+        .from('revenue_loss_calculations')
         .update({
           status: 'claimed',
           claim_submitted_at: new Date().toISOString(),
@@ -195,7 +195,7 @@ export const useRevenueLoss = (vehicleId?: string) => {
   const updateCalculation = async (id: string, updates: Partial<RevenueLossCalculation>): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('revenue_loss_calculations' as any)
+        .from('revenue_loss_calculations')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id);
 

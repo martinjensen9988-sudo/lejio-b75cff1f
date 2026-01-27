@@ -150,8 +150,8 @@ const AdminBookingsPage = () => {
       toast.error('Kunne ikke hente bookinger: ' + error.message);
       setBookings([]);
     } else {
-      // Fetch vehicles separately to avoid any relationship-cache dependencies
-      const vehicleIds = Array.from(new Set((data || []).map((b: any) => b.vehicle_id).filter(Boolean)));
+      // Fetch vehicles separately to avoid unknown relationship-cache dependencies
+      const vehicleIds = Array.from(new Set((data || []).map((b: unknown) => b.vehicle_id).filter(Boolean)));
       const vehicleMap = new Map<string, { registration: string; make: string; model: string }>();
 
       if (vehicleIds.length > 0) {
@@ -163,14 +163,14 @@ const AdminBookingsPage = () => {
         if (vehiclesError) {
           console.error('Error fetching booking vehicles:', vehiclesError);
         } else {
-          (vehiclesData || []).forEach((v: any) => {
+          (vehiclesData || []).forEach((v: unknown) => {
             vehicleMap.set(v.id, { registration: v.registration, make: v.make, model: v.model });
           });
         }
       }
 
       // Fetch contracts for the bookings (so admins can open / generate contract)
-      const bookingIds = Array.from(new Set((data || []).map((b: any) => b.id).filter(Boolean)));
+      const bookingIds = Array.from(new Set((data || []).map((b: unknown) => b.id).filter(Boolean)));
       const contractMap = new Map<string, { id: string; contract_number: string; status: string }>();
 
       if (bookingIds.length > 0) {
@@ -182,14 +182,14 @@ const AdminBookingsPage = () => {
         if (contractsError) {
           console.error('Error fetching booking contracts:', contractsError);
         } else {
-          (contractsData || []).forEach((c: any) => {
+          (contractsData || []).forEach((c: unknown) => {
             contractMap.set(c.booking_id, { id: c.id, contract_number: c.contract_number, status: c.status });
           });
         }
       }
 
       // Fetch lessor profiles separately to avoid reliance on schema relationship cache
-      const lessorIds = Array.from(new Set((data || []).map((b: any) => b.lessor_id).filter(Boolean)));
+      const lessorIds = Array.from(new Set((data || []).map((b: unknown) => b.lessor_id).filter(Boolean)));
       const lessorMap = new Map<string, { full_name: string | null; email: string }>();
 
       if (lessorIds.length > 0) {
@@ -201,17 +201,17 @@ const AdminBookingsPage = () => {
         if (lessorsError) {
           console.error('Error fetching lessor profiles:', lessorsError);
         } else {
-          (lessorsData || []).forEach((p: any) => {
+          (lessorsData || []).forEach((p: unknown) => {
             lessorMap.set(p.id, { full_name: p.full_name, email: p.email });
           });
         }
       }
 
-      setBookings((data || []).map((b: any) => ({
+      setBookings((data || []).map((b: unknown) => ({
         ...b,
-        vehicle: b.vehicle_id ? (vehicleMap.get(b.vehicle_id) as any) : undefined,
-        contract: contractMap.get(b.id) as any,
-        lessor: b.lessor_id ? (lessorMap.get(b.lessor_id) as any) : undefined,
+        vehicle: b.vehicle_id ? (vehicleMap.get(b.vehicle_id)) : undefined,
+        contract: contractMap.get(b.id),
+        lessor: b.lessor_id ? (lessorMap.get(b.lessor_id)) : undefined,
       })));
     }
     setLoadingData(false);
@@ -259,10 +259,10 @@ const AdminBookingsPage = () => {
         toast.error(error.message || 'Kunne ikke oprette lejekontrakt');
         return null;
       }
-      if ((data as any)?.error) throw new Error((data as any).error);
+      if ((data)?.error) throw new Error((data).error);
 
       await fetchBookings();
-      return (data as any)?.contract as AdminBooking['contract'];
+      return (data)?.contract as AdminBooking['contract'];
     } catch (err) {
       console.error('Error generating contract (admin):', err);
       toast.error('Kunne ikke oprette lejekontrakt');
@@ -291,7 +291,7 @@ const AdminBookingsPage = () => {
       setVehicles([]);
     } else {
       // Fetch owner profiles separately to avoid relationship cache issues
-      const ownerIds = Array.from(new Set((data || []).map((v: any) => v.owner_id).filter(Boolean)));
+      const ownerIds = Array.from(new Set((data || []).map((v: unknown) => v.owner_id).filter(Boolean)));
       const ownerMap = new Map<string, { full_name: string | null; email: string; company_name: string | null }>();
 
       if (ownerIds.length > 0) {
@@ -303,15 +303,15 @@ const AdminBookingsPage = () => {
         if (ownersError) {
           console.error('Error fetching owner profiles:', ownersError);
         } else {
-          (ownersData || []).forEach((p: any) => {
+          (ownersData || []).forEach((p: unknown) => {
             ownerMap.set(p.id, { full_name: p.full_name, email: p.email, company_name: p.company_name });
           });
         }
       }
 
-      setVehicles((data || []).map((v: any) => ({
+      setVehicles((data || []).map((v: unknown) => ({
         ...v,
-        owner: v.owner_id ? (ownerMap.get(v.owner_id) as any) : undefined,
+        owner: v.owner_id ? (ownerMap.get(v.owner_id)) : undefined,
       })));
     }
   };

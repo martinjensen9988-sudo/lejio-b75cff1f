@@ -269,7 +269,7 @@ const WidgetPreview = ({
   showVehicles: boolean; 
   showServices: boolean;
 }) => {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'vehicles' | 'services'>('vehicles');
@@ -397,7 +397,7 @@ const WidgetPreview = ({
       <div className="p-4 max-h-[400px] overflow-y-auto">
         {activeTab === 'vehicles' && hasVehicles && (
           <div className="grid gap-4">
-            {vehicles.map((vehicle: any) => (
+            {vehicles.map((vehicle: unknown) => (
               <div key={vehicle.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                 <img 
                   src={vehicle.image_url || 'https://placehold.co/400x200/f3f4f6/9ca3af?text=Ingen+billede'} 
@@ -422,7 +422,7 @@ const WidgetPreview = ({
 
         {activeTab === 'services' && hasServices && (
           <div className="space-y-3">
-            {services.map((service: any) => (
+            {services.map((service: unknown) => (
               <div key={service.id} className="border rounded-lg p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
                 <div>
                   <h4 className="font-semibold">{service.name}</h4>

@@ -222,7 +222,7 @@ serve(async (req: Request): Promise<Response> => {
         'Content-Type': 'text/html; charset=utf-8',
         'Content-Transfer-Encoding': '8bit',
       },
-    } as any);
+    } );
 
     await client.close();
 

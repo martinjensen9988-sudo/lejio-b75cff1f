@@ -146,7 +146,7 @@ export const AdminFleetFinance = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [statement, setStatement] = useState<any>(null);
+  const [statement, setStatement] = useState<unknown>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const fetchFinanceData = async () => {
@@ -475,7 +475,7 @@ export const AdminFleetFinance = () => {
       doc.text('Pris', 150, y);
       doc.setFont('helvetica', 'normal');
       y += 6;
-      statement.bookings.forEach((b: any) => {
+      statement.bookings.forEach((b: unknown) => {
         doc.text(`${b.start_date} - ${b.end_date}`, 10, y);
         doc.text(`${b.vehicle_id || ''}`, 45, y); // evt. slå op på bilnavn
         doc.text(`${b.renter_name || ''}`, 100, y);
@@ -507,7 +507,7 @@ export const AdminFleetFinance = () => {
       if (data.invoice.pdf_url) {
         window.open(data.invoice.pdf_url, '_blank');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Kunne ikke oprette faktura: ' + (err?.message || err));
     } finally {
       setIsCalculating(false);

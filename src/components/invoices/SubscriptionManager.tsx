@@ -24,7 +24,7 @@ export const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({
     cancelSubscription,
     getUpcomingBillings,
   } = useSubscriptionBilling();
-  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [subscriptions, setSubscriptions] = useState<unknown[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -75,7 +75,7 @@ export const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({
         return;
       }
 
-      const data: any = {
+      const data: unknown = {
         vehicle_id: vehicleId,
         renter_id: renterId,
         subscription_type: formData.subscriptionType as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly',

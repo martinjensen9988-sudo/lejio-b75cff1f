@@ -53,7 +53,7 @@ export const MCMaintenanceCard = ({ vehicles }: MCMaintenanceCardProps) => {
   });
 
   const { logs, isLoading, addMaintenanceLog, getMaintenanceStats } = useMCMaintenance(selectedVehicleId);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<unknown>(null);
 
   useEffect(() => {
     if (selectedVehicleId) {

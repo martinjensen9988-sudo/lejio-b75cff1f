@@ -175,7 +175,7 @@ const Booking = () => {
   // Referral credit
   const [referralCredit, setReferralCredit] = useState(0);
   const [pendingRedemptionId, setPendingRedemptionId] = useState<string | undefined>();
-  const { useCredit, completePendingReferral } = useReferral();
+const { applyCreditAmount, completePendingReferral } = useReferral();
 
   // Fetch vehicle data
   useEffect(() => {
@@ -493,7 +493,7 @@ const Booking = () => {
       if (referralCredit > 0) {
         // If using available credit, deduct it
         if (!pendingRedemptionId) {
-          await useCredit(referralCredit, bookingResponse.booking_id);
+          await applyCreditAmount(referralCredit, bookingResponse.booking_id);
         } else {
           // Complete the pending referral redemption
           await completePendingReferral(pendingRedemptionId, bookingResponse.booking_id);
@@ -703,7 +703,7 @@ const Booking = () => {
                       </Select>
                     </div>
 
-                    {/* Availability Notice - Show if there are any booked periods */}
+                    {/* Availability Notice - Show if there are unknown booked periods */}
                     {bookedPeriods.length > 0 && (
                       <div className="bg-muted/50 border border-border rounded-xl p-4">
                         <div className="flex items-start gap-3">

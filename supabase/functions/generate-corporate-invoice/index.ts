@@ -71,11 +71,11 @@ serve(async (req) => {
     // Calculate totals
     let subtotal = 0;
     let totalKmDriven = 0;
-    const lineItems: any[] = [];
+    const lineItems: Record<string, unknown>[] = [];
     const departmentBreakdown: Record<string, { cost: number; bookings: number }> = {};
 
     for (const cb of corporateBookings || []) {
-      const booking = cb.booking as any;
+      const booking = cb.booking ;
       if (!booking || booking.status === "cancelled") continue;
 
       const amount = cb.cost_allocated || booking.total_price || 0;

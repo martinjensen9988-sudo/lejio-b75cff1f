@@ -7,7 +7,7 @@ export interface RealtimeSubscriptionConfig {
   tableName: string;
   event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
   filter?: string;
-  onData: (payload: any) => void;
+  onData: (payload: unknown) => void;
   onError?: (error: Error) => void;
 }
 
@@ -62,7 +62,7 @@ export const useRealtimeSubscription = (config: RealtimeSubscriptionConfig) => {
 };
 
 // Real-time invoice updates hook
-export const useRealtimeInvoices = (userId: string | undefined, onUpdate: (payload: any) => void) => {
+export const useRealtimeInvoices = (userId: string | undefined, onUpdate: (payload: unknown) => void) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const useRealtimeInvoices = (userId: string | undefined, onUpdate: (paylo
 };
 
 // Real-time payment reminders hook
-export const useRealtimePaymentReminders = (onUpdate: (payload: any) => void) => {
+export const useRealtimePaymentReminders = (onUpdate: (payload: unknown) => void) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export const useRealtimePaymentReminders = (onUpdate: (payload: any) => void) =>
 };
 
 // Real-time subscriptions hook
-export const useRealtimeSubscriptions = (userId: string | undefined, onUpdate: (payload: any) => void) => {
+export const useRealtimeSubscriptions = (userId: string | undefined, onUpdate: (payload: unknown) => void) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -159,11 +159,11 @@ export const useRealtimeSubscriptions = (userId: string | undefined, onUpdate: (
 };
 
 // Broadcast message hook for pub/sub communication
-export const useBroadcast = (channelName: string, onMessage?: (data: any) => void) => {
+export const useBroadcast = (channelName: string, onMessage?: (data: unknown) => void) => {
   const [isConnected, setIsConnected] = useState(false);
 
   const sendMessage = useCallback(
-    (data: any) => {
+    (data: unknown) => {
       const channel = supabase.channel(channelName);
       channel.send({
         type: 'broadcast',

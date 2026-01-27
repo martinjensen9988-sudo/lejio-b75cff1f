@@ -195,7 +195,7 @@ export const GpsTrackingMap = ({ devices, selectedDevice, onSelectDevice, geofen
         let coords: [number, number][];
 
         // Check if this is a polygon geofence with stored coordinates
-        const gf = geofence as any;
+        const gf = geofence;
         if (gf.geofence_type === 'polygon' && gf.polygon_coordinates && Array.isArray(gf.polygon_coordinates) && gf.polygon_coordinates.length >= 3) {
           // Use stored polygon coordinates
           coords = gf.polygon_coordinates.map((p: number[]) => [p[0], p[1]] as [number, number]);

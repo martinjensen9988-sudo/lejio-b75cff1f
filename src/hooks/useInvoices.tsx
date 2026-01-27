@@ -21,7 +21,7 @@ interface Invoice {
   due_date: string | null;
   paid_at: string | null;
   pdf_url: string | null;
-  line_items: any;
+  line_items: unknown;
   created_at: string;
 }
 
@@ -72,7 +72,7 @@ export const useInvoices = () => {
       }
       
       throw new Error(data.error || 'Kunne ikke oprette faktura');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating invoice:', error);
       toast.error(error.message || 'Kunne ikke oprette faktura');
       return null;
@@ -138,7 +138,7 @@ export const useInvoices = () => {
   };
 
   // Generate settlement/final invoice for extra charges at end of rental
-  const generateSettlementInvoice = async (bookingId: string, settlement: any) => {
+  const generateSettlementInvoice = async (bookingId: string, settlement: unknown) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-settlement-invoice', {
         body: { bookingId, settlement }
@@ -153,7 +153,7 @@ export const useInvoices = () => {
       }
 
       throw new Error(data?.error || 'Kunne ikke oprette afregningsfaktura');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating settlement invoice:', error);
       toast.error(error.message || 'Kunne ikke oprette afregningsfaktura');
       return null;

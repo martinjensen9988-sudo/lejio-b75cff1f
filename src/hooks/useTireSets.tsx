@@ -121,7 +121,7 @@ export const useTireSets = (vehicleId?: string) => {
 
   const mountTireSet = async (id: string, vehicleId: string): Promise<boolean> => {
     try {
-      // First unmount any currently mounted tires for this vehicle
+      // First unmount unknown currently mounted tires for this vehicle
       await supabase
         .from('tire_sets')
         .update({ is_mounted: false })

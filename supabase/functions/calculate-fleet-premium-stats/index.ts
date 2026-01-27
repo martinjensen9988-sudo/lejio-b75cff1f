@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
     if (profilesError) throw profilesError;
 
-    const fleetOwnerIds = (fleetProfiles || []).map((p: any) => p.id);
+    const fleetOwnerIds = (fleetProfiles || []).map((p: unknown) => p.id);
 
     if (fleetOwnerIds.length === 0) {
       console.log('[calculate-fleet-premium-stats] No fleet customers found');
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
 
     if (vehiclesError) throw vehiclesError;
 
-    const vehicleIds = (vehiclesData || []).map((v: any) => v.id);
+    const vehicleIds = (vehiclesData || []).map((v: unknown) => v.id);
 
     // Fetch supporting data in parallel
     const [
@@ -99,8 +99,8 @@ Deno.serve(async (req) => {
     const activeBookings = activeBookingsResult.data || [];
 
     // Fetch GPS locations
-    const deviceIds = gpsDevicesData.map((d: any) => d.id);
-    let gpsLocations: any[] = [];
+    const deviceIds = gpsDevicesData.map((d: unknown) => d.id);
+    let gpsLocations: Record<string, unknown>[] = [];
     if (deviceIds.length > 0) {
       const { data: gpsData } = await supabase
         .from('gps_data_points')
@@ -112,38 +112,38 @@ Deno.serve(async (req) => {
     }
 
     // Process each customer
-    const processedCustomers: any[] = [];
-    const allProcessedVehicles: any[] = [];
+    const processedCustomers: Record<string, unknown>[] = [];
+    const allProcessedVehicles: Record<string, unknown>[] = [];
 
     for (const profile of fleetProfiles || []) {
-      const customerVehicles = (vehiclesData || []).filter((v: any) => v.owner_id === profile.id);
+      const customerVehicles = (vehiclesData || []).filter((v: unknown) => v.owner_id === profile.id);
       const commissionRate = profile.fleet_commission_rate 
         ? profile.fleet_commission_rate / 100 
         : getCommissionRate(customerVehicles.length);
 
-      const processedVehicles: any[] = customerVehicles.map((vehicle: any) => {
-        const vehicleYearlyBookings = yearlyBookings.filter((b: any) => b.vehicle_id === vehicle.id);
-        const yearlyGrossRevenue = vehicleYearlyBookings.reduce((sum: number, b: any) => sum + (b.total_price || 0), 0);
+      const processedVehicles: Record<string, unknown>[] = customerVehicles.map((vehicle: Record<string, unknown>) => {
+        const vehicleYearlyBookings = yearlyBookings.filter((b: unknown) => b.vehicle_id === vehicle.id);
+        const yearlyGrossRevenue = vehicleYearlyBookings.reduce((sum: number, b: unknown) => sum + (b.total_price || 0), 0);
 
-        const vehicleMonthlyBookings = vehicleYearlyBookings.filter((b: any) => {
+        const vehicleMonthlyBookings = vehicleYearlyBookings.filter((b: unknown) => {
           const startDate = new Date(b.start_date);
           return startDate.getMonth() + 1 === currentMonth;
         });
-        const monthlyGrossRevenue = vehicleMonthlyBookings.reduce((sum: number, b: any) => sum + (b.total_price || 0), 0);
+        const monthlyGrossRevenue = vehicleMonthlyBookings.reduce((sum: number, b: unknown) => sum + (b.total_price || 0), 0);
 
         const lejioCommissionAmount = monthlyGrossRevenue * commissionRate;
 
-        const vehicleLoans = loansData.filter((l: any) => l.vehicle_id === vehicle.id);
+        const vehicleLoans = loansData.filter((l: unknown) => l.vehicle_id === vehicle.id);
         const activeLoan = vehicleLoans[0] || null;
-        const totalLoanBalance = vehicleLoans.reduce((sum: number, l: any) => sum + (l.remaining_balance || 0), 0);
-        const monthlyInstallment = vehicleLoans.reduce((sum: number, l: any) => sum + (l.monthly_installment || 0), 0);
+        const totalLoanBalance = vehicleLoans.reduce((sum: number, l: unknown) => sum + (l.remaining_balance || 0), 0);
+        const monthlyInstallment = vehicleLoans.reduce((sum: number, l: unknown) => sum + (l.monthly_installment || 0), 0);
 
-        const loanIds = vehicleLoans.map((l: any) => l.id);
-        const loanPaymentHistory = loanPaymentsData.filter((p: any) => loanIds.includes(p.loan_id));
+        const loanIds = vehicleLoans.map((l: unknown) => l.id);
+        const loanPaymentHistory = loanPaymentsData.filter((p: unknown) => loanIds.includes(p.loan_id));
 
         const netPayout = monthlyGrossRevenue - lejioCommissionAmount - monthlyInstallment;
 
-        const daysRentedThisYear = vehicleYearlyBookings.reduce((total: number, booking: any) => {
+        const daysRentedThisYear = vehicleYearlyBookings.reduce((total: number, booking: unknown) => {
           const start = new Date(Math.max(new Date(booking.start_date).getTime(), new Date(yearStart).getTime()));
           const end = new Date(Math.min(new Date(booking.end_date).getTime(), new Date(yearEnd).getTime()));
           const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
         const daysAvailableThisYear = vehicle.days_available_this_year ||
           Math.min(365, Math.ceil((now.getTime() - new Date(yearStart).getTime()) / (1000 * 60 * 60 * 24)));
 
-        const activeBooking = activeBookings.find((b: any) => b.vehicle_id === vehicle.id);
+        const activeBooking = activeBookings.find((b: unknown) => b.vehicle_id === vehicle.id);
         let currentStatus = 'available';
 
         if (activeBooking) {
@@ -162,10 +162,10 @@ Deno.serve(async (req) => {
           currentStatus = 'maintenance';
         }
 
-        const gpsDevice = gpsDevicesData.find((d: any) => d.vehicle_id === vehicle.id);
+        const gpsDevice = gpsDevicesData.find((d: unknown) => d.vehicle_id === vehicle.id);
         let location = null;
         if (gpsDevice) {
-          const latestPoint = gpsLocations.find((p: any) => p.device_id === gpsDevice.id);
+          const latestPoint = gpsLocations.find((p: unknown) => p.device_id === gpsDevice.id);
           if (latestPoint) {
             location = {
               latitude: latestPoint.latitude,
@@ -175,8 +175,8 @@ Deno.serve(async (req) => {
           }
         }
 
-        const vehicleTires = tireSetsData.filter((t: any) => t.vehicle_id === vehicle.id);
-        const mountedTire = vehicleTires.find((t: any) => t.is_mounted);
+        const vehicleTires = tireSetsData.filter((t: unknown) => t.vehicle_id === vehicle.id);
+        const mountedTire = vehicleTires.find((t: unknown) => t.is_mounted);
         const tireStatus = mountedTire ? {
           id: mountedTire.id,
           tire_type: mountedTire.tire_type,
@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
           is_mounted: mountedTire.is_mounted,
         } : null;
 
-        const vehicleServiceLogs = serviceLogsData.filter((s: any) => s.vehicle_id === vehicle.id);
+        const vehicleServiceLogs = serviceLogsData.filter((s: unknown) => s.vehicle_id === vehicle.id);
         const lastServiceLog = vehicleServiceLogs[0] || null;
 
         const guaranteePercentage = Math.min((daysRentedThisYear / GUARANTEE_DAYS) * 100, 100);
@@ -223,7 +223,7 @@ Deno.serve(async (req) => {
           } : null,
           totalLoanBalance,
           monthlyInstallment,
-          loanPaymentHistory: loanPaymentHistory.map((p: any) => ({
+          loanPaymentHistory: loanPaymentHistory.map((p: unknown) => ({
             id: p.id,
             loan_id: p.loan_id,
             payment_date: p.payment_date,
@@ -261,16 +261,16 @@ Deno.serve(async (req) => {
 
       allProcessedVehicles.push(...processedVehicles);
 
-      const totalMonthlyGrossRevenue = processedVehicles.reduce((sum: number, v: any) => sum + v.monthlyGrossRevenue, 0);
-      const totalYearlyGrossRevenue = processedVehicles.reduce((sum: number, v: any) => sum + v.yearlyGrossRevenue, 0);
-      const totalCommission = processedVehicles.reduce((sum: number, v: any) => sum + v.lejioCommissionAmount, 0);
-      const totalMonthlyInstallments = processedVehicles.reduce((sum: number, v: any) => sum + v.monthlyInstallment, 0);
-      const totalLoanBalance = processedVehicles.reduce((sum: number, v: any) => sum + v.totalLoanBalance, 0);
-      const finalNetPayout = processedVehicles.reduce((sum: number, v: any) => sum + v.netPayout, 0);
+      const totalMonthlyGrossRevenue = processedVehicles.reduce((sum: number, v: unknown) => sum + v.monthlyGrossRevenue, 0);
+      const totalYearlyGrossRevenue = processedVehicles.reduce((sum: number, v: unknown) => sum + v.yearlyGrossRevenue, 0);
+      const totalCommission = processedVehicles.reduce((sum: number, v: unknown) => sum + v.lejioCommissionAmount, 0);
+      const totalMonthlyInstallments = processedVehicles.reduce((sum: number, v: unknown) => sum + v.monthlyInstallment, 0);
+      const totalLoanBalance = processedVehicles.reduce((sum: number, v: unknown) => sum + v.totalLoanBalance, 0);
+      const finalNetPayout = processedVehicles.reduce((sum: number, v: unknown) => sum + v.netPayout, 0);
       const averageUtilization = processedVehicles.length > 0
-        ? (processedVehicles.reduce((sum: number, v: any) => sum + v.guaranteePercentage, 0) / processedVehicles.length)
+        ? (processedVehicles.reduce((sum: number, v: unknown) => sum + v.guaranteePercentage, 0) / processedVehicles.length)
         : 0;
-      const vehiclesMeetingGuarantee = processedVehicles.filter((v: any) => v.isGuaranteeMet).length;
+      const vehiclesMeetingGuarantee = processedVehicles.filter((v: unknown) => v.isGuaranteeMet).length;
 
       processedCustomers.push({
         id: profile.id,
@@ -296,16 +296,16 @@ Deno.serve(async (req) => {
     }
 
     // Calculate global summary
-    const globalTotalMonthlyGross = allProcessedVehicles.reduce((sum: number, v: any) => sum + v.monthlyGrossRevenue, 0);
-    const globalTotalYearlyGross = allProcessedVehicles.reduce((sum: number, v: any) => sum + v.yearlyGrossRevenue, 0);
-    const globalTotalCommission = allProcessedVehicles.reduce((sum: number, v: any) => sum + v.lejioCommissionAmount, 0);
-    const globalTotalInstallments = allProcessedVehicles.reduce((sum: number, v: any) => sum + v.monthlyInstallment, 0);
-    const globalTotalLoanBalance = allProcessedVehicles.reduce((sum: number, v: any) => sum + v.totalLoanBalance, 0);
-    const globalFinalNetPayout = allProcessedVehicles.reduce((sum: number, v: any) => sum + v.netPayout, 0);
+    const globalTotalMonthlyGross = allProcessedVehicles.reduce((sum: number, v: unknown) => sum + v.monthlyGrossRevenue, 0);
+    const globalTotalYearlyGross = allProcessedVehicles.reduce((sum: number, v: unknown) => sum + v.yearlyGrossRevenue, 0);
+    const globalTotalCommission = allProcessedVehicles.reduce((sum: number, v: unknown) => sum + v.lejioCommissionAmount, 0);
+    const globalTotalInstallments = allProcessedVehicles.reduce((sum: number, v: unknown) => sum + v.monthlyInstallment, 0);
+    const globalTotalLoanBalance = allProcessedVehicles.reduce((sum: number, v: unknown) => sum + v.totalLoanBalance, 0);
+    const globalFinalNetPayout = allProcessedVehicles.reduce((sum: number, v: unknown) => sum + v.netPayout, 0);
     const globalAverageUtilization = allProcessedVehicles.length > 0
-      ? (allProcessedVehicles.reduce((sum: number, v: any) => sum + v.guaranteePercentage, 0) / allProcessedVehicles.length)
+      ? (allProcessedVehicles.reduce((sum: number, v: unknown) => sum + v.guaranteePercentage, 0) / allProcessedVehicles.length)
       : 0;
-    const globalVehiclesMeetingGuarantee = allProcessedVehicles.filter((v: any) => v.isGuaranteeMet).length;
+    const globalVehiclesMeetingGuarantee = allProcessedVehicles.filter((v: unknown) => v.isGuaranteeMet).length;
 
     const globalSummary = {
       totalVehicles: allProcessedVehicles.length,

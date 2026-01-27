@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-sales-email function:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Kunne ikke sende email" }),

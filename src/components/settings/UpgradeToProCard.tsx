@@ -162,7 +162,7 @@ const UpgradeToProCard = ({ onUpgradeSuccess }: UpgradeToProCardProps) => {
 
     setLoading(true);
     try {
-      const updateData: Record<string, any> = {
+      const updateData: Record<string, unknown> = {
         user_type: 'professionel',
         company_name: formData.company_name.trim(),
         cvr_number: formData.cvr_number.trim(),

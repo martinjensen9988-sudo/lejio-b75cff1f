@@ -12,7 +12,7 @@ interface AddFleetVehicleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   corporateAccountId: string;
-  departments: any[];
+  departments: unknown[];
   onSuccess: () => void;
 }
 

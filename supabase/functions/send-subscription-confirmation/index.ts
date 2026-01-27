@@ -41,7 +41,7 @@ const TIER_INFO = {
   },
 };
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[SEND-SUBSCRIPTION-CONFIRMATION] ${step}${detailsStr}`);
 };

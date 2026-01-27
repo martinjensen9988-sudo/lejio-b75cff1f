@@ -110,7 +110,7 @@ const ServiceRemindersCard = ({ vehicles }: ServiceRemindersCardProps) => {
     return <Skeleton className="h-64 rounded-xl" />;
   }
 
-  const ReminderItem = ({ reminder, isOverdue = false }: { reminder: any, isOverdue?: boolean }) => (
+  const ReminderItem = ({ reminder, isOverdue = false }: { reminder: unknown, isOverdue?: boolean }) => (
     <div className={`flex items-center justify-between p-4 rounded-xl border ${isOverdue ? 'border-red-500/30 bg-red-500/5' : 'border-border bg-card'}`}>
       <div className="flex items-start gap-3">
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isOverdue ? 'bg-red-500/20' : 'bg-yellow-500/20'}`}>

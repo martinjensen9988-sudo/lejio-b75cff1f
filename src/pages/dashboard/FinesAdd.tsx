@@ -79,7 +79,7 @@ const FinesAddPage = () => {
       vehicle_id: formData.vehicle_id || undefined,
       renter_email: formData.renter_email,
       renter_name: formData.renter_name || undefined,
-      fine_type: formData.fine_type as any,
+      fine_type: formData.fine_type,
       fine_date: formData.fine_date,
       fine_amount: parseFloat(formData.fine_amount),
       description: formData.description || undefined,

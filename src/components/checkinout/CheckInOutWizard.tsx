@@ -81,7 +81,7 @@ export const CheckInOutWizard = ({
   const [isEditing, setIsEditing] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showDamageScanner, setShowDamageScanner] = useState(false);
-  const [damageResults, setDamageResults] = useState<any[]>([]);
+  const [damageResults, setDamageResults] = useState<unknown[]>([]);
   const [scanSessionId, setScanSessionId] = useState<string | null>(null);
   const [exteriorClean, setExteriorClean] = useState(true);
   const [interiorClean, setInteriorClean] = useState(true);
@@ -167,7 +167,7 @@ export const CheckInOutWizard = ({
     }
   };
 
-  const handleDamageScanComplete = async (results: any[]) => {
+  const handleDamageScanComplete = async (results: unknown[]) => {
     setDamageResults(results);
     setShowDamageScanner(false);
     

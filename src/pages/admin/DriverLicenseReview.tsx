@@ -27,7 +27,7 @@ interface DriverLicense {
   front_image_url: string | null;
   back_image_url: string | null;
   verification_status: string;
-  ai_verification_result: any;
+  ai_verification_result: unknown;
   created_at: string;
   rejection_reason: string | null;
   user_profile?: {

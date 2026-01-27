@@ -83,7 +83,7 @@ const BookingsAddPage = () => {
       status: 'pending',
       pickup_time: formData.pickup_time,
       dropoff_time: formData.dropoff_time,
-    } as any);
+    });
 
     if (error) {
       console.error('Error creating booking:', error);

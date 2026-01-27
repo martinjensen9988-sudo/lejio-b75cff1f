@@ -164,7 +164,7 @@ const AddVehicleDialog = () => {
       return;
     }
     
-    let finalDetails = { ...vehicleDetails };
+    const finalDetails = { ...vehicleDetails };
     
     // Geocode the address if custom location is enabled
     if (vehicleDetails.use_custom_location && vehicleDetails.location_address) {

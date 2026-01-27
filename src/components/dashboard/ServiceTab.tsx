@@ -149,7 +149,7 @@ const ServiceTab = ({ vehicles, onUpdate }: ServiceTabProps) => {
         tire_type: serviceForm.tire_type,
         tire_size: serviceForm.tire_size || null,
         tire_hotel_location: serviceForm.tire_hotel_location || null,
-      } as any);
+      });
       
       if (success) {
         toast.success('Serviceoplysninger opdateret');
@@ -192,7 +192,7 @@ const ServiceTab = ({ vehicles, onUpdate }: ServiceTabProps) => {
         last_service_odometer: serviceLogForm.odometer_reading,
         current_odometer: serviceLogForm.odometer_reading,
         service_status: 'ok',
-      } as any);
+      });
 
       toast.success('Service registreret');
       setLogServiceOpen(false);

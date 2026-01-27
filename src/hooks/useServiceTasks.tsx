@@ -58,7 +58,7 @@ export const useServiceTasks = (vehicleId?: string) => {
 
     try {
       let query = supabase
-        .from('service_tasks' as any)
+        .from('service_tasks')
         .select('*')
         .eq('lessor_id', user.id)
         .order('scheduled_date', { ascending: true });
@@ -83,7 +83,7 @@ export const useServiceTasks = (vehicleId?: string) => {
 
     try {
       const { data, error } = await supabase
-        .from('service_tasks' as any)
+        .from('service_tasks')
         .insert({
           ...input,
           lessor_id: user.id
@@ -106,7 +106,7 @@ export const useServiceTasks = (vehicleId?: string) => {
   const updateTask = async (id: string, updates: Partial<ServiceTask>): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('service_tasks' as any)
+        .from('service_tasks')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id);
 
@@ -132,7 +132,7 @@ export const useServiceTasks = (vehicleId?: string) => {
   const deleteTask = async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('service_tasks' as any)
+        .from('service_tasks')
         .delete()
         .eq('id', id);
 

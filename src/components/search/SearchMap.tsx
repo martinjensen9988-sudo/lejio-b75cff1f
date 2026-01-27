@@ -30,7 +30,7 @@ function SearchMap({ vehicles, selectedVehicle, onVehicleSelect }: SearchMapProp
         } else {
           setError("Mapbox token ikke konfigureret");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching mapbox token:", err);
         setError("Kunne ikke hente kort-konfiguration");
       } finally {

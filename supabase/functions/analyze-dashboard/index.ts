@@ -57,7 +57,7 @@ Return your response as a JSON object with exactly these fields:
   "odometer": <number or null>,
   "fuel_percent": <number 0-100 or null>,
   "confidence": <"high" | "medium" | "low">,
-  "notes": "<any relevant notes about the reading>"
+  "notes": "<unknown relevant notes about the reading>"
 }`
           },
           {

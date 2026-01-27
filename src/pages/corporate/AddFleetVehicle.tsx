@@ -25,7 +25,7 @@ const AddFleetVehiclePage = () => {
   const corporateAccountId = searchParams.get('corporateAccountId') || '';
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [departments, setDepartments] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<unknown[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(false);

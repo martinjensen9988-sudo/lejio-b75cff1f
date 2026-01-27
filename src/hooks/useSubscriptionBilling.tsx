@@ -68,7 +68,7 @@ export const useSubscriptionBilling = () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('subscriptions')
         .select('*')
         .eq('lessor_id', user.id)
@@ -106,7 +106,7 @@ export const useSubscriptionBilling = () => {
           .toISOString()
           .split('T')[0];
 
-        const { data, error } = await (supabase as any)
+        const { data, error } = await (supabase)
           .from('subscriptions')
           .insert({
             ...subData,
@@ -149,7 +149,7 @@ export const useSubscriptionBilling = () => {
     subscriptionId: string
   ): Promise<boolean> => {
     try {
-      const { data: subscription, error: fetchError } = await (supabase as any)
+      const { data: subscription, error: fetchError } = await (supabase)
         .from('subscriptions')
         .select('*')
         .eq('id', subscriptionId)
@@ -175,7 +175,7 @@ export const useSubscriptionBilling = () => {
         .toISOString()
         .split('T')[0];
 
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await (supabase)
         .from('subscriptions')
         .update({
           next_billing_date: nextBillingDate,
@@ -219,7 +219,7 @@ export const useSubscriptionBilling = () => {
     subscriptionId: string
   ): Promise<boolean> => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('subscriptions')
         .update({ status: 'paused' })
         .eq('id', subscriptionId);
@@ -249,7 +249,7 @@ export const useSubscriptionBilling = () => {
     subscriptionId: string
   ): Promise<boolean> => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('subscriptions')
         .update({ status: 'active' })
         .eq('id', subscriptionId);
@@ -280,7 +280,7 @@ export const useSubscriptionBilling = () => {
     cancelDate?: string
   ): Promise<boolean> => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('subscriptions')
         .update({
           status: 'cancelled',

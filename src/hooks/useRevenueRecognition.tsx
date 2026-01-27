@@ -62,7 +62,7 @@ export const useRevenueRecognition = () => {
       if (!user) return;
       setIsLoading(true);
       try {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await (supabase)
           .from('accounting_entries')
           .select('*')
           .eq('lessor_id', user.id)
@@ -92,7 +92,7 @@ export const useRevenueRecognition = () => {
       if (!user) return null;
 
       try {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await (supabase)
           .from('accounting_entries')
           .insert({
             ...entryData,
@@ -138,7 +138,7 @@ export const useRevenueRecognition = () => {
         const accountingPeriod = format(new Date(), 'yyyy-MM');
 
         // Create revenue entry
-        const { error } = await (supabase as any)
+        const { error } = await (supabase)
           .from('accounting_entries')
           .insert({
             invoice_id: invoiceId,
@@ -213,7 +213,7 @@ export const useRevenueRecognition = () => {
 
         // Update external_id for synced entries
         for (const entry of entries_to_sync) {
-          await (supabase as any)
+          await (supabase)
             .from('accounting_entries')
             .update({
               external_id: `${systemName}-${entry.id}`,

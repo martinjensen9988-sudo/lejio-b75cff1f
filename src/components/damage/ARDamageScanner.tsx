@@ -164,7 +164,7 @@ export const ARDamageScanner = ({
       }
 
       const result = await response.json();
-      return (result.damages || []).map((d: any, i: number) => ({
+      return (result.damages || []).map((d: unknown, i: number) => ({
         ...d,
         id: `${currentArea.id}-${i}-${Date.now()}`,
         imageUrl,

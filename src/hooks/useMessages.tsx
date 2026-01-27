@@ -97,7 +97,7 @@ export const useMessages = () => {
       );
 
       setConversations(enrichedConversations);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching conversations:", error);
     } finally {
       setLoading(false);
@@ -124,7 +124,7 @@ export const useMessages = () => {
         .eq("conversation_id", conversationId)
         .neq("sender_id", user.id);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching messages:", error);
     }
   };
@@ -137,7 +137,7 @@ export const useMessages = () => {
     if (!user || (!content.trim() && !attachment)) return;
 
     try {
-      const messageData: any = {
+      const messageData: unknown = {
         conversation_id: conversationId,
         sender_id: user.id,
         content: content.trim() || (attachment ? `📎 ${attachment.name}` : ''),
@@ -184,7 +184,7 @@ export const useMessages = () => {
       }
 
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending message:", error);
       toast({
         title: "Fejl",
@@ -217,7 +217,7 @@ export const useMessages = () => {
         type: file.type,
         name: file.name,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error uploading attachment:", error);
       toast({
         title: "Fejl",
@@ -269,7 +269,7 @@ export const useMessages = () => {
       await fetchConversations();
       setActiveConversation(data.id);
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error starting conversation:", error);
       toast({
         title: "Fejl",

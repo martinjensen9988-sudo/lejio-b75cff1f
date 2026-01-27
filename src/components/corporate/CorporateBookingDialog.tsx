@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface CorporateBookingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  fleetVehicles: any[];
+  fleetVehicles: unknown[];
   corporateAccountId: string;
   currentEmployeeId: string;
   departmentId: string | null;

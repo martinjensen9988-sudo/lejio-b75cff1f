@@ -96,8 +96,8 @@ export interface CorporateInvoice {
   total_amount: number;
   total_km_driven: number;
   total_bookings: number;
-  line_items: any[];
-  department_breakdown: any[];
+  line_items: unknown[];
+  department_breakdown: unknown[];
   status: 'draft' | 'issued' | 'paid' | 'overdue' | 'cancelled';
   issued_at: string | null;
   due_date: string | null;
@@ -114,7 +114,7 @@ export interface CorporateUsageStats {
   total_cost: number;
   co2_emissions_kg: number;
   avg_utilization_rate: number;
-  department_stats: Record<string, any>;
+  department_stats: Record<string, unknown>;
 }
 
 export const useCorporateFleet = () => {

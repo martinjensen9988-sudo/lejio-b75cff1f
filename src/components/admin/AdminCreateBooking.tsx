@@ -88,7 +88,7 @@ const AdminCreateBooking = ({ open, onClose, onSuccess }: AdminCreateBookingProp
 
     setCreating(true);
 
-    const { error } = await supabase.from('bookings').insert({
+    const bookingData = {
       vehicle_id: formData.vehicle_id,
       lessor_id: selectedVehicle.owner_id,
       start_date: formData.start_date,
@@ -97,10 +97,11 @@ const AdminCreateBooking = ({ open, onClose, onSuccess }: AdminCreateBookingProp
       renter_email: formData.renter_email || null,
       renter_phone: formData.renter_phone || null,
       total_price: parseFloat(formData.total_price) || 0,
-      status: 'pending',
+      status: 'pending' as const,
       pickup_time: formData.pickup_time,
       dropoff_time: formData.dropoff_time,
-    } as any);
+    };
+    const { error } = await supabase.from('bookings').insert(bookingData);
 
     if (error) {
       console.error('Error creating booking:', error);

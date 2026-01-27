@@ -69,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { ...corsHeaders, "Content-Type": "application/xml" } 
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in twilio-call-webhook:", error);
     return new Response(
       '<?xml version="1.0" encoding="UTF-8"?><Response></Response>',

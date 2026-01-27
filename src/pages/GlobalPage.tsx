@@ -7,13 +7,13 @@ import ReactMarkdown from 'react-markdown';
 
 export default function GlobalPage() {
   const { slug } = useParams();
-  const [page, setPage] = useState<any | null>(null);
+  const [page, setPage] = useState<unknown | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     async function fetchPage() {
-      // @ts-ignore
-      const { data } = await supabase.from<any, any>('global_pages').select('*').eq('slug', slug).single();
+      // @ts-expect-error Supabase type compatibility
+      const { data } = await supabase.from('global_pages').select('*').eq('slug', slug).single();
       if (!data) {
         setNotFound(true);
         setPage(null);

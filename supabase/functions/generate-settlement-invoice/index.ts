@@ -177,7 +177,7 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[SETTLEMENT-INVOICE] Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

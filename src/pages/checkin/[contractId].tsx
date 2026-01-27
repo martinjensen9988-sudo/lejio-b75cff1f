@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 
 export default function CheckinPage() {
   const { contractId } = useParams();
-  const [contract, setContract] = useState<any>(null);
+  const [contract, setContract] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
   const [checkedIn, setCheckedIn] = useState(false);
   const [pin, setPin] = useState('');
@@ -47,7 +47,7 @@ export default function CheckinPage() {
     }
     const { error } = await supabase
       .from('contracts')
-      .update({ checked_in_at: new Date().toISOString() } as any)
+      .update({ checked_in_at: new Date().toISOString() })
       .eq('id', contractId);
     if (!error) {
       setCheckedIn(true);

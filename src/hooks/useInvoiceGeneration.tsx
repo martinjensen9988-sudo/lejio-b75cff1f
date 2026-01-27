@@ -43,7 +43,7 @@ export const useInvoiceGeneration = () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('invoices')
         .select('*')
         .eq('lessor_id', user.id)
@@ -66,7 +66,7 @@ export const useInvoiceGeneration = () => {
   // Generate invoice number (format: INV-YYYY-000001)
   const generateInvoiceNumber = useCallback(async (): Promise<string> => {
     const year = new Date().getFullYear();
-    const { data } = await (supabase as any)
+    const { data } = await (supabase)
       .from('invoices')
       .select('invoice_number')
       .ilike('invoice_number', `INV-${year}-%`)
@@ -87,7 +87,7 @@ export const useInvoiceGeneration = () => {
     try {
       const invoiceNumber = await generateInvoiceNumber();
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('invoices')
         .insert({
           ...invoiceData,
@@ -127,7 +127,7 @@ export const useInvoiceGeneration = () => {
   // Send invoice via email
   const sendInvoice = useCallback(async (invoiceId: string): Promise<boolean> => {
     try {
-      const { data: invoice, error: fetchError } = await (supabase as any)
+      const { data: invoice, error: fetchError } = await (supabase)
         .from('invoices')
         .select('*')
         .eq('id', invoiceId)
@@ -136,7 +136,7 @@ export const useInvoiceGeneration = () => {
       if (fetchError) throw fetchError;
 
       // Update invoice status to sent
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await (supabase)
         .from('invoices')
         .update({
           status: 'sent',
@@ -181,7 +181,7 @@ export const useInvoiceGeneration = () => {
   // Record payment for invoice
   const recordPayment = useCallback(async (invoiceId: string, amount: number): Promise<boolean> => {
     try {
-      const { data: invoice, error: fetchError } = await (supabase as any)
+      const { data: invoice, error: fetchError } = await (supabase)
         .from('invoices')
         .select('*')
         .eq('id', invoiceId)
@@ -193,7 +193,7 @@ export const useInvoiceGeneration = () => {
       const newAmountDue = invoice.amount_total - newAmountPaid;
       const newStatus = newAmountDue <= 0 ? 'paid' : 'partially_paid';
 
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await (supabase)
         .from('invoices')
         .update({
           amount_paid: newAmountPaid,

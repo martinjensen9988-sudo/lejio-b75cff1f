@@ -154,7 +154,7 @@ const Search = () => {
     vehicleType: 'all',
   });
 
-  // Check if any filters are active
+  // Check if unknown filters are active
   const hasActiveFilters = useMemo(() => {
     return (
       filters.priceMin > 0 ||
@@ -268,7 +268,7 @@ const Search = () => {
           }
         }
         
-        const v = vehicle as any;
+        const v = vehicle;
         
         // Combine legacy image with new images
         const vehicleImages = imagesByVehicle[vehicle.id] || [];

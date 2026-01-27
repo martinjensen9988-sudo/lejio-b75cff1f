@@ -23,9 +23,9 @@ const CorporateCreateBookingPage = () => {
   const departmentId = searchParams.get('departmentId') || null;
   const fleetVehiclesParam = searchParams.get('fleetVehicles') || '[]';
   
-  let fleetVehicles: any[] = [];
+  let fleetVehicles: Record<string, unknown>[] = [];
   try {
-    fleetVehicles = JSON.parse(fleetVehiclesParam);
+    fleetVehicles = JSON.parse(fleetVehiclesParam) as Record<string, unknown>[];
   } catch (e) {
     console.error('Error parsing fleet vehicles:', e);
   }

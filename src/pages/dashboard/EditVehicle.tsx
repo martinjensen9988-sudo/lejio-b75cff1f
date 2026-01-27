@@ -251,7 +251,7 @@ const EditVehiclePage = () => {
       toast.success('Billede uploadet!');
     } catch (error) {
       console.error('Upload error:', error);
-      const msg = typeof (error as any)?.message === 'string' ? (error as any).message : '';
+      const msg = typeof (error)?.message === 'string' ? (error).message : '';
       if (msg.toLowerCase().includes('forbidden')) {
         toast.error('Du har ikke rettighed til at uploade billeder til dette køretøj');
       } else {

@@ -80,7 +80,7 @@ function validateAIOutput(output: string): string {
 // Sanitize message content to prevent prompt injection attempts
 function sanitizeMessageContent(content: string): string {
   // Remove potential system prompt injection patterns - including unicode bypasses
-  let sanitized = content
+  const sanitized = content
     // Normalize unicode characters that could bypass filters
     .normalize('NFKC')
     // Remove attempts to override system instructions (case insensitive + unicode resistant)
@@ -92,6 +92,7 @@ function sanitizeMessageContent(content: string): string {
     .replace(/DISREGARD\s+(PREVIOUS|ABOVE|ALL)/gi, '[filtered]')
     .replace(/NEW\s+INSTRUCTIONS?:/gi, '[filtered]')
     // Remove control characters except newlines and tabs
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     // Limit consecutive whitespace
     .replace(/\s{10,}/g, '          ');

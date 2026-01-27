@@ -47,7 +47,7 @@ const PRO_TIERS = {
   },
 };
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CREATE-PRO-CHECKOUT] ${step}${detailsStr}`);
 };

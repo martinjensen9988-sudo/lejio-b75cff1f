@@ -47,7 +47,7 @@ export const useVisitorPresence = (options: UseVisitorPresenceOptions = {}) => {
         Object.keys(state).forEach((key) => {
           // Only count non-admin visitors
           if (!key.startsWith('admin_')) {
-            const presences = state[key] as any[];
+            const presences = state[key];
             presences.forEach((presence) => {
               allVisitors.push({
                 visitorId: key,

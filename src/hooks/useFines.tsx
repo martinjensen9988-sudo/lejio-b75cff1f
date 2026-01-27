@@ -84,7 +84,7 @@ export const useFines = () => {
 
     try {
       // Get custom admin fee from profile or use default
-      const adminFee = (profile as any)?.fine_admin_fee || 500;
+      const adminFee = (profile)?.fine_admin_fee || 500;
 
       // Try to auto-match with a booking
       let matchedBooking = null;
@@ -138,7 +138,7 @@ export const useFines = () => {
       if (!fine) throw new Error('Bøde ikke fundet');
 
       // Get lessor name
-      const lessorName = (profile as any)?.full_name || (profile as any)?.company_name || 'Udlejer';
+      const lessorName = (profile)?.full_name || (profile)?.company_name || 'Udlejer';
 
       // Send email notification
       await supabase.functions.invoke('send-fine-notification', {

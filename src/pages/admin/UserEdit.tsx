@@ -70,7 +70,7 @@ const UserEditPage = () => {
     if (!user) return;
     setSaving(true);
 
-    const updateData: any = {
+    const updateData: unknown = {
       subscription_status: editForm.subscription_status,
       subscription_tier: editForm.subscription_tier,
       manual_activation: editForm.manual_activation,

@@ -104,7 +104,7 @@ const handler = async (req: Request): Promise<Response> => {
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-push-notification:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

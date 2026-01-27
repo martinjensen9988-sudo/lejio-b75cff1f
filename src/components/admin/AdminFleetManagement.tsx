@@ -252,7 +252,7 @@ const AdminFleetManagement = () => {
                 } else {
                   const formattedBookings = (bookingsData || []).map(b => ({
                     ...b,
-                    vehicle: b.vehicles as any,
+                    vehicle: b.vehicles,
                   }));
                   setBookings(formattedBookings);
                 }
@@ -267,7 +267,7 @@ const AdminFleetManagement = () => {
         })(),
         timeout,
       ]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AdminFleetManagement fetchData failed:', err);
       toast.error(err?.message || 'Kunne ikke hente fleet data');
     } finally {
@@ -307,7 +307,7 @@ const AdminFleetManagement = () => {
         .update({
           company_name: newCustomerForm.company_name,
           full_name: newCustomerForm.full_name || null,
-          fleet_plan: newCustomerForm.fleet_plan as any,
+          fleet_plan: newCustomerForm.fleet_plan,
           fleet_commission_rate: newCustomerForm.fleet_commission_rate,
           user_type: newCustomerForm.fleet_plan === 'fleet_private' ? 'privat' : 'professionel',
         })
@@ -541,7 +541,7 @@ const AdminFleetManagement = () => {
         setSelectedVehicleForDelete(null);
         fetchData();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting vehicle:', error);
       toast.error('Kunne ikke slette køretøj');
     } finally {

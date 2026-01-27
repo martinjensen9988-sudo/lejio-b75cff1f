@@ -34,6 +34,7 @@ const limitObjectDepth = (obj: unknown, maxDepth: number, currentDepth: number =
 
 // Sanitize string for logging (remove potential injection characters)
 const sanitizeForLog = (str: string, maxLength: number = 100): string => {
+  // eslint-disable-next-line no-control-regex
   return str.slice(0, maxLength).replace(/[\x00-\x1f\x7f]/g, '');
 };
 

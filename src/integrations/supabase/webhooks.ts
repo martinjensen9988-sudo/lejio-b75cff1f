@@ -4,7 +4,7 @@ import { differenceInDays, startOfDay, addDays } from 'date-fns';
 // Webhook event types
 export interface WebhookPayload {
   event: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -12,8 +12,8 @@ export interface WebhookPayload {
 export const processDunningWebhook = async (): Promise<void> => {
   try {
     // Get all unpaid invoices
-    // TODO: Replace 'as any' with proper types when Supabase types are updated
-    const { data: unpaidInvoices, error } = await (supabase as any)
+    // TODO: Replace 'as unknown' with proper types when Supabase types are updated
+    const { data: unpaidInvoices, error } = await (supabase)
       .from('invoices')
       .select('id, due_date, lessor_id, renter_id')
       .in('status', ['unpaid', 'partially_paid', 'overdue'])
@@ -22,8 +22,8 @@ export const processDunningWebhook = async (): Promise<void> => {
     if (error) throw error;
 
     for (const invoice of unpaidInvoices || []) {
-      // Use 'as any' for invoice object
-      const inv: any = invoice;
+      // Use 'as unknown' for invoice object
+      const inv: unknown = invoice;
       const daysOverdue = differenceInDays(new Date(), new Date(inv.due_date));
 
       // Determine reminder type based on days overdue
@@ -37,7 +37,7 @@ export const processDunningWebhook = async (): Promise<void> => {
       }
 
       // Check if reminder already sent
-      const { data: existingReminder } = await (supabase as any)
+      const { data: existingReminder } = await (supabase)
         .from('payment_reminders')
         .select('id')
         .eq('invoice_id', inv.id)
@@ -46,7 +46,7 @@ export const processDunningWebhook = async (): Promise<void> => {
 
       if (!existingReminder) {
         // Create reminder
-        await (supabase as any)
+        await (supabase)
           .from('payment_reminders')
           .insert({
             invoice_id: inv.id,
@@ -83,8 +83,8 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
     const today = startOfDay(new Date()).toISOString();
 
     // Get subscriptions due for billing
-    // TODO: Replace 'as any' with proper types when Supabase types are updated
-    const { data: dueSubscriptions, error } = await (supabase as any)
+    // TODO: Replace 'as unknown' with proper types when Supabase types are updated
+    const { data: dueSubscriptions, error } = await (supabase)
       .from('subscriptions')
       .select('id, renter_id, lessor_id, vehicle_id, daily_rate, billing_cycle_days, subscription_type, completed_billing_cycles')
       .eq('status', 'active')
@@ -96,12 +96,12 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
     if (error) throw error;
 
     for (const subscription of dueSubscriptions || []) {
-      // Use 'as any' for subscription object
-      const sub: any = subscription;
+      // Use 'as unknown' for subscription object
+      const sub: unknown = subscription;
       const billingAmount = sub.daily_rate * sub.billing_cycle_days;
 
       // Create invoice for subscription
-      const { data: invoice, error: invoiceError } = await (supabase as any)
+      const { data: invoice, error: invoiceError } = await (supabase)
         .from('invoices')
         .insert({
           booking_id: null, // Subscription-based, not booking-based
@@ -125,7 +125,7 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
       }
 
       // Update subscription last billed date
-      await (supabase as any)
+      await (supabase)
         .from('subscriptions')
         .update({
           last_billed_date: today,
@@ -134,7 +134,7 @@ export const processSubscriptionBillingWebhook = async (): Promise<void> => {
         .eq('id', sub.id);
 
       // Create accounting entries
-      await (supabase as any)
+      await (supabase)
         .from('accounting_entries')
         .insert([
           {

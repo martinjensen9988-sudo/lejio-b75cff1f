@@ -76,48 +76,43 @@ export const useDealerLocations = (partnerId?: string) => {
     setError(null);
 
     try {
-      let query = (supabase
-        .from('dealer_locations' as any)
+      const { data: locationsData, error: locationsError } = await supabase
+        .from('dealer_locations')
         .select('*')
         .order('is_headquarters', { ascending: false })
-        .order('name')) as any;
-
-      if (partnerId) {
-        query = query.eq('partner_id', partnerId);
-      }
-
-      const { data: locationsData, error: locationsError } = await query;
+        .order('name');
 
       if (locationsError) throw locationsError;
 
       // Fetch opening hours for all locations
-      const locationIds = ((locationsData || []) as any[]).map((l: any) => l.id);
+      const locationIds = (locationsData || []).map((l) => l.id) as string[];
       
       if (locationIds.length > 0) {
-        const { data: hoursData } = await (supabase
-          .from('location_opening_hours' as any)
+        const { data: hoursData } = await supabase
+          .from('location_opening_hours')
           .select('*')
-          .in('location_id', locationIds) as any);
+          .in('location_id', locationIds);
 
-        const { data: specialDaysData } = await (supabase
-          .from('location_special_days' as any)
+        const { data: specialDaysData } = await supabase
+          .from('location_special_days')
           .select('*')
           .in('location_id', locationIds)
-          .gte('date', new Date().toISOString().split('T')[0]) as any);
+          .gte('date', new Date().toISOString().split('T')[0]);
 
         const locationsWithHours = (locationsData || []).map(loc => ({
           ...loc,
-          opening_hours: (hoursData || []).filter(h => h.location_id === loc.id),
-          special_days: (specialDaysData || []).filter(d => d.location_id === loc.id),
-        }));
+          opening_hours: ((hoursData as LocationOpeningHours[]) || []).filter(h => h.location_id === loc.id),
+          special_days: ((specialDaysData as LocationSpecialDay[]) || []).filter(d => d.location_id === loc.id),
+        })) as DealerLocation[];
 
         setLocations(locationsWithHours);
       } else {
         setLocations([]);
       }
-    } catch (err: any) {
-      console.error('Error fetching locations:', err);
-      setError(err.message);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Error fetching locations:', errorMsg);
+      setError(errorMsg);
       toast.error('Kunne ikke hente lokationer');
     } finally {
       setIsLoading(false);
@@ -130,11 +125,11 @@ export const useDealerLocations = (partnerId?: string) => {
 
   const createLocation = async (input: CreateLocationInput): Promise<DealerLocation | null> => {
     try {
-      const { data, error } = await (supabase
-        .from('dealer_locations' as any)
-        .insert(input as any)
+      const { data, error } = await supabase
+        .from('dealer_locations')
+        .insert(input)
         .select()
-        .single() as any);
+        .single();
 
       if (error) throw error;
 
@@ -149,12 +144,12 @@ export const useDealerLocations = (partnerId?: string) => {
         { location_id: data.id, day_of_week: 6, is_closed: false, opens_at: '09:00', closes_at: '14:00' }, // Saturday
       ];
 
-      await (supabase.from('location_opening_hours' as any).insert(defaultHours as any) as any);
+      await (supabase.from('location_opening_hours').insert(defaultHours));
 
       toast.success('Lokation oprettet');
       await fetchLocations();
       return data as DealerLocation;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating location:', err);
       toast.error('Kunne ikke oprette lokation: ' + err.message);
       return null;
@@ -164,16 +159,16 @@ export const useDealerLocations = (partnerId?: string) => {
   const updateLocation = async (locationId: string, input: UpdateLocationInput): Promise<boolean> => {
     try {
       const { error } = await (supabase
-        .from('dealer_locations' as any)
-        .update(input as any)
-        .eq('id', locationId) as any);
+        .from('dealer_locations')
+        .update(input)
+        .eq('id', locationId));
 
       if (error) throw error;
 
       toast.success('Lokation opdateret');
       await fetchLocations();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating location:', err);
       toast.error('Kunne ikke opdatere lokation: ' + err.message);
       return false;
@@ -183,16 +178,16 @@ export const useDealerLocations = (partnerId?: string) => {
   const deleteLocation = async (locationId: string): Promise<boolean> => {
     try {
       const { error } = await (supabase
-        .from('dealer_locations' as any)
+        .from('dealer_locations')
         .delete()
-        .eq('id', locationId) as any);
+        .eq('id', locationId));
 
       if (error) throw error;
 
       toast.success('Lokation slettet');
       await fetchLocations();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting location:', err);
       toast.error('Kunne ikke slette lokation: ' + err.message);
       return false;
@@ -206,9 +201,9 @@ export const useDealerLocations = (partnerId?: string) => {
     try {
       // Delete existing hours
       await (supabase
-        .from('location_opening_hours' as any)
+        .from('location_opening_hours')
         .delete()
-        .eq('location_id', locationId) as any);
+        .eq('location_id', locationId));
 
       // Insert new hours
       const hoursWithLocationId = hours.map(h => ({
@@ -217,15 +212,15 @@ export const useDealerLocations = (partnerId?: string) => {
       }));
 
       const { error } = await (supabase
-        .from('location_opening_hours' as any)
-        .insert(hoursWithLocationId as any) as any);
+        .from('location_opening_hours')
+        .insert(hoursWithLocationId));
 
       if (error) throw error;
 
       toast.success('Åbningstider opdateret');
       await fetchLocations();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating opening hours:', err);
       toast.error('Kunne ikke opdatere åbningstider: ' + err.message);
       return false;
@@ -238,15 +233,15 @@ export const useDealerLocations = (partnerId?: string) => {
   ): Promise<boolean> => {
     try {
       const { error } = await (supabase
-        .from('location_special_days' as any)
-        .insert({ ...input, location_id: locationId } as any) as any);
+        .from('location_special_days')
+        .insert({ ...input, location_id: locationId }));
 
       if (error) throw error;
 
       toast.success('Særlig dag tilføjet');
       await fetchLocations();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding special day:', err);
       toast.error('Kunne ikke tilføje særlig dag: ' + err.message);
       return false;
@@ -256,16 +251,16 @@ export const useDealerLocations = (partnerId?: string) => {
   const removeSpecialDay = async (specialDayId: string): Promise<boolean> => {
     try {
       const { error } = await (supabase
-        .from('location_special_days' as any)
+        .from('location_special_days')
         .delete()
-        .eq('id', specialDayId) as any);
+        .eq('id', specialDayId));
 
       if (error) throw error;
 
       toast.success('Særlig dag fjernet');
       await fetchLocations();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error removing special day:', err);
       toast.error('Kunne ikke fjerne særlig dag: ' + err.message);
       return false;
@@ -274,14 +269,14 @@ export const useDealerLocations = (partnerId?: string) => {
 
   const checkLocationOpen = async (locationId: string, datetime: Date): Promise<boolean> => {
     try {
-      const { data, error } = await (supabase.rpc('is_location_open' as any, {
+      const { data, error } = await (supabase.rpc('is_location_open', {
         _location_id: locationId,
         _datetime: datetime.toISOString(),
-      }) as any);
+      }));
 
       if (error) throw error;
       return data === true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error checking location open:', err);
       return false;
     }

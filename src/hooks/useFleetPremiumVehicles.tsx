@@ -201,7 +201,7 @@ export const useFleetPremiumVehicles = () => {
       const deviceVehicleMap = new Map(gpsDevicesData.map(d => [d.vehicle_id, d.id]));
       const deviceIds = gpsDevicesData.map(d => d.id);
       
-      let gpsLocations: any[] = [];
+      let gpsLocations: unknown[] = [];
       if (deviceIds.length > 0) {
         const { data: gpsData } = await supabase
           .from('gps_data_points')

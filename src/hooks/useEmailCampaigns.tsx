@@ -41,7 +41,7 @@ export const useEmailCampaigns = () => {
   const fetchCampaigns = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('email_campaigns')
         .select('*')
         .order('created_at', { ascending: false });
@@ -65,7 +65,7 @@ export const useEmailCampaigns = () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (supabase)
         .from('email_campaigns')
         .insert({
           ...campaignData,
@@ -103,7 +103,7 @@ export const useEmailCampaigns = () => {
       const { data: userData } = await supabase.auth.getUser();
 
       // Update campaign status
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await (supabase)
         .from('email_campaigns')
         .update({
           status: 'sent',
@@ -122,7 +122,7 @@ export const useEmailCampaigns = () => {
         created_by: userData.user?.id,
       }));
 
-      const { error: trackingError } = await (supabase as any)
+      const { error: trackingError } = await (supabase)
         .from('email_tracking')
         .insert(trackingData);
 
@@ -149,7 +149,7 @@ export const useEmailCampaigns = () => {
   // Track email open (webhook from email provider)
   const trackEmailOpen = useCallback(async (trackingId: string): Promise<boolean> => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('email_tracking')
         .update({
           status: 'opened',
@@ -168,7 +168,7 @@ export const useEmailCampaigns = () => {
   // Track email click
   const trackEmailClick = useCallback(async (trackingId: string, link: string): Promise<boolean> => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (supabase)
         .from('email_tracking')
         .update({
           status: 'clicked',

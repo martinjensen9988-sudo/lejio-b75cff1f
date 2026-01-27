@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
 // Simple input for social links
-function SocialInput({ label, name, value, onChange }: { label: string, name: string, value: string, onChange: (e: any) => void }) {
+function SocialInput({ label, name, value, onChange }: { label: string, name: string, value: string, onChange: (e: unknown) => void }) {
   return (
     <div>
       <Label htmlFor={name}>{label}</Label>
@@ -45,14 +45,14 @@ export default function DealerWebsiteSettings() {
   });
   const [galleryUpload, setGalleryUpload] = useState<File | null>(null);
   const [logoUpload, setLogoUpload] = useState<File | null>(null);
-  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<unknown[]>([]);
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState<{ views: number }>({ views: 0 });
 
   useEffect(() => {
     async function fetchDealer() {
       if (!user) return;
-      const { data } = await (supabase as any).from('public_lessor_profiles').select('*').eq('id', user.id).single();
+      const { data } = await (supabase).from('public_lessor_profiles').select('*').eq('id', user.id).single();
       if (data) setForm(f => ({
         ...f,
         name: data.name || '',
@@ -74,7 +74,7 @@ export default function DealerWebsiteSettings() {
         contact_phone: data.contact_phone || '',
       }));
       // Hent forhandlerens biler
-      const { data: vehicleData } = await (supabase as any).from('vehicles_public').select('*').eq('dealer_id', user.id);
+      const { data: vehicleData } = await (supabase).from('vehicles_public').select('*').eq('dealer_id', user.id);
       setVehicles(vehicleData || []);
       // Dummy statistik
       setStats({ views: Math.floor(Math.random() * 1000) });
@@ -84,7 +84,7 @@ export default function DealerWebsiteSettings() {
 
   async function handleSave() {
     setSaving(true);
-    const { error } = await (supabase as any).from('dealer_profiles').update(form).eq('id', user.id);
+    const { error } = await (supabase).from('dealer_profiles').update(form).eq('id', user.id);
     setSaving(false);
     if (error) {
       toast({ title: 'Fejl', description: error.message, variant: 'destructive' });

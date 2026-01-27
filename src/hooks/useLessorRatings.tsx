@@ -103,7 +103,7 @@ export const useLessorRatings = (lessorId?: string) => {
       await fetchRatings();
       await fetchStats();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error submitting rating:', err);
       if (err.code === '23505') {
         toast.error('Du har allerede vurderet denne booking');

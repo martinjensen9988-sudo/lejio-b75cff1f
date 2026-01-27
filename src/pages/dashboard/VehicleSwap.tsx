@@ -157,7 +157,7 @@ const VehicleSwapPage = () => {
             {/* Swap Reason */}
             <div className="space-y-2">
               <Label>Årsag til udskiftning</Label>
-              <Select value={swapReason} onValueChange={(value: any) => setSwapReason(value)}>
+              <Select value={swapReason} onValueChange={(value: unknown) => setSwapReason(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

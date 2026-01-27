@@ -929,7 +929,7 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-demo-contract function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,

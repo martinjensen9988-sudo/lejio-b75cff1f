@@ -141,7 +141,7 @@ serve(async (req) => {
     const calculatedVehicleValue = vehicleValue || 150000; // Default value if not provided
 
     // Determine pricing based on booking period type
-    let displayPrice = booking.base_price || vehicle.daily_price || 499;
+    const displayPrice = booking.base_price || vehicle.daily_price || 499;
     let includedKm = booking.included_km || vehicle.included_km || 100;
     let extraKmPrice = booking.extra_km_price || vehicle.extra_km_price || 2.50;
 

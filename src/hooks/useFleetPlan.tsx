@@ -76,8 +76,8 @@ export const useFleetPlan = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const currentPlan: FleetPlanInfo = {
-    type: (profile as any)?.fleet_plan || null,
-    commissionRate: (profile as any)?.fleet_commission_rate || null,
+    type: (profile)?.fleet_plan || null,
+    commissionRate: (profile)?.fleet_commission_rate || null,
   };
 
   const fetchSettlements = async () => {
@@ -116,7 +116,7 @@ export const useFleetPlan = () => {
       const { error } = await supabase
         .from('profiles')
         .update({
-          fleet_plan: planType as any,
+          fleet_plan: planType,
           fleet_commission_rate: commissionRate,
         })
         .eq('id', user.id);
