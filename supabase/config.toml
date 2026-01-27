@@ -203,3 +203,9 @@ verify_jwt = false
 
 [functions.ai-find-leads]
 verify_jwt = true
+
+[functions.ai-generate-global-page-description]
+verify_jwt = false
+
+[functions.ai-generate-global-page-description-google]
+verify_jwt = false

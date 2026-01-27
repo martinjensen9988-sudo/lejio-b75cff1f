@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 // Kald Google edge function for AI-beskrivelse
 async function generateAIDescription({ title, slug }: { title: string; slug: string }) {
-  const res = await fetch('/functions/v1/ai-generate-global-page-description-google', {
+  const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-generate-global-page-description-google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title, slug }),
