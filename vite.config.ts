@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "script-defer",
-      includeAssets: ["favicon.ico", "robots.txt"],
+      includeAssets: ["favicon.ico", "robots.txt", "index.html"],
       manifest: {
         name: "LEJIO – Find din lejebil",
         short_name: "LEJIO",
@@ -48,9 +48,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        // Avoid precaching HTML, as stale cached HTML can reference old hashed CSS/JS
-        // and cause white-screen issues after deployments.
-        globPatterns: ["**/*.{js,css,ico,png,svg,woff2}"],
+        // Nu inkluderes index.html i precache for at undgå non-precached-url fejl
+        globPatterns: ["**/*.{js,css,ico,png,svg,woff2,html}"],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB limit
         cleanupOutdatedCaches: true,
         skipWaiting: true,
