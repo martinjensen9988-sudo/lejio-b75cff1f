@@ -22,6 +22,32 @@ if (typeof window !== 'undefined') {
     originalError.apply(console, args);
   };
 
+  // Suppress benign Lovable dev environment logs
+  const originalLog = console.log;
+  console.log = function(...args) {
+    const message = args[0]?.toString?.() || '';
+    // Filter out WebSocket connection logs and workspace context messages
+    if (message.includes('devserver_websocket_open') || 
+        message.includes('Cannot change workspace in project context') ||
+        message.includes("We're hiring") ||
+        message.includes('Initializing RudderStack')) {
+      return;
+    }
+    originalLog.apply(console, args);
+  };
+
+  // Suppress benign Lovable dev environment warnings
+  const originalWarn = console.warn;
+  console.warn = function(...args) {
+    const message = args[0]?.toString?.() || '';
+    // Filter out unrecognized feature warnings and iframe sandbox warnings (dev-only)
+    if (message.includes('Unrecognized feature') || 
+        message.includes('iframe') && message.includes('sandbox')) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+
   const originalFetch = window.fetch;
   window.fetch = function(...args) {
     const url = args[0]?.toString?.() || '';
