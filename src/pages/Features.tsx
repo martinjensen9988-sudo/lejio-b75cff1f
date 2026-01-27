@@ -111,11 +111,11 @@ const Features = () => {
       color: "from-primary to-primary/60",
       tier: "starter",
       features: [
-        { title: "Smart Booking-kalender", description: "Visuel oversigt over alle dine bookinger med drag-and-drop funktionalitet.", icon: Calendar, status: "Fuldt implementeret" },
-        { title: "Automatisk tilgængelighed", description: "Systemet blokerer automatisk datoer ved nye bookinger.", icon: Clock, status: "Fuldt implementeret" },
-        { title: "Abonnementsudlejning", description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.", icon: Repeat, status: "Beta" },
-        { title: "AI-prissætning", description: "Få intelligente prisforslag baseret på marked, sæson og efterspørgsel.", icon: Brain, badge: "Ny", status: "Planlagt", tier: "pro" },
-        { title: "Sæsonpriser", description: "Indstil forskellige priser for høj- og lavsæson automatisk.", icon: CalendarClock, badge: "Ny", status: "Fuldt implementeret", tier: "pro" },
+        { title: "Smart Booking-kalender", description: "Visuel oversigt over alle dine bookinger med drag-and-drop funktionalitet.", icon: Calendar, status: "Fuldt implementeret", badge: undefined, demoUrl: undefined, tier: undefined },
+        { title: "Automatisk tilgængelighed", description: "Systemet blokerer automatisk datoer ved nye bookinger.", icon: Clock, status: "Fuldt implementeret", badge: undefined, demoUrl: undefined, tier: undefined },
+        { title: "Abonnementsudlejning", description: "Tilbyd månedlig bilabonnement med automatisk kortbetaling.", icon: Repeat, status: "Beta", badge: undefined, demoUrl: undefined, tier: undefined },
+        { title: "AI-prissætning", description: "Få intelligente prisforslag baseret på marked, sæson og efterspørgsel.", icon: Brain, status: "Planlagt", badge: "Ny", demoUrl: undefined, tier: "pro" },
+        { title: "Sæsonpriser", description: "Indstil forskellige priser for høj- og lavsæson automatisk.", icon: CalendarClock, status: "Fuldt implementeret", badge: "Ny", demoUrl: undefined, tier: "pro" },
       ],
     },
     {
