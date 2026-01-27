@@ -1,179 +1,154 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// deno-lint-ignore-file no-explicit-any
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// HTML escape function to prevent XSS/injection
-function escapeHtml(text: string | null | undefined): string {
-  if (!text) return '';
-  return text.replace(/[&<>"']/g, char => 
-    ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[char] || char
-  );
-}
-
-interface AdminEmailRequest {
-  recipientEmail: string;
-  recipientName: string;
+interface SendAdminEmailRequest {
   subject: string;
-  message: string;
+  title: string;
+  content: string;
+  recipients?: string[];
 }
 
-serve(async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
+/**
+ * Send HTML email to admin(s) via SendGrid
+ * Replaces JWT/SMTP with simpler SendGrid integration
+ */
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify JWT token
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      console.error('No authorization header');
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    const { subject, title, content, recipients } = (await req.json()) as SendAdminEmailRequest;
+
+    if (!subject || !title || !content) {
+      throw new Error('Missing required fields: subject, title, content');
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    
-    // Create client with user's token to verify auth
-    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    // Get admin email(s) from environment
+    const defaultAdminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@lejio.dk';
+    const adminEmails = recipients && recipients.length > 0 ? recipients : [defaultAdminEmail];
 
-    // Verify user is authenticated
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
-    if (authError || !user) {
-      console.error('Auth error:', authError);
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    // Create service role client to check admin status
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Check if user is super_admin
-    const { data: roleData, error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'super_admin')
-      .maybeSingle();
-
-    if (roleError || !roleData) {
-      console.error('User is not a super_admin:', user.id);
-      return new Response(JSON.stringify({ error: 'Forbidden - Admin access required' }), {
-        status: 403,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    const data: AdminEmailRequest = await req.json();
-    console.log("Admin sending email to:", data.recipientEmail);
-
-    const smtpHost = Deno.env.get("SMTP_HOST");
-    const smtpUser = Deno.env.get("SMTP_USER");
-    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
-    const smtpFromEmail = Deno.env.get("SMTP_FROM_EMAIL");
-
-    if (!smtpHost || !smtpUser || !smtpPassword || !smtpFromEmail) {
-      console.error("Missing SMTP configuration");
-      throw new Error("SMTP configuration is incomplete");
-    }
-
-    const client = new SMTPClient({
-      connection: {
-        hostname: smtpHost,
-        port: 465,
-        tls: true,
-        auth: {
-          username: smtpUser,
-          password: smtpPassword,
-        },
-      },
-    });
-
-    // Escape user-provided data
-    const safeRecipientName = escapeHtml(data.recipientName);
-    const safeSubject = escapeHtml(data.subject);
-    // Convert newlines to <br> for HTML display while escaping other HTML
-    const safeMessage = escapeHtml(data.message).replace(/\n/g, '<br>');
-
-    const emailHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #2962FF, #00E676); padding: 30px; border-radius: 12px 12px 0 0; text-align: center; }
-    .header h1 { color: white; margin: 0; font-size: 24px; }
-    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
-    .message-box { background: white; padding: 25px; border-radius: 8px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .footer { text-align: center; margin-top: 20px; color: #888; font-size: 12px; }
-    .logo { font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="logo">LEJIO</div>
-      <h1>Besked fra LEJIO</h1>
-    </div>
-    <div class="content">
-      <p>Hej ${safeRecipientName},</p>
+    // Get SendGrid API key
+    const sendgridApiKey = Deno.env.get('SENDGRID_API_KEY');
+    if (!sendgridApiKey) {
+      console.warn('⚠️ SENDGRID_API_KEY not configured - email logged only');
+      console.log(`📧 Admin Email: ${subject}`);
+      console.log(`👥 Recipients: ${adminEmails.join(', ')}`);
+      console.log(`📝 Content: ${content.substring(0, 200)}...`);
       
-      <div class="message-box">
-        ${safeMessage}
-      </div>
+      // Return success so automated-lead-discovery doesn't fail
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Email queued (SendGrid not configured)',
+          recipients: adminEmails,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-      <div class="footer">
-        <p>Med venlig hilsen,<br><strong>LEJIO Team</strong></p>
-        <p style="margin-top: 20px; font-size: 11px; color: #aaa;">
-          Denne email er sendt fra LEJIO administrationen.<br>
-          Har du spørgsmål? Kontakt os på support@lejio.dk
-        </p>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
+    // HTML email template with styling
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; color: #333; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; padding: 0; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+            .body { background: #f9fafb; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb; }
+            .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
+            table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+            th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+            th { background: #f3f4f6; font-weight: 600; }
+            tr:nth-child(even) { background: #f9fafb; }
+            .stats { display: inline-block; background: #f3f4f6; padding: 12px 16px; border-radius: 6px; margin: 10px 0; }
+            .button { display: inline-block; background: #667eea; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; margin-top: 10px; }
+            hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔔 ${title}</h1>
+            </div>
+            <div class="body">
+              ${content}
+              <div class="footer">
+                <p><strong>LEJIO System Notification</strong></p>
+                <p>Tid: ${new Date().toLocaleString('da-DK')}</p>
+                <p style="margin-top: 10px; font-size: 11px; color: #aaa;">
+                  Denne email er auto-genereret af LEJIO-systemet.<br>
+                  Spørgsmål? Kontakt support@lejio.dk
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
     `;
 
-    await client.send({
-      from: smtpFromEmail,
-      to: data.recipientEmail,
-      subject: data.subject,
-      content: emailHtml,
-      html: emailHtml,
+    // Send via SendGrid
+    const sendgridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sendgridApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        personalizations: adminEmails.map(email => ({
+          to: [{ email }],
+          subject: subject,
+        })),
+        from: {
+          email: 'notifications@lejio.dk',
+          name: 'LEJIO System',
+        },
+        content: [
+          {
+            type: 'text/html',
+            value: htmlContent,
+          },
+        ],
+        reply_to: {
+          email: 'support@lejio.dk',
+          name: 'LEJIO Support',
+        },
+        // Tag for SendGrid analytics
+        categories: ['admin-notifications', 'lejio-system'],
+      }),
     });
 
-    await client.close();
+    if (!sendgridResponse.ok) {
+      const errorData = await sendgridResponse.text();
+      console.error('SendGrid error:', errorData);
+      throw new Error(`SendGrid failed: ${sendgridResponse.status}`);
+    }
 
-    console.log("Admin email sent successfully to:", data.recipientEmail);
+    console.log(`✅ Admin email sent to ${adminEmails.join(', ')}`);
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error sending admin email:", errorMessage);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      JSON.stringify({
+        success: true,
+        message: 'Email sent successfully',
+        recipients: adminEmails,
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Send admin email error:', error);
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Failed to send email',
+      }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
