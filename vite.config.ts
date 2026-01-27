@@ -21,61 +21,27 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "script-defer",
-      includeAssets: ["favicon.ico", "robots.txt", "index.html"],
+      includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
         name: "LEJIO – Find din lejebil",
         short_name: "LEJIO",
-        description: "LEJIO gør det nemt at leje køretøjer. Søg blandt private udlejere og forhandlere.",
+        description: "LEJIO gør det nemt at leje køretøjer.",
         theme_color: "#2962FF",
         background_color: "#FDF8F3",
         display: "standalone",
-        orientation: "portrait-primary",
-        scope: "/",
-        start_url: "/",
-        categories: ["business", "lifestyle"],
         icons: [
           {
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
           },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
         ],
       },
       workbox: {
-        // Optimized caching strategy
-        globPatterns: ["**/*.{js,css,ico,png,svg,woff2,html}"],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        // Minimal caching for faster builds
+        globPatterns: ["**/*.{js,css,woff2}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
-        skipWaiting: true,
-        clientsClaim: true,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "supabase-cache",
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24,
-              },
-            },
-          },
-          {
-            urlPattern: /index\.html$/,
-            handler: "NetworkOnly",
-          },
-        ],
       },
     }),
   ].filter(Boolean),
@@ -97,42 +63,11 @@ export default defineConfig(({ mode }) => ({
     sourcemap: mode === "development",
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Vendor chunks only - avoid circular deps with routes/components
-          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
-            return "react-vendor";
-          }
-          if (id.includes("node_modules/react-router")) {
-            return "router-vendor";
-          }
-          if (id.includes("node_modules/@radix-ui")) {
-            return "ui-vendor";
-          }
-          if (id.includes("node_modules/recharts")) {
-            return "charts-vendor";
-          }
-          if (id.includes("node_modules/mapbox-gl")) {
-            return "maps-vendor";
-          }
-          if (id.includes("node_modules/@supabase")) {
-            return "supabase-vendor";
-          }
-          if (id.includes("node_modules/react-hook-form")) {
-            return "forms-vendor";
-          }
-        },
+        manualChunks: undefined, // Disable to reduce memory during build
       },
     },
   },
   optimizeDeps: {
-    include: [
-      "react",
-      "react-dom",
-      "react-router-dom",
-      "@supabase/supabase-js",
-      "@radix-ui/react-dialog",
-      "@radix-ui/react-dropdown-menu",
-      "@radix-ui/react-tabs",
-    ],
+    include: ["react", "react-dom", "react-router-dom"],
   },
 }));
