@@ -21,7 +21,12 @@ export default function CheckinPage() {
         .select('*')
         .eq('id', contractId)
         .single();
-      if (data) setContract(data);
+      if (error) {
+        console.error('Failed to fetch contract:', error);
+        setPinError('Kunne ikke hente kontrakt. Tjek venligst linket.');
+      } else if (data) {
+        setContract(data);
+      }
       setLoading(false);
     };
     fetchContract();
@@ -34,7 +39,9 @@ export default function CheckinPage() {
       setPinError('Der mangler PIN-kode på kontrakten. Kontakt udlejer.');
       return;
     }
-    if (pin.trim() !== String(contract.checkin_pin)) {
+    // Remove all whitespace from user input and normalize
+    const normalizedPin = pin.replace(/\s/g, '');
+    if (normalizedPin !== String(contract.checkin_pin)) {
       setPinError('Forkert PIN-kode. Prøv igen.');
       return;
     }
