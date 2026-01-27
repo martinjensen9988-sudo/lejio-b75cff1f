@@ -3,6 +3,7 @@ import { useBrand } from '@/providers/BrandContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
+import { FriVehicleList } from '@/components/fri/FriVehicleList';
 
 export function FriDashboard() {
   const { user, signOut } = useFriAuthContext();
@@ -81,13 +82,7 @@ export function FriDashboard() {
           {/* Vehicles Tab */}
           <TabsContent value="vehicles">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Mine køretøjer</h2>
-                <Button>Tilføj køretøj</Button>
-              </div>
-              <p className="text-gray-600">
-                Ingen køretøjer endnu. Tilføj dit første køretøj for at begynde.
-              </p>
+              <FriVehicleList lessorId={user?.id || null} />
             </div>
           </TabsContent>
 
