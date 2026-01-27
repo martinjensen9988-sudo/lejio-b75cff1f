@@ -98,7 +98,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks
+          // Vendor chunks only - avoid circular deps with routes/components
           if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
             return "react-vendor";
           }
@@ -119,23 +119,6 @@ export default defineConfig(({ mode }) => ({
           }
           if (id.includes("node_modules/react-hook-form")) {
             return "forms-vendor";
-          }
-          
-          // Route-based chunks
-          if (id.includes("/pages/admin/")) {
-            return "admin-routes";
-          }
-          if (id.includes("/pages/dashboard/")) {
-            return "dashboard-routes";
-          }
-          if (id.includes("/pages/search")) {
-            return "search-route";
-          }
-          if (id.includes("/components/admin/")) {
-            return "admin-components";
-          }
-          if (id.includes("/components/dashboard/")) {
-            return "dashboard-components";
           }
         },
       },
