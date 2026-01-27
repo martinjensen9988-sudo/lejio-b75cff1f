@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "strict": false,
+    "skipLibCheck": true,
+    "moduleResolution": "node"
+  }
+}
