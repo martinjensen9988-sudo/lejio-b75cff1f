@@ -2,11 +2,76 @@ import { Car, MapPin, Shield, Clock, CreditCard, Star, ArrowRight, Zap, CheckCir
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Features = () => {
   const navigate = useNavigate();
 
-  const renterFeatures = [
+  // Mapping til admin feature keys
+  const featureKeyMap = {
+    "Smart Booking-kalender": "booking_calendar",
+    "Automatisk tilgængelighed": "auto_availability",
+    "Abonnementsudlejning": "subscription_rental",
+    "AI-prissætning": "ai_pricing",
+    "Sæsonpriser": "season_pricing",
+    "Multi-lokation support": "multi_location",
+    "Åbningstider pr. lokation": "location_hours",
+    "Særlige lukkedage": "special_closures",
+    "Lokation på køretøj": "location_on_vehicle",
+    "Automatisk kontraktgenerering": "contract_generation",
+    "Digital underskrift": "digital_signature",
+    "PDF-download & Email": "pdf_email",
+    "Skaderapporter med AI": "damage_ai",
+    "Lokationsinfo i kontrakt": "location_in_contract",
+    "Nummerplade-scanning": "license_plate_scan",
+    "Dashboard-foto med AI": "dashboard_photo_ai",
+    "GPS-lokationsverifikation": "gps_verification",
+    "Automatisk opgørelse": "auto_statement",
+    "QR-kode check-in": "qr_checkin",
+    "Flere betalingsmetoder": "payment_methods",
+    "Automatisk abonnementsbetaling": "auto_subscription_payment",
+    "Depositumhåndtering": "deposit_handling",
+    "Selvrisiko-forsikring": "selfrisk_insurance",
+    "Brændstofpolitik": "fuel_policy",
+    "Platformgebyr-betaling": "platform_fee_payment",
+    "GPS-sikkerhed": "gps_security",
+    "Geofencing-alarmer": "geofencing",
+    "Kilometerregistrering": "km_registration",
+    "Webhook-integration": "webhook_gps",
+    "MC-kørekort validering": "mc_license_validation",
+    "MC-specifik vedligeholdelse": "mc_maintenance",
+    "Sæson-tjekliste": "season_checklist",
+    "MC Check-in guide": "mc_checkin_guide",
+    "Smart Service hos LEJIO": "smart_service",
+    "Syns-påmindelser": "inspection_reminders",
+    "Dækstyring": "tire_management",
+    "Byttebil-funktion": "replacement_car",
+    "Service-booking": "service_booking",
+    "Auto-Dispatch AI": "auto_dispatch_ai",
+    "Dashboard-analyse": "ai_dashboard_analysis",
+    // Tilføj flere hvis nødvendigt
+  };
+
+  const [featureLinks, setFeatureLinks] = useState({});
+
+  useEffect(() => {
+    const fetchLinks = async () => {
+      const { data, error } = await supabase.from('feature_links').select('feature_key, video, image, page');
+      if (!error && data) {
+        const linksObj = {};
+        data.forEach(row => {
+          linksObj[row.feature_key] = {
+            video: row.video || '',
+            image: row.image || '',
+            page: row.page || ''
+          };
+        });
+        setFeatureLinks(linksObj);
+      }
+    };
+    fetchLinks();
+  }, []);
     {
       icon: Car,
       title: "Stort udvalg",
@@ -82,6 +147,9 @@ const Features = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
           {renterFeatures.map((feature, i) => {
             const Icon = feature.icon;
+            // Find admin key
+            const adminKey = featureKeyMap[feature.title];
+            const links = adminKey ? featureLinks[adminKey] : undefined;
             return (
               <motion.div 
                 key={i}
@@ -96,6 +164,20 @@ const Features = () => {
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mb-2">{feature.title}</h3>
                 <p className="text-white/70 text-sm leading-relaxed">{feature.description}</p>
+                {/* VIS LINKS */}
+                {links && (links.video || links.image || links.page) && (
+                  <div className="mt-4 flex flex-col gap-2">
+                    {links.video && (
+                      <a href={links.video} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">Video</a>
+                    )}
+                    {links.image && (
+                      <a href={links.image} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">Billede</a>
+                    )}
+                    {links.page && (
+                      <a href={links.page} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">Læs mere</a>
+                    )}
+                  </div>
+                )}
               </motion.div>
             );
           })}
