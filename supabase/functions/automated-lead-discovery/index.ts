@@ -12,6 +12,21 @@ interface AutomatedLeadDiscoveryRequest {
   enableNotifications?: boolean;
 }
 
+interface LeadStats {
+  with_email: number;
+  with_phone: number;
+  with_website: number;
+  with_cvr: number;
+}
+
+interface AiLeadData {
+  total: number;
+  savedLeads: number;
+  enriched: number;
+  stats: LeadStats;
+  suggestions: Array<{ company_name: string; industry: string; city?: string; score: number }>;
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -51,7 +66,7 @@ serve(async (req: Request) => {
       throw new Error(`AI find leads failed: ${errorText}`);
     }
 
-    const aiData = await aiResponse.json();
+    const aiData = (await aiResponse.json()) as AiLeadData;
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
     console.log(`✅ Lead discovery completed in ${duration}s`);

@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
-    "lib": ["deno.window"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "lib": ["es2020"],
+    "target": "es2020",
+    "module": "esnext",
     "strict": false,
     "skipLibCheck": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowJs": true,
+    "noImplicitAny": false
   }
 }

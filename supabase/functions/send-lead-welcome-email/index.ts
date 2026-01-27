@@ -18,6 +18,19 @@ interface SendLeadEmailRequest {
   body?: string;
 }
 
+interface OpenAiMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface OpenAiChoice {
+  message: OpenAiMessage;
+}
+
+interface OpenAiResponse {
+  choices: OpenAiChoice[];
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -93,7 +106,7 @@ Grund til at kontakte: ${reason}`,
         throw new Error('Failed to generate email');
       }
 
-      const emailData = await emailResponse.json();
+      const emailData = (await emailResponse.json()) as OpenAiResponse;
       const emailContent = emailData.choices?.[0]?.message?.content || '';
 
       try {
