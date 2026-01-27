@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { FriVehicleList } from '@/components/fri/FriVehicleList';
+import { FriBookingList } from '@/components/fri/FriBookingList';
 
 export function FriDashboard() {
   const { user, signOut } = useFriAuthContext();
@@ -89,10 +90,7 @@ export function FriDashboard() {
           {/* Bookings Tab */}
           <TabsContent value="bookings">
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Bookinger</h2>
-              <p className="text-gray-600">
-                Ingen bookinger endnu.
-              </p>
+              <FriBookingList lessorId={user?.id || null} />
             </div>
           </TabsContent>
 
