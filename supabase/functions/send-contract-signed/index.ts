@@ -52,6 +52,7 @@ interface Contract {
   renter_phone: string | null;
   renter_address: string | null;
   renter_license_number: string | null;
+  renter_signature: string | null;
   renter_signed_at: string | null;
   vanvidskørsel_accepted: boolean;
   vanvidskørsel_liability_amount: number | null;

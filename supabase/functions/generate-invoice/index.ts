@@ -103,7 +103,16 @@ serve(async (req) => {
     const lessorRentalIncome = booking.total_price - insuranceFee;
     const dailyPrice = lessorRentalIncome / days;
 
-    const lineItems = [
+    interface InvoiceLineItem {
+      description: string;
+      quantity: number;
+      unit: string;
+      unit_price: number;
+      total: number;
+      platform_fee?: boolean;
+    }
+
+    const lineItems: InvoiceLineItem[] = [
       {
         description: `Leje af ${booking.vehicles?.[0]?.make || 'Køretøj'} ${booking.vehicles?.[0]?.model || ''} (${booking.vehicles?.[0]?.registration || 'N/A'})`,
         quantity: days,
