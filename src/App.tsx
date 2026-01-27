@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, forwardRef } from "react";
 
 const SubscriptionRental = lazy(() => import("./pages/subscription-rental"));
 const DealerWebsiteSettings = lazy(() => import("./pages/dealer/WebsiteSettings"));
@@ -197,7 +197,7 @@ const PageLoader = () => (
   </div>
 );
 
-const App = () => (
+const App = forwardRef((props, ref) => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -336,6 +336,8 @@ const App = () => (
     </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
-);
+));
+
+App.displayName = 'App';
 
 export default App;
