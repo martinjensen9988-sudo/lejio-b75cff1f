@@ -287,23 +287,23 @@ const Features = () => {
 
   // Filter og søg logik
   const filteredCategories = useMemo(() => {
-    let filtered = [...featureCategories];
+    let filtered = [...featureCategories] as any[];
 
     // Filter by selected categories
     if (selectedCategories.size > 0) {
-      filtered = filtered.filter(cat => selectedCategories.has(cat.id));
+      filtered = filtered.filter((cat: any) => selectedCategories.has(cat.id));
     }
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.map(category => ({
+      filtered = filtered.map((category: any) => ({
         ...category,
-        features: category.features.filter(feature =>
+        features: category.features.filter((feature: any) =>
           feature.title.toLowerCase().includes(query) ||
           feature.description.toLowerCase().includes(query)
         )
-      })).filter(cat => cat.features.length > 0);
+      })).filter((cat: any) => cat.features.length > 0);
     }
 
     return filtered;

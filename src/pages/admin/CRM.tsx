@@ -1200,7 +1200,11 @@ const AdminCRMPage = () => {
               {/* Team Collaboration - Feature 9 */}
               {selectedDeal && (
                 <div className="mt-4">
-                  <TeamCollaboration dealId={selectedDeal.id} />
+                  <TeamCollaboration 
+                    deal={selectedDeal} 
+                    comments={[]} 
+                    onAddComment={async () => {}} 
+                  />
                 </div>
               )}
 
