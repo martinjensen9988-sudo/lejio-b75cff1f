@@ -1,3 +1,4 @@
+const DealerWebsiteSettings = lazy(() => import("./pages/dealer/WebsiteSettings"));
 
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -298,6 +299,7 @@ const App = () => (
               <Route path="/kontakt" element={<Contact />} />
               <Route path="/side/:slug" element={<GlobalPage />} />
               <Route path="/forhandler/:id" element={<DealerProfile />} />
+              <Route path="/dealer/website-settings" element={<DealerWebsiteSettings />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
