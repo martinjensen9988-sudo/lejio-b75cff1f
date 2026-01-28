@@ -37,10 +37,11 @@ jobs:
         run: npm run build
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app
           path: ./dist
+          retention-days: 1
 
       - name: Deploy to Azure Static Web Apps
         id: deploy
