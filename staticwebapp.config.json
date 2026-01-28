@@ -8,6 +8,11 @@
   },
   "routes": [
     {
+      "route": "/",
+      "redirect": "/fri/",
+      "statusCode": 301
+    },
+    {
       "route": "/fri/*",
       "rewrite": "index.html",
       "statusCode": 200
