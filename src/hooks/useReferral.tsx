@@ -42,7 +42,7 @@ export const useReferral = () => {
     setIsLoading(true);
     try {
       // Fetch or create referral code
-      const { data: codeData, error: codeError } = await supabase
+      let { data: codeData, error: codeError } = await supabase
         .from('referral_codes')
         .select('*')
         .eq('user_id', user.id)
