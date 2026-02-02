@@ -27,7 +27,7 @@ export function FriLandingPage() {
           Dine køretøjer, dit kontrol
         </h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          En moderne platform til bilutlejning. Administrer din flåde, bookinger og invoiceringer fra ét sted.
+          En moderne platform til bilutlejning. Administrer din flåde, bookinger og fakturaer fra ét sted.
         </p>
         <div className="flex gap-4 justify-center">
           <Link to="/fri/trial">
@@ -69,11 +69,11 @@ export function FriLandingPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Invoiceringer</CardTitle>
+              <CardTitle>Fakturaer</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">
-                Generer professionelle invoicer automatisk. Spor betalinger og udestående beløb.
+                Generer professionelle fakturaer automatisk. Spor betalinger og udestående beløb.
               </p>
             </CardContent>
           </Card>
