@@ -1,61 +1,61 @@
-# Azure Migration Complete ✅
+# Azure Migration Færdig ✅
 
-## Summary of Changes
+## Opsummering af Ændringer
 
-### Code Changes
-- ✅ **186 files updated** - All Supabase imports replaced with Azure SDK imports
-- ✅ **Build successful** - Frontend compiled without errors (dist/ ready)
-- ✅ **Dependencies installed** - Azure SDKs added (@azure/storage-blob, @azure/identity, etc.)
+### Kodeændringer
+- ✅ **186 filer opdateret** - Alle Supabase imports erstattet med Azure SDK imports
+- ✅ **Build succesfuld** - Frontend kompileret uden fejl (dist/ klar)
+- ✅ **Dependencies installeret** - Azure SDKs tilføjet (@azure/storage-blob, @azure/identity, etc.)
 
-### New Files Created
+### Nye Filer Oprettet
 
-**Infrastructure (Bicep IaC):**
-- `infra/main.bicep` - Main orchestration template
-- `infra/main.parameters.json` - Configuration
+**Infrastruktur (Bicep IaC):**
+- `infra/main.bicep` - Hovedorkestrering
+- `infra/main.parameters.json` - Konfiguration
 - `infra/modules/sql.bicep` - Azure SQL Database
 - `infra/modules/keyvault.bicep` - Azure Key Vault
 - `infra/modules/storage.bicep` - Azure Blob Storage
 - `infra/modules/functions.bicep` - Azure Functions
 - `infra/modules/staticwebapp.bicep` - Azure Static Web Apps
 
-**Frontend Code:**
+**Frontend Kode:**
 - `src/integrations/azure/client.ts` - Azure SDK wrapper
 
 **Backend Functions:**
-- `azure-functions/AuthLogin/index.ts` - Authentication endpoint
-- `azure-functions/AuthLogin/function.json` - Function configuration
+- `azure-functions/AuthLogin/index.ts` - Autentificeringsendepunkt
+- `azure-functions/AuthLogin/function.json` - Funktionskonfiguration
 
-**Configuration:**
-- `.env.azure.template` - Environment variables template
-- `azure-deploy.sh` - Automated deployment script
+**Konfiguration:**
+- `.env.azure.template` - Miljøvariable template
+- `azure-deploy.sh` - Automatiseret deployment script
 
-**Documentation:**
-- `AZURE_MIGRATION_GUIDE.md` - Complete deployment steps
-- `AZURE_MIGRATION_STATUS.md` - Migration status
-- `AZURE_DEPLOYMENT_CHECKLIST.md` - Pre/post deployment checks
+**Dokumentation:**
+- `AZURE_MIGRATION_GUIDE.md` - Komplette deployment trin
+- `AZURE_MIGRATION_STATUS.md` - Migrationstatus
+- `AZURE_DEPLOYMENT_CHECKLIST.md` - Før/efter deployment checks
 
-## How to Deploy
+## Sådan Deployer Du
 
-### Option 1: Use the Deployment Script
+### Mulighed 1: Brug Deployment Script
 ```bash
-# In Azure Cloud Shell or locally with Azure CLI installed:
+# I Azure Cloud Shell eller lokalt med Azure CLI installeret:
 bash azure-deploy.sh
 ```
 
-This script will:
-1. Validate your Azure login
-2. Create resource group
-3. Validate Bicep template
-4. Show what will be deployed (what-if)
-5. Deploy all infrastructure
-6. Output connection strings and URLs
+Dette script vil:
+1. Validere Azure login
+2. Oprette ressourcegruppe
+3. Validere Bicep template
+4. Vise hvad der bliver deployet (what-if)
+5. Deploy hele infrastrukturen
+6. Udlæse connection strings og URLs
 
-### Option 2: Manual Deployment
+### Mulighed 2: Manuel Deployment
 ```bash
-# 1. Login to Azure
+# 1. Login til Azure
 az login
 
-# 2. Create resource group
+# 2. Opret ressourcegruppe
 az group create -n lejio-fri-rg -l eastus
 
 # 3. Deploy
@@ -65,44 +65,44 @@ az deployment group create \
   -p infra/main.parameters.json
 ```
 
-## What Gets Deployed
+## Hvad Bliver Deployeret
 
-- ✅ **Azure SQL Database** - PostgreSQL compatible, with encryption & threat detection
-- ✅ **Azure Static Web Apps** - Frontend hosting with GitHub auto-deployment
+- ✅ **Azure SQL Database** - PostgreSQL kompatibel, med kryptering & trusseldetektering
+- ✅ **Azure Static Web Apps** - Frontend hosting med GitHub auto-deployment
 - ✅ **Azure Functions** - Serverless backend API (Consumption plan)
-- ✅ **Azure Storage** - Blob storage for files/images (GRS redundancy)
-- ✅ **Azure Key Vault** - Secrets management
-- ✅ **Security** - HTTPS, TDE, private blobs, managed identity
+- ✅ **Azure Storage** - Blob storage til filer/billeder (GRS redundans)
+- ✅ **Azure Key Vault** - Hemmeligheder management
+- ✅ **Sikkerhed** - HTTPS, TDE, private blobs, managed identity
 
-## Estimated Costs (Monthly)
+## Estimeret Omkostninger (Månedlig)
 
-| Service | Cost |
-|---------|------|
+| Service | Omkostning |
+|---------|-----------|
 | Azure SQL DB (Standard, 20 DTU) | ~$25 |
 | Azure Storage (GRS) | ~$5-10 |
 | Azure Functions (Consumption) | ~$0-5 |
 | Static Web Apps (Free tier) | $0 |
-| Key Vault | ~$0.60 |
-| **Total** | **~$30-41** |
+| Key Vault | ~$0,60 |
+| **I alt** | **~$30-41** |
 
-## After Deployment
+## Efter Deployment
 
-1. **Get credentials from deployment outputs**
-   - Copy SQL server name
-   - Copy Static Web App URL
-   - Copy Function App URL
+1. **Få credentials fra deployment resultater**
+   - Kopier SQL server navn
+   - Kopier Static Web App URL
+   - Kopier Function App URL
 
-2. **Update environment variables**
+2. **Opdater miljøvariable**
    ```bash
    cp .env.azure.template .env.azure
-   # Edit with your Azure resources
+   # Rediger med dine Azure ressourcer
    ```
 
-3. **Configure GitHub integration**
-   - Copy deployment token from Azure Portal
-   - Add to GitHub Secrets: `AZURE_STATIC_WEB_APPS_API_TOKEN`
+3. **Konfigurer GitHub integration**
+   - Kopier deployment token fra Azure Portal
+   - Tilføj til GitHub Secrets: `AZURE_STATIC_WEB_APPS_API_TOKEN`
 
-4. **Run database migrations**
+4. **Kør database migrationer**
    ```bash
    sqlcmd -S <SQL_SERVER>.database.windows.net -U sqladmin -P <PASSWORD> -d lejio-fri
    :r supabase/migrations/azure-sql/001_initial_schema.sql
@@ -114,32 +114,32 @@ az deployment group create \
    func azure functionapp publish func-lejio-fri-dev
    ```
 
-6. **Push to GitHub** - Triggers Static Web Apps auto-deployment
+6. **Push til GitHub** - Trigger Static Web Apps auto-deployment
    ```bash
    git add .
-   git commit -m "Migrate from Supabase to Azure"
+   git commit -m "Migrer fra Supabase til Azure"
    git push origin main
    ```
 
-## Files Ready for Deployment
+## Filer Klar til Deployment
 
-- ✅ Frontend compiled (`dist/` folder)
-- ✅ Bicep templates validated
-- ✅ Azure SDK integrated
-- ✅ Configuration templates ready
-- ✅ Deployment script ready
+- ✅ Frontend kompileret (`dist/` folder)
+- ✅ Bicep templates valideret
+- ✅ Azure SDK integreret
+- ✅ Konfiguration templates klar
+- ✅ Deployment script klar
 
-## Current Status
+## Nuværende Status
 
-| Item | Status |
+| Emne | Status |
 |------|--------|
-| Code Migration | ✅ Complete |
-| Frontend Build | ✅ Successful |
-| Azure SDK Integration | ✅ Ready |
-| Infrastructure as Code | ✅ Ready |
-| Deployment Script | ✅ Ready |
-| Deployment | ⏳ Pending (requires Azure CLI) |
+| Kodemigration | ✅ Færdig |
+| Frontend Build | ✅ Succesfuld |
+| Azure SDK Integration | ✅ Klar |
+| Infrastructure as Code | ✅ Klar |
+| Deployment Script | ✅ Klar |
+| Deployment | ⏳ Afventer (kræver Azure CLI) |
 
 ---
 
-**To proceed:** Run `bash azure-deploy.sh` in Azure Cloud Shell or terminal with Azure CLI installed.
+**For at fortsætte:** Kør `bash azure-deploy.sh` i Azure Cloud Shell eller terminal med Azure CLI installeret.
