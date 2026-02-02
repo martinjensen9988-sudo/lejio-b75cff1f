@@ -59,7 +59,7 @@ module functions 'modules/functions.bicep' = {
     functionAppName: functionAppName
     keyVaultName: keyVault.outputs.keyVaultName
     sqlConnectionString: sqlDatabase.outputs.connectionString
-    storageConnectionString: storage.outputs.connectionString
+    storageConnectionString: 'DefaultEndpointsProtocol=https;AccountName=${storage.outputs.storageAccountName};AccountKey=${listKeys(storage.outputs.storageAccountId, '2023-01-01').keys[0].value};EndpointSuffix=core.windows.net'
   }
 }
 

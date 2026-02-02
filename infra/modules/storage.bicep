@@ -55,9 +55,7 @@ resource damageContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
-// Outputs
+// Outputs (secrets removed from outputs as per best practices)
 output storageAccountName string = storageAccount.name
 output storageAccountId string = storageAccount.id
-output connectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listKeys(storageAccount.id, '2023-01-01').keys[0].value};EndpointSuffix=core.windows.net'
-output storageKey string = listKeys(storageAccount.id, '2023-01-01').keys[0].value
 output primaryBlobEndpoint string = storageAccount.properties.primaryEndpoints.blob

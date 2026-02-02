@@ -1,12 +1,11 @@
 // Azure SQL Database module
-// Deploys PostgreSQL-compatible database with security best practices
+// Deploys SQL database with security best practices
 
 param location string
 param sqlServerName string
 param adminUsername string
 @secure()
 param adminPassword string
-param projectName string
 
 // SQL Server
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
@@ -41,7 +40,6 @@ resource database 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
     maxSizeBytes: 1099511627776 // 1TB
     catalogCollation: 'SQL_Latin1_General_CP1_CI_AS'
     zoneRedundant: false
-    storageAccountType: 'GRS'
     requestedBackupStorageRedundancy: 'GRS'
     isLedgerOn: false
   }
@@ -61,14 +59,11 @@ resource tde 'Microsoft.Sql/servers/databases/transparentDataEncryption@2023-08-
   }
 }
 
-// Vulnerability Assessment
+// Vulnerability Assessment (simplified)
 resource vulnAssessment 'Microsoft.Sql/servers/databases/vulnerabilityAssessments@2023-08-01-preview' = {
   parent: database
   name: 'default'
   properties: {
-    storageEndpoint: ''
-    storageContainerPath: ''
-    storageAccountAccessKey: ''
     recurringScans: {
       isEnabled: true
       emailSubscriptionAdmins: true
@@ -88,6 +83,6 @@ resource advancedThreatProtection 'Microsoft.Sql/servers/databases/advancedThrea
 
 // Outputs
 output serverName string = sqlServer.name
-output connectionString string = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${database.name};Persist Security Info=False;User ID=${adminUsername};Password=${adminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+output connectionString string = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${database.name};Persist Security Info=False;User ID=${adminUsername};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 output databaseName string = database.name
 output fullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName

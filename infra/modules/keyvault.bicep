@@ -4,6 +4,7 @@
 param location string
 param keyVaultName string
 param sqlConnectionString string
+@secure()
 param storageAccountKey string
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
