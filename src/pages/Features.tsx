@@ -51,7 +51,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/azure/client';
 
 const Features = () => {
   const navigate = useNavigate();

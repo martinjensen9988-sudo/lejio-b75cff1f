@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, createContext, useContext, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/azure/client';
 import { User } from '@supabase/supabase-js';
 
 type AdminRole = 'support' | 'admin' | 'super_admin' | null;

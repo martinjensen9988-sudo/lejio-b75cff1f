@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/azure/client';
 import { RealtimeChannel, PostgresChangesPayload } from '@supabase/supabase-js';
 
 // Type-safe real-time subscription management

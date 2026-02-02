@@ -1,0 +1,14 @@
+// Azure deployment parameters file
+// Use: az deployment group create ... --parameters main.parameters.json
+
+param environment string = 'dev'
+param location string = 'eastus' // Change to your region
+param projectName string = 'lejio-fri'
+
+// Database credentials - CHANGE THESE IN PRODUCTION
+param sqlAdminUsername string = 'sqladmin'
+@secure()
+param sqlAdminPassword string = 'ChangeMe@Azure123' // MUST be changed before deployment
+
+param githubRepo string = 'martinjensen9988-sudo/lejio-b75cff1f'
+param githubBranch string = 'main'

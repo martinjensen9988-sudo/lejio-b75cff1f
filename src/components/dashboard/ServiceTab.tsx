@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/azure/client';
 import { toast } from 'sonner';
 import { 
   Wrench, 

@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Download, FileText, Eye, CheckCircle, Clock, AlertCircle, DollarSign, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/azure/client';
 import { toast } from 'sonner';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
