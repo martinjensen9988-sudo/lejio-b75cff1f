@@ -23,10 +23,10 @@ export default defineConfig(({ mode }) => ({
       injectRegister: "script-defer",
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
-        name: "LEJIO – Find din lejebil",
-        short_name: "LEJIO",
-        description: "LEJIO gør det nemt at leje køretøjer.",
-        theme_color: "#2962FF",
+        name: "LEJIO Fri – Biludlejningsplatform",
+        short_name: "LEJIO Fri",
+        description: "LEJIO Fri - white-label biludlejningsplatform for forhandlere.",
+        theme_color: "#3b82f6",
         background_color: "#FDF8F3",
         display: "standalone",
         icons: [
@@ -38,10 +38,26 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        // Minimal caching for faster builds
-        globPatterns: ["**/*.{js,css,woff2}"],
+        // Include all necessary files for SPA
+        globPatterns: ["**/*.{js,css,woff2,html}"],
+        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/aqzggwewjttbkaqnbmrb\.supabase\.co/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "supabase-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 5 * 60,
+              },
+            },
+          },
+        ],
       },
     }),
   ].filter(Boolean),
