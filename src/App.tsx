@@ -189,6 +189,11 @@ const FriAdminLayout = lazy(() => import("./pages/fri/admin/Layout").then(m => (
 // Fri Lessor Pages - lazy loaded
 const FriApiKeysPage = lazy(() => import("./pages/fri/dashboard/ApiKeysPage").then(m => ({ default: m.FriApiKeysPage })));
 
+// Page Builder - lazy loaded
+const PagesDashboard = lazy(() => import("./pages/dashboard/PagesDashboard").then(m => ({ default: m.PagesDashboard })));
+const PageBuilder = lazy(() => import("./pages/dashboard/PageBuilder").then(m => ({ default: m.PageBuilder })));
+const PublicSiteRenderer = lazy(() => import("./pages/PublicSite").then(m => ({ default: m.PublicSiteRenderer })));
+
 // Redirect component for /search/booking/:vehicleId → /booking/:vehicleId
 const SearchBookingRedirect = () => {
   const { vehicleId } = useParams();
@@ -277,6 +282,8 @@ const App = forwardRef((props, ref) => (
               <Route path="/dashboard/warnings" element={<WarningsPage />} />
               <Route path="/dashboard/warnings/create" element={<CreateWarningPage />} />
               <Route path="/dashboard/api-keys" element={<ApiKeysPage />} />
+              <Route path="/dashboard/pages" element={<PagesDashboard />} />
+              <Route path="/dashboard/pages/:id/edit" element={<PageBuilder />} />
               <Route path="/gps/add-device" element={<AddGpsDevicePage />} />
               <Route path="/gps/add-geofence" element={<AddGeofencePage />} />
               <Route path="/settings" element={<Settings />} />
@@ -384,6 +391,9 @@ const App = forwardRef((props, ref) => (
                   </Routes>
                 </FriAdminLayout>
               } />
+
+              {/* Page Renderer for published sites */}
+              <Route path="/site/:lessorId/*" element={<PublicSiteRenderer />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="/abonnementsudlejning" element={<SubscriptionRental />} />
