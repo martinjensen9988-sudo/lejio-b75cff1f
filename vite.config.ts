@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => ({
     }),
     mode === "development" && componentTagger(),
     VitePWA({
+      disable: true, // DISABLED - testing auth without service worker caching issues
       registerType: "autoUpdate",
       injectRegister: "script-defer",
       includeAssets: ["favicon.ico", "robots.txt"],
