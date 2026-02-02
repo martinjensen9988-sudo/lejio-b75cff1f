@@ -10,7 +10,10 @@ export function FriLandingPage() {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold text-blue-600">Lejio Fri</div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
+            <Link to="/fri/features">
+              <Button variant="ghost">Alle funktioner</Button>
+            </Link>
             <Link to="/fri/login">
               <Button variant="ghost">Log ind</Button>
             </Link>

@@ -49,7 +49,10 @@ export function FriTrialPage() {
           <Link to="/fri" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Lejio Fri
           </Link>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
+            <Link to="/fri/features">
+              <Button variant="ghost">Alle funktioner</Button>
+            </Link>
             <Link to="/fri/login">
               <Button variant="ghost">Log ind</Button>
             </Link>
