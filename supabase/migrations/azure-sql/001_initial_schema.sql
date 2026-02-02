@@ -9,7 +9,7 @@
 -- Table: fri_admins
 -- Purpose: System administrators with access to admin panel
 CREATE TABLE fri_admins (
-    id NVARCHAR(MAX) PRIMARY KEY,
+    id NVARCHAR(36) PRIMARY KEY,
     email NVARCHAR(255) UNIQUE NOT NULL,
     admin_name NVARCHAR(255) NOT NULL,
     admin_email NVARCHAR(255) UNIQUE NOT NULL,
@@ -27,7 +27,7 @@ CREATE INDEX idx_fri_admins_email ON fri_admins(email);
 -- Table: fri_lessors
 -- Purpose: Individual lessor accounts (companies renting out vehicles)
 CREATE TABLE fri_lessors (
-    id NVARCHAR(MAX) PRIMARY KEY,
+    id NVARCHAR(36) PRIMARY KEY,
     email NVARCHAR(255) UNIQUE NOT NULL,
     company_name NVARCHAR(255) NOT NULL,
     cvr_number NVARCHAR(50) UNIQUE,
@@ -49,7 +49,7 @@ CREATE INDEX idx_fri_lessors_status ON fri_lessors(subscription_status);
 -- Purpose: Team members with access to lessor account
 CREATE TABLE fri_lessor_team_members (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX) NOT NULL,
+    lessor_id NVARCHAR(36) NOT NULL,
     email NVARCHAR(255) NOT NULL,
     name NVARCHAR(255) NOT NULL,
     role NVARCHAR(50) NOT NULL, -- owner, admin, manager, viewer
@@ -72,7 +72,7 @@ CREATE INDEX idx_fri_team_email ON fri_lessor_team_members(email);
 -- Purpose: Vehicles available for rent
 CREATE TABLE fri_vehicles (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX) NOT NULL,
+    lessor_id NVARCHAR(36) NOT NULL,
     make NVARCHAR(100) NOT NULL,
     model NVARCHAR(100) NOT NULL,
     year INT NOT NULL,
@@ -99,7 +99,7 @@ CREATE INDEX idx_fri_vehicles_status ON fri_vehicles(availability_status);
 -- Purpose: Rental bookings
 CREATE TABLE fri_bookings (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX) NOT NULL,
+    lessor_id NVARCHAR(36) NOT NULL,
     vehicle_id UNIQUEIDENTIFIER NOT NULL,
     customer_name NVARCHAR(255) NOT NULL,
     email NVARCHAR(255) NOT NULL,
@@ -130,7 +130,7 @@ CREATE INDEX idx_fri_bookings_dates ON fri_bookings(start_date, end_date);
 -- Purpose: Invoices for bookings
 CREATE TABLE fri_invoices (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX) NOT NULL,
+    lessor_id NVARCHAR(36) NOT NULL,
     booking_id UNIQUEIDENTIFIER,
     invoice_number NVARCHAR(50) UNIQUE NOT NULL,
     customer_name NVARCHAR(255) NOT NULL,
@@ -161,7 +161,7 @@ CREATE INDEX idx_fri_invoices_number ON fri_invoices(invoice_number);
 -- Purpose: Lessor subscription payments
 CREATE TABLE fri_payments (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX) NOT NULL,
+    lessor_id NVARCHAR(36) NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     currency NVARCHAR(3) DEFAULT 'DKK',
     status NVARCHAR(50) NOT NULL DEFAULT 'pending', -- pending, completed, failed, refunded
@@ -186,7 +186,7 @@ CREATE INDEX idx_fri_payments_status ON fri_payments(status);
 -- Purpose: Support tickets from lessors
 CREATE TABLE fri_support_tickets (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX) NOT NULL,
+    lessor_id NVARCHAR(36) NOT NULL,
     subject NVARCHAR(255) NOT NULL,
     description NVARCHAR(MAX) NOT NULL,
     category NVARCHAR(50) NOT NULL DEFAULT 'other', -- technical, billing, account, other
@@ -206,7 +206,7 @@ CREATE INDEX idx_fri_tickets_priority ON fri_support_tickets(priority);
 CREATE TABLE fri_ticket_messages (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ticket_id UNIQUEIDENTIFIER NOT NULL,
-    sender_id NVARCHAR(MAX) NOT NULL,
+    sender_id NVARCHAR(36) NOT NULL,
     sender_type NVARCHAR(50) NOT NULL, -- lessor, admin
     message NVARCHAR(MAX) NOT NULL,
     created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
@@ -223,9 +223,9 @@ CREATE INDEX idx_fri_messages_ticket ON fri_ticket_messages(ticket_id);
 -- Purpose: API keys for lessor integrations
 CREATE TABLE fri_api_keys (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX) NOT NULL,
+    lessor_id NVARCHAR(36) NOT NULL,
     name NVARCHAR(255) NOT NULL,
-    key NVARCHAR(255) UNIQUE NOT NULL,
+    [key] NVARCHAR(255) UNIQUE NOT NULL,
     status NVARCHAR(50) NOT NULL DEFAULT 'active', -- active, inactive
     last_used_at DATETIME2,
     created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
@@ -234,7 +234,7 @@ CREATE TABLE fri_api_keys (
 );
 
 CREATE INDEX idx_fri_api_keys_lessor ON fri_api_keys(lessor_id);
-CREATE INDEX idx_fri_api_keys_key ON fri_api_keys(key);
+CREATE INDEX idx_fri_api_keys_key ON fri_api_keys([key]);
 
 -- ============================================================================
 -- 9. AUDIT LOG TABLE
@@ -244,8 +244,8 @@ CREATE INDEX idx_fri_api_keys_key ON fri_api_keys(key);
 -- Purpose: Track all important changes
 CREATE TABLE fri_audit_logs (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(MAX),
-    user_id NVARCHAR(MAX),
+    lessor_id NVARCHAR(36),
+    user_id NVARCHAR(36),
     action NVARCHAR(100) NOT NULL,
     entity_type NVARCHAR(100),
     entity_id NVARCHAR(MAX),

@@ -31,6 +31,7 @@ SELECT
     updated_at
 FROM fri_vehicles
 -- Note: Filter by session variable @current_lessor_id in application
+GO
 
 -- View: vw_lessor_bookings
 CREATE VIEW vw_lessor_bookings AS
@@ -52,6 +53,7 @@ SELECT
     updated_at
 FROM fri_bookings
 -- Note: Filter by session variable @current_lessor_id in application
+GO
 
 -- View: vw_lessor_invoices
 CREATE VIEW vw_lessor_invoices AS
@@ -74,6 +76,7 @@ SELECT
     updated_at
 FROM fri_invoices
 -- Note: Filter by session variable @current_lessor_id in application
+GO
 
 -- View: vw_lessor_team
 CREATE VIEW vw_lessor_team_members AS
@@ -89,6 +92,7 @@ SELECT
     created_at
 FROM fri_lessor_team_members
 -- Note: Filter by session variable @current_lessor_id in application
+GO
 
 -- ============================================================================
 -- 2. SECURITY STORED PROCEDURES
@@ -118,6 +122,7 @@ BEGIN
         THROW 50001, 'Access Denied: Resource does not belong to this lessor', 1
     END
 END
+GO
 
 -- Procedure: sp_insert_vehicle_secure
 -- Purpose: Insert vehicle with lessor validation
@@ -148,6 +153,7 @@ BEGIN
         @daily_rate, @mileage_limit, 'available'
     )
 END
+GO
 
 -- Procedure: sp_insert_booking_secure
 CREATE PROCEDURE sp_insert_booking_secure
@@ -190,6 +196,7 @@ BEGIN
         @start_date, @end_date, @rental_days, @daily_rate, @total_price, 'pending'
     )
 END
+GO
 
 -- Procedure: sp_insert_invoice_secure
 CREATE PROCEDURE sp_insert_invoice_secure
@@ -240,6 +247,7 @@ BEGIN
         @amount, @tax_amount, @total_amount, 'draft'
     )
 END
+GO
 
 -- ============================================================================
 -- 3. AUDIT TRIGGER
@@ -261,6 +269,7 @@ BEGIN
     SELECT lessor_id, @action, 'VEHICLE', id, GETUTCDATE()
     FROM inserted
 END
+GO
 
 -- ============================================================================
 -- 4. INDEXES FOR PERFORMANCE
@@ -272,10 +281,12 @@ END
 CREATE INDEX idx_fri_bookings_date_range 
 ON fri_bookings(start_date, end_date) 
 WHERE status IN ('pending', 'confirmed')
+GO
 
 -- Index on invoice status + date
 CREATE INDEX idx_fri_invoices_status_date 
 ON fri_invoices(status, created_at)
+GO
 
 -- Index on payments + lessor for dashboard
 CREATE INDEX idx_fri_payments_lessor_date 

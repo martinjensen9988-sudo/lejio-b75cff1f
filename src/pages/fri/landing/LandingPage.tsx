@@ -30,7 +30,7 @@ export function FriLandingPage() {
           En moderne platform til bilutlejning. Administrer din flåde, bookinger og invoiceringer fra ét sted.
         </p>
         <div className="flex gap-4 justify-center">
-          <Link to="/fri/signup">
+          <Link to="/fri/trial">
             <Button size="lg" className="gap-2">
               Start 14-dages gratis prøveperiode <ArrowRight className="w-4 h-4" />
             </Button>
@@ -252,7 +252,7 @@ export function FriLandingPage() {
           <p className="text-xl mb-8">
             Prøv gratis i 14 dage. Intet kreditkort påkrævet.
           </p>
-          <Link to="/fri/signup">
+          <Link to="/fri/trial">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
               Start gratis prøveperiode
             </Button>
