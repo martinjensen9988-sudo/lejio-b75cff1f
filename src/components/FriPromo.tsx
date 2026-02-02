@@ -24,7 +24,7 @@ const FriPromo = () => {
           
           {/* Subtitle */}
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Din egen hvid-label bilutlejningsplatform. Full kontrol over din flåde, bookinger og fakturaer – alt fra ét sted. Prøv gratis i 14 dage!
+            Din egen hvid-label biludlejningsplatform. Fuld kontrol over din flåde, bookinger og fakturaer – alt fra ét sted. Prøv gratis i 14 dage!
           </p>
 
           {/* Key benefits */}
