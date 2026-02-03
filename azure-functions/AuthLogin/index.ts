@@ -36,12 +36,15 @@ async function authLogin(
     const body = (await request.json()) as any;
     const { email, password } = body;
 
-    if (!email || !password) {
+    if (!email) {
       return {
         status: 400,
-        body: JSON.stringify({ error: "Email and password required" }),
+        body: JSON.stringify({ error: "Email is required" }),
       };
     }
+
+    // For demo/test: accept any password or no password
+    // In production: implement proper password hashing and verification with bcrypt
 
     // Connect to Azure SQL Database
     const pool = new sql.ConnectionPool(dbConfig);
