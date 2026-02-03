@@ -26,8 +26,8 @@ BEGIN
         domain NVARCHAR(255) UNIQUE,
         custom_domain NVARCHAR(255) UNIQUE,
         subdomain NVARCHAR(100) UNIQUE,
-        plan NVARCHAR(50) NOT NULL DEFAULT 'trial',
-        status NVARCHAR(50) NOT NULL DEFAULT 'active',
+        [plan] NVARCHAR(50) NOT NULL DEFAULT 'trial',
+        [status] NVARCHAR(50) NOT NULL DEFAULT 'active',
         owner_email NVARCHAR(255) NOT NULL,
         cvr_number NVARCHAR(50),
         primary_color NVARCHAR(7) DEFAULT '#3b82f6',
@@ -44,7 +44,7 @@ BEGIN
     CREATE INDEX idx_fri_tenants_slug ON fri_tenants(slug);
     CREATE INDEX idx_fri_tenants_subdomain ON fri_tenants(subdomain);
     CREATE INDEX idx_fri_tenants_domain ON fri_tenants(domain);
-    CREATE INDEX idx_fri_tenants_status ON fri_tenants(status);
+    CREATE INDEX idx_fri_tenants_status ON fri_tenants([status]);
     
     PRINT 'fri_tenants table created';
 END
@@ -130,8 +130,8 @@ BEGIN
         slug,
         subdomain,
         domain,
-        plan,
-        status,
+        [plan],
+        [status],
         owner_email,
         cvr_number,
         trial_start_date,
@@ -212,4 +212,4 @@ PRINT '';
 PRINT '✅ Multi-tenant migration complete!';
 PRINT '';
 PRINT 'Tenant Information:';
-SELECT id, name, slug, subdomain, plan, status, owner_email, trial_end_date FROM fri_tenants WHERE id = 'tenant-martin-001';
+SELECT id, name, slug, subdomain, [plan], [status], owner_email, trial_end_date FROM fri_tenants WHERE id = 'tenant-martin-001';
