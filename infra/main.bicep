@@ -17,7 +17,7 @@ param githubBranch string = 'main'
 // Naming
 var resourceSuffix = '${projectName}-${environment}'
 var sqlServerName = 'sql-${uniqueString(resourceGroup().id)}-${environment}'
-var keyVaultName = 'kv-${uniqueString(resourceGroup().id)}-${environment}'
+var keyVaultName = 'kv-${uniqueString(subscription().id, resourceGroup().id, utcNow())}-${environment}'
 var storageAccountName = 'st${replace(projectName, '-', '')}${environment}'
 var functionAppName = 'func-${resourceSuffix}'
 var staticWebAppName = 'swa-${resourceSuffix}'
