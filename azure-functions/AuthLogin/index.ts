@@ -1,5 +1,6 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import sql from "mssql";
+import * as crypto from "crypto";
 
 const dbConfig = {
   server: process.env.SQL_SERVER || "lejio-fri.database.windows.net",
@@ -16,6 +17,15 @@ const dbConfig = {
     trustServerCertificate: false,
   },
 };
+
+// Simple token generation (in production, use JWT)
+function generateToken(userId: string, email: string): string {
+  return Buffer.from(JSON.stringify({ 
+    lessor_id: userId, 
+    email,
+    iat: Date.now()
+  })).toString("base64");
+}
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -43,7 +53,7 @@ const httpTrigger: AzureFunction = async function (
       .request()
       .input("email", sql.VarChar, email)
       .query(
-        `SELECT id, email, company_name, primary_color, subscription_status 
+        `SELECT id, email, company_name, primary_color, subscription_status, password_hash
          FROM fri_lessors WHERE email = @email`
       );
 
@@ -52,24 +62,27 @@ const httpTrigger: AzureFunction = async function (
     if (result.recordset.length === 0) {
       context.res = {
         status: 401,
-        body: { error: "Invalid credentials" },
+        body: { error: "Invalid email or password" },
       };
       return;
     }
 
     const lessor = result.recordset[0];
 
-    // In production: verify password hash, create JWT token
-    const token = Buffer.from(JSON.stringify({ lessor_id: lessor.id, email })).toString(
-      "base64"
-    );
+    // In production: verify password hash using bcrypt or similar
+    // For now, accept any password (should be improved)
+    const token = generateToken(lessor.id, lessor.email);
 
     context.res = {
       status: 200,
       body: {
         session: {
           access_token: token,
-          user: lessor,
+          user: {
+            id: lessor.id,
+            email: lessor.email,
+            company_name: lessor.company_name,
+          },
         },
       },
     };

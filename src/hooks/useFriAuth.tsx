@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 interface FriAuthUser {
   id: string;
   email: string;
+  company_name?: string;
   isLessor?: boolean;
 }
 
@@ -17,13 +18,13 @@ interface UseFriAuthReturn {
 
 /**
  * Hook for Lejio Fri authentication
- * Uses Supabase edge functions for auth
+ * Uses Azure Functions for auth endpoints
  */
 export function useFriAuth(): UseFriAuthReturn {
   const [user, setUser] = useState<FriAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://aqzggwewjttbkaqnbmrb.supabase.co';
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7071/api';
 
   // Check auth status on mount
   useEffect(() => {
@@ -36,7 +37,7 @@ export function useFriAuth(): UseFriAuthReturn {
           return;
         }
 
-        const response = await fetch(`${supabaseUrl}/functions/v1/fri-auth-me`, {
+        const response = await fetch(`${apiBaseUrl}/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -58,14 +59,14 @@ export function useFriAuth(): UseFriAuthReturn {
     };
 
     checkAuth();
-  }, [supabaseUrl]);
+  }, [apiBaseUrl]);
 
   const signUp = useCallback(
     async (email: string, password: string) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${supabaseUrl}/functions/v1/fri-auth-signup`, {
+        const response = await fetch(`${apiBaseUrl}/auth/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -73,11 +74,11 @@ export function useFriAuth(): UseFriAuthReturn {
 
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.message || 'Signup failed');
+          throw new Error(data.error || 'Signup failed');
         }
 
         const userData = await response.json();
-        // For signup, user needs to verify email, so we don't auto-login
+        // For signup, user needs email confirmation, so we don't auto-login
         setUser(null);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
@@ -87,7 +88,7 @@ export function useFriAuth(): UseFriAuthReturn {
         setLoading(false);
       }
     },
-    [supabaseUrl]
+    [apiBaseUrl]
   );
 
   const signIn = useCallback(
@@ -95,7 +96,7 @@ export function useFriAuth(): UseFriAuthReturn {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${supabaseUrl}/functions/v1/fri-auth-signin`, {
+        const response = await fetch(`${apiBaseUrl}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -103,7 +104,7 @@ export function useFriAuth(): UseFriAuthReturn {
 
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.message || 'Login failed');
+          throw new Error(data.error || 'Login failed');
         }
 
         const data = await response.json();
@@ -113,9 +114,9 @@ export function useFriAuth(): UseFriAuthReturn {
           localStorage.setItem('fri-auth-token', data.session.access_token);
         }
         
-        setUser({
-          id: data.id,
-          email: data.email,
+        setUser(data.session?.user || {
+          id: '',
+          email: email,
         });
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
@@ -125,16 +126,22 @@ export function useFriAuth(): UseFriAuthReturn {
         setLoading(false);
       }
     },
-    [supabaseUrl]
+    [apiBaseUrl]
   );
 
   const signOut = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      await fetch(`${supabaseUrl}/functions/v1/fri-auth-signout`, {
-        method: 'POST',
-      });
+      const token = localStorage.getItem('fri-auth-token');
+      if (token) {
+        await fetch(`${apiBaseUrl}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      }
       localStorage.removeItem('fri-auth-token');
       setUser(null);
     } catch (err) {
@@ -144,7 +151,7 @@ export function useFriAuth(): UseFriAuthReturn {
     } finally {
       setLoading(false);
     }
-  }, [supabaseUrl]);
+  }, [apiBaseUrl]);
 
   return {
     user,
