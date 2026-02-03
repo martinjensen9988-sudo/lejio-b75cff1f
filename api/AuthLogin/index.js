@@ -35,7 +35,7 @@ module.exports = async function (context, req) {
 
     if (!email) {
       context.res.status = 400;
-      context.res.body = { error: "Email required" };
+      context.res.body = JSON.stringify({ error: "Email required" });
       return;
     }
 
@@ -51,14 +51,15 @@ module.exports = async function (context, req) {
 
     if (result.recordset.length === 0 || password !== "test") {
       context.res.status = 401;
-      context.res.body = { error: "Invalid credentials" };
+      context.res.body = JSON.stringify({ error: "Invalid credentials" });
       return;
     }
 
     const user = result.recordset[0];
     const token = generateToken(user.id, user.email);
 
-    context.res.body = {
+    context.res.status = 200;
+    context.res.body = JSON.stringify({
       session: {
         access_token: token,
         user: {
@@ -67,9 +68,9 @@ module.exports = async function (context, req) {
           company_name: user.company_name,
         },
       },
-    };
+    });
   } catch (err) {
     context.res.status = 500;
-    context.res.body = { error: err.message };
+    context.res.body = JSON.stringify({ error: err.message });
   }
 };
