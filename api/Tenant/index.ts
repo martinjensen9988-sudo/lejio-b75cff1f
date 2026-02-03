@@ -1,4 +1,4 @@
-import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import sql from "mssql";
 
 const dbConfig = {
@@ -24,50 +24,46 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
-async function getTenant(
-  request: HttpRequest,
-  context: InvocationContext
-): Promise<HttpResponseInit> {
+const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
   context.log("Get tenant function triggered");
 
   try {
-    const subdomain = request.query.get("subdomain");
+    const subdomain = req.query.get("subdomain");
 
     if (!subdomain) {
-      return {
+      context.res = {
         status: 400,
         headers: corsHeaders,
         body: JSON.stringify({ error: "Subdomain parameter required" }),
       };
+      return;
     }
 
-    // Connect to Azure SQL Database
     const pool = new sql.ConnectionPool(dbConfig);
     await pool.connect();
 
-    // Query tenant from fri_lessors table
-    // For now, we use company_name as tenant name
     const result = await pool
       .request()
       .input("email", sql.VarChar, `test-${subdomain}@lejio.dk`)
       .query(
         `SELECT id, company_name as name, primary_color as primaryColor
-         FROM fri_lessors WHERE email = @email LIMIT 1`
+         FROM fri_lessors WHERE email = @email`
       );
 
     await pool.close();
 
     if (result.recordset.length === 0) {
-      return {
+      context.res = {
         status: 404,
         headers: corsHeaders,
         body: JSON.stringify({ error: "Tenant not found" }),
       };
+      return;
     }
 
     const tenantData = result.recordset[0];
 
-    return {
+    context.res = {
       status: 200,
       headers: corsHeaders,
       body: JSON.stringify({
@@ -84,17 +80,13 @@ async function getTenant(
       }),
     };
   } catch (error) {
-    context.error("Tenant error:", error);
-    return {
+    context.log.error("Tenant error:", error);
+    context.res = {
       status: 500,
       headers: corsHeaders,
       body: JSON.stringify({ error: "Internal server error", details: String(error) }),
     };
   }
-}
+};
 
-app.http("Tenant", {
-  methods: ["GET", "POST", "OPTIONS"],
-  authLevel: "anonymous",
-  handler: getTenant,
-});
+export default httpTrigger;

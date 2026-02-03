@@ -1,11 +1,10 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-import sql from "mssql";
+const sql = require('mssql');
 
 const dbConfig = {
   server: process.env.MSSQL_SERVER || "lejio-fri.database.windows.net",
   database: process.env.MSSQL_DATABASE || "lejio-fri",
   authentication: {
-    type: "default" as any,
+    type: "default",
     options: {
       userName: process.env.MSSQL_USER,
       password: process.env.MSSQL_PASSWORD,
@@ -15,9 +14,9 @@ const dbConfig = {
     encrypt: true,
     trustServerCertificate: false,
   },
-} as any;
+};
 
-function generateToken(userId: string, email: string): string {
+function generateToken(userId, email) {
   return Buffer.from(JSON.stringify({ 
     lessor_id: userId, 
     email,
@@ -25,18 +24,18 @@ function generateToken(userId: string, email: string): string {
   })).toString("base64");
 }
 
-const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Content-Type": "application/json",
+};
+
+module.exports = async function (context, req) {
   context.log("Auth login function triggered");
 
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Content-Type": "application/json",
-  };
-
   try {
-    const body = req.body as any || {};
+    const body = req.body || {};
     const { email, password } = body;
 
     if (!email) {
@@ -95,5 +94,3 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     };
   }
 };
-
-export default httpTrigger;

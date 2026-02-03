@@ -3,18 +3,11 @@
   "version": "1.0.0",
   "description": "Lejio Fri Azure Functions",
   "scripts": {
-    "build": "tsc",
+    "build": "echo 'No build needed for JavaScript'",
     "start": "func start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@azure/functions": "^4.5.0",
     "mssql": "^10.0.1"
-  },
-  "devDependencies": {
-    "@types/mssql": "^9.1.9",
-    "@types/node": "^20.0.0",
-    "@types/uuid": "^10.0.0",
-    "typescript": "^5.0.0"
   }
 }
