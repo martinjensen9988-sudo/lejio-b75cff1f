@@ -78,8 +78,8 @@ export function TenantSignupPage() {
     setIsLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7071/api';
-      const response = await fetch(`${apiUrl}/tenant/signup`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      const response = await fetch(`${apiUrl}/TenantSignup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

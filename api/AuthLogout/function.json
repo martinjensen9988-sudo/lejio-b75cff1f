@@ -4,9 +4,8 @@
       "authLevel": "anonymous",
       "type": "httpTrigger",
       "direction": "in",
-      "name": "request",
-      "methods": ["post"],
-      "route": "authlogout"
+      "name": "req",
+      "methods": ["post"]
     },
     {
       "type": "http",
