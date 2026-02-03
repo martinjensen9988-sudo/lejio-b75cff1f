@@ -17,246 +17,301 @@ PRINT '====== PART 1: INITIAL SCHEMA ======'
 -- 1. ADMIN TABLES
 -- ============================================================================
 
-CREATE TABLE fri_admins (
-    id NVARCHAR(36) PRIMARY KEY,
-    email NVARCHAR(255) UNIQUE NOT NULL,
-    admin_name NVARCHAR(255) NOT NULL,
-    admin_email NVARCHAR(255) UNIQUE NOT NULL,
-    is_super_admin BIT NOT NULL DEFAULT 0,
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE()
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_admins')
+BEGIN
+    CREATE TABLE fri_admins (
+        id NVARCHAR(36) PRIMARY KEY,
+        email NVARCHAR(255) UNIQUE NOT NULL,
+        admin_name NVARCHAR(255) NOT NULL,
+        admin_email NVARCHAR(255) UNIQUE NOT NULL,
+        is_super_admin BIT NOT NULL DEFAULT 0,
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+    );
 
-CREATE INDEX idx_fri_admins_email ON fri_admins(email);
-PRINT '✓ fri_admins created';
+    CREATE INDEX idx_fri_admins_email ON fri_admins(email);
+    PRINT '✓ fri_admins created';
+END
+ELSE
+    PRINT '⚠ fri_admins already exists';
 
 -- ============================================================================
 -- 2. LESSOR TABLES
 -- ============================================================================
 
-CREATE TABLE fri_lessors (
-    id NVARCHAR(36) PRIMARY KEY,
-    email NVARCHAR(255) UNIQUE NOT NULL,
-    company_name NVARCHAR(255) NOT NULL,
-    cvr_number NVARCHAR(50) UNIQUE,
-    custom_domain NVARCHAR(255) UNIQUE,
-    primary_color NVARCHAR(7) DEFAULT '#3b82f6',
-    logo_url NVARCHAR(MAX),
-    trial_start_date DATETIME2 NOT NULL,
-    trial_end_date DATETIME2 NOT NULL,
-    subscription_status NVARCHAR(50) NOT NULL DEFAULT 'trial',
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE()
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_lessors')
+BEGIN
+    CREATE TABLE fri_lessors (
+        id NVARCHAR(36) PRIMARY KEY,
+        email NVARCHAR(255) UNIQUE NOT NULL,
+        company_name NVARCHAR(255) NOT NULL,
+        cvr_number NVARCHAR(50) UNIQUE,
+        custom_domain NVARCHAR(255) UNIQUE,
+        primary_color NVARCHAR(7) DEFAULT '#3b82f6',
+        logo_url NVARCHAR(MAX),
+        trial_start_date DATETIME2 NOT NULL,
+        trial_end_date DATETIME2 NOT NULL,
+        subscription_status NVARCHAR(50) NOT NULL DEFAULT 'trial',
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+    );
 
-CREATE INDEX idx_fri_lessors_email ON fri_lessors(email);
-CREATE INDEX idx_fri_lessors_domain ON fri_lessors(custom_domain);
-CREATE INDEX idx_fri_lessors_status ON fri_lessors(subscription_status);
-PRINT '✓ fri_lessors created';
+    CREATE INDEX idx_fri_lessors_email ON fri_lessors(email);
+    CREATE INDEX idx_fri_lessors_domain ON fri_lessors(custom_domain);
+    CREATE INDEX idx_fri_lessors_status ON fri_lessors(subscription_status);
+    PRINT '✓ fri_lessors created';
+END
+ELSE
+    PRINT '⚠ fri_lessors already exists';
 
-CREATE TABLE fri_lessor_team_members (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    email NVARCHAR(255) NOT NULL,
-    name NVARCHAR(255) NOT NULL,
-    role NVARCHAR(50) NOT NULL,
-    status NVARCHAR(50) NOT NULL DEFAULT 'invited',
-    invited_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    accepted_at DATETIME2,
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
-    CONSTRAINT uq_team_member UNIQUE (lessor_id, email)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_lessor_team_members')
+BEGIN
+    CREATE TABLE fri_lessor_team_members (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        email NVARCHAR(255) NOT NULL,
+        name NVARCHAR(255) NOT NULL,
+        role NVARCHAR(50) NOT NULL,
+        status NVARCHAR(50) NOT NULL DEFAULT 'invited',
+        invited_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        accepted_at DATETIME2,
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
+        CONSTRAINT uq_team_member UNIQUE (lessor_id, email)
+    );
 
-CREATE INDEX idx_fri_team_lessor ON fri_lessor_team_members(lessor_id);
-CREATE INDEX idx_fri_team_email ON fri_lessor_team_members(email);
-PRINT '✓ fri_lessor_team_members created';
+    CREATE INDEX idx_fri_team_lessor ON fri_lessor_team_members(lessor_id);
+    CREATE INDEX idx_fri_team_email ON fri_lessor_team_members(email);
+    PRINT '✓ fri_lessor_team_members created';
+END
+ELSE
+    PRINT '⚠ fri_lessor_team_members already exists';
 
 -- ============================================================================
 -- 3. VEHICLE TABLES
 -- ============================================================================
 
-CREATE TABLE fri_vehicles (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    make NVARCHAR(100) NOT NULL,
-    model NVARCHAR(100) NOT NULL,
-    year INT NOT NULL,
-    license_plate NVARCHAR(50) UNIQUE NOT NULL,
-    vin NVARCHAR(50) UNIQUE,
-    daily_rate DECIMAL(10, 2) NOT NULL,
-    mileage_limit INT DEFAULT 300,
-    availability_status NVARCHAR(50) NOT NULL DEFAULT 'available',
-    last_mileage INT DEFAULT 0,
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_vehicles')
+BEGIN
+    CREATE TABLE fri_vehicles (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        make NVARCHAR(100) NOT NULL,
+        model NVARCHAR(100) NOT NULL,
+        year INT NOT NULL,
+        license_plate NVARCHAR(50) UNIQUE NOT NULL,
+        vin NVARCHAR(50) UNIQUE,
+        daily_rate DECIMAL(10, 2) NOT NULL,
+        mileage_limit INT DEFAULT 300,
+        availability_status NVARCHAR(50) NOT NULL DEFAULT 'available',
+        last_mileage INT DEFAULT 0,
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
 
-CREATE INDEX idx_fri_vehicles_lessor ON fri_vehicles(lessor_id);
-CREATE INDEX idx_fri_vehicles_plate ON fri_vehicles(license_plate);
-CREATE INDEX idx_fri_vehicles_status ON fri_vehicles(availability_status);
-PRINT '✓ fri_vehicles created';
+    CREATE INDEX idx_fri_vehicles_lessor ON fri_vehicles(lessor_id);
+    CREATE INDEX idx_fri_vehicles_plate ON fri_vehicles(license_plate);
+    CREATE INDEX idx_fri_vehicles_status ON fri_vehicles(availability_status);
+    PRINT '✓ fri_vehicles created';
+END
+ELSE
+    PRINT '⚠ fri_vehicles already exists';
 
 -- ============================================================================
 -- 4. BOOKING TABLES
 -- ============================================================================
 
-CREATE TABLE fri_bookings (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    vehicle_id UNIQUEIDENTIFIER NOT NULL,
-    customer_name NVARCHAR(255) NOT NULL,
-    email NVARCHAR(255) NOT NULL,
-    phone NVARCHAR(20),
-    start_date DATETIME2 NOT NULL,
-    end_date DATETIME2 NOT NULL,
-    rental_days INT NOT NULL,
-    daily_rate DECIMAL(10, 2) NOT NULL,
-    total_price DECIMAL(10, 2) NOT NULL,
-    [status] NVARCHAR(50) NOT NULL DEFAULT 'pending',
-    notes NVARCHAR(MAX),
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
-    FOREIGN KEY (vehicle_id) REFERENCES fri_vehicles(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_bookings')
+BEGIN
+    CREATE TABLE fri_bookings (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        vehicle_id UNIQUEIDENTIFIER NOT NULL,
+        customer_name NVARCHAR(255) NOT NULL,
+        email NVARCHAR(255) NOT NULL,
+        phone NVARCHAR(20),
+        start_date DATETIME2 NOT NULL,
+        end_date DATETIME2 NOT NULL,
+        rental_days INT NOT NULL,
+        daily_rate DECIMAL(10, 2) NOT NULL,
+        total_price DECIMAL(10, 2) NOT NULL,
+        [status] NVARCHAR(50) NOT NULL DEFAULT 'pending',
+        notes NVARCHAR(MAX),
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
+        FOREIGN KEY (vehicle_id) REFERENCES fri_vehicles(id)
+    );
 
-CREATE INDEX idx_fri_bookings_lessor ON fri_bookings(lessor_id);
-CREATE INDEX idx_fri_bookings_vehicle ON fri_bookings(vehicle_id);
-CREATE INDEX idx_fri_bookings_status ON fri_bookings([status]);
-CREATE INDEX idx_fri_bookings_dates ON fri_bookings(start_date, end_date);
-PRINT '✓ fri_bookings created';
+    CREATE INDEX idx_fri_bookings_lessor ON fri_bookings(lessor_id);
+    CREATE INDEX idx_fri_bookings_vehicle ON fri_bookings(vehicle_id);
+    CREATE INDEX idx_fri_bookings_status ON fri_bookings([status]);
+    CREATE INDEX idx_fri_bookings_dates ON fri_bookings(start_date, end_date);
+    PRINT '✓ fri_bookings created';
+END
+ELSE
+    PRINT '⚠ fri_bookings already exists';
 
 -- ============================================================================
 -- 5. INVOICE TABLES
 -- ============================================================================
 
-CREATE TABLE fri_invoices (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    booking_id UNIQUEIDENTIFIER,
-    invoice_number NVARCHAR(50) UNIQUE NOT NULL,
-    customer_name NVARCHAR(255) NOT NULL,
-    email NVARCHAR(255) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    tax_amount DECIMAL(10, 2) DEFAULT 0,
-    total_amount DECIMAL(10, 2) NOT NULL,
-    [status] NVARCHAR(50) NOT NULL DEFAULT 'draft',
-    payment_method NVARCHAR(50),
-    payment_date DATETIME2,
-    due_date DATETIME2,
-    notes NVARCHAR(MAX),
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
-    FOREIGN KEY (booking_id) REFERENCES fri_bookings(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_invoices')
+BEGIN
+    CREATE TABLE fri_invoices (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        booking_id UNIQUEIDENTIFIER,
+        invoice_number NVARCHAR(50) UNIQUE NOT NULL,
+        customer_name NVARCHAR(255) NOT NULL,
+        email NVARCHAR(255) NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        tax_amount DECIMAL(10, 2) DEFAULT 0,
+        total_amount DECIMAL(10, 2) NOT NULL,
+        [status] NVARCHAR(50) NOT NULL DEFAULT 'draft',
+        payment_method NVARCHAR(50),
+        payment_date DATETIME2,
+        due_date DATETIME2,
+        notes NVARCHAR(MAX),
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
+        FOREIGN KEY (booking_id) REFERENCES fri_bookings(id)
+    );
 
-CREATE INDEX idx_fri_invoices_lessor ON fri_invoices(lessor_id);
-CREATE INDEX idx_fri_invoices_status ON fri_invoices([status]);
-CREATE INDEX idx_fri_invoices_number ON fri_invoices(invoice_number);
-PRINT '✓ fri_invoices created';
+    CREATE INDEX idx_fri_invoices_lessor ON fri_invoices(lessor_id);
+    CREATE INDEX idx_fri_invoices_status ON fri_invoices([status]);
+    CREATE INDEX idx_fri_invoices_number ON fri_invoices(invoice_number);
+    PRINT '✓ fri_invoices created';
+END
+ELSE
+    PRINT '⚠ fri_invoices already exists';
 
 -- ============================================================================
 -- 6. PAYMENT TABLES
 -- ============================================================================
 
-CREATE TABLE fri_payments (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    currency NVARCHAR(3) DEFAULT 'DKK',
-    [status] NVARCHAR(50) NOT NULL DEFAULT 'pending',
-    payment_method NVARCHAR(50) NOT NULL,
-    subscription_type NVARCHAR(50) NOT NULL,
-    reference NVARCHAR(255),
-    notes NVARCHAR(MAX),
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    paid_at DATETIME2,
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_payments')
+BEGIN
+    CREATE TABLE fri_payments (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        currency NVARCHAR(3) DEFAULT 'DKK',
+        [status] NVARCHAR(50) NOT NULL DEFAULT 'pending',
+        payment_method NVARCHAR(50) NOT NULL,
+        subscription_type NVARCHAR(50) NOT NULL,
+        reference NVARCHAR(255),
+        notes NVARCHAR(MAX),
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        paid_at DATETIME2,
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
 
-CREATE INDEX idx_fri_payments_lessor ON fri_payments(lessor_id);
-CREATE INDEX idx_fri_payments_status ON fri_payments([status]);
-PRINT '✓ fri_payments created';
+    CREATE INDEX idx_fri_payments_lessor ON fri_payments(lessor_id);
+    CREATE INDEX idx_fri_payments_status ON fri_payments([status]);
+    PRINT '✓ fri_payments created';
+END
+ELSE
+    PRINT '⚠ fri_payments already exists';
 
 -- ============================================================================
 -- 7. SUPPORT TABLES
 -- ============================================================================
 
-CREATE TABLE fri_support_tickets (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    subject NVARCHAR(255) NOT NULL,
-    description NVARCHAR(MAX) NOT NULL,
-    category NVARCHAR(50) NOT NULL DEFAULT 'other',
-    [status] NVARCHAR(50) NOT NULL DEFAULT 'open',
-    priority NVARCHAR(50) NOT NULL DEFAULT 'medium',
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_support_tickets')
+BEGIN
+    CREATE TABLE fri_support_tickets (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        subject NVARCHAR(255) NOT NULL,
+        description NVARCHAR(MAX) NOT NULL,
+        category NVARCHAR(50) NOT NULL DEFAULT 'other',
+        [status] NVARCHAR(50) NOT NULL DEFAULT 'open',
+        priority NVARCHAR(50) NOT NULL DEFAULT 'medium',
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
 
-CREATE INDEX idx_fri_tickets_lessor ON fri_support_tickets(lessor_id);
-CREATE INDEX idx_fri_tickets_status ON fri_support_tickets([status]);
-CREATE INDEX idx_fri_tickets_priority ON fri_support_tickets(priority);
-PRINT '✓ fri_support_tickets created';
+    CREATE INDEX idx_fri_tickets_lessor ON fri_support_tickets(lessor_id);
+    CREATE INDEX idx_fri_tickets_status ON fri_support_tickets([status]);
+    CREATE INDEX idx_fri_tickets_priority ON fri_support_tickets(priority);
+    PRINT '✓ fri_support_tickets created';
+END
+ELSE
+    PRINT '⚠ fri_support_tickets already exists';
 
-CREATE TABLE fri_ticket_messages (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    ticket_id UNIQUEIDENTIFIER NOT NULL,
-    sender_id NVARCHAR(36) NOT NULL,
-    sender_type NVARCHAR(50) NOT NULL,
-    message NVARCHAR(MAX) NOT NULL,
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (ticket_id) REFERENCES fri_support_tickets(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_ticket_messages')
+BEGIN
+    CREATE TABLE fri_ticket_messages (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        ticket_id UNIQUEIDENTIFIER NOT NULL,
+        sender_id NVARCHAR(36) NOT NULL,
+        sender_type NVARCHAR(50) NOT NULL,
+        message NVARCHAR(MAX) NOT NULL,
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (ticket_id) REFERENCES fri_support_tickets(id)
+    );
 
-CREATE INDEX idx_fri_messages_ticket ON fri_ticket_messages(ticket_id);
-PRINT '✓ fri_ticket_messages created';
+    CREATE INDEX idx_fri_messages_ticket ON fri_ticket_messages(ticket_id);
+    PRINT '✓ fri_ticket_messages created';
+END
+ELSE
+    PRINT '⚠ fri_ticket_messages already exists';
 
 -- ============================================================================
 -- 8. API KEYS TABLE
 -- ============================================================================
 
-CREATE TABLE fri_api_keys (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    name NVARCHAR(255) NOT NULL,
-    [key] NVARCHAR(255) UNIQUE NOT NULL,
-    [status] NVARCHAR(50) NOT NULL DEFAULT 'active',
-    last_used_at DATETIME2,
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    expires_at DATETIME2,
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_api_keys')
+BEGIN
+    CREATE TABLE fri_api_keys (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        name NVARCHAR(255) NOT NULL,
+        [key] NVARCHAR(255) UNIQUE NOT NULL,
+        [status] NVARCHAR(50) NOT NULL DEFAULT 'active',
+        last_used_at DATETIME2,
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        expires_at DATETIME2,
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
 
-CREATE INDEX idx_fri_api_keys_lessor ON fri_api_keys(lessor_id);
-CREATE INDEX idx_fri_api_keys_key ON fri_api_keys([key]);
-PRINT '✓ fri_api_keys created';
+    CREATE INDEX idx_fri_api_keys_lessor ON fri_api_keys(lessor_id);
+    CREATE INDEX idx_fri_api_keys_key ON fri_api_keys([key]);
+    PRINT '✓ fri_api_keys created';
+END
+ELSE
+    PRINT '⚠ fri_api_keys already exists';
 
 -- ============================================================================
 -- 9. AUDIT LOG TABLE
 -- ============================================================================
 
-CREATE TABLE fri_audit_logs (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36),
-    user_id NVARCHAR(36),
-    action NVARCHAR(100) NOT NULL,
-    entity_type NVARCHAR(100),
-    entity_id NVARCHAR(MAX),
-    changes NVARCHAR(MAX),
-    ip_address NVARCHAR(50),
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
-);
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'fri_audit_logs')
+BEGIN
+    CREATE TABLE fri_audit_logs (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36),
+        user_id NVARCHAR(36),
+        action NVARCHAR(100) NOT NULL,
+        entity_type NVARCHAR(100),
+        entity_id NVARCHAR(MAX),
+        changes NVARCHAR(MAX),
+        ip_address NVARCHAR(50),
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
 
-CREATE INDEX idx_fri_audit_lessor ON fri_audit_logs(lessor_id);
-CREATE INDEX idx_fri_audit_date ON fri_audit_logs(created_at);
-PRINT '✓ fri_audit_logs created';
+    CREATE INDEX idx_fri_audit_lessor ON fri_audit_logs(lessor_id);
+    CREATE INDEX idx_fri_audit_date ON fri_audit_logs(created_at);
+    PRINT '✓ fri_audit_logs created';
+END
+ELSE
+    PRINT '⚠ fri_audit_logs already exists';
 
 PRINT ''
 PRINT '====== PART 2: MULTI-TENANT SCHEMA ======'
