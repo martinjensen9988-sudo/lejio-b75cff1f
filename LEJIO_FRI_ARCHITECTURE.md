@@ -316,3 +316,235 @@ curl "https://zealous-stone-04c86dd03.2.azurestaticapps.net/api/GetPages?lessor_
 **Last Updated:** 2026-02-03
 **Status:** Deployment ready, PageBuilder API endpoints working, persistent storage needed
 **Next AI:** Read this file for full context before continuing development
+
+## 11. DEVELOPMENT SETUP & COMMANDS
+
+**Installation:**
+```bash
+cd /workspaces/lejio-b75cff1f
+npm install
+npm run dev
+```
+
+**Available Commands:**
+- `npm run dev` - Start development server (Vite)
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint
+
+**Development Server:**
+- Local: http://localhost:5173 (Vite dev server)
+- Frontend is auto-reloading on file changes
+
+## 12. CRITICAL CONSTRAINTS & RULES
+
+⚠️ **MUST FOLLOW THESE:**
+
+1. **Database Technology:**
+   - ✅ USE ONLY: Azure SQL Database
+   - ❌ DO NOT USE: Supabase (explicitly forbidden)
+   - ❌ DO NOT USE: Firebase, MongoDB, PostgreSQL (unless via Azure)
+
+2. **Styling:**
+   - USE: Tailwind CSS utility classes
+   - USE: shadcn-ui components from `src/components/ui/`
+   - DO NOT: Write custom CSS unless absolutely necessary
+
+3. **Authentication:**
+   - Mock test user: `martin@lejio.dk` / `test`
+   - Token stored: localStorage as `fri-auth-token`
+   - Bearer token in Authorization header for API calls
+   - Token format: Base64 JSON with `lessor_id`, `email`, `iat`
+
+4. **API Endpoints:**
+   - All backend code in `/api/` folder
+   - Each endpoint has: `function.json` (config) + `index.js` (handler)
+   - Frontend calls via `/api/EndpointName` (no /api/EndpointName/)
+   - All endpoints return JSON
+
+5. **Imports:**
+   - Use `@/` alias for `src/` (configured in vite.config.ts)
+   - Example: `import { useAuth } from '@/hooks/useAuth'`
+
+6. **Copilot Optimization (CRITICAL):**
+   - ❌ NEVER use: `read_file`, `grep_search`, `file_search` tools
+   - ✅ USE ONLY: terminal commands (`cat`, `sed`, `awk`, `git`, `npm`, `curl`)
+   - Reason: File tools cause 400 timeout errors
+   - Config files: `.copilotignore`, `.vscode/settings.json`, `.devcontainer/devcontainer.json`
+
+7. **Component Structure:**
+   - Pages: `src/pages/path/ComponentName.tsx` (PascalCase)
+   - Hooks: `src/hooks/useHookName.ts` (camelCase)
+   - Components: `src/components/ComponentName.tsx` (PascalCase)
+   - Lazy load pages in App.tsx for performance
+
+## 13. PRODUCTION DEPLOYMENT
+
+**Hosting:** Azure Static Web Apps
+- **Domain:** https://zealous-stone-04c86dd03.2.azurestaticapps.net
+- **Auto-deploy:** On every push to main branch via GitHub Actions
+- **Deployment time:** ~2 minutes
+- **Workflow file:** `.github/workflows/azure-static-web-apps-deploy.yml`
+
+**How to Deploy:**
+1. Make changes in local git
+2. Commit to main branch: `git commit -m "message"`
+3. Push to GitHub: `git push origin main`
+4. GitHub Actions automatically builds and deploys
+5. Check status in GitHub Actions tab
+
+**Pre-deployment:**
+- Run `npm run lint` to check for errors
+- Verify API endpoints are working
+- Test in local dev server first
+
+## 14. AUTHENTICATION FLOW
+
+```
+┌─────────────────────────────────────┐
+│    User visits /fri/login           │
+└────────────┬────────────────────────┘
+             │
+             ↓
+┌─────────────────────────────────────┐
+│  LoginPage.tsx component            │
+│  (form for email/password)          │
+└────────────┬────────────────────────┘
+             │
+             ↓
+┌─────────────────────────────────────┐
+│  POST /api/AuthLogin                │
+│  (validate credentials)             │
+└────────────┬────────────────────────┘
+             │
+             ↓
+┌─────────────────────────────────────┐
+│  Returns: { access_token, user }    │
+│  Token saved to localStorage        │
+└────────────┬────────────────────────┘
+             │
+             ↓
+┌─────────────────────────────────────┐
+│  FriAuthProvider wraps app          │
+│  useFriAuthContext() to access user │
+└────────────┬────────────────────────┘
+             │
+             ↓
+┌─────────────────────────────────────┐
+│  Protected routes check auth        │
+│  Redirect to login if not authed    │
+└─────────────────────────────────────┘
+```
+
+## 15. KNOWN ISSUES & SOLUTIONS
+
+### Issue 1: Copilot Timeout Errors
+**Problem:** "The request timed out while trying to download the file"
+**Root Cause:** Using `read_file`, `grep_search`, `file_search` tools
+**Solution:** Only use terminal commands (`cat`, `sed`, `awk`, `grep` in terminal)
+**Prevention:** Use `.copilotignore` to exclude large files
+
+### Issue 2: Dashboard Components Errors
+**Problem:** Dashboard throws "Noget gik galt" error
+**Root Cause:** Sub-components need database APIs not yet implemented
+**Solution:** Remove problematic components until database is ready
+**Status:** ✅ Fixed in current version
+
+### Issue 3: Missing BrandProvider
+**Problem:** useBrand() hook errors if not wrapped in provider
+**Root Cause:** Component used outside provider context
+**Solution:** Wrap dashboard route in `<BrandProvider>`
+**Status:** ✅ Fixed in current version
+
+### Issue 4: Persistent Storage
+**Problem:** Pages and blocks not persisting across sessions
+**Root Cause:** Currently using in-memory storage
+**Solution:** Connect API endpoints to Azure SQL database
+**Status:** 🟡 In progress - migration ready, needs connection
+
+## 16. TEAM & COLLABORATION
+
+**Repository:**
+- GitHub: https://github.com/martinjensen9988-sudo/lejio-b75cff1f
+- Branch: main (default)
+- CI/CD: GitHub Actions (automatic Azure deployment)
+
+**Handoff Instructions:**
+- New developers must read LEJIO_FRI_ARCHITECTURE.md first
+- Use Azure SQL ONLY (never Supabase)
+- Follow all constraints in section 12
+- Use terminal commands, never file tools
+- Test locally before pushing
+- Push to main triggers automatic deployment
+
+## 17. TESTING CHECKLIST
+
+### Frontend Testing:
+- [ ] Login page loads
+- [ ] Can login with martin@lejio.dk / test
+- [ ] Dashboard displays after login
+- [ ] "📄 Lav Hjemmeside" button visible and clickable
+- [ ] Navigates to PageBuilder on button click
+- [ ] PageBuilder UI loads
+- [ ] Can create new page
+- [ ] Can add blocks to page
+- [ ] Can drag-drop blocks (when implemented)
+- [ ] Can save/publish page
+
+### Backend Testing:
+- [ ] GET /api/AuthMe returns user data
+- [ ] POST /api/CreatePage accepts page data
+- [ ] GET /api/GetPages returns pages for lessor
+- [ ] PUT /api/UpdatePage updates page
+- [ ] DELETE /api/DeletePage removes page
+- [ ] POST /api/AddPageBlock adds block
+- [ ] PUT /api/UpdatePageBlock updates block
+- [ ] DELETE /api/DeletePageBlock removes block
+
+### Database Testing:
+- [ ] Pages persist after refresh
+- [ ] Blocks persist in database
+- [ ] Multiple pages can be created per lessor
+- [ ] Pages are isolated by lessor_id
+
+## 18. QUICK REFERENCE
+
+**Test User:**
+- Email: martin@lejio.dk
+- Password: test
+
+**Production URL:**
+- https://zealous-stone-04c86dd03.2.azurestaticapps.net
+
+**Key Files:**
+- Frontend auth: `src/hooks/useFriAuthContext.tsx`
+- PageBuilder hook: `src/hooks/usePages.tsx`
+- Dashboard: `src/pages/fri/dashboard/Dashboard.tsx`
+- Block components: `src/components/BlockComponents.tsx`
+- API config: `src/integrations/azure/client.ts`
+- Database migrations: `supabase/migrations/20260203_create_lessor_pages.sql`
+
+**Key Endpoints:**
+- POST /api/AuthLogin - Login
+- GET /api/AuthMe - Check session
+- GET /api/GetPages - List pages
+- POST /api/CreatePage - Create page
+- POST /api/AddPageBlock - Add block to page
+
+**NPM Commands:**
+- `npm run dev` - Start dev server
+- `npm run build` - Build production
+- `npm run lint` - Check for errors
+
+---
+
+**IMPORTANT:** This is a complete specification. Any future development must:
+1. Read this entire document first
+2. Follow all constraints (especially Azure SQL, no Supabase)
+3. Use terminal commands only (no file tools)
+4. Test before pushing to main
+5. Auto-deployment triggers on push
+
+**Last Updated:** 2026-02-03
+**Completeness:** 100% - All planned features documented
+**Next Developer:** Read sections 1-4, then 12, then dive into specific feature
