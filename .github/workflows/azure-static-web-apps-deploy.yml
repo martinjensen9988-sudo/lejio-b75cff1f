@@ -37,7 +37,7 @@ jobs:
           action: "upload"
           app_location: "dist"
           api_location: "api"
-          skip_app_build: falsse
+          skip_app_build: false
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -48,6 +48,6 @@ jobs:
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: e8ce9a859c2aea7447816fc71eff9c46f769d91da50c70b337fb73516c7ef21b02-e819a58e-7f7d-4478-9ce8-f08ab63d6
+          azure_static_web_apps_api_token: 43a41d7f029531b6a5c19590be0f0ab3b37015996d9621d5c6d0ddfe7010d71302-bdd2e150-80af-4e7d-bd94-869badafab0e003311904c86dd03
           app_location: "dist"
           action: "close"
