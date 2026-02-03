@@ -9,6 +9,7 @@ export function FriDashboard() {
   const { companyName } = useBrand();
   const navigate = useNavigate();
 
+  const handlePageBuilder = () => navigate('/dashboard/pages');
   const handleLogout = async () => {
     await signOut();
     navigate('/fri');
@@ -57,6 +58,9 @@ export function FriDashboard() {
           <div className="flex items-center gap-4">
             <span className="text-gray-600">Hej, {user.email}</span>
             <Button variant="outline" size="sm" onClick={handleLogout}>
+            <Button variant="outline" size="sm" onClick={handlePageBuilder}>
+              📄 Lav Hjemmeside
+            </Button>
               Log ud
             </Button>
           </div>
