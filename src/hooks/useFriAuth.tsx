@@ -18,13 +18,14 @@ interface UseFriAuthReturn {
 
 /**
  * Hook for Lejio Fri authentication
- * Uses Azure Functions for auth endpoints
+ * Uses Azure Functions via Static Web Apps API routing
  */
 export function useFriAuth(): UseFriAuthReturn {
   const [user, setUser] = useState<FriAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7071/api';
+  // Use relative /api path which Azure Static Web Apps will proxy to Azure Functions
+  const apiBaseUrl = '/api';
 
   // Check auth status on mount
   useEffect(() => {

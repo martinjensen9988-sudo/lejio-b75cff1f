@@ -69,7 +69,7 @@ const PageLoader = () => (
 const App = forwardRef((props, ref) => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <TenantProvider apiBaseUrl={import.meta.env.VITE_API_URL || 'http://localhost:7071/api'}>
+      <TenantProvider apiBaseUrl="/api">
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
