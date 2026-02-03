@@ -17,6 +17,7 @@ const FriFeaturesPage = lazy(() => import("./pages/fri/FeaturesPage").then(m => 
 const FriLoginPage = lazy(() => import("./pages/fri/auth/LoginPage").then(m => ({ default: m.FriLoginPage })));
 const FriSignupPage = lazy(() => import("./pages/fri/auth/SignupPage").then(m => ({ default: m.FriSignupPage })));
 const FriDashboard = lazy(() => import("./pages/fri/dashboard/Dashboard").then(m => ({ default: m.FriDashboard })));
+const TenantSignupPage = lazy(() => import("./pages/fri/tenant/SignupPage").then(m => ({ default: m.TenantSignupPage })));
 
 // Lejio Fri Admin - lazy loaded
 const FriAdminLoginPage = lazy(() => import("./pages/fri/admin/LoginPage").then(m => ({ default: m.FriAdminLoginPage })));
@@ -82,6 +83,7 @@ const App = forwardRef((props, ref) => (
                 <Route path="/fri/features" element={<FriFeaturesPage />} />
                 <Route path="/fri/login" element={<FriLoginPage />} />
                 <Route path="/fri/signup" element={<FriSignupPage />} />
+                <Route path="/fri/tenant/signup" element={<TenantSignupPage />} />
                 <Route path="/fri/dashboard" element={<FriDashboard />} />
                 
                 {/* Lejio Fri Admin */}
