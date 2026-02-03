@@ -38,7 +38,7 @@ export function useFriAuth(): UseFriAuthReturn {
           return;
         }
 
-        const response = await fetch(`${apiBaseUrl}/auth/me`, {
+        const response = await fetch(`${apiBaseUrl}/authme`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -67,7 +67,7 @@ export function useFriAuth(): UseFriAuthReturn {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${apiBaseUrl}/auth/signup`, {
+        const response = await fetch(`${apiBaseUrl}/authsignup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -97,7 +97,7 @@ export function useFriAuth(): UseFriAuthReturn {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${apiBaseUrl}/auth/login`, {
+        const response = await fetch(`${apiBaseUrl}/authlogin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -136,7 +136,7 @@ export function useFriAuth(): UseFriAuthReturn {
     try {
       const token = localStorage.getItem('fri-auth-token');
       if (token) {
-        await fetch(`${apiBaseUrl}/auth/logout`, {
+        await fetch(`${apiBaseUrl}/authlogout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
