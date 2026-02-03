@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
+import { TenantProvider } from "@/hooks/useTenant";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import NotFound from "./pages/NotFound";
 
@@ -66,13 +67,14 @@ const PageLoader = () => (
 const App = forwardRef((props, ref) => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
+      <TenantProvider apiBaseUrl={import.meta.env.VITE_API_URL || 'http://localhost:7071/api'}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
                 {/* Lejio Fri - Main Platform */}
                 <Route path="/" element={<Navigate to="/fri" replace />} />
                 <Route path="/fri" element={<FriLandingPage />} />
@@ -112,6 +114,7 @@ const App = forwardRef((props, ref) => (
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
+        </TenantProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 ));
