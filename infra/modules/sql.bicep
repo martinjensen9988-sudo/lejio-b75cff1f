@@ -17,6 +17,10 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
     version: '12.0'
     publicNetworkAccess: 'Enabled'
     minimalTlsVersion: '1.2'
+    administrators: {
+      login: adminUsername
+      administratorType: 'ActiveDirectory'
+    }
   }
 }
 
