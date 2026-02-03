@@ -8,6 +8,11 @@
   },
   "routes": [
     {
+      "route": "/api/auth/session",
+      "rewrite": "/api/AuthSession",
+      "statusCode": 200
+    },
+    {
       "route": "/",
       "redirect": "/fri/",
       "statusCode": 301
