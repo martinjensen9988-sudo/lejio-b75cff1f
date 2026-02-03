@@ -15,7 +15,12 @@
       "value": "sqladmin"
     },
     "sqlAdminPassword": {
-      "value": "ChangeMe@Azure123!SecurePassword"
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{keyVaultName}"
+        },
+        "secretName": "sql-admin-password"
+      }
     },
     "githubRepo": {
       "value": "martinjensen9988-sudo/lejio-b75cff1f"

@@ -33,6 +33,9 @@ const FriAdminLayout = lazy(() => import("./pages/fri/admin/Layout").then(m => (
 
 // Fri Lessor Pages - lazy loaded
 const FriApiKeysPage = lazy(() => import("./pages/fri/dashboard/ApiKeysPage").then(m => ({ default: m.FriApiKeysPage })));
+const FriTeamManagement = lazy(() => import("./pages/fri/dashboard/FriTeamManagement").then(m => ({ default: m.default })));
+const FriLessorDashboard = lazy(() => import("./pages/fri/dashboard/FriLessorDashboard").then(m => ({ default: m.default })));
+const FriInvoiceManagement = lazy(() => import("./pages/fri/dashboard/FriInvoiceManagement").then(m => ({ default: m.default })));
 
 // Page Builder - lazy loaded
 const PagesDashboard = lazy(() => import("./pages/dashboard/PagesDashboard").then(m => ({ default: m.PagesDashboard })));
@@ -90,6 +93,27 @@ const App = forwardRef((props, ref) => (
                   <BrandProvider branding={{ primary_color: '#0066cc', secondary_color: '#00cc99', company_name: 'Lejio Fri' }} domain="fri">
                     <FriAuthProvider>
                       <FriDashboard />
+                    </FriAuthProvider>
+                  </BrandProvider>
+                } />
+                <Route path="/fri/dashboard/team" element={
+                  <BrandProvider branding={{ primary_color: '#0066cc', secondary_color: '#00cc99', company_name: 'Lejio Fri' }} domain="fri">
+                    <FriAuthProvider>
+                      <FriTeamManagement />
+                    </FriAuthProvider>
+                  </BrandProvider>
+                } />
+                <Route path="/fri/dashboard/analytics" element={
+                  <BrandProvider branding={{ primary_color: '#0066cc', secondary_color: '#00cc99', company_name: 'Lejio Fri' }} domain="fri">
+                    <FriAuthProvider>
+                      <FriLessorDashboard />
+                    </FriAuthProvider>
+                  </BrandProvider>
+                } />
+                <Route path="/fri/dashboard/invoices" element={
+                  <BrandProvider branding={{ primary_color: '#0066cc', secondary_color: '#00cc99', company_name: 'Lejio Fri' }} domain="fri">
+                    <FriAuthProvider>
+                      <FriInvoiceManagement />
                     </FriAuthProvider>
                   </BrandProvider>
                 } />

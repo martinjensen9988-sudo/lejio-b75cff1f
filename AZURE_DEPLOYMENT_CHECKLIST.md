@@ -1,34 +1,36 @@
-# Azure Deployment Checklist for Lejio Fri
+# 🚀 Azure Deployment Checklist for Lejio Fri
 
-## Pre-Deployment Setup
+## ✅ Completed Setup
+
+### Infrastructure Files (Bicep IaC)
+- ✅ `infra/main.bicep` - Main template (updated)
+- ✅ `infra/main.parameters.json` - Parameters (updated to use Key Vault)
+- ✅ `infra/modules/sql.bicep` - SQL Database with security
+- ✅ `infra/modules/functions.bicep` - Azure Functions
+- ✅ `infra/modules/staticwebapp.bicep` - Static Web App
+- ✅ `infra/modules/storage.bicep` - Storage Account
+- ✅ `infra/modules/keyvault.bicep` - Key Vault with purge protection
+
+### Database Schema
+- ✅ `infra/migrations/001-init-fri-schema.sql` - Complete 13 tables with indexes
+
+### Configuration
+- ✅ `azure.yaml` - Azure Developer CLI config
+- ✅ `.env.azure.example` - Environment template
+- ✅ `AZURE_SETUP_GUIDE.md` - Step-by-step guide
+
+### Application
+- ✅ Build successful (10.93s, 0 errors)
+- ✅ All features working and integrated
+
+## 🎯 How to Deploy
 
 ### Prerequisites
-- [ ] Azure Subscription created and active
+- [ ] Azure Subscription
 - [ ] Azure CLI installed (`az --version`)
-- [ ] Bicep CLI installed (`az bicep --version`)
-- [ ] GitHub Personal Access Token created
-- [ ] Node.js 18+ installed
-- [ ] Azure Functions Core Tools installed
-
-### Azure Account
-- [ ] Login: `az login` ✅
-- [ ] Set subscription: `az account set --subscription <ID>` ✅
-- [ ] Verify: `az account show`
-
-## Infrastructure Deployment
-
-### Step 1: Prepare Parameters
-- [ ] Copy `infra/main.parameters.json` to safe location
-- [ ] Update SQL admin password (generate strong one)
-- [ ] Verify GitHub repo path is correct
-- [ ] Verify region (eastus, westeurope, etc.)
-
-### Step 2: Create Resource Group
-```bash
-az group create \
-  --name lejio-fri-rg \
-  --location eastus
-```
+- [ ] Azure Developer CLI installed (`azd --version`)
+- [ ] Node.js 18+ (`node --version`)
+- [ ] GitHub access
 - [ ] Resource group created
 
 ### Step 3: Validate Deployment

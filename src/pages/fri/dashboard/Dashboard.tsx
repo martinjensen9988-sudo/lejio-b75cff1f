@@ -125,21 +125,45 @@ export function FriDashboard() {
           {/* Invoices Tab */}
           <TabsContent value="invoices">
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Invoicer kommer snart...</p>
+              <h2 className="text-xl font-semibold mb-4">Fakturaer</h2>
+              <p className="text-gray-600 mb-6">Se og administrer alle dine fakturaer her. Track betalingsstatus, generer rapporter og download PDF.</p>
+              <Button 
+                size="lg"
+                onClick={() => navigate('/fri/dashboard/invoices')}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                📋 Se Fakturaer
+              </Button>
             </div>
           </TabsContent>
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Analytik kommer snart...</p>
+              <h2 className="text-xl font-semibold mb-4">Analytik & Omsætning</h2>
+              <p className="text-gray-600 mb-6">Få indsigt i din virksomheds performance. Se omsætning, udnyttelsesgrader og trends for hver køretøj.</p>
+              <Button 
+                size="lg"
+                onClick={() => navigate('/fri/dashboard/analytics')}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                📊 Se Analytik
+              </Button>
             </div>
           </TabsContent>
 
           {/* Team Tab */}
           <TabsContent value="team">
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Team administation kommer snart...</p>
+              <h2 className="text-xl font-semibold mb-4">Teammedlemmer</h2>
+              <p className="text-gray-600 mb-6">Administrer dine teammedlemmer. Tilføj medarbejdere, sæt roller (manager, chauffør, mekaniker) og styrer adgang.</p>
+              <Button 
+                size="lg"
+                onClick={() => navigate('/fri/dashboard/team')}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                👥 Se Team
+              </Button>
             </div>
           </TabsContent>
 
