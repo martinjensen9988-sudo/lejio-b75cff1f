@@ -40,7 +40,6 @@ resource database 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
     maxSizeBytes: 1099511627776 // 1TB
     catalogCollation: 'SQL_Latin1_General_CP1_CI_AS'
     zoneRedundant: false
-    requestedBackupStorageRedundancy: 'GRS'
     isLedgerOn: false
   }
   sku: {
