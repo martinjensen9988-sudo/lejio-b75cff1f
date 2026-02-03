@@ -1,0 +1,19 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "FUNCTIONS_WORKER_RUNTIME_VERSION": "18",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "MSSQL_SERVER": "sql-vqiibdafjcmnc-dev.database.windows.net",
+    "MSSQL_DATABASE": "lejio-fri",
+    "MSSQL_USER": "sqladmin",
+    "MSSQL_PASSWORD": "Lejio2024Secure123",
+    "AZURE_STORAGE_ACCOUNT": "stlejiofridev",
+    "AZURE_STORAGE_KEY": "",
+    "KEY_VAULT_URL": "https://kv-o4xfr7shbmgyw-dev.vault.azure.net/"
+  },
+  "Host": {
+    "LocalDebug": "verbose"
+  }
+}
