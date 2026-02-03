@@ -165,7 +165,7 @@ export const supabase = {
 
     getSession: async () => {
       try {
-        const session = await azureApi.get<any>("/auth/session");
+        const session = await azureApi.get<any>("/AuthSession");
         return { data: { session }, error: null };
       } catch (error: any) {
         return { data: { session: null }, error };
