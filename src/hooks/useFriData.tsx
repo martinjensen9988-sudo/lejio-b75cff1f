@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTenant } from '@/providers/TenantProvider';
 import { useFriAuthContext } from '@/providers/FriAuthProvider';
 
@@ -45,6 +45,86 @@ export function useFriVehicles() {
     },
     enabled: !!user?.lessor_id,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook for creating a vehicle
+ */
+export function useCreateVehicle() {
+  const { apiBaseUrl } = useTenant();
+  const { user } = useFriAuthContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vehicleData: any) => {
+      const response = await fetch(`${apiBaseUrl}/CreateVehicle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lessor_id: user?.lessor_id,
+          ...vehicleData,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to create vehicle');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friVehicles', user?.lessor_id] });
+      queryClient.invalidateQueries({ queryKey: ['friStats', user?.lessor_id] });
+    },
+  });
+}
+
+/**
+ * Hook for updating a vehicle
+ */
+export function useUpdateVehicle() {
+  const { apiBaseUrl } = useTenant();
+  const { user } = useFriAuthContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...vehicleData }: any) => {
+      const response = await fetch(`${apiBaseUrl}/UpdateVehicle`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          lessor_id: user?.lessor_id,
+          ...vehicleData,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to update vehicle');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friVehicles', user?.lessor_id] });
+    },
+  });
+}
+
+/**
+ * Hook for deleting a vehicle
+ */
+export function useDeleteVehicle() {
+  const { apiBaseUrl } = useTenant();
+  const { user } = useFriAuthContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vehicleId: string) => {
+      const response = await fetch(
+        `${apiBaseUrl}/DeleteVehicle?id=${vehicleId}&lessor_id=${user?.lessor_id}`,
+        { method: 'DELETE' }
+      );
+      if (!response.ok) throw new Error('Failed to delete vehicle');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friVehicles', user?.lessor_id] });
+      queryClient.invalidateQueries({ queryKey: ['friStats', user?.lessor_id] });
+    },
   });
 }
 
