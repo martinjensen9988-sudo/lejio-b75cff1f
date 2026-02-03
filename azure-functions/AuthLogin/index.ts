@@ -32,6 +32,13 @@ async function authLogin(
 ): Promise<HttpResponseInit> {
   context.log("Auth login function triggered");
 
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Content-Type": "application/json",
+  };
+
   try {
     const body = (await request.json()) as any;
     const { email, password } = body;
@@ -39,6 +46,7 @@ async function authLogin(
     if (!email) {
       return {
         status: 400,
+        headers: corsHeaders,
         body: JSON.stringify({ error: "Email is required" }),
       };
     }
@@ -49,6 +57,7 @@ async function authLogin(
     // Connect to Azure SQL Database
     const pool = new sql.ConnectionPool(dbConfig);
     await pool.connect();
+    context.log("Connected to database");
 
     // Query user from fri_lessors table
     const result = await pool
@@ -59,11 +68,13 @@ async function authLogin(
          FROM fri_lessors WHERE email = @email`
       );
 
-    pool.close();
+    await pool.close();
+    context.log(`Query result: ${result.recordset.length} records found`);
 
     if (result.recordset.length === 0) {
       return {
         status: 401,
+        headers: corsHeaders,
         body: JSON.stringify({ error: "Invalid email or password" }),
       };
     }
@@ -76,6 +87,7 @@ async function authLogin(
 
     return {
       status: 200,
+      headers: corsHeaders,
       body: JSON.stringify({
         session: {
           access_token: token,
@@ -88,10 +100,11 @@ async function authLogin(
       }),
     };
   } catch (error) {
-    console.error("Auth error:", error);
+    context.error("Auth error:", error);
     return {
       status: 500,
-      body: JSON.stringify({ error: "Internal server error" }),
+      headers: corsHeaders,
+      body: JSON.stringify({ error: "Internal server error", details: String(error) }),
     };
   }
 }

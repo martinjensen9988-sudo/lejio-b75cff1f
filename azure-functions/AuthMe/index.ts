@@ -1,5 +1,12 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Content-Type": "application/json",
+};
+
 async function authMe(
   request: HttpRequest,
   context: InvocationContext
@@ -12,6 +19,7 @@ async function authMe(
     if (!authHeader) {
       return {
         status: 401,
+        headers: corsHeaders,
         body: JSON.stringify({ error: "No authorization header" }),
       };
     }
@@ -25,6 +33,7 @@ async function authMe(
       
       return {
         status: 200,
+        headers: corsHeaders,
         body: JSON.stringify({
           id: decoded.lessor_id,
           email: decoded.email,
@@ -33,13 +42,15 @@ async function authMe(
     } catch {
       return {
         status: 401,
+        headers: corsHeaders,
         body: JSON.stringify({ error: "Invalid token" }),
       };
     }
   } catch (error) {
-    console.error("Auth error:", error);
+    context.error("Auth error:", error);
     return {
       status: 500,
+      headers: corsHeaders,
       body: JSON.stringify({ error: "Internal server error" }),
     };
   }
