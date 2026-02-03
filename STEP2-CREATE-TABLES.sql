@@ -4,6 +4,21 @@
 -- Run this SECOND in Azure Portal Query Editor
 -- After successfully running STEP1-DROP-TABLES.sql
 
+-- Clean up any existing tables (for idempotency)
+DROP TABLE IF EXISTS fri_payments;
+DROP TABLE IF EXISTS fri_invoices;
+DROP TABLE IF EXISTS fri_page_blocks;
+DROP TABLE IF EXISTS fri_bookings;
+DROP TABLE IF EXISTS fri_pages;
+DROP TABLE IF EXISTS fri_vehicle_maintenance;
+DROP TABLE IF EXISTS fri_vehicles;
+DROP TABLE IF EXISTS fri_customers;
+DROP TABLE IF EXISTS fri_api_keys;
+DROP TABLE IF EXISTS fri_audit_logs;
+DROP TABLE IF EXISTS fri_custom_domains;
+DROP TABLE IF EXISTS fri_lessor_team_members;
+DROP TABLE IF EXISTS fri_lessors;
+
 -- ============================================
 -- 1. LESSOR MANAGEMENT TABLES
 -- ============================================
@@ -217,7 +232,7 @@ CREATE TABLE fri_page_blocks (
   created_at DATETIME2 DEFAULT GETUTCDATE(),
   updated_at DATETIME2 DEFAULT GETUTCDATE(),
   FOREIGN KEY (page_id) REFERENCES fri_pages(id) ON DELETE CASCADE,
-  FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id) ON DELETE CASCADE,
+  FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id) ON DELETE NO ACTION,
   CONSTRAINT chk_block_type CHECK (block_type IN ('hero', 'text', 'pricing', 'vehicles', 'booking', 'contact', 'image', 'cta', 'testimonial', 'footer')),
   INDEX idx_page_position (page_id, position)
 );
