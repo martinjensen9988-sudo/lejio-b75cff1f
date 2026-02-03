@@ -1,7 +1,7 @@
 module.exports = async function (context, req) {
   context.res = {
     status: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: "Test works!" })
+    body: { message: "Test works!" }
   };
+  return context.res;
 };
