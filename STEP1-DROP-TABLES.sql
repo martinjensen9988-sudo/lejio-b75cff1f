@@ -2,23 +2,65 @@
 -- STEP 1: DROP ALL EXISTING FRI_* TABLES
 -- ============================================
 -- Run this FIRST in Azure Portal Query Editor
--- Location: Azure Portal > SQL Database (lejio-fri) > Query Editor
+-- NOTE: Loop drops each table with diagnostics
 
-DROP TABLE IF EXISTS fri_api_keys;
-DROP TABLE IF EXISTS fri_audit_logs;
-DROP TABLE IF EXISTS fri_custom_domains;
-DROP TABLE IF EXISTS fri_page_blocks;
-DROP TABLE IF EXISTS fri_pages;
-DROP TABLE IF EXISTS fri_payments;
-DROP TABLE IF EXISTS fri_invoices;
-DROP TABLE IF EXISTS fri_bookings;
-DROP TABLE IF EXISTS fri_vehicle_maintenance;
-DROP TABLE IF EXISTS fri_vehicles;
-DROP TABLE IF EXISTS fri_customers;
-DROP TABLE IF EXISTS fri_lessor_team_members;
-DROP TABLE IF EXISTS fri_lessors;
+-- Show which fri_* tables currently exist
+PRINT '=== Tables to be dropped ==='
+SELECT name FROM sys.tables 
+WHERE name LIKE 'fri_%'
+ORDER BY name;
 
--- Verify all tables are dropped:
-SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES 
-WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME LIKE 'fri_%'
-ORDER BY TABLE_NAME;
+-- Drop ALL foreign key constraints on fri_* tables
+PRINT '=== Dropping all foreign key constraints ==='
+DECLARE @sql NVARCHAR(MAX) = '';
+
+SELECT @sql += 'ALTER TABLE ' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + 
+               ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';' + CHAR(10)
+FROM sys.foreign_keys fk
+WHERE OBJECT_NAME(fk.parent_object_id) LIKE 'fri_%'
+   OR OBJECT_NAME(fk.referenced_object_id) LIKE 'fri_%';
+
+IF LEN(@sql) > 0
+BEGIN
+  PRINT 'Executing constraint drops...'
+  EXEC sp_executesql @sql;
+  PRINT 'All FK constraints dropped!'
+END
+ELSE
+BEGIN
+  PRINT 'No FK constraints found'
+END
+
+-- Loop: Try dropping each table individually to see which ones fail
+PRINT '=== Dropping tables one by one ==='
+DECLARE @tableName NVARCHAR(MAX);
+DECLARE @dropSql NVARCHAR(MAX);
+DECLARE table_cursor CURSOR FOR
+SELECT name FROM sys.tables WHERE name LIKE 'fri_%' ORDER BY name;
+
+OPEN table_cursor;
+FETCH NEXT FROM table_cursor INTO @tableName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+  SET @dropSql = 'DROP TABLE [' + @tableName + '];';
+  BEGIN TRY
+    EXEC sp_executesql @dropSql;
+    PRINT '✅ Dropped: ' + @tableName;
+  END TRY
+  BEGIN CATCH
+    PRINT '❌ Failed ' + @tableName + ': ' + ERROR_MESSAGE();
+  END CATCH
+  FETCH NEXT FROM table_cursor INTO @tableName;
+END;
+
+CLOSE table_cursor;
+DEALLOCATE table_cursor;
+
+-- Verify all tables are gone
+PRINT '=== Verification ==='
+SELECT COUNT(*) as RemainingFriTables
+FROM sys.tables 
+WHERE name LIKE 'fri_%';
+
+PRINT '=== If RemainingFriTables = 0, SUCCESS! ✅ ==='
