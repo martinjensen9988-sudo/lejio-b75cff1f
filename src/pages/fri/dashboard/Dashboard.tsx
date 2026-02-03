@@ -11,7 +11,7 @@ import { FriTeamList } from '@/components/fri/FriTeamList';
 import { FriSettingsPage } from '@/components/fri/FriSettingsPage';
 
 export function FriDashboard() {
-  const { user, signOut } = useFriAuthContext();
+  const { user, signOut, loading, error } = useFriAuthContext();
   const { companyName } = useBrand();
   const navigate = useNavigate();
 
@@ -20,10 +20,36 @@ export function FriDashboard() {
     navigate('/fri');
   };
 
-  if (!user) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loader...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Fejl: {error.message}</p>
+          <Button onClick={() => navigate('/fri/login')}>
+            Gå til login
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="mb-4">Du skal være logget ind for at se dashboardet</p>
+          <Button onClick={() => navigate('/fri/login')}>
+            Gå til login
+          </Button>
+        </div>
       </div>
     );
   }

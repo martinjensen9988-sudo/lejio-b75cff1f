@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/azure/client';
 
-interface FriAuthUser extends User {
+interface FriAuthUser {
+  id: string;
+  email: string;
   isLessor?: boolean;
 }
 
@@ -17,52 +17,58 @@ interface UseFriAuthReturn {
 
 /**
  * Hook for Lejio Fri authentication
- * Uses Supabase auth (shared with corporate)
- * But checks lessor_accounts for access
+ * Uses Azure Functions backend for auth
  */
 export function useFriAuth(): UseFriAuthReturn {
   const [user, setUser] = useState<FriAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7071/api';
 
   // Check auth status on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
-        if (data.session?.user) {
-          setUser(data.session.user as FriAuthUser);
+        const response = await fetch(`${apiBaseUrl}/auth/me`, {
+          credentials: 'include',
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          setUser(null);
         }
         setLoading(false);
       } catch (err) {
         console.error('Auth check error:', err);
-        setError(err instanceof Error ? err : new Error(String(err)));
+        setUser(null);
         setLoading(false);
       }
     };
 
     checkAuth();
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user as FriAuthUser | null);
-    });
-
-    return () => subscription?.unsubscribe();
-  }, []);
+  }, [apiBaseUrl]);
 
   const signUp = useCallback(
     async (email: string, password: string) => {
       setLoading(true);
       setError(null);
       try {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
+        const response = await fetch(`${apiBaseUrl}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include',
         });
-        if (signUpError) throw signUpError;
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || 'Signup failed');
+        }
+
+        const userData = await response.json();
+        setUser(userData);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
@@ -71,7 +77,7 @@ export function useFriAuth(): UseFriAuthReturn {
         setLoading(false);
       }
     },
-    []
+    [apiBaseUrl]
   );
 
   const signIn = useCallback(
@@ -79,14 +85,20 @@ export function useFriAuth(): UseFriAuthReturn {
       setLoading(true);
       setError(null);
       try {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+        const response = await fetch(`${apiBaseUrl}/auth/signin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include',
         });
-        if (signInError) throw signInError;
-        if (data.user) {
-          setUser(data.user as FriAuthUser);
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || 'Login failed');
         }
+
+        const userData = await response.json();
+        setUser(userData);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
@@ -95,15 +107,17 @@ export function useFriAuth(): UseFriAuthReturn {
         setLoading(false);
       }
     },
-    []
+    [apiBaseUrl]
   );
 
   const signOut = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const { error: signOutError } = await supabase.auth.signOut();
-      if (signOutError) throw signOutError;
+      await fetch(`${apiBaseUrl}/auth/signout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       setUser(null);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
@@ -112,7 +126,7 @@ export function useFriAuth(): UseFriAuthReturn {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiBaseUrl]);
 
   return {
     user,
