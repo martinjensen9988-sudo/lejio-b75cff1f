@@ -1,5 +1,17 @@
 project_id = "aqzggwewjttbkaqnbmrb"
 
+[functions.fri-auth-signin]
+verify_jwt = false
+
+[functions.fri-auth-signup]
+verify_jwt = false
+
+[functions.fri-auth-me]
+verify_jwt = false
+
+[functions.fri-auth-signout]
+verify_jwt = false
+
 [functions.vehicle-lookup]
 verify_jwt = false
 
