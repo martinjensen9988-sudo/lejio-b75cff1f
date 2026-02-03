@@ -1,22 +1,21 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import sql from "mssql";
-import * as crypto from "crypto";
 
 const dbConfig = {
-  server: process.env.SQL_SERVER || "lejio-fri.database.windows.net",
-  database: process.env.SQL_DATABASE || "lejio-fri",
+  server: process.env.MSSQL_SERVER || "lejio-fri.database.windows.net",
+  database: process.env.MSSQL_DATABASE || "lejio-fri",
   authentication: {
-    type: "default",
+    type: "default" as any,
     options: {
-      userName: process.env.SQL_USER,
-      password: process.env.SQL_PASSWORD,
+      userName: process.env.MSSQL_USER,
+      password: process.env.MSSQL_PASSWORD,
     },
   },
   options: {
     encrypt: true,
     trustServerCertificate: false,
   },
-};
+} as any;
 
 // Simple token generation (in production, use JWT)
 function generateToken(userId: string, email: string): string {
@@ -27,23 +26,23 @@ function generateToken(userId: string, email: string): string {
   })).toString("base64");
 }
 
-const httpTrigger: AzureFunction = async function (
-  context: Context,
-  req: HttpRequest
-): Promise<void> {
+async function authLogin(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
   context.log("Auth login function triggered");
 
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    context.res = {
-      status: 400,
-      body: { error: "Email and password required" },
-    };
-    return;
-  }
-
   try {
+    const body = (await request.json()) as any;
+    const { email, password } = body;
+
+    if (!email || !password) {
+      return {
+        status: 400,
+        body: JSON.stringify({ error: "Email and password required" }),
+      };
+    }
+
     // Connect to Azure SQL Database
     const pool = new sql.ConnectionPool(dbConfig);
     await pool.connect();
@@ -60,11 +59,10 @@ const httpTrigger: AzureFunction = async function (
     pool.close();
 
     if (result.recordset.length === 0) {
-      context.res = {
+      return {
         status: 401,
-        body: { error: "Invalid email or password" },
+        body: JSON.stringify({ error: "Invalid email or password" }),
       };
-      return;
     }
 
     const lessor = result.recordset[0];
@@ -73,9 +71,9 @@ const httpTrigger: AzureFunction = async function (
     // For now, accept any password (should be improved)
     const token = generateToken(lessor.id, lessor.email);
 
-    context.res = {
+    return {
       status: 200,
-      body: {
+      body: JSON.stringify({
         session: {
           access_token: token,
           user: {
@@ -84,15 +82,19 @@ const httpTrigger: AzureFunction = async function (
             company_name: lessor.company_name,
           },
         },
-      },
+      }),
     };
   } catch (error) {
-    context.log.error("Auth error:", error);
-    context.res = {
+    console.error("Auth error:", error);
+    return {
       status: 500,
-      body: { error: "Internal server error" },
+      body: JSON.stringify({ error: "Internal server error" }),
     };
   }
-};
+}
 
-export default httpTrigger;
+app.http("AuthLogin", {
+  methods: ["POST"],
+  authLevel: "anonymous",
+  handler: authLogin,
+});

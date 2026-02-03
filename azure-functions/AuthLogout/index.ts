@@ -1,24 +1,28 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 
-const httpTrigger: AzureFunction = async function (
-  context: Context,
-  req: HttpRequest
-): Promise<void> {
+async function authLogout(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
   context.log("Auth logout function triggered");
 
   try {
     // Simply confirm logout (token is handled by client)
-    context.res = {
+    return {
       status: 200,
-      body: { message: "Logged out successfully" },
+      body: JSON.stringify({ message: "Logged out successfully" }),
     };
   } catch (error) {
-    context.log.error("Auth error:", error);
-    context.res = {
+    console.error("Auth error:", error);
+    return {
       status: 500,
-      body: { error: "Internal server error" },
+      body: JSON.stringify({ error: "Internal server error" }),
     };
   }
-};
+}
 
-export default httpTrigger;
+app.http("AuthLogout", {
+  methods: ["POST"],
+  authLevel: "anonymous",
+  handler: authLogout,
+});

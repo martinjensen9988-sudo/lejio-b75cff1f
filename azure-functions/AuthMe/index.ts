@@ -1,20 +1,19 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 
-const httpTrigger: AzureFunction = async function (
-  context: Context,
-  req: HttpRequest
-): Promise<void> {
+async function authMe(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
   context.log("Auth me function triggered");
 
   try {
     // Get authorization header
-    const authHeader = req.headers["authorization"];
+    const authHeader = request.headers.get("authorization");
     if (!authHeader) {
-      context.res = {
+      return {
         status: 401,
-        body: { error: "No authorization header" },
+        body: JSON.stringify({ error: "No authorization header" }),
       };
-      return;
     }
 
     // Extract token from "Bearer token"
@@ -24,26 +23,30 @@ const httpTrigger: AzureFunction = async function (
       // Decode token
       const decoded = JSON.parse(Buffer.from(token, "base64").toString());
       
-      context.res = {
+      return {
         status: 200,
-        body: {
+        body: JSON.stringify({
           id: decoded.lessor_id,
           email: decoded.email,
-        },
+        }),
       };
     } catch {
-      context.res = {
+      return {
         status: 401,
-        body: { error: "Invalid token" },
+        body: JSON.stringify({ error: "Invalid token" }),
       };
     }
   } catch (error) {
-    context.log.error("Auth error:", error);
-    context.res = {
+    console.error("Auth error:", error);
+    return {
       status: 500,
-      body: { error: "Internal server error" },
+      body: JSON.stringify({ error: "Internal server error" }),
     };
   }
-};
+}
 
-export default httpTrigger;
+app.http("AuthMe", {
+  methods: ["GET"],
+  authLevel: "anonymous",
+  handler: authMe,
+});
