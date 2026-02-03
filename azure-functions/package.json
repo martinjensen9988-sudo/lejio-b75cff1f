@@ -2,7 +2,6 @@
   "name": "azure-functions",
   "version": "1.0.0",
   "description": "Lejio Fri Azure Functions",
-  "main": "dist/src/index.js",
   "scripts": {
     "build": "tsc",
     "start": "func start",

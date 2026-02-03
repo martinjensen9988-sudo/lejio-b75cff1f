@@ -5,7 +5,8 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "request",
-      "methods": ["post"]
+      "methods": ["post"],
+      "route": "authlogout"
     },
     {
       "type": "http",
