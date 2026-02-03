@@ -1,3 +1,110 @@
+import { useQuery } from '@tanstack/react-query';
+import { useTenant } from '@/providers/TenantProvider';
+import { useFriAuthContext } from '@/providers/FriAuthProvider';
+
+/**
+ * Hook for fetching lessor dashboard statistics
+ */
+export function useFriStats() {
+  const { apiBaseUrl } = useTenant();
+  const { user } = useFriAuthContext();
+
+  return useQuery({
+    queryKey: ['friStats', user?.lessor_id],
+    queryFn: async () => {
+      if (!user?.lessor_id) throw new Error('No lessor_id');
+      
+      const response = await fetch(
+        `${apiBaseUrl}/GetLessorStats?lessor_id=${user.lessor_id}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json();
+    },
+    enabled: !!user?.lessor_id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Hook for fetching vehicles
+ */
+export function useFriVehicles() {
+  const { apiBaseUrl } = useTenant();
+  const { user } = useFriAuthContext();
+
+  return useQuery({
+    queryKey: ['friVehicles', user?.lessor_id],
+    queryFn: async () => {
+      if (!user?.lessor_id) throw new Error('No lessor_id');
+      
+      const response = await fetch(
+        `${apiBaseUrl}/GetVehicles?lessor_id=${user.lessor_id}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch vehicles');
+      return response.json();
+    },
+    enabled: !!user?.lessor_id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook for fetching bookings
+ */
+export function useFriBookings(status?: string) {
+  const { apiBaseUrl } = useTenant();
+  const { user } = useFriAuthContext();
+
+  const queryParams = new URLSearchParams({
+    lessor_id: user?.lessor_id || '',
+    ...(status && { status }),
+  });
+
+  return useQuery({
+    queryKey: ['friBookings', user?.lessor_id, status],
+    queryFn: async () => {
+      if (!user?.lessor_id) throw new Error('No lessor_id');
+      
+      const response = await fetch(
+        `${apiBaseUrl}/GetBookings?${queryParams}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch bookings');
+      return response.json();
+    },
+    enabled: !!user?.lessor_id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook for fetching invoices
+ */
+export function useFriInvoices(status?: string) {
+  const { apiBaseUrl } = useTenant();
+  const { user } = useFriAuthContext();
+
+  const queryParams = new URLSearchParams({
+    lessor_id: user?.lessor_id || '',
+    ...(status && { status }),
+  });
+
+  return useQuery({
+    queryKey: ['friInvoices', user?.lessor_id, status],
+    queryFn: async () => {
+      if (!user?.lessor_id) throw new Error('No lessor_id');
+      
+      const response = await fetch(
+        `${apiBaseUrl}/GetInvoices?${queryParams}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch invoices');
+      return response.json();
+    },
+    enabled: !!user?.lessor_id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Legacy function - keeping for backward compatibility
 import { useState, useCallback, useEffect } from 'react';
 import { queryAzure } from '@/integrations/azure/clientFri';
 
