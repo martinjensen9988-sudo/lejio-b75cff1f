@@ -3,12 +3,6 @@ import { useBrand } from '@/providers/BrandContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
-import { FriVehicleList } from '@/components/fri/FriVehicleList';
-import { FriBookingList } from '@/components/fri/FriBookingList';
-import { FriInvoiceList } from '@/components/fri/FriInvoiceList';
-import { FriAnalyticsDashboard } from '@/components/fri/FriAnalyticsDashboard';
-import { FriTeamList } from '@/components/fri/FriTeamList';
-import { FriSettingsPage } from '@/components/fri/FriSettingsPage';
 
 export function FriDashboard() {
   const { user, signOut, loading, error } = useFriAuthContext();
@@ -113,39 +107,43 @@ export function FriDashboard() {
           {/* Vehicles Tab */}
           <TabsContent value="vehicles">
             <div className="bg-white rounded-lg shadow p-6">
-              <FriVehicleList lessorId={user?.id || null} />
+              <p className="text-gray-600">Køretøjer kommer snart...</p>
             </div>
           </TabsContent>
 
           {/* Bookings Tab */}
           <TabsContent value="bookings">
             <div className="bg-white rounded-lg shadow p-6">
-              <FriBookingList lessorId={user?.id || null} />
+              <p className="text-gray-600">Bookinger kommer snart...</p>
             </div>
           </TabsContent>
 
           {/* Invoices Tab */}
           <TabsContent value="invoices">
             <div className="bg-white rounded-lg shadow p-6">
-              <FriInvoiceList lessorId={user?.id || null} />
+              <p className="text-gray-600">Invoicer kommer snart...</p>
             </div>
           </TabsContent>
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <FriAnalyticsDashboard lessorId={user?.id || null} />
+            <div className="bg-white rounded-lg shadow p-6">
+              <p className="text-gray-600">Analytik kommer snart...</p>
+            </div>
           </TabsContent>
 
           {/* Team Tab */}
           <TabsContent value="team">
             <div className="bg-white rounded-lg shadow p-6">
-              <FriTeamList lessorId={user?.id || null} />
+              <p className="text-gray-600">Team administation kommer snart...</p>
             </div>
           </TabsContent>
 
           {/* Settings Tab */}
           <TabsContent value="settings">
-            <FriSettingsPage userId={user?.id || null} />
+            <div className="bg-white rounded-lg shadow p-6">
+              <p className="text-gray-600">Indstillinger kommer snart...</p>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
