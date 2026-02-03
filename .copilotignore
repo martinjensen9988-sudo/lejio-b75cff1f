@@ -1,8 +1,16 @@
-node_modules/
+# Lock files og binære filer
 bun.lockb
 package-lock.json
+*.lockb
+
+# Dependencies
+node_modules/
 dist/
 build/
+
+# Git
 .git/
+
+# Large files
 public/
 api/
