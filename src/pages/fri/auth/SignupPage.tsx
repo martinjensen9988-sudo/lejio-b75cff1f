@@ -103,10 +103,12 @@ export function FriSignupPage() {
             {step === 'credentials' && (
               <form onSubmit={handleCredentialsSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email
                   </label>
                   <Input
+                    id="signup-email"
+                    name="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) =>
@@ -114,14 +116,17 @@ export function FriSignupPage() {
                     }
                     placeholder="din@email.dk"
                     required
+                    autoComplete="email"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700 mb-1">
                     Adgangskode
                   </label>
                   <Input
+                    id="signup-password"
+                    name="password"
                     type="password"
                     value={formData.password}
                     onChange={(e) =>
@@ -129,6 +134,7 @@ export function FriSignupPage() {
                     }
                     placeholder="Minimum 8 tegn"
                     required
+                    autoComplete="new-password"
                   />
                 </div>
 
@@ -157,10 +163,12 @@ export function FriSignupPage() {
             {step === 'company' && (
               <form onSubmit={handleCompanySubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="company-name" className="block text-sm font-medium text-gray-700 mb-1">
                     Virksomhedsnavn
                   </label>
                   <Input
+                    id="company-name"
+                    name="company-name"
                     type="text"
                     value={formData.companyName}
                     onChange={(e) =>
@@ -172,11 +180,13 @@ export function FriSignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="domain" className="block text-sm font-medium text-gray-700 mb-1">
                     Dit domæne
                   </label>
                   <div className="flex items-center gap-2">
                     <Input
+                      id="domain"
+                      name="domain"
                       type="text"
                       value={formData.domain}
                       onChange={(e) =>
@@ -193,10 +203,12 @@ export function FriSignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="cvr" className="block text-sm font-medium text-gray-700 mb-1">
                     CVR-nummer (valgfrit)
                   </label>
                   <Input
+                    id="cvr"
+                    name="cvr"
                     type="text"
                     value={formData.cvr}
                     onChange={(e) =>
@@ -232,11 +244,13 @@ export function FriSignupPage() {
             {step === 'branding' && (
               <form onSubmit={handleBrandingSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="primary-color" className="block text-sm font-medium text-gray-700 mb-1">
                     Primær farve
                   </label>
                   <div className="flex gap-2 items-center">
                     <input
+                      id="primary-color"
+                      name="primary-color"
                       type="color"
                       value={formData.primaryColor}
                       onChange={(e) =>
