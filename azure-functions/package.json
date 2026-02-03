@@ -1,19 +1,5 @@
 {
   "name": "azure-functions",
   "version": "1.0.0",
-  "description": "Lejio Fri Azure Functions",
-  "main": "index.js",
-  "scripts": {
-    "start": "func start",
-    "build": "tsc",
-    "watch": "tsc -w",
-    "prestart": "npm run build"
-  },
-  "dependencies": {
-    "@azure/functions": "^1.5.4"
-  },
-  "devDependencies": {
-    "typescript": "^5.3.0",
-    "@types/node": "^20.0.0"
-  }
+  "description": "Lejio Fri Azure Functions"
 }

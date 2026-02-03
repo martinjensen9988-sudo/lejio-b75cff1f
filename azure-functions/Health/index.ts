@@ -1,6 +1,4 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-
-const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
+module.exports = async function (context, req) {
     context.log('Health check request received.');
 
     context.res = {
@@ -12,5 +10,3 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         }
     };
 };
-
-export default httpTrigger;
