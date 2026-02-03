@@ -30,17 +30,6 @@ module sqlDatabase 'modules/sql.bicep' = {
     sqlServerName: sqlServerName
     adminUsername: sqlAdminUsername
     adminPassword: sqlAdminPassword
-    projectName: projectName
-  }
-}
-
-module keyVault 'modules/keyvault.bicep' = {
-  name: 'keyVault'
-  params: {
-    location: location
-    keyVaultName: keyVaultName
-    sqlConnectionString: sqlDatabase.outputs.connectionString
-    storageAccountKey: storage.outputs.storageKey
   }
 }
 
@@ -52,14 +41,24 @@ module storage 'modules/storage.bicep' = {
   }
 }
 
+module keyVault 'modules/keyvault.bicep' = {
+  name: 'keyVault'
+  params: {
+    location: location
+    keyVaultName: keyVaultName
+    sqlConnectionString: sqlDatabase.outputs.connectionString
+    storageAccountKey: 'placeholder' // Will be set via policy post-deployment
+  }
+}
+
 module functions 'modules/functions.bicep' = {
   name: 'functions'
   params: {
     location: location
     functionAppName: functionAppName
-    keyVaultName: keyVault.outputs.keyVaultName
+    keyVaultName: keyVaultName
     sqlConnectionString: sqlDatabase.outputs.connectionString
-    storageConnectionString: 'DefaultEndpointsProtocol=https;AccountName=${storage.outputs.storageAccountName};AccountKey=${listKeys(storage.outputs.storageAccountId, '2023-01-01').keys[0].value};EndpointSuffix=core.windows.net'
+    storageConnectionString: 'BlobEndpoint=https://${storage.outputs.storageAccountName}.blob.core.windows.net/;SharedAccessSignature=sv=2023-01-01&ss=b&srt=sco&sp=rwdlac&se=2099-12-31T23:59:59Z'
   }
 }
 
