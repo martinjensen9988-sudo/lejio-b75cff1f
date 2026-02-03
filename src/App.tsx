@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import { FriAuthProvider } from "@/providers/FriAuthProvider";
+import { BrandProvider } from "@/providers/BrandContext";
 import { TenantProvider } from "@/hooks/useTenant";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import NotFound from "./pages/NotFound";
@@ -86,9 +87,11 @@ const App = forwardRef((props, ref) => (
                 <Route path="/fri/signup" element={<FriSignupPage />} />
                 <Route path="/fri/tenant/signup" element={<TenantSignupPage />} />
                 <Route path="/fri/dashboard" element={
-                  <FriAuthProvider>
-                    <FriDashboard />
-                  </FriAuthProvider>
+                  <BrandProvider branding={{ primary_color: '#0066cc', secondary_color: '#00cc99', company_name: 'Lejio Fri' }} domain="fri">
+                    <FriAuthProvider>
+                      <FriDashboard />
+                    </FriAuthProvider>
+                  </BrandProvider>
                 } />
                 
                 {/* Lejio Fri Admin */}
