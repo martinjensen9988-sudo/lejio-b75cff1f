@@ -1,5 +1,4 @@
-// Mock pages storage
-const mockPages = {};
+const { readPages, writePages } = require("../storage");
 
 module.exports = async function (context, req) {
   context.res.headers = {
@@ -16,8 +15,10 @@ module.exports = async function (context, req) {
       return context.res;
     }
 
+    const pages = readPages();
+    
     // Check if slug already exists for this lessor
-    for (const page of Object.values(mockPages)) {
+    for (const page of Object.values(pages)) {
       if (page.lessor_id === lessor_id && page.slug === slug) {
         context.res.status = 409;
         context.res.body = { error: "Page with this slug already exists" };
@@ -38,7 +39,8 @@ module.exports = async function (context, req) {
       updated_at: new Date().toISOString(),
     };
 
-    mockPages[pageId] = newPage;
+    pages[pageId] = newPage;
+    writePages(pages);
 
     context.res.status = 201;
     context.res.body = newPage;
