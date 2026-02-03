@@ -4,11 +4,7 @@ module.exports = async function (context, req) {
   if (!token) {
     context.res = {
       status: 200,
-      body: {
-        id: null,
-        email: null,
-        company_name: null
-      }
+      body: { session: null }
     };
     return context.res;
   }
@@ -20,19 +16,20 @@ module.exports = async function (context, req) {
     context.res = {
       status: 200,
       body: {
-        id: decoded.lessor_id,
-        email: decoded.email,
-        company_name: "Lejio Test"
+        session: {
+          user: {
+            id: decoded.lessor_id,
+            email: decoded.email,
+            company_name: "Lejio Test"
+          },
+          access_token: token
+        }
       }
     };
   } catch (err) {
     context.res = {
       status: 200,
-      body: {
-        id: null,
-        email: null,
-        company_name: null
-      }
+      body: { session: null }
     };
   }
   
