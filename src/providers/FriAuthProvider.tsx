@@ -1,9 +1,15 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { User } from '@supabase/supabase-js';
 import { useFriAuth } from '@/hooks/useFriAuth';
 
+interface FriAuthUser {
+  id: string;
+  email: string;
+  company_name?: string;
+  isLessor?: boolean;
+}
+
 interface FriAuthContextType {
-  user: User | null;
+  user: FriAuthUser | null;
   loading: boolean;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
