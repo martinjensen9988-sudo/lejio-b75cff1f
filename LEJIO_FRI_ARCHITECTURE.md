@@ -189,7 +189,7 @@ invoices (id, lessor_id, booking_id, amount, status, due_date, created_at)
 1. Create Azure SQL table (migration file)
 2. Create API endpoint that queries table
 3. Update frontend hook to use API endpoint
-4. Update `.vscode/settings.json` if changing timeout needs
+
 
 ## 7. IMPORTANT NOTES
 
@@ -203,10 +203,6 @@ invoices (id, lessor_id, booking_id, amount, status, due_date, created_at)
 - Current PageBuilder API uses in-memory mock storage
 - Need persistent storage layer (Azure SQL or files on disk)
 
-### Timeout Issues:
-- Copilot times out when reading large files
-- Solution: Use terminal commands, avoid grep_search/read_file
-- Files to exclude: `.copilotignore`, `files.watcherExclude`
 
 ### Deployment:
 - GitHub Actions workflow: `.github/workflows/azure-static-web-apps-deploy.yml`
@@ -306,9 +302,6 @@ curl "https://zealous-stone-04c86dd03.2.azurestaticapps.net/api/GetPages?lessor_
 │   └── azure-static-web-apps-deploy.yml ← CI/CD
 ├── .vscode/
 │   └── settings.json ← VS Code config
-├── .devcontainer/
-│   └── devcontainer.json ← Dev container config
-└── .copilotignore ← Files to exclude from AI scanning
 ```
 
 ---
@@ -366,11 +359,6 @@ npm run dev
    - Use `@/` alias for `src/` (configured in vite.config.ts)
    - Example: `import { useAuth } from '@/hooks/useAuth'`
 
-6. **Copilot Optimization (CRITICAL):**
-   - ❌ NEVER use: `read_file`, `grep_search`, `file_search` tools
-   - ✅ USE ONLY: terminal commands (`cat`, `sed`, `awk`, `git`, `npm`, `curl`)
-   - Reason: File tools cause 400 timeout errors
-   - Config files: `.copilotignore`, `.vscode/settings.json`, `.devcontainer/devcontainer.json`
 
 7. **Component Structure:**
    - Pages: `src/pages/path/ComponentName.tsx` (PascalCase)
@@ -438,25 +426,18 @@ npm run dev
 
 ## 15. KNOWN ISSUES & SOLUTIONS
 
-### Issue 1: Copilot Timeout Errors
-**Problem:** "The request timed out while trying to download the file"
-**Root Cause:** Using `read_file`, `grep_search`, `file_search` tools
-**Solution:** Only use terminal commands (`cat`, `sed`, `awk`, `grep` in terminal)
-**Prevention:** Use `.copilotignore` to exclude large files
-
-### Issue 2: Dashboard Components Errors
 **Problem:** Dashboard throws "Noget gik galt" error
 **Root Cause:** Sub-components need database APIs not yet implemented
 **Solution:** Remove problematic components until database is ready
 **Status:** ✅ Fixed in current version
 
-### Issue 3: Missing BrandProvider
+### Issue 2: Missing BrandProvider
 **Problem:** useBrand() hook errors if not wrapped in provider
 **Root Cause:** Component used outside provider context
 **Solution:** Wrap dashboard route in `<BrandProvider>`
 **Status:** ✅ Fixed in current version
 
-### Issue 4: Persistent Storage
+### Issue 3: Persistent Storage
 **Problem:** Pages and blocks not persisting across sessions
 **Root Cause:** Currently using in-memory storage
 **Solution:** Connect API endpoints to Azure SQL database
