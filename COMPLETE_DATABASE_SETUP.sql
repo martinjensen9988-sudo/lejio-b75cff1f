@@ -437,22 +437,22 @@ ELSE
 -- Insert test vehicles for Martin
 IF NOT EXISTS (SELECT 1 FROM fri_vehicles WHERE license_plate = 'AB12345')
 BEGIN
-    INSERT INTO fri_vehicles (id, lessor_id, make, model, year, license_plate, daily_rate, tenant_id)
-    VALUES (NEWID(), 'lessor-martin-001', 'BMW', '320i', 2023, 'AB12345', 500.00, @TenantId);
+    INSERT INTO fri_vehicles (id, lessor_id, make, model, year, license_plate, vin, daily_rate, tenant_id)
+    VALUES (NEWID(), 'lessor-martin-001', 'BMW', '320i', 2023, 'AB12345', 'VIN2023BMW320I001', 500.00, @TenantId);
     PRINT '✓ BMW 320i created';
 END
 
 IF NOT EXISTS (SELECT 1 FROM fri_vehicles WHERE license_plate = 'AB12346')
 BEGIN
-    INSERT INTO fri_vehicles (id, lessor_id, make, model, year, license_plate, daily_rate, tenant_id)
-    VALUES (NEWID(), 'lessor-martin-001', 'Audi', 'A4', 2023, 'AB12346', 450.00, @TenantId);
+    INSERT INTO fri_vehicles (id, lessor_id, make, model, year, license_plate, vin, daily_rate, tenant_id)
+    VALUES (NEWID(), 'lessor-martin-001', 'Audi', 'A4', 2023, 'AB12346', 'VIN2023AUDIA4001', 450.00, @TenantId);
     PRINT '✓ Audi A4 created';
 END
 
 IF NOT EXISTS (SELECT 1 FROM fri_vehicles WHERE license_plate = 'AB12347')
 BEGIN
-    INSERT INTO fri_vehicles (id, lessor_id, make, model, year, license_plate, daily_rate, tenant_id)
-    VALUES (NEWID(), 'lessor-martin-001', 'Volvo', 'XC90', 2023, 'AB12347', 600.00, @TenantId);
+    INSERT INTO fri_vehicles (id, lessor_id, make, model, year, license_plate, vin, daily_rate, tenant_id)
+    VALUES (NEWID(), 'lessor-martin-001', 'Volvo', 'XC90', 2023, 'AB12347', 'VIN2023VOLVOXC90', 600.00, @TenantId);
     PRINT '✓ Volvo XC90 created';
 END
 
