@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
+import { FriAuthProvider } from "@/providers/FriAuthProvider";
 import { TenantProvider } from "@/hooks/useTenant";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import NotFound from "./pages/NotFound";
@@ -84,7 +85,11 @@ const App = forwardRef((props, ref) => (
                 <Route path="/fri/login" element={<FriLoginPage />} />
                 <Route path="/fri/signup" element={<FriSignupPage />} />
                 <Route path="/fri/tenant/signup" element={<TenantSignupPage />} />
-                <Route path="/fri/dashboard" element={<FriDashboard />} />
+                <Route path="/fri/dashboard" element={
+                  <FriAuthProvider>
+                    <FriDashboard />
+                  </FriAuthProvider>
+                } />
                 
                 {/* Lejio Fri Admin */}
                 <Route path="/fri/admin/login" element={<FriAdminLoginPage />} />
