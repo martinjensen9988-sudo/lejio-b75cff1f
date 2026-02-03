@@ -95,7 +95,7 @@ async function tenantSignup(
 }
 
 app.http("TenantSignup", {
-  methods: ["POST"],
+  methods: ["GET", "POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: tenantSignup,
 });

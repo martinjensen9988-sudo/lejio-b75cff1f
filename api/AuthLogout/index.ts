@@ -31,7 +31,7 @@ async function authLogout(
 }
 
 app.http("AuthLogout", {
-  methods: ["POST"],
+  methods: ["GET", "POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: authLogout,
 });

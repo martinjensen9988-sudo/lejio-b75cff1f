@@ -16,7 +16,7 @@ async function testFunction(
 }
 
 app.http("Test", {
-  methods: ["GET"],
+  methods: ["GET", "POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: testFunction,
 });

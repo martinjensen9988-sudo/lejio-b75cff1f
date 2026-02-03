@@ -110,7 +110,7 @@ async function authLogin(
 }
 
 app.http("AuthLogin", {
-  methods: ["POST"],
+  methods: ["GET", "POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: authLogin,
 });

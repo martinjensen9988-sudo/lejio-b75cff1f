@@ -57,7 +57,7 @@ async function authMe(
 }
 
 app.http("AuthMe", {
-  methods: ["GET"],
+  methods: ["GET", "POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: authMe,
 });
