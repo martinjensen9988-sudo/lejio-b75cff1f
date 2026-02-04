@@ -152,7 +152,7 @@ export const AdminAuditLog = () => {
 
   useEffect(() => {
     loadLogs(true);
-  }, [actionFilter, entityFilter]);
+  }, [actionFilter, entityFilter, loadLogs]);
 
   const handleSearch = () => {
     loadLogs(true);
@@ -166,7 +166,7 @@ export const AdminAuditLog = () => {
     if (page > 0) {
       loadLogs();
     }
-  }, [page]);
+  }, [page, loadLogs]);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);

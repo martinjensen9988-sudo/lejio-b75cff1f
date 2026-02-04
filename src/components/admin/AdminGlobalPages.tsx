@@ -45,7 +45,7 @@ export default function AdminGlobalPages() {
 
   useEffect(() => {
     fetchPages();
-  }, []);
+  }, [fetchPages]);
 
   async function fetchPages() {
     const { data } = await supabase.from('global_pages').select('*').order('created_at', { ascending: false });

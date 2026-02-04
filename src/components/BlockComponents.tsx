@@ -2,7 +2,14 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 interface BlockConfig {
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
+  bg_color?: string;
+  headline?: string;
+  subheadline?: string;
+  cta_text?: string;
+  cta_link?: string;
+  alignment?: string;
+  content?: string;
 }
 
 // Hero Block
@@ -361,34 +368,4 @@ export function FooterBlock({ config, lessor = {} }: { config: BlockConfig; less
       </div>
     </footer>
   );
-}
-
-// Render dispatcher
-export function renderBlock(block: any, lessor?: any, vehicles?: any[]) {
-  const { block_type, config } = block;
-
-  switch (block_type) {
-    case "hero":
-      return <HeroBlock key={block.id} config={config} />;
-    case "text":
-      return <TextBlock key={block.id} config={config} />;
-    case "pricing":
-      return <PricingBlock key={block.id} config={config} />;
-    case "vehicles":
-      return <VehiclesBlock key={block.id} config={config} vehicles={vehicles} />;
-    case "booking":
-      return <BookingBlock key={block.id} config={config} />;
-    case "contact":
-      return <ContactBlock key={block.id} config={config} />;
-    case "image":
-      return <ImageBlock key={block.id} config={config} />;
-    case "cta":
-      return <CTABlock key={block.id} config={config} />;
-    case "testimonial":
-      return <TestimonialBlock key={block.id} config={config} />;
-    case "footer":
-      return <FooterBlock key={block.id} config={config} lessor={lessor} />;
-    default:
-      return <div key={block.id} className="p-4 bg-gray-100 text-center">Unknown block type: {block_type}</div>;
-  }
 }

@@ -52,7 +52,7 @@ export function AILeadFinderCard({ existingLeads, onSearchClick }: AILeadFinderC
     if (suggestions.length === 0) {
       discoverNewLeads();
     }
-  }, []);
+  }, [suggestions.length, discoverNewLeads]);
 
   const handleSuggestionClick = (suggestion: LeadSuggestion) => {
     if (onSearchClick) {

@@ -6,18 +6,18 @@ import { Textarea } from "@/components/ui/textarea";
 interface PageBlock {
   id: string;
   block_type: string;
-  config: Record<string, any>;
+  config: Record<string, string | number | boolean | undefined>;
 }
 
 interface BlockSettingsProps {
   block: PageBlock;
-  onUpdate: (config: Record<string, any>) => void;
+  onUpdate: (config: Record<string, string | number | boolean | undefined>) => void;
 }
 
 export function BlockSettings({ block, onUpdate }: BlockSettingsProps) {
-  const [config, setConfig] = useState(block.config || {});
+  const [config, setConfig] = useState<Record<string, string | number | boolean | undefined>>(block.config || {});
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: string | number | boolean | undefined) => {
     const newConfig = { ...config, [key]: value };
     setConfig(newConfig);
   };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { renderBlock } from "@/components/BlockComponents";
+import { renderBlock } from "@/utils/blockRenderer";
 
 interface Page {
   id: string;

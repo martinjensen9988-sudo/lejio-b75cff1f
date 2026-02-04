@@ -48,7 +48,7 @@ export const LiveChatWidget = forwardRef<HTMLDivElement>((props, ref) => {
       const timeoutId = setTimeout(initChat, 1000);
       return () => clearTimeout(timeoutId);
     }
-  }, []);
+  }, [checkLiveChatStatus, loadOrCreateSession]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

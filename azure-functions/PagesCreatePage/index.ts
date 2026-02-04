@@ -27,7 +27,7 @@ function verifyToken(authHeader: string | undefined): string | null {
 
   try {
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as { sub: string };
     return decoded.sub;
   } catch {
     return null;

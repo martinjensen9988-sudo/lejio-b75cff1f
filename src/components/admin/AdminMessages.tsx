@@ -73,7 +73,7 @@ const AdminMessages = () => {
     if (activeConversation) {
       fetchMessages(activeConversation);
     }
-  }, [activeConversation]);
+  }, [activeConversation, fetchMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

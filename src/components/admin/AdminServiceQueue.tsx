@@ -133,7 +133,7 @@ export const AdminServiceQueue = ({ fleetVehicles }: AdminServiceQueueProps) => 
 
   useEffect(() => {
     fetchQueue();
-  }, [filterType, filterStatus]);
+  }, [filterType, filterStatus, fetchQueue]);
 
   const handleAddTask = async () => {
     if (!newTaskForm.vehicle_id) {

@@ -40,7 +40,7 @@ import { useLeadDeduplication } from '@/hooks/useLeadDeduplication';
 import { useSavedSearches, applyFilters } from '@/hooks/useSavedSearches';
 import { useEmailCampaigns } from '@/hooks/useEmailCampaigns';
 import { useCalendarIntegration } from '@/hooks/useCalendarIntegration';
-import { calculateLeadScore } from '@/components/admin/CRMDashboardWidget';
+import { calculateLeadScore } from '@/utils/leadScoring';
 import { 
   Plus, 
   Kanban, 

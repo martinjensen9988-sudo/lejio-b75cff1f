@@ -39,7 +39,7 @@ export const ReferralCreditOption = ({
       }
     };
     checkPending();
-  }, [user, periodType]);
+  }, [user, periodType, getPendingDiscount, onCreditApplied]);
 
   const handleUseCredit = (checked: boolean) => {
     setUseAvailableCredit(checked);
