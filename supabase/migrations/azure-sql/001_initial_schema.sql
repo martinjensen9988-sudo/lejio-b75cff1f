@@ -196,49 +196,68 @@ END
 
 -- Table: fri_invoices
 -- Purpose: Invoices for bookings
-CREATE TABLE fri_invoices (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    booking_id UNIQUEIDENTIFIER,
-    invoice_number NVARCHAR(50) UNIQUE NOT NULL,
-    customer_name NVARCHAR(255) NOT NULL,
-    email NVARCHAR(255) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    tax_amount DECIMAL(10, 2) DEFAULT 0,
-    total_amount DECIMAL(10, 2) NOT NULL,
-    status NVARCHAR(50) NOT NULL DEFAULT 'draft', -- draft, sent, paid, overdue, cancelled
-    payment_method NVARCHAR(50),
-    payment_date DATETIME2,
-    due_date DATETIME2,
-    notes NVARCHAR(MAX),
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
-    FOREIGN KEY (booking_id) REFERENCES fri_bookings(id)
-);
+IF OBJECT_ID('dbo.fri_invoices', 'U') IS NULL
+BEGIN
+    CREATE TABLE fri_invoices (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        booking_id UNIQUEIDENTIFIER,
+        invoice_number NVARCHAR(50) UNIQUE NOT NULL,
+        customer_name NVARCHAR(255) NOT NULL,
+        email NVARCHAR(255) NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        tax_amount DECIMAL(10, 2) DEFAULT 0,
+        total_amount DECIMAL(10, 2) NOT NULL,
+        status NVARCHAR(50) NOT NULL DEFAULT 'draft', -- draft, sent, paid, overdue, cancelled
+        payment_method NVARCHAR(50),
+        payment_date DATETIME2,
+        due_date DATETIME2,
+        notes NVARCHAR(MAX),
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id),
+        FOREIGN KEY (booking_id) REFERENCES fri_bookings(id)
+IF COL_LENGTH('dbo.fri_invoices', 'lessor_id') IS NOT NULL
+AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_fri_invoices_lessor' AND object_id = OBJECT_ID('dbo.fri_invoices'))
+BEGIN
+    CREATE INDEX idx_fri_invoices_lessor ON fri_invoices(lessor_id);
+END
 
-CREATE INDEX idx_fri_invoices_lessor ON fri_invoices(lessor_id);
+IF COL_LENGTH('dbo.fri_invoices', 'status') IS NOT NULL
+AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_fri_invoices_status' AND object_id = OBJECT_ID('dbo.fri_invoices'))
+BEGIN
+    CREATE INDEX idx_fri_invoices_status ON fri_invoices(status);
+END
+
+IF COL_LENGTH('dbo.fri_invoices', 'invoice_number') IS NOT NULL
+AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_fri_invoices_number' AND object_id = OBJECT_ID('dbo.fri_invoices'))
+BEGIN
+    CREATE INDEX idx_fri_invoices_number ON fri_invoices(invoice_number);
+END
 CREATE INDEX idx_fri_invoices_status ON fri_invoices(status);
 CREATE INDEX idx_fri_invoices_number ON fri_invoices(invoice_number);
 
 -- ============================================================================
 -- 6. PAYMENT TABLES
 -- ============================================================================
-
--- Table: fri_payments
--- Purpose: Lessor subscription payments
-CREATE TABLE fri_payments (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    currency NVARCHAR(3) DEFAULT 'DKK',
-    status NVARCHAR(50) NOT NULL DEFAULT 'pending', -- pending, completed, failed, refunded
-    payment_method NVARCHAR(50) NOT NULL, -- card, bank_transfer, paypal
-    subscription_type NVARCHAR(50) NOT NULL, -- trial, monthly, yearly
-    reference NVARCHAR(255),
-    notes NVARCHAR(MAX),
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+IF OBJECT_ID('dbo.fri_payments', 'U') IS NULL
+BEGIN
+    CREATE TABLE fri_payments (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        currency NVARCHAR(3) DEFAULT 'DKK',
+        status NVARCHAR(50) NOT NULL DEFAULT 'pending', -- pending, completed, failed, refunded
+        payment_method NVARCHAR(50) NOT NULL, -- card, bank_transfer, paypal
+        subscription_type NVARCHAR(50) NOT NULL, -- trial, monthly, yearly
+        reference NVARCHAR(255),
+        notes NVARCHAR(MAX),
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        paid_at DATETIME2,
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
+END
     paid_at DATETIME2,
     FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
 );
@@ -246,40 +265,57 @@ CREATE TABLE fri_payments (
 CREATE INDEX idx_fri_payments_lessor ON fri_payments(lessor_id);
 CREATE INDEX idx_fri_payments_status ON fri_payments(status);
 
--- ============================================================================
--- 7. SUPPORT TABLES
--- ============================================================================
+IF OBJECT_ID('dbo.fri_support_tickets', 'U') IS NULL
+BEGIN
+    CREATE TABLE fri_support_tickets (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        subject NVARCHAR(255) NOT NULL,
+        description NVARCHAR(MAX) NOT NULL,
+        category NVARCHAR(50) NOT NULL DEFAULT 'other', -- technical, billing, account, other
+        status NVARCHAR(50) NOT NULL DEFAULT 'open', -- open, in_progress, resolved, closed
+        priority NVARCHAR(50) NOT NULL DEFAULT 'medium', -- low, medium, high, urgent
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
 
--- Table: fri_support_tickets
--- Purpose: Support tickets from lessors
-CREATE TABLE fri_support_tickets (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    subject NVARCHAR(255) NOT NULL,
-    description NVARCHAR(MAX) NOT NULL,
-    category NVARCHAR(50) NOT NULL DEFAULT 'other', -- technical, billing, account, other
-    status NVARCHAR(50) NOT NULL DEFAULT 'open', -- open, in_progress, resolved, closed
-    priority NVARCHAR(50) NOT NULL DEFAULT 'medium', -- low, medium, high, urgent
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    updated_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
-);
+    CREATE INDEX idx_fri_tickets_lessor ON fri_support_tickets(lessor_id);
+    CREATE INDEX idx_fri_tickets_status ON fri_support_tickets(status);
+    CREATE INDEX idx_fri_tickets_priority ON fri_support_tickets(priority);
+END
+IF OBJECT_ID('dbo.fri_ticket_messages', 'U') IS NULL
+BEGIN
+    CREATE TABLE fri_ticket_messages (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        ticket_id UNIQUEIDENTIFIER NOT NULL,
+        sender_id NVARCHAR(36) NOT NULL,
+        sender_type NVARCHAR(50) NOT NULL, -- lessor, admin
+        message NVARCHAR(MAX) NOT NULL,
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (ticket_id) REFERENCES fri_support_tickets(id)
+    );
+END
 
-CREATE INDEX idx_fri_tickets_lessor ON fri_support_tickets(lessor_id);
-CREATE INDEX idx_fri_tickets_status ON fri_support_tickets(status);
-CREATE INDEX idx_fri_tickets_priority ON fri_support_tickets(priority);
-
--- Table: fri_ticket_messages
--- Purpose: Messages in support tickets
-CREATE TABLE fri_ticket_messages (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    ticket_id UNIQUEIDENTIFIER NOT NULL,
-    sender_id NVARCHAR(36) NOT NULL,
-    sender_type NVARCHAR(50) NOT NULL, -- lessor, admin
-    message NVARCHAR(MAX) NOT NULL,
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    FOREIGN KEY (ticket_id) REFERENCES fri_support_tickets(id)
-);
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'idx_fri_messages_ticket'
+      AND object_id = OBJECT_ID('dbo.fri_ticket_messages')
+IF OBJECT_ID('dbo.fri_api_keys', 'U') IS NULL
+BEGIN
+    CREATE TABLE fri_api_keys (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36) NOT NULL,
+        name NVARCHAR(255) NOT NULL,
+        [key] NVARCHAR(255) UNIQUE NOT NULL,
+        status NVARCHAR(50) NOT NULL DEFAULT 'active', -- active, inactive
+        last_used_at DATETIME2,
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        expires_at DATETIME2,
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
+END
 
 CREATE INDEX idx_fri_messages_ticket ON fri_ticket_messages(ticket_id);
 
@@ -287,21 +323,24 @@ CREATE INDEX idx_fri_messages_ticket ON fri_ticket_messages(ticket_id);
 -- 8. API KEYS TABLE
 -- ============================================================================
 
--- Table: fri_api_keys
--- Purpose: API keys for lessor integrations
-CREATE TABLE fri_api_keys (
-    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    lessor_id NVARCHAR(36) NOT NULL,
-    name NVARCHAR(255) NOT NULL,
-    [key] NVARCHAR(255) UNIQUE NOT NULL,
-    status NVARCHAR(50) NOT NULL DEFAULT 'active', -- active, inactive
-    last_used_at DATETIME2,
-    created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    expires_at DATETIME2,
-    FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
-);
+IF OBJECT_ID('dbo.fri_audit_logs', 'U') IS NULL
+BEGIN
+    CREATE TABLE fri_audit_logs (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        lessor_id NVARCHAR(36),
+        user_id NVARCHAR(36),
+        action NVARCHAR(100) NOT NULL,
+        entity_type NVARCHAR(100),
+        entity_id NVARCHAR(MAX),
+        changes NVARCHAR(MAX), -- JSON of changes
+        ip_address NVARCHAR(50),
+        created_at DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        FOREIGN KEY (lessor_id) REFERENCES fri_lessors(id)
+    );
 
-CREATE INDEX idx_fri_api_keys_lessor ON fri_api_keys(lessor_id);
+    CREATE INDEX idx_fri_audit_lessor ON fri_audit_logs(lessor_id);
+    CREATE INDEX idx_fri_audit_date ON fri_audit_logs(created_at);
+END
 CREATE INDEX idx_fri_api_keys_key ON fri_api_keys([key]);
 
 -- ============================================================================
