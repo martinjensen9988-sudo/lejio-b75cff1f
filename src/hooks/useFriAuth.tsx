@@ -1,92 +1,63 @@
 import { useEffect, useState, useCallback } from 'react';
 
 interface FriAuthUser {
-  id: string;
+  lessorId: string;
   email: string;
-  company_name?: string;
-  lessor_id?: string;
-  isLessor?: boolean;
+  companyName: string;
+  primaryColor: string;
 }
 
 interface UseFriAuthReturn {
   user: FriAuthUser | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   error: Error | null;
+  token: string | null;
 }
 
 /**
  * Hook for Lejio Fri authentication
- * Uses Azure Functions via Static Web Apps API routing
+ * Uses Azure Functions backend with JWT tokens
  */
 export function useFriAuth(): UseFriAuthReturn {
   const [user, setUser] = useState<FriAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  // Use relative /api path which Azure Static Web Apps will proxy to Azure Functions
-  const apiBaseUrl = '/api';
+  const [token, setToken] = useState<string | null>(null);
 
-  // Check auth status on mount
+  // Check auth on mount
   useEffect(() => {
-    const checkAuth = async () => {
+    const storedToken = localStorage.getItem('fri-auth-token');
+    if (storedToken) {
       try {
-        const token = localStorage.getItem('fri-auth-token');
-        if (!token) {
-          // Set demo user for testing
+        // Decode token to get user info
+        const parts = storedToken.split('.');
+        if (parts.length === 3) {
+          const decoded = JSON.parse(atob(parts[1]));
           setUser({
-            id: 'demo-user-1',
-            email: 'martin@lejio.dk',
-            lessor_id: 'lessor-1',
-            company_name: 'Martin Biludlejning',
-          } as any);
-          setLoading(false);
-          return;
+            lessorId: decoded.sub,
+            email: decoded.email,
+            companyName: decoded.company_name,
+            primaryColor: decoded.primary_color
+          });
+          setToken(storedToken);
         }
-
-        const response = await fetch(`${apiBaseUrl}/AuthMe`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-        } else {
-          // Fallback to demo user
-          setUser({
-            id: 'demo-user-1',
-            email: 'martin@lejio.dk',
-            lessor_id: 'lessor-1',
-            company_name: 'Martin Biludlejning',
-          } as any);
-          localStorage.removeItem('fri-auth-token');
-        }
-        setLoading(false);
       } catch (err) {
-        console.error('Auth check error:', err);
-        // Fallback to demo user on error
-        setUser({
-          id: 'demo-user-1',
-          email: 'martin@lejio.dk',
-          lessor_id: 'lessor-1',
-          company_name: 'Martin Biludlejning',
-        } as any);
-        setLoading(false);
+        console.error('Token decode error:', err);
+        localStorage.removeItem('fri-auth-token');
       }
-    };
-
-    checkAuth();
-  }, [apiBaseUrl]);
+    }
+    setLoading(false);
+  }, []);
 
   const signUp = useCallback(
     async (email: string, password: string) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${apiBaseUrl}/AuthSignup`, {
+        const apiUrl = process.env.REACT_APP_API_BASE_URL || '/api';
+        const response = await fetch(`${apiUrl}/auth/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -97,8 +68,7 @@ export function useFriAuth(): UseFriAuthReturn {
           throw new Error(data.error || 'Signup failed');
         }
 
-        const userData = await response.json();
-        // For signup, user needs email confirmation, so we don't auto-login
+        // Don't auto-login after signup, user needs to verify email
         setUser(null);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
@@ -108,77 +78,21 @@ export function useFriAuth(): UseFriAuthReturn {
         setLoading(false);
       }
     },
-    [apiBaseUrl]
-  );
-
-  const signIn = useCallback(
-    async (email: string, password: string) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`${apiBaseUrl}/AuthLogin`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Login failed');
-        }
-
-        const data = await response.json();
-        
-        // Store session token
-        if (data.session?.access_token) {
-          localStorage.setItem('fri-auth-token', data.session.access_token);
-        }
-        
-        setUser(data.session?.user || {
-          id: '',
-          email: email,
-        });
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [apiBaseUrl]
+    []
   );
 
   const signOut = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const token = localStorage.getItem('fri-auth-token');
-      if (token) {
-        await fetch(`${apiBaseUrl}/AuthLogout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-      }
-      localStorage.removeItem('fri-auth-token');
-      setUser(null);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [apiBaseUrl]);
+    localStorage.removeItem('fri-auth-token');
+    setUser(null);
+    setToken(null);
+  }, []);
 
   return {
     user,
     loading,
-    signUp,
     signIn,
     signOut,
     error,
+    token
   };
 }
