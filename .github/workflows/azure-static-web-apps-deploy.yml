@@ -4,15 +4,10 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
 
 jobs:
-  build_and_deploy_job:
+  build_and_deploy:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
     steps:
       - uses: actions/checkout@v4
 
@@ -27,32 +22,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Copy staticwebapp.config.json to dist
+      - name: Copy config
         run: cp staticwebapp.config.json dist/
 
-      - name: Install API dependencies
-        run: cd api && npm ci
-
       - name: Deploy to Azure Static Web Apps
-        id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_TOKEN || '43a41d7f029531b6a5c19590be0f0ab3b37015996d9621d5c6d0ddfe7010d71302-bdd2e150-80af-4e7d-bd94-869badafab0e003311904c86dd03' }}
+          azure_static_web_apps_api_token: '43a41d7f029531b6a5c19590be0f0ab3b37015996d9621d5c6d0ddfe7010d71302-bdd2e150-80af-4e7d-bd94-869badafab0e003311904c86dd03'
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "dist"
           api_location: "api"
           skip_app_build: true
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request in Azure Static Web Apps
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_TOKEN }}
-          app_location: "dist"
-          action: "close"
