@@ -82,8 +82,7 @@ const App = forwardRef((props, ref) => (
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 {/* Debug route */}
-                <Route path="/debug" element={<div className="p-8"><h1>Debug: App is working!</h1></div>} />
-                
+        <Route path="/debug" element={<div className="p-8"><h1>Debug: App is working! (v2)</h1><p>This is the NEW compiled version</p></div>} />
                 {/* Lejio Fri - Main Platform */}
                 <Route path="/" element={<Navigate to="/fri" replace />} />
                 <Route path="/fri" element={<FriLandingPage />} />

@@ -82,7 +82,7 @@ if (!rootElement) {
   console.error('❌ Root element not found!');
   document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>ERROR: Root element not found</h1><p>Check console</p></div>';
 } else {
-  console.log('✅ Root element found, mounting React');
+  console.log('✅ Root element found, mounting React - BUILD VERSION: ' + new Date().getTime());
   createRoot(rootElement).render(<SentryApp />);
-  console.log('✅ React mounted');
+  console.log('✅ React mounted successfully at ' + new Date().toISOString());
 }
