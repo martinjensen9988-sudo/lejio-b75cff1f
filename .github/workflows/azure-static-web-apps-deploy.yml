@@ -28,6 +28,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Copy staticwebapp.config.json to dist
+        run: cp staticwebapp.config.json dist/
+
       - name: Install API dependencies
         run: cd api && npm ci
 
