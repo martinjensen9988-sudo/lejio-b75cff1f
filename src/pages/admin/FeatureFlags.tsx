@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AdminFeatureFlags } from '@/components/admin/AdminFeatureFlags';
 
 export default function FeatureFlagsPage() {

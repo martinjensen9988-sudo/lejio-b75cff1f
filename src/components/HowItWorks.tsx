@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Search, CreditCard, Key, Car, Wallet, Users, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";

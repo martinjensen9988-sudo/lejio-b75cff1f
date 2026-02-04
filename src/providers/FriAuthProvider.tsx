@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { useFriAuth } from '@/hooks/useFriAuth';
 
 interface FriAuthUser {
