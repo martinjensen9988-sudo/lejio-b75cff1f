@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { AlertCircle, TrendingUp, TrendingDown, DollarSign, AlertTriangle, Calendar } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -54,14 +54,20 @@ const FriLessorDashboard = () => {
       const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
-      // Hent bookinger for denne måned
-      const { data: monthlyBookings, error } = await supabase
-        .from('fri_bookings')
-        .select('*')
-        .gte('start_date', firstDay.toISOString())
-        .lte('end_date', lastDay.toISOString());
+      const safeLessorId = (friLessor?.id || '').replace(/'/g, "''");
+      const startIso = firstDay.toISOString();
+      const endIso = lastDay.toISOString();
 
-      if (error) throw error;
+      // Hent bookinger for denne måned
+      const monthlyBookingsResponse = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_bookings WHERE lessor_id='${safeLessorId}' AND start_date >= '${startIso}' AND end_date <= '${endIso}'`,
+      });
+
+      const monthlyBookings = Array.isArray(monthlyBookingsResponse?.data)
+        ? monthlyBookingsResponse.data
+        : Array.isArray(monthlyBookingsResponse)
+          ? monthlyBookingsResponse
+          : monthlyBookingsResponse?.data?.recordset || monthlyBookingsResponse?.recordset || [];
 
       // Beregn revenue data pr. køretøj
       const revenueMap = new Map<string, VehicleRevenueData>();

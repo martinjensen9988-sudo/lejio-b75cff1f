@@ -2,13 +2,24 @@
 
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 
+interface ContractRecord {
+  id: string;
+  contract_number: string;
+  renter_name: string;
+  vehicle_make?: string | null;
+  vehicle_model?: string | null;
+  vehicle_id?: string | null;
+  checkin_pin?: string | number | null;
+  checked_in_at?: string | null;
+}
+
 export default function CheckinPage() {
   const { contractId } = useParams();
-  const [contract, setContract] = useState<unknown>(null);
+  const [contract, setContract] = useState<ContractRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkedIn, setCheckedIn] = useState(false);
   const [pin, setPin] = useState('');
@@ -17,18 +28,31 @@ export default function CheckinPage() {
   useEffect(() => {
     if (!contractId) return;
     const fetchContract = async () => {
-      const { data, error } = await supabase
-        .from('contracts')
-        .select('*')
-        .eq('id', contractId)
-        .single();
-      if (error) {
-        console.error('Failed to fetch contract:', error);
+      try {
+        const safeContractId = String(contractId).replace(/'/g, "''");
+        const response = await azureApi.post<any>('/db/query', {
+          query: `SELECT * FROM contracts WHERE id='${safeContractId}'`,
+        });
+
+        const rows = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response)
+            ? response
+            : response?.data?.recordset || response?.recordset || [];
+
+        const data = rows?.[0] as ContractRecord | undefined;
+
+        if (!data) {
+          setPinError('Kunne ikke hente kontrakt. Tjek venligst linket.');
+        } else {
+          setContract(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch contract:', err);
         setPinError('Kunne ikke hente kontrakt. Tjek venligst linket.');
-      } else if (data) {
-        setContract(data);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchContract();
   }, [contractId]);
@@ -46,15 +70,16 @@ export default function CheckinPage() {
       setPinError('Forkert PIN-kode. Prøv igen.');
       return;
     }
-    const { error } = await supabase
-      .from('contracts')
-      .update({ checked_in_at: new Date().toISOString() })
-      .eq('id', contractId);
-    if (!error) {
+    try {
+      const checkedInAt = new Date().toISOString();
+      await azureApi.post('/db/query', {
+        query: `UPDATE contracts SET checked_in_at='${checkedInAt}' WHERE id='${String(contractId).replace(/'/g, "''")}'`,
+      });
       setCheckedIn(true);
       toast({ title: 'Check-in registreret', description: 'Du er nu checket ind!', variant: 'default' });
-    } else {
-      toast({ title: 'Fejl ved check-in', description: error.message, variant: 'destructive' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Ukendt fejl';
+      toast({ title: 'Fejl ved check-in', description: message, variant: 'destructive' });
     }
   };
 

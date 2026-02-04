@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Download, FileText, Eye, CheckCircle, Clock, AlertCircle, DollarSign, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 import { toast } from 'sonner';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -60,7 +60,7 @@ interface DashboardStats {
 }
 
 const FriInvoiceManagement = () => {
-  const { invoices, bookings, refetch, isLoading } = useFriLessor();
+  const { invoices, bookings, friLessor, refetch, isLoading } = useFriLessor();
   const [friInvoices, setFriInvoices] = useState<FriInvoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<FriInvoice | null>(null);
   const [invoiceDetails, setInvoiceDetails] = useState<InvoiceDetail | null>(null);
@@ -84,12 +84,16 @@ const FriInvoiceManagement = () => {
   const loadInvoices = async () => {
     setIsLoadingInvoices(true);
     try {
-      const { data: allInvoices, error } = await supabase
-        .from('fri_invoices')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const safeLessorId = (friLessor?.id || '').replace(/'/g, "''");
+      const allInvoicesResponse = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_invoices WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC`,
+      });
 
-      if (error) throw error;
+      const allInvoices = Array.isArray(allInvoicesResponse?.data)
+        ? allInvoicesResponse.data
+        : Array.isArray(allInvoicesResponse)
+          ? allInvoicesResponse
+          : allInvoicesResponse?.data?.recordset || allInvoicesResponse?.recordset || [];
 
       const invoiceList = (allInvoices || []).map((inv: any) => ({
         id: inv.id,

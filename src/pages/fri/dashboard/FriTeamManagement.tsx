@@ -21,7 +21,7 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 import { toast } from 'sonner';
 import {
   Loader2,
@@ -130,33 +130,29 @@ const FriTeamManagement = () => {
     try {
       if (selectedMember) {
         // Update existing
-        const { error } = await supabase
-          .from('fri_lessor_team_members')
-          .update({
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone || null,
-            role: formData.role,
-            is_active: formData.is_active,
-          })
-          .eq('id', selectedMember.id);
-
-        if (error) throw error;
+        await azureApi.put('/db/fri_lessor_team_members', {
+          id: selectedMember.id,
+          full_name: formData.full_name,
+          email: formData.email,
+          phone: formData.phone || null,
+          role: formData.role,
+          is_active: formData.is_active,
+        });
         toast.success('Teammedlem opdateret');
       } else {
         // Create new
-        const { error } = await supabase
-          .from('fri_lessor_team_members')
-          .insert({
-            lessor_id: friLessor?.id || '',
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone || null,
-            role: formData.role,
-            is_active: true,
-          });
-
-        if (error) throw error;
+        await azureApi.post('/db/fri_lessor_team_members', {
+          records: [
+            {
+              lessor_id: friLessor?.id || '',
+              full_name: formData.full_name,
+              email: formData.email,
+              phone: formData.phone || null,
+              role: formData.role,
+              is_active: true,
+            },
+          ],
+        });
         toast.success('Teammedlem oprettet');
       }
 
@@ -175,12 +171,10 @@ const FriTeamManagement = () => {
 
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('fri_lessor_team_members')
-        .update({ is_active: false })
-        .eq('id', selectedMember.id);
-
-      if (error) throw error;
+      await azureApi.put('/db/fri_lessor_team_members', {
+        id: selectedMember.id,
+        is_active: false,
+      });
       toast.success('Teammedlem deaktiveret');
       await refetch();
       setIsDeleteAlertOpen(false);

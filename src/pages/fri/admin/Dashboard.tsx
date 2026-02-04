@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 import { Card } from '@/components/ui/card';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Users, Zap, TrendingUp, DollarSign, Activity } from 'lucide-react';
@@ -22,28 +22,37 @@ export const FriAdminDashboard = () => {
     const fetchAdminStats = async () => {
       try {
         // Fetch lessor counts
-        const { data: lessorsData, error: lessorsError } = await supabase
-          .from('fri_lessors')
-          .select('id, subscription_status, created_at');
-
-        if (lessorsError) throw lessorsError;
+        const lessorsResponse = await azureApi.post<any>('/db/query', {
+          query: 'SELECT id, subscription_status, created_at FROM fri_lessors',
+        });
+        const lessorsData = Array.isArray(lessorsResponse?.data)
+          ? lessorsResponse.data
+          : Array.isArray(lessorsResponse)
+            ? lessorsResponse
+            : lessorsResponse?.data?.recordset || lessorsResponse?.recordset || [];
 
         const totalLessors = lessorsData?.length || 0;
         const activeLessors = lessorsData?.filter(l => l.subscription_status === 'active' || l.subscription_status === 'trial').length || 0;
 
         // Fetch vehicles
-        const { data: vehiclesData, error: vehiclesError } = await supabase
-          .from('fri_vehicles')
-          .select('id');
-
-        if (vehiclesError) throw vehiclesError;
+        const vehiclesResponse = await azureApi.post<any>('/db/query', {
+          query: 'SELECT id FROM fri_vehicles',
+        });
+        const vehiclesData = Array.isArray(vehiclesResponse?.data)
+          ? vehiclesResponse.data
+          : Array.isArray(vehiclesResponse)
+            ? vehiclesResponse
+            : vehiclesResponse?.data?.recordset || vehiclesResponse?.recordset || [];
 
         // Fetch bookings
-        const { data: bookingsData, error: bookingsError } = await supabase
-          .from('fri_bookings')
-          .select('id, total_price, status, start_date');
-
-        if (bookingsError) throw bookingsError;
+        const bookingsResponse = await azureApi.post<any>('/db/query', {
+          query: 'SELECT id, total_price, status, start_date FROM fri_bookings',
+        });
+        const bookingsData = Array.isArray(bookingsResponse?.data)
+          ? bookingsResponse.data
+          : Array.isArray(bookingsResponse)
+            ? bookingsResponse
+            : bookingsResponse?.data?.recordset || bookingsResponse?.recordset || [];
 
         const totalBookings = bookingsData?.length || 0;
         const totalRevenue = bookingsData?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;

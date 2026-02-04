@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -40,6 +40,15 @@ export const FriAdminLessorDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   useEffect(() => {
     const fetchLessorDetails = async () => {
       if (!lessorId) return;
@@ -48,24 +57,25 @@ export const FriAdminLessorDetailsPage = () => {
         setLoading(true);
 
         // Fetch lessor info
-        const { data: lessorData, error: lessorError } = await supabase
-          .from('fri_lessors')
-          .select('*')
-          .eq('id', lessorId)
-          .single();
+        const safeLessorId = String(lessorId).replace(/'/g, "''");
+        const lessorResponse = await azureApi.post<any>('/db/query', {
+          query: `SELECT * FROM fri_lessors WHERE id='${safeLessorId}'`,
+        });
 
-        if (lessorError) throw lessorError;
+        const lessorRows = normalizeRows(lessorResponse);
+        const lessorData = lessorRows?.[0] as LessorDetails | undefined;
+        if (!lessorData) throw new Error('Lessor ikke fundet');
         setLessor(lessorData);
 
         // Fetch lessor data
         const [vehiclesRes, bookingsRes, invoicesRes, activeBookingsRes] = await Promise.all([
-          supabase.from('fri_vehicles').select('id').eq('lessor_id', lessorId),
-          supabase.from('fri_bookings').select('id, total_price, status, start_date').eq('lessor_id', lessorId),
-          supabase.from('fri_invoices').select('id').eq('lessor_id', lessorId),
-          supabase.from('fri_bookings').select('id').eq('lessor_id', lessorId).eq('status', 'confirmed'),
+          azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_vehicles WHERE lessor_id='${safeLessorId}'` }),
+          azureApi.post<any>('/db/query', { query: `SELECT id, total_price, status, start_date FROM fri_bookings WHERE lessor_id='${safeLessorId}'` }),
+          azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_invoices WHERE lessor_id='${safeLessorId}'` }),
+          azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_bookings WHERE lessor_id='${safeLessorId}' AND status='confirmed'` }),
         ]);
 
-        const bookingsData = bookingsRes.data || [];
+        const bookingsData = normalizeRows(bookingsRes);
         const monthlyMap = new Map<string, number>();
         
         bookingsData.forEach(booking => {
@@ -77,10 +87,10 @@ export const FriAdminLessorDetailsPage = () => {
         });
 
         setData({
-          vehicles: vehiclesRes.data?.length || 0,
+          vehicles: normalizeRows(vehiclesRes).length || 0,
           bookings: bookingsData.length,
           revenue: bookingsData.reduce((sum, b) => sum + (b.total_price || 0), 0),
-          activeBookings: activeBookingsRes.data?.length || 0,
+          activeBookings: normalizeRows(activeBookingsRes).length || 0,
           completedBookings: bookingsData.filter(b => b.status === 'completed').length,
           monthlyData: Array.from(monthlyMap.entries())
             .map(([month, revenue]) => ({ month, revenue }))

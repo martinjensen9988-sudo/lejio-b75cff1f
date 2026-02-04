@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { useFriVehicles, useDeleteVehicle } from '@/hooks/useFriData';
 import { Loader2, Trash2, Edit2, Plus } from 'lucide-react';
-import CreateVehicleModal from './CreateVehicleModal';
+import CreateVehicleModal from '@/components/fri/CreateVehicleModal';
 
 export function VehiclesTab() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);

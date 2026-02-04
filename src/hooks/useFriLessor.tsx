@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 import { useFriAuth } from '@/hooks/useFriAuth';
 import { toast } from 'sonner';
 
@@ -67,7 +67,8 @@ export interface FriInvoice {
 }
 
 export const useFriLessor = () => {
-  const { token, lessorId } = useFriAuth();
+  const auth = useFriAuth();
+  const lessorId = auth.user?.lessor_id;
   const [friLessor, setFriLessor] = useState<FriLessor | null>(null);
   const [teamMembers, setTeamMembers] = useState<FriTeamMember[]>([]);
   const [vehicles, setVehicles] = useState<FriVehicle[]>([]);
@@ -75,8 +76,19 @@ export const useFriLessor = () => {
   const [invoices, setInvoices] = useState<FriInvoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   const fetchFriData = useCallback(async () => {
-    if (!token || !lessorId) {
+    if (!lessorId) {
       setIsLoading(false);
       return;
     }
@@ -84,19 +96,27 @@ export const useFriLessor = () => {
     setIsLoading(true);
     try {
       // Fetch all related data in parallel
+      const safeLessorId = escapeSqlValue(lessorId);
+
       const [lessorRes, teamRes, vehiclesRes, bookingsRes, invoicesRes] = await Promise.all([
-        supabase.from('fri_lessors').select('*').eq('id', lessorId).maybeSingle(),
-        supabase.from('fri_lessor_team_members').select('*').eq('lessor_id', lessorId).eq('is_active', true),
-        supabase.from('fri_vehicles').select('*').eq('lessor_id', lessorId).order('created_at', { ascending: false }),
-        supabase.from('fri_bookings').select('*').eq('lessor_id', lessorId).order('created_at', { ascending: false }).limit(100),
-        supabase.from('fri_invoices').select('*').eq('lessor_id', lessorId).order('created_at', { ascending: false }),
+        azureApi.post<any>("/db/query", { query: `SELECT * FROM fri_lessors WHERE id='${safeLessorId}'` }),
+        azureApi.post<any>("/db/query", { query: `SELECT * FROM fri_lessor_team_members WHERE lessor_id='${safeLessorId}' AND is_active=1` }),
+        azureApi.post<any>("/db/query", { query: `SELECT * FROM fri_vehicles WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC` }),
+        azureApi.post<any>("/db/query", { query: `SELECT * FROM fri_bookings WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC OFFSET 0 ROWS FETCH NEXT 100 ROWS ONLY` }),
+        azureApi.post<any>("/db/query", { query: `SELECT * FROM fri_invoices WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC` }),
       ]);
 
-      if (lessorRes.data) setFriLessor(lessorRes.data as FriLessor);
-      if (teamRes.data) setTeamMembers(teamRes.data as FriTeamMember[]);
-      if (vehiclesRes.data) setVehicles(vehiclesRes.data as FriVehicle[]);
-      if (bookingsRes.data) setBookings(bookingsRes.data as FriBooking[]);
-      if (invoicesRes.data) setInvoices(invoicesRes.data as FriInvoice[]);
+      const lessorRows = normalizeRows(lessorRes);
+      const teamRows = normalizeRows(teamRes);
+      const vehicleRows = normalizeRows(vehiclesRes);
+      const bookingRows = normalizeRows(bookingsRes);
+      const invoiceRows = normalizeRows(invoicesRes);
+
+      if (lessorRows?.[0]) setFriLessor(lessorRows[0] as FriLessor);
+      setTeamMembers((teamRows || []) as FriTeamMember[]);
+      setVehicles((vehicleRows || []) as FriVehicle[]);
+      setBookings((bookingRows || []) as FriBooking[]);
+      setInvoices((invoiceRows || []) as FriInvoice[]);
 
     } catch (error) {
       console.error('Error fetching Fri data:', error);
@@ -104,7 +124,7 @@ export const useFriLessor = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [token, lessorId]);
+  }, [lessorId]);
 
   useEffect(() => {
     fetchFriData();
@@ -117,24 +137,22 @@ export const useFriLessor = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('fri_lessor_team_members')
-        .insert({
-          lessor_id: lessorId,
-          full_name: member.full_name,
-          email: member.email,
-          phone: member.phone || null,
-          role: member.role,
-          is_active: true,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      await azureApi.post(`/db/fri_lessor_team_members`, {
+        records: [
+          {
+            lessor_id: lessorId,
+            full_name: member.full_name,
+            email: member.email,
+            phone: member.phone || null,
+            role: member.role,
+            is_active: true,
+          },
+        ],
+      });
 
       toast.success('Teammedlem oprettet');
       await fetchFriData();
-      return data;
+      return true;
     } catch (error) {
       console.error('Error creating team member:', error);
       toast.error('Kunne ikke oprette teammedlem');
@@ -144,12 +162,7 @@ export const useFriLessor = () => {
 
   const updateTeamMember = async (memberId: string, updates: Partial<FriTeamMember>) => {
     try {
-      const { error } = await supabase
-        .from('fri_lessor_team_members')
-        .update(updates)
-        .eq('id', memberId);
-
-      if (error) throw error;
+      await azureApi.put(`/db/fri_lessor_team_members`, { id: memberId, ...updates });
 
       toast.success('Teammedlem opdateret');
       await fetchFriData();
@@ -163,12 +176,7 @@ export const useFriLessor = () => {
 
   const deleteTeamMember = async (memberId: string) => {
     try {
-      const { error } = await supabase
-        .from('fri_lessor_team_members')
-        .update({ is_active: false })
-        .eq('id', memberId);
-
-      if (error) throw error;
+      await azureApi.put(`/db/fri_lessor_team_members`, { id: memberId, is_active: false });
 
       toast.success('Teammedlem slettet');
       await fetchFriData();
@@ -187,21 +195,19 @@ export const useFriLessor = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('fri_vehicles')
-        .insert({
-          lessor_id: lessorId,
-          ...vehicle,
-          status: 'available',
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      await azureApi.post(`/db/fri_vehicles`, {
+        records: [
+          {
+            lessor_id: lessorId,
+            ...vehicle,
+            status: 'available',
+          },
+        ],
+      });
 
       toast.success('Køretøj oprettet');
       await fetchFriData();
-      return data;
+      return true;
     } catch (error) {
       console.error('Error creating vehicle:', error);
       toast.error('Kunne ikke oprette køretøj');
@@ -211,12 +217,7 @@ export const useFriLessor = () => {
 
   const updateVehicle = async (vehicleId: string, updates: Partial<FriVehicle>) => {
     try {
-      const { error } = await supabase
-        .from('fri_vehicles')
-        .update(updates)
-        .eq('id', vehicleId);
-
-      if (error) throw error;
+      await azureApi.put(`/db/fri_vehicles`, { id: vehicleId, ...updates });
 
       toast.success('Køretøj opdateret');
       await fetchFriData();
@@ -241,29 +242,27 @@ export const useFriLessor = () => {
       );
       const totalPrice = (booking.daily_rate * daysBooked) + (booking.additional_fees || 0);
 
-      const { data, error } = await supabase
-        .from('fri_bookings')
-        .insert({
-          lessor_id: lessorId,
-          vehicle_id: booking.vehicle_id,
-          renter_name: booking.renter_name,
-          renter_email: booking.renter_email,
-          renter_phone: booking.renter_phone || null,
-          start_date: booking.start_date,
-          end_date: booking.end_date,
-          daily_rate: booking.daily_rate,
-          additional_fees: booking.additional_fees || 0,
-          total_price: totalPrice,
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      await azureApi.post(`/db/fri_bookings`, {
+        records: [
+          {
+            lessor_id: lessorId,
+            vehicle_id: booking.vehicle_id,
+            renter_name: booking.renter_name,
+            renter_email: booking.renter_email,
+            renter_phone: booking.renter_phone || null,
+            start_date: booking.start_date,
+            end_date: booking.end_date,
+            daily_rate: booking.daily_rate,
+            additional_fees: booking.additional_fees || 0,
+            total_price: totalPrice,
+            status: 'pending',
+          },
+        ],
+      });
 
       toast.success('Booking oprettet');
       await fetchFriData();
-      return data;
+      return true;
     } catch (error) {
       console.error('Error creating booking:', error);
       toast.error('Kunne ikke oprette booking');
@@ -273,12 +272,7 @@ export const useFriLessor = () => {
 
   const updateBookingStatus = async (bookingId: string, newStatus: FriBooking['status']) => {
     try {
-      const { error } = await supabase
-        .from('fri_bookings')
-        .update({ status: newStatus })
-        .eq('id', bookingId);
-
-      if (error) throw error;
+      await azureApi.put(`/db/fri_bookings`, { id: bookingId, status: newStatus });
 
       toast.success('Booking status opdateret');
       await fetchFriData();
