@@ -37,13 +37,15 @@ const SafeSidebar = () => {
 const FriDashboardLayout: React.FC<FriDashboardLayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <Suspense fallback={<div className="w-64 bg-gray-200 animate-pulse" />}>
-        <FriSidebar />
+      {/* Sidebar - Fixed position */}
+      <Suspense fallback={<div className="w-64 bg-gray-200 animate-pulse flex-shrink-0" />}>
+        <div className="flex-shrink-0 fixed left-0 top-0 h-screen w-64 z-50">
+          <FriSidebar />
+        </div>
       </Suspense>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Main Content Area - with margin for sidebar */}
+      <div className="flex-1 flex flex-col overflow-hidden ml-64">
         {/* Top Bar */}
         <Suspense fallback={<div className="h-16 bg-gray-200 animate-pulse" />}>
           <FriTopBar />
