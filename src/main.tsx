@@ -97,7 +97,7 @@ if (!rootElement) {
   console.error('❌ Root element not found!');
   document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>ERROR: Root element not found</h1><p>Check console</p></div>';
 } else {
-  console.log('✅ Root element found, mounting React - BUILDVERSION_FORCE_DEPLOY_1');
+  console.log('✅ Root element found, mounting React - BUILDVERSION_GH_ACTIONS_FORCE_v2');
   createRoot(rootElement).render(<SentryApp />);
-  console.log('✅ React mounted successfully at BUILD_FORCE_DEPLOY_1');
+  console.log('✅ React mounted successfully at BUILDVERSION_GH_ACTIONS_FORCE_v2');
 }
