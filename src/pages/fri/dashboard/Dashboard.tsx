@@ -1,10 +1,13 @@
+import React from 'react';
 import { useFriAuthContext } from '@/providers/FriAuthProvider';
 import { useBrand } from '@/providers/BrandContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { useFriStats } from '@/hooks/useFriData';
-import { Loader2 } from 'lucide-react';
+import { Loader2, TrendingUp, DollarSign, AlertCircle } from 'lucide-react';
+import FriDashboardLayout from '@/components/fri/FriDashboardLayout';
+import VehiclesTab from '@/components/fri/VehiclesTab';
 
 export function FriDashboard() {
   const { user, signOut, loading, error } = useFriAuthContext();
@@ -20,188 +23,170 @@ export function FriDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loader...</p>
-      </div>
+      <FriDashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-[#4CAF50]" />
+        </div>
+      </FriDashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Fejl: {error.message}</p>
-          <Button onClick={() => navigate('/fri/login')}>
+      <FriDashboardLayout>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl">
+          <h2 className="text-lg font-semibold text-red-900 mb-2">Fejl</h2>
+          <p className="text-red-700 mb-4">{error.message}</p>
+          <Button onClick={() => navigate('/fri/login')} variant="outline">
             Gå til login
           </Button>
         </div>
-      </div>
+      </FriDashboardLayout>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="mb-4">Du skal være logget ind for at se dashboardet</p>
-          <Button onClick={() => navigate('/fri/login')}>
+      <FriDashboardLayout>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-2xl">
+          <h2 className="text-lg font-semibold text-yellow-900 mb-2">Du skal være logget ind</h2>
+          <Button onClick={() => navigate('/fri/login')} className="mt-4">
             Gå til login
           </Button>
         </div>
-      </div>
+      </FriDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">{companyName}</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-600">Hej, {user.email}</span>
-            <Button variant="outline" size="sm" onClick={handlePageBuilder}>
-              📄 Lav Hjemmeside
+    <FriDashboardLayout>
+      <div className="space-y-8">
+        {/* Welcome Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Velkommen!</h1>
+          <p className="text-gray-600 mt-2">Administrer hele din bilutlejningsvirksomhed på ét sted.</p>
+        </div>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Active Vehicles */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Aktive Køretøjer</p>
+                <div className="flex items-baseline gap-2 mt-3">
+                  {statsLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-[#4CAF50]" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-gray-900">{stats?.activeVehicles || 0}</p>
+                      <span className="text-xs text-gray-500">køretøjer</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <span className="text-xl">🚗</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bookings This Month */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Bookinger (Denne Måned)</p>
+                <div className="flex items-baseline gap-2 mt-3">
+                  {statsLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-[#4CAF50]" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-gray-900">{stats?.bookingsThisMonth || 0}</p>
+                      <span className="text-xs text-gray-500">bookinger</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                <span className="text-xl">📅</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue This Month */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Omsætning (Denne Måned)</p>
+                <div className="flex items-baseline gap-2 mt-3">
+                  {statsLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-[#4CAF50]" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-gray-900">kr {(stats?.revenueThisMonth || 0).toLocaleString('da-DK')}</p>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Outstanding Invoices */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Udestående Invoicer</p>
+                <div className="flex items-baseline gap-2 mt-3">
+                  {statsLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-[#4CAF50]" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-gray-900">kr {(stats?.outstandingInvoices || 0).toLocaleString('da-DK')}</p>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-gradient-to-r from-[#4CAF50] to-[#45a049] rounded-lg shadow-md p-8 text-white">
+          <h2 className="text-2xl font-bold mb-4">Hurtigudfør</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              onClick={() => navigate('/fri/dashboard/vehicles')}
+              variant="secondary"
+              size="lg"
+              className="justify-start"
+            >
+              ➕ Tilføj Køretøj
             </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              Log ud
+            <Button
+              onClick={() => navigate('/fri/dashboard/bookings')}
+              variant="secondary"
+              size="lg"
+              className="justify-start"
+            >
+              📅 Se Bookinger
+            </Button>
+            <Button
+              onClick={handlePageBuilder}
+              variant="secondary"
+              size="lg"
+              className="justify-start"
+            >
+              🌐 Lav Hjemmeside
             </Button>
           </div>
         </div>
-      </header>
-
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="overview">Oversigt</TabsTrigger>
-            <TabsTrigger value="vehicles">Køretøjer</TabsTrigger>
-            <TabsTrigger value="bookings">Bookinger</TabsTrigger>
-            <TabsTrigger value="invoices">Invoicer</TabsTrigger>
-            <TabsTrigger value="analytics">Analytik</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="settings">Indstillinger</TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Dashboard oversigt</h2>
-              <p className="text-gray-600">
-                Velkommen til dit Lejio Fri dashboard! Her kan du administrere hele din bilutlejningsvirksomhed.
-              </p>
-              <div className="grid grid-cols-4 gap-4 mt-6">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-gray-600 text-sm">Aktive køretøjer</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    {statsLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-                    ) : (
-                      <p className="text-2xl font-bold text-blue-600">{stats?.activeVehicles || 0}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-gray-600 text-sm">Bookinger denne måned</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    {statsLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-green-600" />
-                    ) : (
-                      <p className="text-2xl font-bold text-green-600">{stats?.bookingsThisMonth || 0}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <p className="text-gray-600 text-sm">Indlæg denne måned</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    {statsLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
-                    ) : (
-                      <p className="text-2xl font-bold text-purple-600">kr. {(stats?.revenueThisMonth || 0).toLocaleString('da-DK')}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-orange-50 rounded-lg p-4">
-                  <p className="text-gray-600 text-sm">Udestående invoicer</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    {statsLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-orange-600" />
-                    ) : (
-                      <p className="text-2xl font-bold text-orange-600">kr. {(stats?.outstandingInvoices || 0).toLocaleString('da-DK')}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Vehicles Tab */}
-          <TabsContent value="vehicles">
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Køretøjer kommer snart...</p>
-            </div>
-          </TabsContent>
-
-          {/* Bookings Tab */}
-          <TabsContent value="bookings">
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Bookinger kommer snart...</p>
-            </div>
-          </TabsContent>
-
-          {/* Invoices Tab */}
-          <TabsContent value="invoices">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Fakturaer</h2>
-              <p className="text-gray-600 mb-6">Se og administrer alle dine fakturaer her. Track betalingsstatus, generer rapporter og download PDF.</p>
-              <Button 
-                size="lg"
-                onClick={() => navigate('/fri/dashboard/invoices')}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                📋 Se Fakturaer
-              </Button>
-            </div>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Analytik & Omsætning</h2>
-              <p className="text-gray-600 mb-6">Få indsigt i din virksomheds performance. Se omsætning, udnyttelsesgrader og trends for hver køretøj.</p>
-              <Button 
-                size="lg"
-                onClick={() => navigate('/fri/dashboard/analytics')}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                📊 Se Analytik
-              </Button>
-            </div>
-          </TabsContent>
-
-          {/* Team Tab */}
-          <TabsContent value="team">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Teammedlemmer</h2>
-              <p className="text-gray-600 mb-6">Administrer dine teammedlemmer. Tilføj medarbejdere, sæt roller (manager, chauffør, mekaniker) og styrer adgang.</p>
-              <Button 
-                size="lg"
-                onClick={() => navigate('/fri/dashboard/team')}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                👥 Se Team
-              </Button>
-            </div>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Indstillinger kommer snart...</p>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
+      </div>
+    </FriDashboardLayout>
   );
 }
