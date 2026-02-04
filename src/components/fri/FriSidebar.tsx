@@ -7,14 +7,13 @@ import {
   FileText, 
   Users, 
   Settings,
-  ChevronDown,
   LogOut
 } from 'lucide-react';
 import { useFriAuthContext } from '@/providers/FriAuthProvider';
 
 const FriSidebar = () => {
   const location = useLocation();
-  const { user, logout } = useFriAuthContext();
+  const { user, signOut } = useFriAuthContext();
 
   const menuItems = [
     {
@@ -95,7 +94,13 @@ const FriSidebar = () => {
           </div>
         </div>
         <button
-          onClick={logout}
+          onClick={() => {
+            try {
+              signOut?.();
+            } catch (err) {
+              console.error('Logout error:', err);
+            }
+          }}
           className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-white/10 rounded-lg transition-colors"
         >
           <LogOut className="w-4 h-4" />
