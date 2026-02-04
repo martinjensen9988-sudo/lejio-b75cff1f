@@ -19,7 +19,6 @@ export function FriVehicleForm({ vehicle, onSubmit, onCancel }: FriVehicleFormPr
     license_plate: vehicle?.license_plate || '',
     vin: vehicle?.vin,
     daily_rate: vehicle?.daily_rate,
-    mileage_limit: vehicle?.mileage_limit,
   });
 
   const [loading, setLoading] = useState(false);
@@ -155,24 +154,6 @@ export function FriVehicleForm({ vehicle, onSubmit, onCancel }: FriVehicleFormPr
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Km-grænse pr. dag
-                  </label>
-                  <Input
-                    type="number"
-                    value={formData.mileage_limit || ''}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        mileage_limit: e.target.value
-                          ? parseInt(e.target.value)
-                          : undefined,
-                      })
-                    }
-                    placeholder="Ubegrænset hvis tomt"
-                  />
-                </div>
               </div>
             </div>
 

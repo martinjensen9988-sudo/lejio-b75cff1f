@@ -60,7 +60,7 @@ const FriLessorDashboard = () => {
 
       // Hent bookinger for denne måned
       const monthlyBookingsResponse = await azureApi.post<any>('/db/query', {
-        query: `SELECT * FROM fri_bookings WHERE lessor_id='${safeLessorId}' AND start_date >= '${startIso}' AND end_date <= '${endIso}'`,
+        query: `SELECT *, pickup_date AS start_date, return_date AS end_date FROM fri_bookings WHERE lessor_id='${safeLessorId}' AND pickup_date >= '${startIso}' AND return_date <= '${endIso}'`,
       });
 
       const monthlyBookings = Array.isArray(monthlyBookingsResponse?.data)

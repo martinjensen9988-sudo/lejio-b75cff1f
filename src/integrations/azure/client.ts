@@ -136,9 +136,11 @@ export const azureConfig = {
   environment: ENVIRONMENT,
 };
 // Supabase client for main Lejio platform. Fri bruger Azure API via azureApi.
-export const dbClient: ReturnType<typeof createClient> = createClient(
+export const supabase = createClient(
   SUPABASE_URL,
   SUPABASE_KEY,
 );
+
+export const dbClient: ReturnType<typeof createClient> = supabase;
 
 export default dbClient;

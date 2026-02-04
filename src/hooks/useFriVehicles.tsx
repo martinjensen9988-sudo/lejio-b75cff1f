@@ -9,8 +9,8 @@ export interface Vehicle {
   license_plate: string;
   vin?: string;
   daily_rate?: number;
-  mileage_limit?: number;
-  availability_status: 'available' | 'rented' | 'maintenance' | 'retired';
+  availability_status?: 'available' | 'rented' | 'maintenance' | 'retired';
+  status?: 'available' | 'rented' | 'maintenance' | 'retired';
   created_at: string;
   updated_at: string;
 }
@@ -22,7 +22,6 @@ export interface CreateVehicleInput {
   license_plate: string;
   vin?: string;
   daily_rate?: number;
-  mileage_limit?: number;
 }
 
 /**
@@ -52,7 +51,7 @@ export function useFriVehicles(lessorId: string | null) {
       setLoading(true);
       const safeLessorId = escapeSqlValue(lessorId);
       const response = await azureApi.post<any>('/db/query', {
-        query: `SELECT * FROM fri_vehicles WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC`,
+        query: `SELECT *, status AS availability_status FROM fri_vehicles WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC`,
       });
 
       const rows = normalizeRows(response) as Vehicle[];
@@ -84,8 +83,8 @@ export function useFriVehicles(lessorId: string | null) {
           'license_plate',
           'vin',
           'daily_rate',
-          'mileage_limit',
-          'availability_status',
+          'status',
+          'is_active',
         ];
         const values = [
           `'${safeLessorId}'`,
@@ -95,8 +94,8 @@ export function useFriVehicles(lessorId: string | null) {
           `'${escapeSqlValue(input.license_plate)}'`,
           input.vin ? `'${escapeSqlValue(input.vin)}'` : null,
           input.daily_rate ?? null,
-          input.mileage_limit ?? null,
           `'available'`,
+          1,
         ];
 
         await azureApi.post('/db/query', {
@@ -120,9 +119,10 @@ export function useFriVehicles(lessorId: string | null) {
         const setClauses = Object.entries(updates)
           .map(([key, value]) => {
             if (value === undefined) return null;
-            if (value === null) return `${key}=NULL`;
-            if (typeof value === 'number') return `${key}=${value}`;
-            return `${key}='${escapeSqlValue(String(value))}'`;
+            const column = key === 'availability_status' ? 'status' : key;
+            if (value === null) return `${column}=NULL`;
+            if (typeof value === 'number') return `${column}=${value}`;
+            return `${column}='${escapeSqlValue(String(value))}'`;
           })
           .filter(Boolean)
           .join(', ');

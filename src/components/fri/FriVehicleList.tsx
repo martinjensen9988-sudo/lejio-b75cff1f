@@ -34,7 +34,6 @@ function FriVehicleForm({
     license_plate: vehicle?.license_plate || '',
     vin: vehicle?.vin || '',
     daily_rate: vehicle?.daily_rate || 0,
-    mileage_limit: vehicle?.mileage_limit || 0,
   });
   const [loading, setLoading] = useState(false);
 
@@ -190,15 +189,20 @@ export function FriVehicleList({ lessorId }: FriVehicleListProps) {
                   {vehicle.year && (
                     <span className="text-gray-600 text-sm">{vehicle.year}</span>
                   )}
-                  <Badge className={statusColors[vehicle.availability_status]}>
-                    {vehicle.availability_status === 'available'
+                  {(() => {
+                    const status = vehicle.availability_status || vehicle.status || 'available';
+                    return (
+                      <Badge className={statusColors[status]}>
+                        {status === 'available'
                       ? 'Ledig'
-                      : vehicle.availability_status === 'rented'
+                      : status === 'rented'
                       ? 'Udlejet'
-                      : vehicle.availability_status === 'maintenance'
+                      : status === 'maintenance'
                       ? 'Vedligehold'
                       : 'Udgået'}
-                  </Badge>
+                      </Badge>
+                    );
+                  })()}
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
@@ -219,14 +223,6 @@ export function FriVehicleList({ lessorId }: FriVehicleListProps) {
                       <p className="text-gray-500">Dagpris</p>
                       <p className="font-semibold text-gray-900">
                         kr. {vehicle.daily_rate.toLocaleString('da-DK')}
-                      </p>
-                    </div>
-                  )}
-                  {vehicle.mileage_limit && (
-                    <div>
-                      <p className="text-gray-500">Km-grænse/dag</p>
-                      <p className="font-semibold text-gray-900">
-                        {vehicle.mileage_limit} km
                       </p>
                     </div>
                   )}

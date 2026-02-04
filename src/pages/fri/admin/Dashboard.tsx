@@ -46,7 +46,7 @@ export const FriAdminDashboard = () => {
 
         // Fetch bookings
         const bookingsResponse = await azureApi.post<any>('/db/query', {
-          query: 'SELECT id, total_price, status, start_date FROM fri_bookings',
+          query: 'SELECT id, total_price, status, pickup_date AS start_date FROM fri_bookings',
         });
         const bookingsData = Array.isArray(bookingsResponse?.data)
           ? bookingsResponse.data

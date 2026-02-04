@@ -7,12 +7,17 @@ export interface Booking {
   vehicle_id: string;
   vehicle_make?: string;
   vehicle_model?: string;
+  customer_id?: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
   start_date: string;
   end_date: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
+  number_of_days?: number;
+  daily_rate?: number;
+  base_price?: number;
+  additional_fees?: number;
   total_price?: number;
   notes?: string;
   created_at: string;
@@ -26,8 +31,10 @@ export interface CreateBookingInput {
   customer_phone: string;
   start_date: string;
   end_date: string;
+  daily_rate?: number;
   total_price?: number;
   notes?: string;
+  status?: Booking['status'];
 }
 
 export function useFriBookings(lessorId: string | null) {
@@ -56,7 +63,20 @@ export function useFriBookings(lessorId: string | null) {
     try {
       const safeLessorId = escapeSqlValue(lessorId);
       const response = await azureApi.post<any>('/db/query', {
-        query: `SELECT * FROM fri_bookings WHERE lessor_id='${safeLessorId}' ORDER BY start_date DESC`,
+        query: `SELECT 
+          b.*, 
+          b.pickup_date AS start_date,
+          b.return_date AS end_date,
+          c.full_name AS customer_name,
+          c.email AS customer_email,
+          c.phone AS customer_phone,
+          v.make AS vehicle_make,
+          v.model AS vehicle_model
+        FROM fri_bookings b
+        LEFT JOIN fri_customers c ON b.customer_id = c.id
+        LEFT JOIN fri_vehicles v ON b.vehicle_id = v.id
+        WHERE b.lessor_id='${safeLessorId}'
+        ORDER BY b.pickup_date DESC`,
       });
 
       const rows = normalizeRows(response) as Booking[];
@@ -86,34 +106,72 @@ export function useFriBookings(lessorId: string | null) {
         setError(null);
 
         const safeLessorId = escapeSqlValue(lessorId);
-        const columns = [
-          'lessor_id',
-          'vehicle_id',
-          'customer_name',
-          'customer_email',
-          'customer_phone',
-          'start_date',
-          'end_date',
-          'total_price',
-          'notes',
-          'status',
-        ];
-        const values = [
-          `'${safeLessorId}'`,
-          `'${escapeSqlValue(input.vehicle_id)}'`,
-          `'${escapeSqlValue(input.customer_name)}'`,
-          `'${escapeSqlValue(input.customer_email)}'`,
-          `'${escapeSqlValue(input.customer_phone)}'`,
-          `'${escapeSqlValue(input.start_date)}'`,
-          `'${escapeSqlValue(input.end_date)}'`,
-          input.total_price ?? null,
-          input.notes ? `'${escapeSqlValue(input.notes)}'` : null,
-          `'pending'`,
-        ];
+        const safeVehicleId = escapeSqlValue(input.vehicle_id);
+        const safeCustomerName = escapeSqlValue(input.customer_name);
+        const safeCustomerEmail = escapeSqlValue(input.customer_email);
+        const safeCustomerPhone = escapeSqlValue(input.customer_phone);
+        const safeStartDate = escapeSqlValue(input.start_date);
+        const safeEndDate = escapeSqlValue(input.end_date);
+        const safeNotes = input.notes ? `'${escapeSqlValue(input.notes)}'` : 'NULL';
+        const manualDailyRate = input.daily_rate ?? null;
+        const totalPriceValue = input.total_price ?? null;
 
-        await azureApi.post('/db/query', {
-          query: `INSERT INTO fri_bookings (${columns.join(', ')}) VALUES (${values.map(v => (v === null ? 'NULL' : v)).join(', ')})`,
-        });
+        const query = `
+DECLARE @customer_id UNIQUEIDENTIFIER;
+SELECT @customer_id = id FROM fri_customers WHERE lessor_id='${safeLessorId}' AND email='${safeCustomerEmail}';
+IF @customer_id IS NULL
+BEGIN
+  INSERT INTO fri_customers (id, lessor_id, full_name, email, phone, is_verified, created_at, updated_at)
+  VALUES (NEWID(), '${safeLessorId}', '${safeCustomerName}', '${safeCustomerEmail}', '${safeCustomerPhone}', 0, GETUTCDATE(), GETUTCDATE());
+  SELECT @customer_id = id FROM fri_customers WHERE lessor_id='${safeLessorId}' AND email='${safeCustomerEmail}';
+END
+
+DECLARE @daily_rate DECIMAL(10,2);
+SELECT @daily_rate = daily_rate FROM fri_vehicles WHERE id='${safeVehicleId}';
+IF @daily_rate IS NULL SET @daily_rate = 0;
+${manualDailyRate !== null ? `SET @daily_rate = ${manualDailyRate};` : ''}
+
+DECLARE @pickup_date DATETIME2 = '${safeStartDate}';
+DECLARE @return_date DATETIME2 = '${safeEndDate}';
+DECLARE @days INT = CASE WHEN ABS(DATEDIFF(day, @pickup_date, @return_date)) < 1 THEN 1 ELSE ABS(DATEDIFF(day, @pickup_date, @return_date)) END;
+DECLARE @base_price DECIMAL(10,2) = @daily_rate * @days;
+DECLARE @total_price DECIMAL(10,2) = ${totalPriceValue === null ? 'NULL' : totalPriceValue};
+DECLARE @additional_fees DECIMAL(10,2) = CASE WHEN @total_price IS NULL THEN 0 ELSE @total_price - @base_price END;
+
+INSERT INTO fri_bookings (
+  lessor_id,
+  vehicle_id,
+  customer_id,
+  pickup_date,
+  return_date,
+  number_of_days,
+  daily_rate,
+  base_price,
+  additional_fees,
+  total_price,
+  status,
+  notes,
+  created_at,
+  updated_at
+) VALUES (
+  '${safeLessorId}',
+  '${safeVehicleId}',
+  @customer_id,
+  @pickup_date,
+  @return_date,
+  @days,
+  @daily_rate,
+  @base_price,
+  @additional_fees,
+  COALESCE(@total_price, @base_price),
+  'pending',
+  ${safeNotes},
+  GETUTCDATE(),
+  GETUTCDATE()
+);
+`;
+
+        await azureApi.post('/db/query', { query });
 
         await fetch();
         return null;
@@ -134,21 +192,44 @@ export function useFriBookings(lessorId: string | null) {
       try {
         setError(null);
 
-        const setClauses = Object.entries(input)
-          .map(([key, value]) => {
-            if (value === undefined) return null;
-            if (value === null) return `${key}=NULL`;
-            if (typeof value === 'number') return `${key}=${value}`;
-            return `${key}='${escapeSqlValue(String(value))}'`;
-          })
-          .filter(Boolean)
-          .join(', ');
+        const safeId = escapeSqlValue(id);
+        const safeLessorId = escapeSqlValue(lessorId);
 
-        if (!setClauses) return null;
+        const setClauses: string[] = [];
+        if (input.vehicle_id) setClauses.push(`vehicle_id='${escapeSqlValue(input.vehicle_id)}'`);
+        if (input.start_date) setClauses.push(`pickup_date='${escapeSqlValue(input.start_date)}'`);
+        if (input.end_date) setClauses.push(`return_date='${escapeSqlValue(input.end_date)}'`);
+        if (input.total_price !== undefined) setClauses.push(`total_price=${input.total_price ?? 'NULL'}`);
+        if (input.notes !== undefined) setClauses.push(`notes=${input.notes ? `'${escapeSqlValue(input.notes)}'` : 'NULL'}`);
+        if ((input as any).status) setClauses.push(`status='${escapeSqlValue((input as any).status)}'`);
 
-        await azureApi.post('/db/query', {
-          query: `UPDATE fri_bookings SET ${setClauses} WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
-        });
+        if (input.start_date || input.end_date) {
+          setClauses.push(`number_of_days = CASE WHEN ABS(DATEDIFF(day, pickup_date, return_date)) < 1 THEN 1 ELSE ABS(DATEDIFF(day, pickup_date, return_date)) END`);
+          setClauses.push(`base_price = daily_rate * number_of_days`);
+        }
+
+        if (input.total_price !== undefined) {
+          setClauses.push(`additional_fees = CASE WHEN total_price IS NULL THEN 0 ELSE total_price - (daily_rate * number_of_days) END`);
+        }
+
+        if (setClauses.length > 0) {
+          await azureApi.post('/db/query', {
+            query: `UPDATE fri_bookings SET ${setClauses.join(', ')} WHERE id='${safeId}' AND lessor_id='${safeLessorId}'`,
+          });
+        }
+
+        if (input.customer_name || input.customer_email || input.customer_phone) {
+          const customerUpdates: string[] = [];
+          if (input.customer_name) customerUpdates.push(`full_name='${escapeSqlValue(input.customer_name)}'`);
+          if (input.customer_email) customerUpdates.push(`email='${escapeSqlValue(input.customer_email)}'`);
+          if (input.customer_phone) customerUpdates.push(`phone='${escapeSqlValue(input.customer_phone)}'`);
+
+          if (customerUpdates.length > 0) {
+            await azureApi.post('/db/query', {
+              query: `UPDATE fri_customers SET ${customerUpdates.join(', ')} WHERE id=(SELECT customer_id FROM fri_bookings WHERE id='${safeId}' AND lessor_id='${safeLessorId}')`,
+            });
+          }
+        }
 
         await fetch();
         return null;

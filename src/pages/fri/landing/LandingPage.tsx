@@ -187,7 +187,7 @@ export function FriLandingPage() {
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-300" />Email support</li>
                 </ul>
                 <Link to="/fri/signup?tier=professional">
-                  <Button className="w-full" variant="outline" className="border-white/20 text-white hover:bg-white/10">Vælg plan</Button>
+                    <Button className="w-full border-white/20 text-white hover:bg-white/10" variant="outline">Vælg plan</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -235,7 +235,7 @@ export function FriLandingPage() {
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-300" />24/7 prioritets support</li>
                 </ul>
                 <Link to="/fri/signup?tier=enterprise">
-                  <Button className="w-full" variant="outline" className="border-white/20 text-white hover:bg-white/10">Kontakt os</Button>
+                    <Button className="w-full border-white/20 text-white hover:bg-white/10" variant="outline">Kontakt os</Button>
                 </Link>
               </CardContent>
             </Card>

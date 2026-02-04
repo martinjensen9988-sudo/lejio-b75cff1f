@@ -5,12 +5,12 @@ export interface FriLessor {
   id: string;
   email: string;
   company_name: string;
-  cvr_number: string;
+  cvr_number?: string;
   custom_domain: string;
   primary_color: string;
   logo_url: string;
-  trial_start_date: string;
-  trial_end_date: string;
+  trial_start_date?: string;
+  trial_end_date?: string;
   subscription_status: 'trial' | 'active' | 'suspended' | 'cancelled';
   created_at: string;
 }
@@ -58,7 +58,16 @@ export const useFriAdminLessors = (): UseFriAdminLessorsReturn => {
       setLoading(true);
 
       const response = await azureApi.post<any>('/db/query', {
-        query: 'SELECT * FROM fri_lessors ORDER BY created_at DESC',
+        query: `SELECT
+          id,
+          company_name,
+          contact_email AS email,
+          custom_domain,
+          primary_color,
+          logo_url,
+          subscription_status,
+          created_at
+        FROM fri_lessors ORDER BY created_at DESC`,
       });
 
       const rows = normalizeRows(response) as FriLessor[];

@@ -133,10 +133,10 @@ export function FriInvoiceList({ lessorId }: FriInvoiceListProps) {
   // Calculate summary stats
   const stats = {
     totalInvoices: invoices.length,
-    totalAmount: invoices.reduce((sum, inv) => sum + calculateTotal(inv.amount, inv.tax_amount), 0),
+    totalAmount: invoices.reduce((sum, inv) => sum + calculateTotal(inv.amount, inv.tax_amount, inv.total_amount), 0),
     paidAmount: invoices
       .filter((inv) => inv.status === 'paid')
-      .reduce((sum, inv) => sum + calculateTotal(inv.amount, inv.tax_amount), 0),
+      .reduce((sum, inv) => sum + calculateTotal(inv.amount, inv.tax_amount, inv.total_amount), 0),
     overdueInvoices: invoices.filter((inv) => isOverdue(inv)).length,
   };
 
@@ -201,7 +201,7 @@ export function FriInvoiceList({ lessorId }: FriInvoiceListProps) {
       ) : (
         <div className="space-y-4">
           {invoices.map((invoice) => {
-            const total = calculateTotal(invoice.amount, invoice.tax_amount);
+            const total = calculateTotal(invoice.amount, invoice.tax_amount, invoice.total_amount);
             const overdue = isOverdue(invoice);
             const displayStatus = overdue && invoice.status !== 'paid' ? 'overdue' : invoice.status;
 

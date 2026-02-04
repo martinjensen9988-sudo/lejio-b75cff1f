@@ -13,12 +13,11 @@ interface LessorDetails {
   id: string;
   email: string;
   company_name: string;
-  cvr_number: string;
+  cvr_number?: string;
   custom_domain: string;
   primary_color: string;
   logo_url: string;
-  trial_start_date: string;
-  trial_end_date: string;
+  subscription_plan?: string;
   subscription_status: string;
   created_at: string;
 }
@@ -59,7 +58,17 @@ export const FriAdminLessorDetailsPage = () => {
         // Fetch lessor info
         const safeLessorId = String(lessorId).replace(/'/g, "''");
         const lessorResponse = await azureApi.post<any>('/db/query', {
-          query: `SELECT * FROM fri_lessors WHERE id='${safeLessorId}'`,
+          query: `SELECT 
+            id,
+            company_name,
+            contact_email AS email,
+            custom_domain,
+            primary_color,
+            logo_url,
+            subscription_plan,
+            subscription_status,
+            created_at
+          FROM fri_lessors WHERE id='${safeLessorId}'`,
         });
 
         const lessorRows = normalizeRows(lessorResponse);
@@ -70,7 +79,7 @@ export const FriAdminLessorDetailsPage = () => {
         // Fetch lessor data
         const [vehiclesRes, bookingsRes, invoicesRes, activeBookingsRes] = await Promise.all([
           azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_vehicles WHERE lessor_id='${safeLessorId}'` }),
-          azureApi.post<any>('/db/query', { query: `SELECT id, total_price, status, start_date FROM fri_bookings WHERE lessor_id='${safeLessorId}'` }),
+          azureApi.post<any>('/db/query', { query: `SELECT id, total_price, status, pickup_date AS start_date FROM fri_bookings WHERE lessor_id='${safeLessorId}'` }),
           azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_invoices WHERE lessor_id='${safeLessorId}'` }),
           azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_bookings WHERE lessor_id='${safeLessorId}' AND status='confirmed'` }),
         ]);
@@ -133,10 +142,6 @@ export const FriAdminLessorDetailsPage = () => {
       </div>
     );
   }
-
-  const trialDaysLeft = Math.ceil(
-    (new Date(lessor.trial_end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-  );
 
   const statusColor = {
     trial: 'text-blue-600',
@@ -268,21 +273,13 @@ export const FriAdminLessorDetailsPage = () => {
             <div className="flex justify-between">
               <span className="text-gray-600">Start dato</span>
               <span className="font-medium text-gray-900">
-                {new Date(lessor.trial_start_date).toLocaleDateString('da-DK')}
+                {new Date(lessor.created_at).toLocaleDateString('da-DK')}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Slut dato</span>
-              <span className="font-medium text-gray-900">
-                {new Date(lessor.trial_end_date).toLocaleDateString('da-DK')}
-              </span>
-            </div>
-            {lessor.subscription_status === 'trial' && (
-              <div className="flex justify-between pt-2 border-t">
-                <span className="text-gray-600">Dage tilbage</span>
-                <span className={`font-bold ${trialDaysLeft > 7 ? 'text-green-600' : 'text-red-600'}`}>
-                  {Math.max(0, trialDaysLeft)} dage
-                </span>
+            {lessor.subscription_plan && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Plan</span>
+                <span className="font-medium text-gray-900">{lessor.subscription_plan}</span>
               </div>
             )}
           </div>
