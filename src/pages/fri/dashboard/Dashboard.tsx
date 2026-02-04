@@ -162,25 +162,22 @@ export function FriDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
               onClick={() => navigate('/fri/dashboard/vehicles')}
-              variant="secondary"
+              className="bg-white text-[#4CAF50] hover:bg-gray-100 font-semibold"
               size="lg"
-              className="justify-start"
             >
               ➕ Tilføj Køretøj
             </Button>
             <Button
               onClick={() => navigate('/fri/dashboard/bookings')}
-              variant="secondary"
+              className="bg-white text-[#4CAF50] hover:bg-gray-100 font-semibold"
               size="lg"
-              className="justify-start"
             >
               📅 Se Bookinger
             </Button>
             <Button
               onClick={handlePageBuilder}
-              variant="secondary"
+              className="bg-white text-[#4CAF50] hover:bg-gray-100 font-semibold"
               size="lg"
-              className="justify-start"
             >
               🌐 Lav Hjemmeside
             </Button>
