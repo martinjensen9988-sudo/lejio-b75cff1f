@@ -21,7 +21,7 @@ Write-Host ""
 
 # Check if Azure CLI is available
 try {
-    $azVersion = az version 2>&1
+    $null = az version 2>&1
     Write-Host "Azure CLI found" -ForegroundColor Green
 } catch {
     Write-Host "ERROR: Azure CLI not found. Please install Azure CLI first." -ForegroundColor Red

@@ -36,7 +36,14 @@ export async function initializeAzureClients() {
 }
 
 // API Client for communication with Azure Functions backend
-export const azureApi = {
+export const azureApi: {
+  request<T>(endpoint: string, options?: RequestInit): Promise<T>;
+  get<T>(endpoint: string): Promise<T>;
+  post<T>(endpoint: string, data?: any): Promise<T>;
+  put<T>(endpoint: string, data?: any): Promise<T>;
+  patch<T>(endpoint: string, data?: any): Promise<T>;
+  delete<T>(endpoint: string): Promise<T>;
+} = {
   async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
     
@@ -136,7 +143,7 @@ export const azureConfig = {
   environment: ENVIRONMENT,
 };
 // Supabase client for main Lejio platform. Fri bruger Azure API via azureApi.
-export const supabase = createClient(
+export const supabase = createClient<any>(
   SUPABASE_URL,
   SUPABASE_KEY,
 );

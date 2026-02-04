@@ -202,6 +202,7 @@ INSERT INTO fri_invoices (
         const statusValue = (input as any).status ? `'${escapeSqlValue((input as any).status)}'` : 'NULL';
         const paymentMethodValue = input.payment_method ? `'${escapeSqlValue(input.payment_method)}'` : 'NULL';
         const notesValue = input.notes || input.description ? `'${escapeSqlValue(input.notes || input.description)}'` : 'NULL';
+        const paidDateValue = (input as any).paid_date ? `'${escapeSqlValue((input as any).paid_date)}'` : 'NULL';
 
         const query = `
 DECLARE @amount DECIMAL(10,2) = ${amountValue === null ? 'NULL' : amountValue};

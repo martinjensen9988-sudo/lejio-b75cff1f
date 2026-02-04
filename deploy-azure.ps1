@@ -53,7 +53,7 @@ Write-Host "🏗️  Provisioning Azure infrastructure..." -ForegroundColor Yell
 Write-Host "   (This will take 5-10 minutes...)" -ForegroundColor Gray
 Write-Host ""
 
-$provisionResult = azd provision --preview
+$null = azd provision --preview
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "✅ Preview successful!" -ForegroundColor Green
