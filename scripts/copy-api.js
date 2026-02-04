@@ -79,4 +79,12 @@ if (fs.existsSync(nodeModulesSrc)) {
   copyNodeModules(nodeModulesSrc, nodeModulesDst);
 }
 
+// Copy staticwebapp.config.json for SPA routing
+const configSrc = path.join(__dirname, '../staticwebapp.config.json');
+const configDst = path.join(__dirname, '../dist/staticwebapp.config.json');
+if (fs.existsSync(configSrc)) {
+  fs.copyFileSync(configSrc, configDst);
+  console.log('✓ staticwebapp.config.json copied');
+}
+
 console.log('✓ API copied to dist/api');
