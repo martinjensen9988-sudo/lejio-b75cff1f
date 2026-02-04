@@ -77,4 +77,12 @@ registerSW({
 // Wrap App with Sentry error tracking
 const SentryApp = Sentry.withProfiler(App);
 
-createRoot(document.getElementById("root")!).render(<SentryApp />);
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  console.error('❌ Root element not found!');
+  document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>ERROR: Root element not found</h1><p>Check console</p></div>';
+} else {
+  console.log('✅ Root element found, mounting React');
+  createRoot(rootElement).render(<SentryApp />);
+  console.log('✅ React mounted');
+}
