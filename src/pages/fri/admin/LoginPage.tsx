@@ -41,7 +41,7 @@ export const FriAdminLoginPage = () => {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 mb-4">
               <LogIn className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Lejio Fri Admin</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Platform Admin</h1>
             <p className="text-gray-600 text-sm mt-2">Administrer lessors og systemet</p>
           </div>
 
@@ -63,7 +63,7 @@ export const FriAdminLoginPage = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@lejio.dk"
+                placeholder="admin@yourdomain.com"
                 required
                 disabled={loading}
               />
@@ -95,7 +95,7 @@ export const FriAdminLoginPage = () => {
           {/* Footer */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-xs text-gray-500 text-center">
-              Dette er administratorpanelet for Lejio Fri.
+              Dette er administratorpanelet for platformen.
               <br />
               Kun autoriserede admins har adgang.
             </p>

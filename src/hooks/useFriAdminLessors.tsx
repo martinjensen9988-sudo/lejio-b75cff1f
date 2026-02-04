@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface FriLessor {
   id: string;
@@ -41,18 +41,28 @@ export const useFriAdminLessors = (): UseFriAdminLessorsReturn => {
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<{ [key: string]: LessorStats }>({});
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   const fetchLessors = async () => {
     try {
       setError(null);
       setLoading(true);
 
-      const { data, error: err } = await supabase
-        .from('fri_lessors')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const response = await azureApi.post<any>('/db/query', {
+        query: 'SELECT * FROM fri_lessors ORDER BY created_at DESC',
+      });
 
-      if (err) throw new Error(err.message);
-      setLessors(data || []);
+      const rows = normalizeRows(response) as FriLessor[];
+      setLessors(rows || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch lessors';
       setError(message);
@@ -63,31 +73,24 @@ export const useFriAdminLessors = (): UseFriAdminLessorsReturn => {
 
   const getLessorStats = async (lessorId: string): Promise<LessorStats | null> => {
     try {
+      const safeLessorId = escapeSqlValue(lessorId);
       const [vehiclesRes, bookingsRes, invoicesRes, activeBookingsRes] = await Promise.all([
-        supabase
-          .from('fri_vehicles')
-          .select('id')
-          .eq('lessor_id', lessorId),
-        supabase
-          .from('fri_bookings')
-          .select('id, total_price')
-          .eq('lessor_id', lessorId),
-        supabase
-          .from('fri_invoices')
-          .select('id')
-          .eq('lessor_id', lessorId),
-        supabase
-          .from('fri_bookings')
-          .select('id')
-          .eq('lessor_id', lessorId)
-          .eq('status', 'confirmed'),
+        azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_vehicles WHERE lessor_id='${safeLessorId}'` }),
+        azureApi.post<any>('/db/query', { query: `SELECT id, total_price FROM fri_bookings WHERE lessor_id='${safeLessorId}'` }),
+        azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_invoices WHERE lessor_id='${safeLessorId}'` }),
+        azureApi.post<any>('/db/query', { query: `SELECT id FROM fri_bookings WHERE lessor_id='${safeLessorId}' AND status='confirmed'` }),
       ]);
 
-      const totalVehicles = vehiclesRes.data?.length || 0;
-      const totalBookings = bookingsRes.data?.length || 0;
-      const totalRevenue = bookingsRes.data?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;
-      const totalInvoices = invoicesRes.data?.length || 0;
-      const activeBookings = activeBookingsRes.data?.length || 0;
+      const vehicles = normalizeRows(vehiclesRes);
+      const bookings = normalizeRows(bookingsRes) as Array<{ total_price?: number }>;
+      const invoices = normalizeRows(invoicesRes);
+      const activeBookingsRows = normalizeRows(activeBookingsRes);
+
+      const totalVehicles = vehicles.length || 0;
+      const totalBookings = bookings.length || 0;
+      const totalRevenue = bookings.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;
+      const totalInvoices = invoices.length || 0;
+      const activeBookings = activeBookingsRows.length || 0;
 
       const lessorStats: LessorStats = {
         total_vehicles: totalVehicles,
@@ -107,12 +110,9 @@ export const useFriAdminLessors = (): UseFriAdminLessorsReturn => {
 
   const suspendLessor = async (lessorId: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_lessors')
-        .update({ subscription_status: 'suspended' })
-        .eq('id', lessorId);
-
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_lessors SET subscription_status='suspended' WHERE id='${escapeSqlValue(lessorId)}'`,
+      });
 
       setLessors(lessors.map(l => 
         l.id === lessorId ? { ...l, subscription_status: 'suspended' } : l
@@ -126,12 +126,9 @@ export const useFriAdminLessors = (): UseFriAdminLessorsReturn => {
 
   const activateLessor = async (lessorId: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_lessors')
-        .update({ subscription_status: 'active' })
-        .eq('id', lessorId);
-
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_lessors SET subscription_status='active' WHERE id='${escapeSqlValue(lessorId)}'`,
+      });
 
       setLessors(lessors.map(l => 
         l.id === lessorId ? { ...l, subscription_status: 'active' } : l
@@ -145,12 +142,9 @@ export const useFriAdminLessors = (): UseFriAdminLessorsReturn => {
 
   const deleteLessor = async (lessorId: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_lessors')
-        .delete()
-        .eq('id', lessorId);
-
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `DELETE FROM fri_lessors WHERE id='${escapeSqlValue(lessorId)}'`,
+      });
 
       setLessors(lessors.filter(l => l.id !== lessorId));
     } catch (err) {

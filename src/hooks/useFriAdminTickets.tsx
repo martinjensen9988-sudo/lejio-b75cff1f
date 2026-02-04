@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface Ticket {
   id: string;
@@ -42,24 +42,32 @@ export const useFriAdminTickets = (): UseFriAdminTicketsReturn => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   const fetchTickets = async (filter?: string) => {
     try {
       setError(null);
       setLoading(true);
 
-      let query = supabase
-        .from('fri_support_tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const statusFilter = filter && filter !== 'all'
+        ? ` WHERE status='${escapeSqlValue(filter)}'`
+        : '';
 
-      if (filter && filter !== 'all') {
-        query = query.eq('status', filter);
-      }
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_support_tickets${statusFilter} ORDER BY created_at DESC`,
+      });
 
-      const { data, error: err } = await query;
-
-      if (err) throw new Error(err.message);
-      setTickets(data || []);
+      const rows = normalizeRows(response) as Ticket[];
+      setTickets(rows || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Fejl ved indlæsning af tickets';
       setError(message);
@@ -70,14 +78,12 @@ export const useFriAdminTickets = (): UseFriAdminTicketsReturn => {
 
   const getTicket = async (ticketId: string): Promise<Ticket | null> => {
     try {
-      const { data, error: err } = await supabase
-        .from('fri_support_tickets')
-        .select('*')
-        .eq('id', ticketId)
-        .single();
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_support_tickets WHERE id='${escapeSqlValue(ticketId)}'`,
+      });
 
-      if (err) throw new Error(err.message);
-      return data;
+      const rows = normalizeRows(response) as Ticket[];
+      return rows?.[0] || null;
     } catch (err) {
       console.error('Error fetching ticket:', err);
       return null;
@@ -86,14 +92,12 @@ export const useFriAdminTickets = (): UseFriAdminTicketsReturn => {
 
   const getTicketMessages = async (ticketId: string): Promise<TicketMessage[]> => {
     try {
-      const { data, error: err } = await supabase
-        .from('fri_ticket_messages')
-        .select('*')
-        .eq('ticket_id', ticketId)
-        .order('created_at', { ascending: true });
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_ticket_messages WHERE ticket_id='${escapeSqlValue(ticketId)}' ORDER BY created_at ASC`,
+      });
 
-      if (err) throw new Error(err.message);
-      return data || [];
+      const rows = normalizeRows(response) as TicketMessage[];
+      return rows || [];
     } catch (err) {
       console.error('Error fetching messages:', err);
       return [];
@@ -102,22 +106,14 @@ export const useFriAdminTickets = (): UseFriAdminTicketsReturn => {
 
   const replyToTicket = async (ticketId: string, message: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_ticket_messages')
-        .insert({
-          ticket_id: ticketId,
-          sender_id: 'admin', // In real app, use actual admin ID from auth
-          sender_type: 'admin',
-          message,
-        });
+      const now = new Date().toISOString();
+      await azureApi.post('/db/query', {
+        query: `INSERT INTO fri_ticket_messages (ticket_id, sender_id, sender_type, message) VALUES ('${escapeSqlValue(ticketId)}', 'admin', 'admin', '${escapeSqlValue(message)}')`,
+      });
 
-      if (err) throw new Error(err.message);
-
-      // Update ticket updated_at
-      await supabase
-        .from('fri_support_tickets')
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', ticketId);
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_support_tickets SET updated_at='${escapeSqlValue(now)}' WHERE id='${escapeSqlValue(ticketId)}'`,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Fejl ved afsendelse';
       setError(message);
@@ -127,15 +123,10 @@ export const useFriAdminTickets = (): UseFriAdminTicketsReturn => {
 
   const updateTicketStatus = async (ticketId: string, status: Ticket['status']) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_support_tickets')
-        .update({
-          status,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', ticketId);
-
-      if (err) throw new Error(err.message);
+      const updatedAt = new Date().toISOString();
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_support_tickets SET status='${escapeSqlValue(status)}', updated_at='${escapeSqlValue(updatedAt)}' WHERE id='${escapeSqlValue(ticketId)}'`,
+      });
 
       setTickets(tickets.map(t =>
         t.id === ticketId ? { ...t, status, updated_at: new Date().toISOString() } : t
@@ -149,15 +140,10 @@ export const useFriAdminTickets = (): UseFriAdminTicketsReturn => {
 
   const updateTicketPriority = async (ticketId: string, priority: Ticket['priority']) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_support_tickets')
-        .update({
-          priority,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', ticketId);
-
-      if (err) throw new Error(err.message);
+      const updatedAt = new Date().toISOString();
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_support_tickets SET priority='${escapeSqlValue(priority)}', updated_at='${escapeSqlValue(updatedAt)}' WHERE id='${escapeSqlValue(ticketId)}'`,
+      });
 
       setTickets(tickets.map(t =>
         t.id === ticketId ? { ...t, priority, updated_at: new Date().toISOString() } : t

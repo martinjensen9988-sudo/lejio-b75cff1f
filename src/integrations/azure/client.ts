@@ -3,6 +3,7 @@
 
 import { BlobServiceClient } from "@azure/storage-blob";
 import { DefaultAzureCredential } from "@azure/identity";
+import { createClient } from "@supabase/supabase-js";
 
 // Environment configuration
 const SQL_SERVER = import.meta.env.VITE_SQL_SERVER || "lejio-fri.database.windows.net";
@@ -10,6 +11,8 @@ const SQL_DATABASE = import.meta.env.VITE_SQL_DATABASE || "lejio-fri";
 const STORAGE_ACCOUNT = import.meta.env.VITE_STORAGE_ACCOUNT;
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7071/api";
 const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT || "development";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || "";
 
 // Initialize Azure Blob Storage client
 let blobClient: BlobServiceClient | null = null;
@@ -132,88 +135,10 @@ export const azureConfig = {
   apiUrl: API_URL,
   environment: ENVIRONMENT,
 };
-
-// Migration helper: Create Azure client compatible with Supabase-style usage
-export const supabase = {
-  auth: {
-    signInWithOAuth: async (options: any) => {
-      // Redirect to Azure AD login
-      const { provider } = options;
-      const redirectUrl = `${window.location.origin}/auth/callback`;
-      const authEndpoint = `${API_URL}/auth/login?provider=${provider}&redirect_uri=${encodeURIComponent(redirectUrl)}`;
-      window.location.href = authEndpoint;
-      return { error: null };
-    },
-    
-    signInWithPassword: async (credentials: { email: string; password: string }) => {
-      try {
-        const response = await azureApi.post<any>("/auth/login", credentials);
-        return { data: response, error: null };
-      } catch (error: any) {
-        return { data: null, error };
-      }
-    },
-
-    signOut: async () => {
-      try {
-        await azureApi.post("/auth/logout");
-        return { error: null };
-      } catch (error: any) {
-        return { error };
-      }
-    },
-
-    getSession: async () => {
-      try {
-        const session = await azureApi.get<any>("/AuthSession");
-        return { data: { session }, error: null };
-      } catch (error: any) {
-        return { data: { session: null }, error };
-      }
-    },
-
-    onAuthStateChange: (callback: any) => {
-      // Listen for auth changes via event listener or polling
-      // For now, return a no-op subscription
-      return {
-        data: { subscription: null },
-        unsubscribe: () => {},
-      };
-    },
-  },
-
-  // Placeholder for database operations - migrate to REST API calls
-  from: (tableName: string) => ({
-    select: async (columns?: string) => {
-      const query = `SELECT ${columns || "*"} FROM ${tableName}`;
-      return azureApi.post("/db/query", { query });
-    },
-    insert: async (data: any[]) => {
-      return azureApi.post(`/db/${tableName}`, { records: data });
-    },
-    update: async (data: any) => {
-      return azureApi.put(`/db/${tableName}`, data);
-    },
-    delete: async () => {
-      return azureApi.delete(`/db/${tableName}`);
-    },
-  }),
-
-  storage: {
-    from: (bucketName: string) => ({
-      upload: async (fileName: string, file: File) => {
-        const url = await uploadFile(bucketName, fileName, file);
-        return { data: { path: fileName }, error: null };
-      },
-      download: async (fileName: string) => {
-        const blob = await downloadFile(bucketName, fileName);
-        return { data: blob, error: null };
-      },
-      getPublicUrl: (fileName: string) => ({
-        data: { publicUrl: `${azureConfig.apiUrl}/blob/${bucketName}/${fileName}` },
-      }),
-    }),
-  },
-};
+// Supabase client (Lejio). Fri bruger Azure API via azureApi.
+export const supabase: ReturnType<typeof createClient> = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY,
+);
 
 export default supabase;

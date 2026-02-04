@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface Booking {
   id: string;
@@ -35,6 +35,17 @@ export function useFriBookings(lessorId: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   // Fetch all bookings for the lessor
   const fetch = useCallback(async () => {
     if (!lessorId) return;
@@ -43,14 +54,13 @@ export function useFriBookings(lessorId: string | null) {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('lessor_bookings')
-        .select('*')
-        .eq('lessor_id', lessorId)
-        .order('start_date', { ascending: false });
+      const safeLessorId = escapeSqlValue(lessorId);
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_bookings WHERE lessor_id='${safeLessorId}' ORDER BY start_date DESC`,
+      });
 
-      if (fetchError) throw fetchError;
-      setBookings(data || []);
+      const rows = normalizeRows(response) as Booking[];
+      setBookings(rows || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch bookings';
       setError(message);
@@ -75,22 +85,38 @@ export function useFriBookings(lessorId: string | null) {
       try {
         setError(null);
 
-        const { data, error: insertError } = await supabase
-          .from('lessor_bookings')
-          .insert({
-            lessor_id: lessorId,
-            ...input,
-            status: 'pending',
-          })
-          .select();
+        const safeLessorId = escapeSqlValue(lessorId);
+        const columns = [
+          'lessor_id',
+          'vehicle_id',
+          'customer_name',
+          'customer_email',
+          'customer_phone',
+          'start_date',
+          'end_date',
+          'total_price',
+          'notes',
+          'status',
+        ];
+        const values = [
+          `'${safeLessorId}'`,
+          `'${escapeSqlValue(input.vehicle_id)}'`,
+          `'${escapeSqlValue(input.customer_name)}'`,
+          `'${escapeSqlValue(input.customer_email)}'`,
+          `'${escapeSqlValue(input.customer_phone)}'`,
+          `'${escapeSqlValue(input.start_date)}'`,
+          `'${escapeSqlValue(input.end_date)}'`,
+          input.total_price ?? null,
+          input.notes ? `'${escapeSqlValue(input.notes)}'` : null,
+          `'pending'`,
+        ];
 
-        if (insertError) throw insertError;
+        await azureApi.post('/db/query', {
+          query: `INSERT INTO fri_bookings (${columns.join(', ')}) VALUES (${values.map(v => (v === null ? 'NULL' : v)).join(', ')})`,
+        });
 
-        if (data && data[0]) {
-          setBookings((prev) => [data[0], ...prev]);
-        }
-
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create booking';
         setError(message);
@@ -108,22 +134,24 @@ export function useFriBookings(lessorId: string | null) {
       try {
         setError(null);
 
-        const { data, error: updateError } = await supabase
-          .from('lessor_bookings')
-          .update(input)
-          .eq('id', id)
-          .eq('lessor_id', lessorId)
-          .select();
+        const setClauses = Object.entries(input)
+          .map(([key, value]) => {
+            if (value === undefined) return null;
+            if (value === null) return `${key}=NULL`;
+            if (typeof value === 'number') return `${key}=${value}`;
+            return `${key}='${escapeSqlValue(String(value))}'`;
+          })
+          .filter(Boolean)
+          .join(', ');
 
-        if (updateError) throw updateError;
+        if (!setClauses) return null;
 
-        if (data && data[0]) {
-          setBookings((prev) =>
-            prev.map((b) => (b.id === id ? data[0] : b))
-          );
-        }
+        await azureApi.post('/db/query', {
+          query: `UPDATE fri_bookings SET ${setClauses} WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update booking';
         setError(message);
@@ -141,13 +169,9 @@ export function useFriBookings(lessorId: string | null) {
       try {
         setError(null);
 
-        const { error: deleteError } = await supabase
-          .from('lessor_bookings')
-          .delete()
-          .eq('id', id)
-          .eq('lessor_id', lessorId);
-
-        if (deleteError) throw deleteError;
+        await azureApi.post('/db/query', {
+          query: `DELETE FROM fri_bookings WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
         setBookings((prev) => prev.filter((b) => b.id !== id));
       } catch (err) {

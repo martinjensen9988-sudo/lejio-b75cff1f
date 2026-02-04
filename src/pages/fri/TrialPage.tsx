@@ -47,7 +47,7 @@ export function FriTrialPage() {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/fri" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Lejio Fri
+            Din platform
           </Link>
           <div className="flex gap-4 items-center">
             <Link to="/fri/features">
@@ -71,10 +71,10 @@ export function FriTrialPage() {
             14 dages gratis prøveperiode
           </div>
           <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight">
-            Prøv Lejio Fri <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">helt gratis</span>
+            Prøv platformen <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">helt gratis</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Se hvordan Lejio Fri kan transformere din bilutlejningsforretning. Ingen kreditkort, ingen binding.
+            Se hvordan din white‑label platform kan transformere din biludlejningsforretning. Ingen kreditkort, ingen binding.
           </p>
         </div>
 
@@ -358,7 +358,7 @@ export function FriTrialPage() {
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 text-center bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-12 text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Klar til at få styr på din flåde?</h2>
-          <p className="text-lg text-blue-100 mb-8">Join hundredvis af danske bilentreprenører, der allerede bruger Lejio Fri</p>
+          <p className="text-lg text-blue-100 mb-8">Join hundredvis af danske bilentreprenører, der allerede bruger platformen</p>
           <Link to="#signup-form">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold">
               Start 14-dages gratis prøveperiode
@@ -372,7 +372,7 @@ export function FriTrialPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="font-bold text-lg mb-4">Om Lejio Fri</h4>
+              <h4 className="font-bold text-lg mb-4">Om platformen</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><a href="#" className="hover:text-white">Funktioner</a></li>
                 <li><a href="#" className="hover:text-white">Priser</a></li>
@@ -382,7 +382,7 @@ export function FriTrialPage() {
             <div>
               <h4 className="font-bold text-lg mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="mailto:support@lejio.dk" className="hover:text-white">support@lejio.dk</a></li>
+                <li><a href="mailto:support@yourdomain.com" className="hover:text-white">support@yourdomain.com</a></li>
                 <li><a href="#" className="hover:text-white">Dokumentation</a></li>
                 <li><a href="#" className="hover:text-white">FAQ</a></li>
               </ul>
@@ -398,14 +398,14 @@ export function FriTrialPage() {
             <div>
               <h4 className="font-bold text-lg mb-4">Kontakt</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li>Lejio ApS</li>
+                <li>Din virksomhed</li>
                 <li>Danmark</li>
                 <li><a href="tel:+4544889999" className="hover:text-white">+45 44 88 99 99</a></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-            <p>© 2026 Lejio Fri. Alle rettigheder forbeholdt.</p>
+            <p>© 2026 Din platform. Alle rettigheder forbeholdt.</p>
           </div>
         </div>
       </footer>

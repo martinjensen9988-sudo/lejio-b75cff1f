@@ -18,7 +18,7 @@ interface UseFriAuthReturn {
 }
 
 /**
- * Hook for Lejio Fri authentication
+ * Hook for Fri authentication
  * Uses Azure Functions via Static Web Apps API routing
  */
 export function useFriAuth(): UseFriAuthReturn {
@@ -37,9 +37,9 @@ export function useFriAuth(): UseFriAuthReturn {
           // Set demo user for testing
           setUser({
             id: 'demo-user-1',
-            email: 'martin@lejio.dk',
+            email: 'demo@yourdomain.com',
             lessor_id: 'lessor-1',
-            company_name: 'Martin Biludlejning',
+            company_name: 'Demo Biludlejning',
           } as any);
           setLoading(false);
           return;
@@ -58,9 +58,9 @@ export function useFriAuth(): UseFriAuthReturn {
           // Fallback to demo user
           setUser({
             id: 'demo-user-1',
-            email: 'martin@lejio.dk',
+            email: 'demo@yourdomain.com',
             lessor_id: 'lessor-1',
-            company_name: 'Martin Biludlejning',
+            company_name: 'Demo Biludlejning',
           } as any);
           localStorage.removeItem('fri-auth-token');
         }
@@ -70,9 +70,9 @@ export function useFriAuth(): UseFriAuthReturn {
         // Fallback to demo user on error
         setUser({
           id: 'demo-user-1',
-          email: 'martin@lejio.dk',
+          email: 'demo@yourdomain.com',
           lessor_id: 'lessor-1',
-          company_name: 'Martin Biludlejning',
+          company_name: 'Demo Biludlejning',
         } as any);
         setLoading(false);
       }

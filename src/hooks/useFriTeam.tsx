@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface TeamMember {
   id: string;
@@ -25,6 +25,17 @@ export function useFriTeam(lessorId: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   // Fetch all team members
   const fetch = useCallback(async () => {
     if (!lessorId) return;
@@ -33,14 +44,13 @@ export function useFriTeam(lessorId: string | null) {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('lessor_team_members')
-        .select('*')
-        .eq('lessor_id', lessorId)
-        .order('created_at', { ascending: true });
+      const safeLessorId = escapeSqlValue(lessorId);
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_lessor_team_members WHERE lessor_id='${safeLessorId}' ORDER BY created_at ASC`,
+      });
 
-      if (fetchError) throw fetchError;
-      setMembers(data || []);
+      const rows = normalizeRows(response) as TeamMember[];
+      setMembers(rows || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch team members';
       setError(message);
@@ -66,35 +76,24 @@ export function useFriTeam(lessorId: string | null) {
         setError(null);
 
         // Check if member already exists
-        const { data: existing, error: checkError } = await supabase
-          .from('lessor_team_members')
-          .select('id')
-          .eq('lessor_id', lessorId)
-          .eq('email', input.email)
-          .single();
+        const safeLessorId = escapeSqlValue(lessorId);
+        const safeEmail = escapeSqlValue(input.email);
 
-        if (!checkError && existing) {
+        const existsResponse = await azureApi.post<any>('/db/query', {
+          query: `SELECT id FROM fri_lessor_team_members WHERE lessor_id='${safeLessorId}' AND email='${safeEmail}'`,
+        });
+
+        const existingRows = normalizeRows(existsResponse);
+        if (existingRows?.[0]) {
           throw new Error('This email is already part of the team');
         }
 
-        const { data, error: insertError } = await supabase
-          .from('lessor_team_members')
-          .insert({
-            lessor_id: lessorId,
-            email: input.email,
-            full_name: input.full_name,
-            role: input.role,
-            status: 'invited',
-          })
-          .select();
+        await azureApi.post('/db/query', {
+          query: `INSERT INTO fri_lessor_team_members (lessor_id, email, full_name, role, status) VALUES ('${safeLessorId}', '${safeEmail}', '${escapeSqlValue(input.full_name)}', '${escapeSqlValue(input.role)}', 'invited')`,
+        });
 
-        if (insertError) throw insertError;
-
-        if (data && data[0]) {
-          setMembers((prev) => [...prev, data[0]]);
-        }
-
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to invite member';
         setError(message);
@@ -112,22 +111,12 @@ export function useFriTeam(lessorId: string | null) {
       try {
         setError(null);
 
-        const { data, error: updateError } = await supabase
-          .from('lessor_team_members')
-          .update({ role })
-          .eq('id', id)
-          .eq('lessor_id', lessorId)
-          .select();
+        await azureApi.post('/db/query', {
+          query: `UPDATE fri_lessor_team_members SET role='${escapeSqlValue(role)}' WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
-        if (updateError) throw updateError;
-
-        if (data && data[0]) {
-          setMembers((prev) =>
-            prev.map((m) => (m.id === id ? data[0] : m))
-          );
-        }
-
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update role';
         setError(message);
@@ -145,22 +134,12 @@ export function useFriTeam(lessorId: string | null) {
       try {
         setError(null);
 
-        const { data, error: updateError } = await supabase
-          .from('lessor_team_members')
-          .update({ status })
-          .eq('id', id)
-          .eq('lessor_id', lessorId)
-          .select();
+        await azureApi.post('/db/query', {
+          query: `UPDATE fri_lessor_team_members SET status='${escapeSqlValue(status)}' WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
-        if (updateError) throw updateError;
-
-        if (data && data[0]) {
-          setMembers((prev) =>
-            prev.map((m) => (m.id === id ? data[0] : m))
-          );
-        }
-
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update status';
         setError(message);
@@ -178,13 +157,9 @@ export function useFriTeam(lessorId: string | null) {
       try {
         setError(null);
 
-        const { error: deleteError } = await supabase
-          .from('lessor_team_members')
-          .delete()
-          .eq('id', id)
-          .eq('lessor_id', lessorId);
-
-        if (deleteError) throw deleteError;
+        await azureApi.post('/db/query', {
+          query: `DELETE FROM fri_lessor_team_members WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
         setMembers((prev) => prev.filter((m) => m.id !== id));
       } catch (err) {
@@ -205,22 +180,12 @@ export function useFriTeam(lessorId: string | null) {
         setError(null);
 
         // Update status to invited
-        const { data, error: updateError } = await supabase
-          .from('lessor_team_members')
-          .update({ status: 'invited' })
-          .eq('id', id)
-          .eq('lessor_id', lessorId)
-          .select();
+        await azureApi.post('/db/query', {
+          query: `UPDATE fri_lessor_team_members SET status='invited' WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
-        if (updateError) throw updateError;
-
-        if (data && data[0]) {
-          setMembers((prev) =>
-            prev.map((m) => (m.id === id ? data[0] : m))
-          );
-        }
-
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to resend invitation';
         setError(message);

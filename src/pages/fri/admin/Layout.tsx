@@ -45,7 +45,7 @@ export const FriAdminLayout = ({ children }: FriAdminLayoutProps) => {
         <div className="p-4 border-b border-gray-800 flex items-center justify-between">
           {sidebarOpen && (
             <div>
-              <h1 className="text-lg font-bold">Lejio Fri</h1>
+              <h1 className="text-lg font-bold">Din platform</h1>
               <p className="text-xs text-gray-400">Admin</p>
             </div>
           )}

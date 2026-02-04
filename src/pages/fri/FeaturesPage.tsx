@@ -130,7 +130,7 @@ export function FriFeaturesPage() {
     {
       category: 'Branding & Tilpasning',
       icon: Settings,
-      description: 'Gør Lejio Fri til dit eget brand',
+      description: 'Gør platformen til dit eget brand',
       features: [
         'Indsæt dine farver og logo',
         'Tilpasset domæne',
@@ -203,7 +203,7 @@ export function FriFeaturesPage() {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/fri" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Lejio Fri
+            Din platform
           </Link>
           <div className="flex gap-4">
             <Link to="/fri/login">
@@ -220,7 +220,7 @@ export function FriFeaturesPage() {
       <section className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight">
-            Alle funktioner i <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Lejio Fri</span>
+            Alle funktioner i <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">platformen</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
             En komplet løsning til bilutlejning. Ingen skjulte funktioner – alt er inkluderet i din plan.
@@ -365,7 +365,7 @@ export function FriFeaturesPage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="font-bold text-lg mb-4">Om Lejio Fri</h4>
+              <h4 className="font-bold text-lg mb-4">Om platformen</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><Link to="/fri" className="hover:text-white">Hjem</Link></li>
                 <li><Link to="/fri/features" className="hover:text-white">Funktioner</Link></li>
@@ -375,7 +375,7 @@ export function FriFeaturesPage() {
             <div>
               <h4 className="font-bold text-lg mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="mailto:support@lejio.dk" className="hover:text-white">support@lejio.dk</a></li>
+                <li><a href="mailto:support@yourdomain.com" className="hover:text-white">support@yourdomain.com</a></li>
                 <li><a href="#" className="hover:text-white">Dokumentation</a></li>
                 <li><a href="#" className="hover:text-white">FAQ</a></li>
               </ul>
@@ -391,14 +391,14 @@ export function FriFeaturesPage() {
             <div>
               <h4 className="font-bold text-lg mb-4">Kontakt</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li>Lejio ApS</li>
+                <li>Din virksomhed</li>
                 <li>Danmark</li>
                 <li><a href="tel:+4544889999" className="hover:text-white">+45 44 88 99 99</a></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-            <p>© 2026 Lejio Fri. Alle rettigheder forbeholdt.</p>
+            <p>© 2026 Din platform. Alle rettigheder forbeholdt.</p>
           </div>
         </div>
       </footer>

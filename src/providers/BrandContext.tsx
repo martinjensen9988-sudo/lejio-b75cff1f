@@ -25,7 +25,7 @@ export function BrandProvider({
   branding: LessorBranding;
   domain: string;
 }) {
-  const companyName = branding.company_name || 'Lejio Fri';
+  const companyName = branding.company_name || 'Din platform';
 
   // Apply branding to document
   if (branding.primary_color) {

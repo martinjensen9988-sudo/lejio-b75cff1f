@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface Invoice {
   id: string;
@@ -39,6 +39,17 @@ export function useFriInvoices(lessorId: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   // Generate invoice number
   const generateInvoiceNumber = useCallback((): string => {
     const date = new Date();
@@ -56,14 +67,13 @@ export function useFriInvoices(lessorId: string | null) {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('lessor_invoices')
-        .select('*')
-        .eq('lessor_id', lessorId)
-        .order('issued_date', { ascending: false });
+      const safeLessorId = escapeSqlValue(lessorId);
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_invoices WHERE lessor_id='${safeLessorId}' ORDER BY issued_date DESC`,
+      });
 
-      if (fetchError) throw fetchError;
-      setInvoices(data || []);
+      const rows = normalizeRows(response) as Invoice[];
+      setInvoices(rows || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch invoices';
       setError(message);
@@ -95,18 +105,43 @@ export function useFriInvoices(lessorId: string | null) {
           status: 'draft',
         };
 
-        const { data, error: insertError } = await supabase
-          .from('lessor_invoices')
-          .insert(invoiceData)
-          .select();
+        const columns = [
+          'lessor_id',
+          'booking_id',
+          'invoice_number',
+          'customer_name',
+          'customer_email',
+          'amount',
+          'tax_amount',
+          'description',
+          'issued_date',
+          'due_date',
+          'status',
+          'payment_method',
+          'notes',
+        ];
+        const values = [
+          `'${escapeSqlValue(lessorId)}'`,
+          invoiceData.booking_id ? `'${escapeSqlValue(invoiceData.booking_id)}'` : null,
+          `'${escapeSqlValue(invoiceData.invoice_number)}'`,
+          `'${escapeSqlValue(invoiceData.customer_name)}'`,
+          `'${escapeSqlValue(invoiceData.customer_email)}'`,
+          invoiceData.amount,
+          invoiceData.tax_amount ?? null,
+          `'${escapeSqlValue(invoiceData.description)}'`,
+          `'${escapeSqlValue(invoiceData.issued_date)}'`,
+          `'${escapeSqlValue(invoiceData.due_date)}'`,
+          `'${escapeSqlValue(invoiceData.status)}'`,
+          invoiceData.payment_method ? `'${escapeSqlValue(invoiceData.payment_method)}'` : null,
+          invoiceData.notes ? `'${escapeSqlValue(invoiceData.notes)}'` : null,
+        ];
 
-        if (insertError) throw insertError;
+        await azureApi.post('/db/query', {
+          query: `INSERT INTO fri_invoices (${columns.join(', ')}) VALUES (${values.map(v => (v === null ? 'NULL' : v)).join(', ')})`,
+        });
 
-        if (data && data[0]) {
-          setInvoices((prev) => [data[0], ...prev]);
-        }
-
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create invoice';
         setError(message);
@@ -124,22 +159,24 @@ export function useFriInvoices(lessorId: string | null) {
       try {
         setError(null);
 
-        const { data, error: updateError } = await supabase
-          .from('lessor_invoices')
-          .update(input)
-          .eq('id', id)
-          .eq('lessor_id', lessorId)
-          .select();
+        const setClauses = Object.entries(input)
+          .map(([key, value]) => {
+            if (value === undefined) return null;
+            if (value === null) return `${key}=NULL`;
+            if (typeof value === 'number') return `${key}=${value}`;
+            return `${key}='${escapeSqlValue(String(value))}'`;
+          })
+          .filter(Boolean)
+          .join(', ');
 
-        if (updateError) throw updateError;
+        if (!setClauses) return null;
 
-        if (data && data[0]) {
-          setInvoices((prev) =>
-            prev.map((inv) => (inv.id === id ? data[0] : inv))
-          );
-        }
+        await azureApi.post('/db/query', {
+          query: `UPDATE fri_invoices SET ${setClauses} WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
-        return data?.[0];
+        await fetch();
+        return null;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update invoice';
         setError(message);
@@ -157,13 +194,9 @@ export function useFriInvoices(lessorId: string | null) {
       try {
         setError(null);
 
-        const { error: deleteError } = await supabase
-          .from('lessor_invoices')
-          .delete()
-          .eq('id', id)
-          .eq('lessor_id', lessorId);
-
-        if (deleteError) throw deleteError;
+        await azureApi.post('/db/query', {
+          query: `DELETE FROM fri_invoices WHERE id='${escapeSqlValue(id)}' AND lessor_id='${escapeSqlValue(lessorId)}'`,
+        });
 
         setInvoices((prev) => prev.filter((inv) => inv.id !== id));
       } catch (err) {

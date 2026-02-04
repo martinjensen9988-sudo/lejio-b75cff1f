@@ -99,7 +99,7 @@ export function TenantSignupPage() {
       
       // Redirect to tenant subdomain after 2 seconds
       setTimeout(() => {
-        const tenantUrl = `https://${data.subdomain}.lejio-fri.dk`;
+        const tenantUrl = `https://${data.subdomain}.ditdomæne.dk`;
         window.location.href = tenantUrl;
       }, 2000);
     } catch (err) {
@@ -113,9 +113,9 @@ export function TenantSignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Start Your Free Trial</CardTitle>
+          <CardTitle>Start din gratis prøveperiode</CardTitle>
           <CardDescription>
-            Get your own Lejio Fri instance in 30 seconds
+            Få din egen white‑label platform på 30 sekunder
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -143,7 +143,7 @@ export function TenantSignupPage() {
                 name="company_name"
                 value={formData.company_name}
                 onChange={handleChange}
-                placeholder="e.g., Martin Biludlejning"
+                placeholder="fx Din Biludlejning"
                 required
                 disabled={isLoading}
               />
@@ -168,7 +168,7 @@ export function TenantSignupPage() {
                 Subdomain
                 {formData.subdomain && (
                   <span className="text-xs text-gray-500 ml-2">
-                    → {formData.subdomain}.lejio-fri.dk
+                    → {formData.subdomain}.ditdomæne.dk
                   </span>
                 )}
               </Label>

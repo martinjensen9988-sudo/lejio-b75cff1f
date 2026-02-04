@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface Vehicle {
   id: string;
@@ -26,8 +26,7 @@ export interface CreateVehicleInput {
 }
 
 /**
- * Hook to manage lessor's fleet vehicles
- * Stores in Supabase for now, will move to Azure when connected
+ * Hook to manage lessor's fleet vehicles (Azure SQL)
  */
 export function useFriVehicles(lessorId: string | null) {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -35,19 +34,29 @@ export function useFriVehicles(lessorId: string | null) {
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch vehicles
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   const fetch = useCallback(async () => {
     if (!lessorId) return;
 
     try {
       setLoading(true);
-      const { data, error: err } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('lessor_id', lessorId)
-        .order('created_at', { ascending: false });
+      const safeLessorId = escapeSqlValue(lessorId);
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_vehicles WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC`,
+      });
 
-      if (err) throw err;
-      setVehicles((data as Vehicle[]) || []);
+      const rows = normalizeRows(response) as Vehicle[];
+      setVehicles(rows || []);
     } catch (err) {
       console.error('Error fetching vehicles:', err);
       setError(err instanceof Error ? err : new Error(String(err)));
@@ -66,19 +75,36 @@ export function useFriVehicles(lessorId: string | null) {
       if (!lessorId) throw new Error('No lessor ID');
 
       try {
-        const { data, error: err } = await supabase
-          .from('vehicles')
-          .insert({
-            lessor_id: lessorId,
-            ...input,
-            availability_status: 'available',
-          })
-          .select()
-          .single();
+        const safeLessorId = escapeSqlValue(lessorId);
+        const columns = [
+          'lessor_id',
+          'make',
+          'model',
+          'year',
+          'license_plate',
+          'vin',
+          'daily_rate',
+          'mileage_limit',
+          'availability_status',
+        ];
+        const values = [
+          `'${safeLessorId}'`,
+          `'${escapeSqlValue(input.make)}'`,
+          `'${escapeSqlValue(input.model)}'`,
+          input.year ?? null,
+          `'${escapeSqlValue(input.license_plate)}'`,
+          input.vin ? `'${escapeSqlValue(input.vin)}'` : null,
+          input.daily_rate ?? null,
+          input.mileage_limit ?? null,
+          `'available'`,
+        ];
 
-        if (err) throw err;
-        setVehicles((prev) => [data as Vehicle, ...prev]);
-        return data;
+        await azureApi.post('/db/query', {
+          query: `INSERT INTO fri_vehicles (${columns.join(', ')}) VALUES (${values.map(v => (v === null ? 'NULL' : v)).join(', ')})`,
+        });
+
+        await fetch();
+        return null;
       } catch (err) {
         console.error('Error adding vehicle:', err);
         throw err;
@@ -91,18 +117,24 @@ export function useFriVehicles(lessorId: string | null) {
   const updateVehicle = useCallback(
     async (id: string, updates: Partial<CreateVehicleInput>) => {
       try {
-        const { data, error: err } = await supabase
-          .from('vehicles')
-          .update(updates)
-          .eq('id', id)
-          .select()
-          .single();
+        const setClauses = Object.entries(updates)
+          .map(([key, value]) => {
+            if (value === undefined) return null;
+            if (value === null) return `${key}=NULL`;
+            if (typeof value === 'number') return `${key}=${value}`;
+            return `${key}='${escapeSqlValue(String(value))}'`;
+          })
+          .filter(Boolean)
+          .join(', ');
 
-        if (err) throw err;
-        setVehicles((prev) =>
-          prev.map((v) => (v.id === id ? (data as Vehicle) : v))
-        );
-        return data;
+        if (!setClauses) return null;
+
+        await azureApi.post('/db/query', {
+          query: `UPDATE fri_vehicles SET ${setClauses} WHERE id='${escapeSqlValue(id)}'`,
+        });
+
+        await fetch();
+        return null;
       } catch (err) {
         console.error('Error updating vehicle:', err);
         throw err;
@@ -114,9 +146,10 @@ export function useFriVehicles(lessorId: string | null) {
   // Delete vehicle
   const deleteVehicle = useCallback(async (id: string) => {
     try {
-      const { error: err } = await supabase.from('vehicles').delete().eq('id', id);
+      await azureApi.post('/db/query', {
+        query: `DELETE FROM fri_vehicles WHERE id='${escapeSqlValue(id)}'`,
+      });
 
-      if (err) throw err;
       setVehicles((prev) => prev.filter((v) => v.id !== id));
     } catch (err) {
       console.error('Error deleting vehicle:', err);
@@ -130,7 +163,7 @@ export function useFriVehicles(lessorId: string | null) {
       id: string,
       status: 'available' | 'rented' | 'maintenance' | 'retired'
     ) => {
-      return updateVehicle(id, { status } as any);
+      return updateVehicle(id, { availability_status: status } as any);
     },
     [updateVehicle]
   );

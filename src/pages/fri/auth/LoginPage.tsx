@@ -37,7 +37,7 @@ export function FriLoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Lejio Fri</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Din platform</h1>
           <p className="text-gray-600">Log ind på dit dashboard</p>
         </div>
 
@@ -103,7 +103,7 @@ export function FriLoginPage() {
               </p>
               <p className="text-sm text-gray-600">
                 <button
-                  onClick={() => alert('Kontakt support: support@lejio.dk')}
+                  onClick={() => alert('Kontakt support: support@yourdomain.com')}
                   className="text-blue-600 hover:underline"
                 >
                   Glemt adgangskode?

@@ -56,7 +56,7 @@ const FriSidebar = () => {
     <aside className="w-64 bg-gradient-to-b from-[#4CAF50] to-[#45a049] text-white flex flex-col h-screen fixed left-0 top-0 z-40">
       {/* Logo/Branding Area */}
       <div className="p-6 border-b border-white/20">
-        <h1 className="text-2xl font-bold">Lejio Fri</h1>
+        <h1 className="text-2xl font-bold">Din platform</h1>
         <p className="text-sm text-white/80 mt-1">Biludlejningsplatform</p>
       </div>
 

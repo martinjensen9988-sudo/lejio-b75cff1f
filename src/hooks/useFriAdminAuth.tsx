@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface FriAdminProfile {
   id: string;
@@ -25,29 +25,59 @@ export const FriAdminAuthProvider = ({ children }: { children: ReactNode }) => {
   const [admin, setAdmin] = useState<FriAdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const apiBaseUrl = '/api';
+
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
+  const fetchAdminByEmail = async (email: string) => {
+    const response = await azureApi.post<any>('/db/query', {
+      query: `SELECT * FROM fri_admins WHERE admin_email='${escapeSqlValue(email)}' OR email='${escapeSqlValue(email)}'`,
+    });
+
+    const rows = normalizeRows(response) as FriAdminProfile[];
+    return rows?.[0] || null;
+  };
 
   // Check if user is already logged in on mount
   useEffect(() => {
     const checkAdminSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          // Verify this is an admin user
-          const { data: adminData, error: adminError } = await supabase
-            .from('fri_admins')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (!adminError && adminData) {
-            setAdmin(adminData);
-          } else {
-            // User is authenticated but not an admin
-            await supabase.auth.signOut();
-            setAdmin(null);
-          }
+        const token = localStorage.getItem('fri-admin-auth-token');
+        if (!token) {
+          setLoading(false);
+          return;
         }
+
+        const response = await fetch(`${apiBaseUrl}/AuthMe`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          localStorage.removeItem('fri-admin-auth-token');
+          setAdmin(null);
+          setLoading(false);
+          return;
+        }
+
+        const userData = await response.json();
+        const email = userData?.email;
+        if (!email) {
+          setAdmin(null);
+          setLoading(false);
+          return;
+        }
+
+        const adminData = await fetchAdminByEmail(email);
+        setAdmin(adminData || null);
       } catch (err) {
         console.error('Error checking admin session:', err);
       } finally {
@@ -56,27 +86,6 @@ export const FriAdminAuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     checkAdminSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const { data: adminData } = await supabase
-          .from('fri_admins')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (adminData) {
-          setAdmin(adminData);
-        } else {
-          setAdmin(null);
-        }
-      } else {
-        setAdmin(null);
-      }
-    });
-
-    return () => subscription?.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -84,23 +93,27 @@ export const FriAdminAuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       setLoading(true);
 
-      // Sign in with Supabase
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch(`${apiBaseUrl}/AuthLogin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (authError) throw new Error(authError.message);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Login failed');
+      }
 
-      // Verify user is an admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('fri_admins')
-        .select('*')
-        .eq('id', authData.user!.id)
-        .single();
+      const data = await response.json();
+      const token = data?.session?.access_token;
 
-      if (adminError || !adminData) {
-        await supabase.auth.signOut();
+      if (token) {
+        localStorage.setItem('fri-admin-auth-token', token);
+      }
+
+      const adminData = await fetchAdminByEmail(email);
+      if (!adminData) {
+        localStorage.removeItem('fri-admin-auth-token');
         throw new Error('User is not an admin');
       }
 
@@ -117,7 +130,7 @@ export const FriAdminAuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       setLoading(true);
-      await supabase.auth.signOut();
+      localStorage.removeItem('fri-admin-auth-token');
       setAdmin(null);
       setError(null);
     } catch (err) {

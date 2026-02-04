@@ -86,7 +86,7 @@ export function FriSignupPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Lejio Fri</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Din platform</h1>
           <p className="text-gray-600">Kom i gang med din bilutlejningsplatform</p>
         </div>
 
@@ -195,10 +195,10 @@ export function FriSignupPage() {
                       placeholder="biluthyr"
                       required
                     />
-                    <span className="text-gray-600">.lejio.app</span>
+                    <span className="text-gray-600">.ditdomæne.dk</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Dit dashboard bliver: biluthyr.lejio.app
+                    Dit dashboard bliver: biluthyr.ditdomæne.dk
                   </p>
                 </div>
 

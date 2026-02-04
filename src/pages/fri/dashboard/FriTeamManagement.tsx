@@ -249,7 +249,7 @@ const FriTeamManagement = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="john@lejio.dk"
+                  placeholder="navn@ditdomæne.dk"
                 />
               </div>
               <div>

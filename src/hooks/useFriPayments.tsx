@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 export interface Payment {
   id: string;
@@ -44,24 +44,32 @@ export const useFriPayments = (): UseFriPaymentsReturn => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   const fetchPayments = async (filter?: string) => {
     try {
       setError(null);
       setLoading(true);
 
-      let query = supabase
-        .from('fri_payments')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const statusFilter = filter && filter !== 'all'
+        ? ` AND status='${escapeSqlValue(filter)}'`
+        : '';
 
-      if (filter && filter !== 'all') {
-        query = query.eq('status', filter);
-      }
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_payments WHERE 1=1${statusFilter} ORDER BY created_at DESC`,
+      });
 
-      const { data, error: err } = await query;
-
-      if (err) throw new Error(err.message);
-      setPayments(data || []);
+      const rows = normalizeRows(response) as Payment[];
+      setPayments(rows || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Fejl ved indlæsning af betalinger';
       setError(message);
@@ -72,13 +80,11 @@ export const useFriPayments = (): UseFriPaymentsReturn => {
 
   const getPaymentStats = async (): Promise<PaymentStats | null> => {
     try {
-      const { data, error: err } = await supabase
-        .from('fri_payments')
-        .select('*');
+      const response = await azureApi.post<any>('/db/query', {
+        query: 'SELECT * FROM fri_payments',
+      });
 
-      if (err) throw new Error(err.message);
-
-      const paymentsData = data || [];
+      const paymentsData = normalizeRows(response) as Payment[];
 
       const totalRevenue = paymentsData
         .filter(p => p.status === 'completed')
@@ -124,16 +130,12 @@ export const useFriPayments = (): UseFriPaymentsReturn => {
 
   const updatePaymentStatus = async (paymentId: string, status: Payment['status']) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_payments')
-        .update({
-          status,
-          updated_at: new Date().toISOString(),
-          paid_at: status === 'completed' ? new Date().toISOString() : null,
-        })
-        .eq('id', paymentId);
+      const updatedAt = new Date().toISOString();
+      const paidAt = status === 'completed' ? updatedAt : null;
 
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_payments SET status='${escapeSqlValue(status)}', updated_at='${escapeSqlValue(updatedAt)}', paid_at=${paidAt ? `'${escapeSqlValue(paidAt)}'` : 'NULL'} WHERE id='${escapeSqlValue(paymentId)}'`,
+      });
 
       setPayments(payments.map(p =>
         p.id === paymentId
@@ -157,21 +159,12 @@ export const useFriPayments = (): UseFriPaymentsReturn => {
 
   const recordManualPayment = async (lessorId: string, amount: number, method: string, notes: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_payments')
-        .insert({
-          lessor_id: lessorId,
-          amount,
-          currency: 'DKK',
-          status: 'completed',
-          payment_method: method,
-          subscription_type: 'monthly',
-          reference: `MANUAL-${Date.now()}`,
-          notes,
-          paid_at: new Date().toISOString(),
-        });
+      const paidAt = new Date().toISOString();
+      const reference = `MANUAL-${Date.now()}`;
 
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `INSERT INTO fri_payments (lessor_id, amount, currency, status, payment_method, subscription_type, reference, notes, paid_at) VALUES ('${escapeSqlValue(lessorId)}', ${amount}, 'DKK', 'completed', '${escapeSqlValue(method)}', 'monthly', '${escapeSqlValue(reference)}', '${escapeSqlValue(notes)}', '${escapeSqlValue(paidAt)}')`,
+      });
 
       // Reload payments
       await fetchPayments();

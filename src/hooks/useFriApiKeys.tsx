@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/azure/client';
+import { azureApi } from '@/integrations/azure/client';
 
 const generateApiKey = () => {
   // Generate a random alphanumeric string
@@ -39,21 +39,31 @@ export const useFriApiKeys = (): UseFriApiKeysReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const escapeSqlValue = (value: string) => value.replace(/'/g, "''");
+
+  const normalizeRows = (response: any) => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.recordset)) return response.recordset;
+    if (Array.isArray(response.data?.recordset)) return response.data.recordset;
+    return response.data ?? response;
+  };
+
   const fetchApiKeys = async (lessorId: string) => {
     try {
       setError(null);
       setLoading(true);
 
-      const { data, error: err } = await supabase
-        .from('fri_api_keys')
-        .select('*')
-        .eq('lessor_id', lessorId)
-        .order('created_at', { ascending: false });
+      const safeLessorId = escapeSqlValue(lessorId);
+      const response = await azureApi.post<any>('/db/query', {
+        query: `SELECT * FROM fri_api_keys WHERE lessor_id='${safeLessorId}' ORDER BY created_at DESC`,
+      });
 
-      if (err) throw new Error(err.message);
-      
+      const rows = normalizeRows(response) as ApiKey[];
+
       // Mask the full keys
-      const maskedKeys = (data || []).map(k => ({
+      const maskedKeys = (rows || []).map(k => ({
         ...k,
         key: `sk_live_${k.key.substring(0, 8)}****`,
       }));
@@ -75,25 +85,20 @@ export const useFriApiKeys = (): UseFriApiKeysReturn => {
       const fullKey = `sk_live_${generateApiKey()}`;
       const shortKey = generateApiKey();
 
-      const { data, error: err } = await supabase
-        .from('fri_api_keys')
-        .insert({
-          lessor_id: lessorId,
-          name,
-          key: shortKey,
-          status: 'active',
-        })
-        .select()
-        .single();
-
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `INSERT INTO fri_api_keys (lessor_id, name, key, status) VALUES ('${escapeSqlValue(lessorId)}', '${escapeSqlValue(name)}', '${escapeSqlValue(shortKey)}', 'active')`,
+      });
 
       // Return the full key only on creation
       return {
-        ...data,
-        full_key: fullKey,
+        id: '',
+        lessor_id: lessorId,
+        name,
         key: `sk_live_${shortKey.substring(0, 8)}****`,
-      };
+        full_key: fullKey,
+        status: 'active',
+        created_at: new Date().toISOString(),
+      } as ApiKey;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Fejl ved oprettelse af API key';
       setError(message);
@@ -103,12 +108,9 @@ export const useFriApiKeys = (): UseFriApiKeysReturn => {
 
   const deleteApiKey = async (keyId: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_api_keys')
-        .delete()
-        .eq('id', keyId);
-
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `DELETE FROM fri_api_keys WHERE id='${escapeSqlValue(keyId)}'`,
+      });
 
       setApiKeys(apiKeys.filter(k => k.id !== keyId));
     } catch (err) {
@@ -120,12 +122,9 @@ export const useFriApiKeys = (): UseFriApiKeysReturn => {
 
   const revokeApiKey = async (keyId: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_api_keys')
-        .update({ status: 'inactive' })
-        .eq('id', keyId);
-
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_api_keys SET status='inactive' WHERE id='${escapeSqlValue(keyId)}'`,
+      });
 
       setApiKeys(apiKeys.map(k =>
         k.id === keyId ? { ...k, status: 'inactive' } : k
@@ -139,12 +138,9 @@ export const useFriApiKeys = (): UseFriApiKeysReturn => {
 
   const activateApiKey = async (keyId: string) => {
     try {
-      const { error: err } = await supabase
-        .from('fri_api_keys')
-        .update({ status: 'active' })
-        .eq('id', keyId);
-
-      if (err) throw new Error(err.message);
+      await azureApi.post('/db/query', {
+        query: `UPDATE fri_api_keys SET status='active' WHERE id='${escapeSqlValue(keyId)}'`,
+      });
 
       setApiKeys(apiKeys.map(k =>
         k.id === keyId ? { ...k, status: 'active' } : k

@@ -286,7 +286,7 @@ export const FriApiKeysPage = ({ lessorId }: FriApiKeysPageProps) => {
           Authorization: Bearer sk_live_xxxxx
         </code>
         <p className="text-xs text-blue-800">
-          Se fuld dokumentation på <a href="#" className="underline">api.lejio-fri.dk/docs</a>
+          Se fuld dokumentation på <a href="#" className="underline">api.ditdomæne.dk/docs</a>
         </p>
       </Card>
     </div>
