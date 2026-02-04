@@ -7,6 +7,9 @@ import * as Sentry from "@sentry/react";
 // Initialize Sentry for error tracking
 initSentry();
 
+// CRITICAL MARKER: v2-production-debugsession-2026-02
+// This code must be deployed for debugging purposes
+
 // Ensure PWA/service worker updates don't leave users with a cached HTML
 // that references old hashed CSS/JS files (white screen / missing stylesheet).
 // Provided by vite-plugin-pwa.
@@ -76,6 +79,17 @@ registerSW({
 
 // Wrap App with Sentry error tracking
 const SentryApp = Sentry.withProfiler(App);
+
+// Initialize debug tracking - this WILL be in the minified bundle
+const debugInit = () => {
+  window.__LEJIO_DEBUG = {
+    appVersion: "2026.02.04.001",
+    bundleTime: Date.now(),
+    environment: "production"
+  };
+  return true;
+};
+debugInit();
 
 const rootElement = document.getElementById("root");
 console.log("🚀🚀🚀 MAIN.TSX EXECUTING - TIMESTAMP:", Date.now());
