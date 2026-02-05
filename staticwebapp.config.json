@@ -1,7 +1,7 @@
 {
   "navigationFallback": {
-    "rewrite": "index.html",
-    "exclude": ["/images/*", "/css/*", "/js/*", "/fonts/*", "*.svg", "*.png", "*.jpg", "*.gif", "*.json", "/api/*"]
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/images/*", "/css/*", "/js/*", "/fonts/*", "*.svg", "*.png", "*.jpg", "*.gif", "*.json", "/api/*"]
   },
   "mimeTypes": {
     ".json": "application/json"
@@ -18,11 +18,7 @@
     },
     {
       "route": "/fri/*",
-      "rewrite": "index.html"
-    },
-    {
-      "route": "/*",
-      "rewrite": "index.html"
+      "rewrite": "/index.html"
     }
   ],
   "responseOverrides": {

@@ -12,7 +12,10 @@ const STORAGE_ACCOUNT = import.meta.env.VITE_STORAGE_ACCOUNT;
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7071/api";
 const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT || "development";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || "";
+const SUPABASE_KEY =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ??
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  "";
 
 // Initialize Azure Blob Storage client
 let blobClient: BlobServiceClient | null = null;
