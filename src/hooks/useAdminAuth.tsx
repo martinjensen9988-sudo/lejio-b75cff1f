@@ -1,11 +1,17 @@
 import { useState, useEffect, useCallback, useRef, createContext, useContext, ReactNode } from 'react';
-import { supabase } from '@/integrations/azure/client';
-import { User } from '@supabase/supabase-js';
+import { azureApi } from '@/integrations/azure/client';
+
+// Local user type (NOT from Supabase)
+export interface AuthUser {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, any>;
+}
 
 type AdminRole = 'support' | 'admin' | 'super_admin' | null;
 
 interface AdminAuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   adminRole: AdminRole;
   isSuperAdmin: boolean;
   isAdmin: boolean;
@@ -19,7 +25,7 @@ interface AdminAuthContextType {
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
 // Singleton state to persist across hook instances
-let globalUser: User | null = null;
+let globalUser: AuthUser | null = null;
 let globalAdminRole: AdminRole = null;
 let globalIsLoading = true;
 let globalIsInitialized = false;

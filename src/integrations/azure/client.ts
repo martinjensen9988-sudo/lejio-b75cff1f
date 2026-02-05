@@ -1,9 +1,8 @@
 // Azure SQL Database client for Lejio Fri
-// Replaces Supabase client with Azure SQL + Managed Identity
+// Uses ONLY Azure services - NO Supabase
 
 import { BlobServiceClient } from "@azure/storage-blob";
 import { DefaultAzureCredential } from "@azure/identity";
-import { createClient } from "@supabase/supabase-js";
 
 // Environment configuration
 const SQL_SERVER = import.meta.env.VITE_SQL_SERVER || "lejio-fri.database.windows.net";
@@ -11,11 +10,6 @@ const SQL_DATABASE = import.meta.env.VITE_SQL_DATABASE || "lejio-fri";
 const STORAGE_ACCOUNT = import.meta.env.VITE_STORAGE_ACCOUNT;
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7071/api";
 const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT || "development";
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
-const SUPABASE_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ??
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
-  "";
 
 // Initialize Azure Blob Storage client
 let blobClient: BlobServiceClient | null = null;
@@ -145,12 +139,5 @@ export const azureConfig = {
   apiUrl: API_URL,
   environment: ENVIRONMENT,
 };
-// Supabase client for main Lejio platform. Fri bruger Azure API via azureApi.
-export const supabase = createClient<any>(
-  SUPABASE_URL,
-  SUPABASE_KEY,
-);
 
-export const dbClient: ReturnType<typeof createClient> = supabase;
-
-export default dbClient;
+export default azureApi;
