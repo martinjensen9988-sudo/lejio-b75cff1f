@@ -121,6 +121,16 @@ export const workshopModules: WorkshopModule[] = [
     outcomes: ['Sikker momsafregning', 'Hurtigere salg', 'Færre manuelle trin'],
   },
   {
+    id: 'garagecommission',
+    name: 'GarageCommission',
+    description: 'Kommissionssalg af biler. Sælg kunders eller andres biler mod provision. Fuld afgørelse og oppgjort automatisk.',
+    tag: 'Kommissionssalg',
+    status: 'Roadmap',
+    highlights: ['Kommissionsaftale', 'Provisionsberegning', 'Opgørelsesrapport', 'Automatisk udbetaling'],
+    integrations: ['e-conomic', 'Bankoplysninger', 'SMS varsling', 'Kontraktskabeloner'],
+    outcomes: ['Høj commissioncontrol', 'Mindre administrativt arbejde', 'Sikker opgørelse'],
+  },
+  {
     id: 'garagerent',
     name: 'GarageRent',
     description: 'Cykelplan og lånebiler. Udlejning helt automatiseret.',
