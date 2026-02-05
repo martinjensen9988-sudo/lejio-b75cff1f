@@ -40,6 +40,9 @@ const FriTeamManagement = lazy(() => import("./pages/fri/dashboard/FriTeamManage
 const FriLessorDashboard = lazy(() => import("./pages/fri/dashboard/FriLessorDashboard").then(m => ({ default: m.default })));
 const FriInvoiceManagement = lazy(() => import("./pages/fri/dashboard/FriInvoiceManagement").then(m => ({ default: m.default })));
 
+// Workshop Pages - lazy loaded
+const GaragePlanPage = lazy(() => import("./pages/fri/workshop/GaragePlan").then(m => ({ default: m.GaragePlanPage })));
+
 // Page Builder - lazy loaded
 const PagesDashboard = lazy(() => import("./pages/dashboard/PagesDashboard").then(m => ({ default: m.PagesDashboard })));
 const PageBuilder = lazy(() => import("./pages/dashboard/PageBuilder").then(m => ({ default: m.PageBuilder })));
@@ -122,6 +125,9 @@ const App = forwardRef((props, ref) => (
                     </FriAuthProvider>
                   </BrandProvider>
                 } />
+                
+                {/* Workshop Pages */}
+                <Route path="/fri/workshop/garageplan" element={<GaragePlanPage />} />
                 
                 {/* Lejio Fri Admin */}
                 <Route path="/fri/admin/login" element={<FriAdminLoginPage />} />
