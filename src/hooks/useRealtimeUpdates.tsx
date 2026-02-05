@@ -1,6 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/azure/client';
-import { RealtimeChannel, PostgresChangesPayload } from '@supabase/supabase-js';
+
+// Local type definitions to avoid importing Supabase library
+interface RealtimeChannel {
+  on(event: string, options: unknown, callback: (payload: unknown) => void): this;
+  subscribe(callback?: (status: string) => void | Promise<void>): Promise<string>;
+  track(data: unknown): Promise<unknown>;
+  presenceState(): Record<string, unknown[]>;
+}
+
+interface PostgresChangesPayload<T = Record<string, unknown>> {
+  schema: string;
+  table: string;
+  commit_timestamp: string;
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: T;
+  old: T;
+}
 
 // Type-safe real-time subscription management
 export interface RealtimeSubscriptionConfig {

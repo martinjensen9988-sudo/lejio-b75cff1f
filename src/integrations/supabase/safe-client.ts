@@ -1,5 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
-
 // DEPRECATED - Use Azure client instead (src/integrations/azure/client.ts)
 // This file is kept for reference only
 throw new Error('Use @/integrations/azure/client instead of Supabase client');

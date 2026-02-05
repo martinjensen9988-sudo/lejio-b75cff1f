@@ -21,9 +21,9 @@ export function WorkshopLanding() {
             Sammensæt præcis de moduler dit værksted har brug for – og udvid løbende. TRISYS‑inspireret modulstruktur med fuld fleksibilitet.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/fri/workshop/triplan">
+            <Link to="/fri/workshop/garageplan">
               <Button size="lg" className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-black hover:brightness-110">
-                Start med TRIPLAN <ArrowRight className="w-4 h-4 ml-2" />
+                Start med GaragePlan <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
             <Link to="/fri/trial">

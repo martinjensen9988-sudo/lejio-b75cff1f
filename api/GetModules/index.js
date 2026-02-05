@@ -4,9 +4,9 @@ module.exports = async function (context, req) {
   // Always return mock data
   const modules = [
     {
-      id: 'mock-triplan-' + lessorId,
+      id: 'mock-garageplan-' + lessorId,
       lessor_id: lessorId,
-      module_id: 'triplan',
+      module_id: 'garageplan',
       status: 'active',
       activated_at: '2026-02-05T10:00:00Z',
       created_at: '2026-01-01T00:00:00Z',

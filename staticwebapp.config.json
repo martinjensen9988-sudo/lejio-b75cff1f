@@ -28,5 +28,8 @@
     "403": {
       "rewrite": "/index.html"
     }
+  },
+  "globalHeaders": {
+    "cache-control": "no-cache, no-store, must-revalidate"
   }
 }

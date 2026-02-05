@@ -1,6 +1,19 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/azure/client';
-import { RealtimeChannel } from '@supabase/supabase-js';
+
+// Local type definition to avoid importing Supabase library
+interface RealtimeChannel {
+  on(event: string, options: unknown, callback: (payload: unknown) => void): this;
+  subscribe(callback?: (status: string) => void | Promise<void>): Promise<string>;
+  track(data: unknown): Promise<unknown>;
+  presenceState(): Record<string, unknown[]>;
+}
+
+// Extend supabase type locally
+interface SupabaseClient {
+  channel(name: string, options?: any): RealtimeChannel;
+  removeChannel(channel: RealtimeChannel): Promise<unknown>;
+}
 
 interface VisitorPresence {
   visitorId: string;

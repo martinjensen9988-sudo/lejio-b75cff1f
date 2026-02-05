@@ -140,4 +140,32 @@ export const azureConfig = {
   environment: ENVIRONMENT,
 };
 
+// Proxy for backwards compatibility - routes Supabase-like calls to Azure API
+export const supabase = {
+  from: (table: string) => ({
+    select: (cols = '*') => ({
+      eq: (field: string, value: any) => azureApi.get(`/tables/${table}?${field}=${value}`),
+      async then(onFulfilled: any) {
+        console.warn(`⚠️  Direct Supabase call to table '${table}' through proxy`);
+        return { data: [], error: null };
+      }
+    }),
+    insert: (data: any) => ({ then: async (cb: any) => azureApi.post(`/tables/${table}`, data) }),
+    update: (data: any) => ({ eq: (f: string, v: any) => azureApi.put(`/tables/${table}/${v}`, data) }),
+    delete: () => ({ eq: (f: string, v: any) => azureApi.delete(`/tables/${table}/${v}`) }),
+  }),
+  functions: {
+    invoke: (name: string, options?: any) => azureApi.post(`/functions/${name}`, options?.body)
+  },
+  storage: {
+    from: (bucket: string) => ({
+      upload: (path: string, file: any) => azureApi.post(`/storage/${bucket}/${path}`, { file }),
+      getPublicUrl: (path: string) => ({ data: { publicUrl: `/storage/${bucket}/${path}` } })
+    })
+  },
+  auth: {
+    getUser: async () => ({ data: { user: null } })
+  }
+};
+
 export default azureApi;
