@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 import { 
   Zap, 
   BarChart3, 
@@ -18,11 +19,171 @@ import {
   Settings,
   Cloud,
   TrendingUp,
-  Calendar
+  Calendar,
+  CreditCard,
+  Database,
+  Workflow,
+  MessageSquare,
+  Package,
+  Truck,
+  TrendingDown
 } from 'lucide-react';
 
 export function FriFeaturesPage() {
+  const garageModules = [
+    { name: 'GaragePlan', tag: 'Planlægning', status: 'Klar' },
+    { name: 'GarageTeam', tag: 'HR/Bemanding', status: 'Klar' },
+    { name: 'GarageBooks', tag: 'Fakturering', status: 'Klar' },
+    { name: 'GarageHub', tag: 'Guides', status: 'Klar' },
+    { name: 'GarageQuote', tag: 'Tilbud', status: 'Under udvikling' },
+    { name: 'GarageBook', tag: 'Online booking', status: 'Under udvikling' },
+    { name: 'GarageSync', tag: 'e-conomic', status: 'Roadmap' },
+    { name: 'GarageChat', tag: 'Beskeder', status: 'Roadmap' },
+    { name: 'GarageTech', tag: 'Teknisk data', status: 'Roadmap' },
+    { name: 'GarageParts', tag: 'Reservedele', status: 'Roadmap' },
+    { name: 'GarageStock', tag: 'Lagerstyring', status: 'Roadmap' },
+    { name: 'GarageDeal', tag: 'Bilsalg', status: 'Roadmap' },
+    { name: 'GarageCommission', tag: 'Kommissionssalg', status: 'Roadmap' },
+    { name: 'GarageRent', tag: 'Udlejning', status: 'Roadmap' },
+    { name: 'GarageTires', tag: 'Dækhotel', status: 'Roadmap' },
+    { name: 'GarageService', tag: 'Servicebog', status: 'Roadmap' },
+  ];
+
   const features = [
+    {
+      category: '📊 ERP & Forretningsstyring',
+      icon: Database,
+      description: 'Fuld ERP-funktionalitet for auto-industrien',
+      features: [
+        'Kundeadministration (CRM)',
+        'Ordreforvaltning',
+        'Lagertyring & varekatalog',
+        'Prislogik & rabatgrupper',
+        'Medarbejderstyring & rolle-baseret adgang',
+        'Regnskabsintegration (e-conomic)',
+        'Rapportgenerering & analyse'
+      ]
+    },
+    {
+      category: '💳 Betalinger & Fakturering',
+      icon: CreditCard,
+      description: 'Komplette betalingsløsninger',
+      features: [
+        'Automatisk fakturagenerering',
+        'Online betaling via Stripe, MobilePay',
+        'Recurring billing & abonnement',
+        'Betalingspåmindelser',
+        'Kreditnota & returneringer',
+        'PSD2-kompatibel for SEPA',
+        'Betalingstracking & ledger'
+      ]
+    },
+    {
+      category: '📅 Planlægning & Ressourcer',
+      icon: Calendar,
+      description: 'Smart planlægning af hele operationen',
+      features: [
+        'Visuel dag/uge/månedsplanlægning',
+        'Ressourceallokeringogning',
+        'Tidsregistrering & timeseddel',
+        'Arbejdskort & jobdelegering',
+        'Kapacitetsplanlægning',
+        'Påmindelser & notifikationer'
+      ]
+    },
+    {
+      category: '💬 Kommunikation & Automatisering',
+      icon: MessageSquare,
+      description: 'Automatiserede kundeprocesser',
+      features: [
+        'SMS & email dokumentation',
+        'Automatiske påmindelser & bekræftelser',
+        'Chatbot for bookinger',
+        'Kundeportal med selvbetjening',
+        'Real-time update til kunder',
+        'Template-baseret kommunikation'
+      ]
+    },
+    {
+      category: '📦 Reservedele & Lager',
+      icon: Package,
+      description: 'Intelligent lagerstyring',
+      features: [
+        'Stregkodescanning',
+        'Min/max lager & auto-bestilling',
+        'Multi-lokations lager',
+        'Vare-katalog med priser',
+        'Leverandør-API integrationer',
+        'Lagertælling & inventar'
+      ]
+    },
+    {
+      category: '🚗 Bilhandel & Kommission',
+      icon: Truck,
+      description: 'Bilsalg og kommissionssalg',
+      features: [
+        'Bilhandel workflow',
+        'Kommissionsafregning',
+        'Automatisk provisionsberegning',
+        'Bilcontraktsgen­ere­ring',
+        'Momsberegning',
+        'Finansieringsintegration'
+      ]
+    },
+    {
+      category: '📊 Analytik & Rapporter',
+      icon: BarChart3,
+      description: 'Data-drevne indsigter',
+      features: [
+        'Omsætningsrapporter',
+        'Kundeanalyse',
+        'Medarbejder-performance',
+        'Rentabilitetsanalyse',
+        'Dashboard & KPI-tracking',
+        'Eksportér til PDF/Excel'
+      ]
+    },
+    {
+      category: '👥 Teamsamarbejde',
+      icon: Users,
+      description: 'Hele holdet på samme side',
+      features: [
+        'Ubegrænsede teammedlemmer',
+        'Rolle & tilladelsesstyring',
+        'Fravær & ferieplanlægning',
+        'Kompetenceprofiler',
+        'Aktivitetslog & audit trail',
+        'Intern kommunikation'
+      ]
+    },
+    {
+      category: '🔒 Sikkerhed & Compliance',
+      icon: Shield,
+      description: 'Enterprise-grade sikkerhed',
+      features: [
+        'SSL-kryptering end-to-end',
+        'GDPR & compliance',
+        'Totrins-autentificering',
+        'Daglige backups',
+        'Adgangskontrol & logging',
+        'ISO 27001 standard',
+        'SOC2 compliance'
+      ]
+    },
+    {
+      category: '🔗 Integrationer',
+      icon: Workflow,
+      description: 'Kobl til dine favorit-systemer',
+      features: [
+        'e-conomic (bogføring)',
+        'Google Kalender & Outlook',
+        'Stripe & MobilePay',
+        'SMS-gateway & Email',
+        'Google Maps & GPS',
+        'Auto-parts APIs',
+        'Custom webhooks & REST API'
+      ]
+    },
     {
       category: 'Flådestyring',
       icon: Zap,
@@ -50,42 +211,16 @@ export function FriFeaturesPage() {
       ]
     },
     {
-      category: 'Fakturaering & Betalinger',
-      icon: DollarSign,
-      description: 'Automatiser fakturering og betalinger',
+      category: 'Mobil & Offline',
+      icon: Smartphone,
+      description: 'Arbejd hvor som helst',
       features: [
-        'Automatisk fakturagenerering',
-        'Professionelle fakturaer med dit brand',
-        'Betalingspåmindelser',
-        'Spor udestående beløb',
-        'Rabatter og kuponkoder',
-        'Integrering med betalingsmetoder'
-      ]
-    },
-    {
-      category: 'Analytik & Rapporter',
-      icon: BarChart3,
-      description: 'Data-drevne indsigter om din forretning',
-      features: [
-        'Omsætningsrapporter',
-        'Utilization rates',
-        'Kundetendenser',
-        'Køretøjsperformance',
-        'Sammenlignbare grafer og diagrammer',
-        'Eksporter rapporter til PDF'
-      ]
-    },
-    {
-      category: 'Teamsamarbejde',
-      icon: Users,
-      description: 'Samarbejd med dine medarbejdere',
-      features: [
-        'Tilføj ubegrænsede teammedlemmer',
-        'Tilpassede roller og rettigheder',
-        'Aktivitetslog og revision',
-        'Teamkalender og opgavestyring',
-        'Notater og kommentarer på bookinger',
-        'Delegation af opgaver'
+        'Native iOS & Android apps',
+        'Offline mode',
+        'Real-time sync',
+        'Mobile-first design',
+        'Biometric login',
+        'Push notifications'
       ]
     },
     {
