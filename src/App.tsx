@@ -43,6 +43,7 @@ const FriModulesPage = lazy(() => import("./pages/fri/dashboard/ModulesPage").th
 
 // Workshop Pages - lazy loaded
 const GaragePlanPage = lazy(() => import("./pages/fri/workshop/GaragePlan").then(m => ({ default: m.GaragePlanPage })));
+const WorkshopModulesPublic = lazy(() => import("./pages/fri/workshop/WorkshopModulesPublic").then(m => ({ default: m.WorkshopModulesPublic })));
 
 // Page Builder - lazy loaded
 const PagesDashboard = lazy(() => import("./pages/dashboard/PagesDashboard").then(m => ({ default: m.PagesDashboard })));
@@ -126,16 +127,11 @@ const App = forwardRef((props, ref) => (
                     </FriAuthProvider>
                   </BrandProvider>
                 } />
-                <Route path="/fri/dashboard/modules" element={
-                  <BrandProvider branding={{ primary_color: '#0066cc', secondary_color: '#00cc99', company_name: 'Lejio Fri' }} domain="fri">
-                    <FriAuthProvider>
-                      <FriModulesPage />
-                    </FriAuthProvider>
-                  </BrandProvider>
-                } />
                 
                 {/* Workshop Pages */}
                 <Route path="/fri/workshop/garageplan" element={<GaragePlanPage />} />
+                <Route path="/fri/workshop/modules" element={<WorkshopModulesPublic />} />
+                <Route path="/fri/dashboard/modules" element={<WorkshopModulesPublic />} />
                 
                 {/* Lejio Fri Admin */}
                 <Route path="/fri/admin/login" element={<FriAdminLoginPage />} />
