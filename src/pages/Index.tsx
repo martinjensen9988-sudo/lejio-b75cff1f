@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import FriPromo from "@/components/FriPromo";
 import HowItWorks from "@/components/HowItWorks";
 import Pricing from "@/components/Pricing";
 import LeaderSection from "@/components/LeaderSection";
@@ -42,7 +41,6 @@ const Index = () => {
       <main className="flex-1">
         <Hero />
         <Features />
-        <FriPromo />
         <HowItWorks />
         <Pricing />
         <LeaderSection />
